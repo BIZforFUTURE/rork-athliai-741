@@ -23,6 +23,82 @@ import { useRouter } from "expo-router";
 
 import { CameraView, useCameraPermissions } from "expo-camera";
 
+interface USDAFoodNutrient {
+  nutrientId: number;
+  nutrientName: string;
+  value: number;
+  unitName: string;
+}
+
+interface USDAFoodResult {
+  fdcId: number;
+  description: string;
+  foodNutrients: USDAFoodNutrient[];
+  servingSize?: number;
+  servingSizeUnit?: string;
+  brandName?: string;
+  brandOwner?: string;
+  dataType?: string;
+}
+
+const searchUSDAFoods = async (query: string): Promise<{name: string; calories: number; protein: number; carbs: number; fat: number; serving: string}[]> => {
+  const USDA_API_KEY = 'DEMO_KEY';
+  const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=15&dataType=Foundation,SR Legacy,Survey (FNDDS),Branded`;
+
+  console.log('Searching USDA FoodData Central for:', query);
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('USDA API Error:', response.status, errorText);
+    throw new Error(`USDA API Error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const foods: USDAFoodResult[] = data.foods || [];
+
+  if (foods.length === 0) {
+    throw new Error('No results found');
+  }
+
+  const getNutrient = (nutrients: USDAFoodNutrient[], id: number): number => {
+    const n = nutrients.find(n => n.nutrientId === id);
+    return n ? Math.round(n.value) : 0;
+  };
+
+  const seen = new Set<string>();
+  const results: {name: string; calories: number; protein: number; carbs: number; fat: number; serving: string}[] = [];
+
+  for (const food of foods) {
+    const name = food.brandName
+      ? `${food.description} (${food.brandName})`
+      : food.description;
+
+    const normalizedName = name.toLowerCase().trim();
+    if (seen.has(normalizedName)) continue;
+    seen.add(normalizedName);
+
+    const calories = getNutrient(food.foodNutrients, 1008);
+    const protein = getNutrient(food.foodNutrients, 1003);
+    const carbs = getNutrient(food.foodNutrients, 1005);
+    const fat = getNutrient(food.foodNutrients, 1004);
+
+    let serving = '100g';
+    if (food.servingSize && food.servingSizeUnit) {
+      serving = `${Math.round(food.servingSize)}${food.servingSizeUnit.toLowerCase()}`;
+    }
+
+    if (calories > 0) {
+      results.push({ name, calories, protein, carbs, fat, serving });
+    }
+
+    if (results.length >= 10) break;
+  }
+
+  console.log(`Found ${results.length} food results from USDA`);
+  return results;
+};
+
 const callOpenAI = async (prompt: string): Promise<string> => {
   const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
   
@@ -1860,25 +1936,8 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   setIsSearching(true);
                   setFoodSearchResults([]);
                   try {
-                    const prompt = `You are a nutrition database. For the food query "${foodSearchQuery}", return 6 different variations/options a user might mean including different serving sizes and preparations. Return ONLY a valid JSON array (no markdown, no code blocks) with format: [{"name": "food description with serving", "calories": number, "protein": number, "carbs": number, "fat": number, "serving": "serving size description"}]. All numeric values must be numbers. Include variety: different portions, cooking methods, or related foods.`;
-                    console.log("Searching for food options...");
-                    const response = await callOpenAI(prompt);
-                    let cleaned = response.replace(/```json/gi, '').replace(/```/g, '').trim();
-                    const arrMatch = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
-                    if (arrMatch) cleaned = arrMatch[0];
-                    const results = JSON.parse(cleaned);
-                    if (Array.isArray(results) && results.length > 0) {
-                      setFoodSearchResults(results.map((r: any) => ({
-                        name: r.name || foodSearchQuery,
-                        calories: Math.round(Number(r.calories) || 0),
-                        protein: Math.round(Number(r.protein) || 0),
-                        carbs: Math.round(Number(r.carbs) || 0),
-                        fat: Math.round(Number(r.fat) || 0),
-                        serving: r.serving || "1 serving",
-                      })));
-                    } else {
-                      throw new Error("No results");
-                    }
+                    const results = await searchUSDAFoods(foodSearchQuery);
+                    setFoodSearchResults(results);
                   } catch (error: any) {
                     console.error("Food search error:", error.message);
                     Alert.alert("Search Failed", "Unable to find foods. Please try a different search.");
@@ -1897,25 +1956,8 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   setIsSearching(true);
                   setFoodSearchResults([]);
                   try {
-                    const prompt = `You are a nutrition database. For the food query "${foodSearchQuery}", return 6 different variations/options a user might mean including different serving sizes and preparations. Return ONLY a valid JSON array (no markdown, no code blocks) with format: [{"name": "food description with serving", "calories": number, "protein": number, "carbs": number, "fat": number, "serving": "serving size description"}]. All numeric values must be numbers. Include variety: different portions, cooking methods, or related foods.`;
-                    console.log("Searching for food options...");
-                    const response = await callOpenAI(prompt);
-                    let cleaned = response.replace(/```json/gi, '').replace(/```/g, '').trim();
-                    const arrMatch = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
-                    if (arrMatch) cleaned = arrMatch[0];
-                    const results = JSON.parse(cleaned);
-                    if (Array.isArray(results) && results.length > 0) {
-                      setFoodSearchResults(results.map((r: any) => ({
-                        name: r.name || foodSearchQuery,
-                        calories: Math.round(Number(r.calories) || 0),
-                        protein: Math.round(Number(r.protein) || 0),
-                        carbs: Math.round(Number(r.carbs) || 0),
-                        fat: Math.round(Number(r.fat) || 0),
-                        serving: r.serving || "1 serving",
-                      })));
-                    } else {
-                      throw new Error("No results");
-                    }
+                    const results = await searchUSDAFoods(foodSearchQuery);
+                    setFoodSearchResults(results);
                   } catch (error: any) {
                     console.error("Food search error:", error.message);
                     Alert.alert("Search Failed", "Unable to find foods. Please try a different search.");
@@ -1937,7 +1979,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               {isSearching && foodSearchResults.length === 0 && (
                 <View style={styles.foodSearchLoading}>
                   <ActivityIndicator size="large" color="#00ADB5" />
-                  <Text style={styles.foodSearchLoadingText}>Finding food options...</Text>
+                  <Text style={styles.foodSearchLoadingText}>Searching USDA database...</Text>
                 </View>
               )}
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length > 0 && (
@@ -1949,8 +1991,8 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length === 0 && (
                 <View style={styles.foodSearchEmpty}>
                   <Search size={40} color="#D1D5DB" />
-                  <Text style={styles.foodSearchEmptyText}>Search for any food</Text>
-                  <Text style={styles.foodSearchEmptyHint}>Try "banana", "grilled chicken", or "pasta"</Text>
+                  <Text style={styles.foodSearchEmptyText}>Search USDA food database</Text>
+                  <Text style={styles.foodSearchEmptyHint}>Try "banana", "chicken breast", or "rice"</Text>
                 </View>
               )}
               {foodSearchResults.map((item, index) => (
