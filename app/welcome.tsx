@@ -117,7 +117,7 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
                 ],
               }}
             >
-              <Dumbbell size={100} color="#000000" strokeWidth={2.5} />
+              <Dumbbell size={100} color="#00ADB5" strokeWidth={2.5} />
             </Animated.View>
             
             <Animated.View
@@ -973,7 +973,6 @@ Format as JSON:
                           <Text
                             style={[
                               styles.dayButtonText,
-                              { color: isSelected ? '#000000' : '#000000' },
                               isSelected && styles.dayButtonTextSelected,
                             ]}
                           >
@@ -1441,6 +1440,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 12,
+    color: '#FFFFFF',
   },
   subtitle: {
     fontSize: 18,
@@ -1448,6 +1448,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     opacity: 0.9,
     fontWeight: '500',
+    color: '#00E5FF',
   },
   description: {
     fontSize: 16,
@@ -1455,6 +1456,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
+    color: '#9CA3AF',
   },
   pagination: {
     flexDirection: 'row',
@@ -1481,13 +1483,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minWidth: 160,
     justifyContent: 'center',
-    backgroundColor: '#000000',
-    borderColor: '#000000',
+    backgroundColor: '#00ADB5',
+    borderColor: '#00ADB5',
   },
   actionButtonText: {
     fontSize: 18,
     fontWeight: '600',
     marginRight: 8,
+    color: '#FFFFFF',
   },
   chevron: {
     marginLeft: 4,
@@ -1628,6 +1631,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     opacity: 0.7,
     textAlign: 'center',
+    color: '#9CA3AF',
   },
   quizContainer: {
     width: '100%',
@@ -1636,7 +1640,7 @@ const styles = StyleSheet.create({
   quizQuestion: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#F9FAFB',
     marginBottom: 15,
     textAlign: 'center',
   },
@@ -1646,20 +1650,20 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   optionButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#171B22',
     paddingHorizontal: 24,
     paddingVertical: 18,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.15)',
+    borderColor: '#1F2937',
     width: '100%',
   },
   optionButtonSelected: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 173, 181, 0.15)',
+    borderColor: '#00ADB5',
   },
   optionText: {
-    color: '#FFFFFF',
+    color: '#F9FAFB',
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'left',
@@ -1668,20 +1672,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   weightInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#171B22',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#F9FAFB',
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: '#1F2937',
     marginBottom: 25,
     textAlign: 'center',
   },
   daySelectionSubtext: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: '#9CA3AF',
     opacity: 0.8,
     marginBottom: 15,
     textAlign: 'center',
@@ -1694,45 +1698,44 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   dayButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#171B22',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.15)',
+    borderColor: '#1F2937',
     minWidth: 90,
     alignItems: 'center',
   },
   dayButtonSelected: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    borderColor: '#000000',
+    backgroundColor: 'rgba(0, 173, 181, 0.15)',
+    borderColor: '#00ADB5',
   },
   dayButtonText: {
-    color: '#FFFFFF',
+    color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '500',
-    opacity: 0.8,
   },
   dayButtonTextSelected: {
-    opacity: 1,
+    color: '#FFFFFF',
     fontWeight: '700',
   },
   goalsSubtext: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: '#9CA3AF',
     opacity: 0.8,
     marginBottom: 15,
     textAlign: 'center',
   },
   goalsInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#171B22',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#F9FAFB',
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: '#1F2937',
     marginBottom: 25,
     minHeight: 100,
   },
@@ -1740,18 +1743,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#171B22',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.3)',
+    borderColor: '#1F2937',
     marginBottom: 25,
     gap: 10,
   },
   datePickerButtonText: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#F9FAFB',
     fontWeight: '500',
   },
   paywallIconContainer: {
@@ -1841,7 +1844,7 @@ const styles = StyleSheet.create({
   },
   loadingBackground: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D0F13',
   },
   loadingContainer: {
     flex: 1,
@@ -1852,13 +1855,13 @@ const styles = StyleSheet.create({
   loadingTitle: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 12,
   },
   loadingSubtitle: {
     fontSize: 18,
-    color: '#000000',
+    color: '#9CA3AF',
     textAlign: 'center',
     marginBottom: 20,
     opacity: 0.7,
@@ -1866,7 +1869,7 @@ const styles = StyleSheet.create({
   },
   loadingDescription: {
     fontSize: 16,
-    color: '#000000',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
     opacity: 0.6,
@@ -1879,8 +1882,8 @@ const styles = StyleSheet.create({
     borderRadius: 80,
     borderWidth: 3,
     borderColor: 'transparent',
-    borderTopColor: '#000000',
-    borderRightColor: '#000000',
+    borderTopColor: '#00ADB5',
+    borderRightColor: '#00E5FF',
   },
   loadingRingInner: {
     width: '100%',
@@ -1894,13 +1897,13 @@ const styles = StyleSheet.create({
   progressBarBackground: {
     width: '80%',
     height: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: '#1F2937',
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#000000',
+    backgroundColor: '#00ADB5',
     borderRadius: 4,
   },
   heightInputContainer: {
@@ -1917,20 +1920,20 @@ const styles = StyleSheet.create({
   },
   heightInput: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#171B22',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 18,
-    color: '#FFFFFF',
+    color: '#F9FAFB',
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: '#1F2937',
     textAlign: 'center',
   },
   heightLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#9CA3AF',
   },
   quizStepIndicator: {
     fontSize: 14,
@@ -1938,18 +1941,19 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     opacity: 0.7,
+    color: '#6B7280',
   },
   quizProgressBarInline: {
     width: '100%',
     height: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#1F2937',
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: 40,
   },
   quizProgressFill: {
     height: '100%',
-    backgroundColor: '#000000',
+    backgroundColor: '#00ADB5',
     borderRadius: 2,
   },
 });

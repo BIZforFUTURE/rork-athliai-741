@@ -28,7 +28,8 @@ import {
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { router } from "expo-router";
-import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups, calculateWorkoutVolume } from "@/constants/workouts";
+import { LinearGradient } from "expo-linear-gradient";
+import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
 
 
 interface QuizAnswer {
@@ -76,7 +77,7 @@ export default function GymScreen() {
   const [showDayAdjustment, setShowDayAdjustment] = useState(false);
   const [adjustedWorkoutDays, setAdjustedWorkoutDays] = useState<string[]>([]);
 
-  const formatWeight = (weight: number): string => {
+  const _formatWeight = (weight: number): string => {
     if (weight >= 1000) {
       return `${(weight / 1000).toFixed(1)}k lbs`;
     }
@@ -150,7 +151,7 @@ export default function GymScreen() {
 
   const handleQuizAnswer = (answer: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     const newAnswers = [...quizAnswers];
     newAnswers[currentQuizStep] = {
@@ -171,13 +172,13 @@ export default function GymScreen() {
     }
   };
 
-  const generateFitnessPlan = async (answers: QuizAnswer[], goals: string): Promise<CustomWorkoutPlan> => {
+  const _generateFitnessPlan = async (answers: QuizAnswer[], _goals: string): Promise<CustomWorkoutPlan> => {
     console.log("Generating fitness plan with preset templates...");
     
     const fitnessLevel = answers.find(a => a.question.includes('fitness level'))?.answer || '';
     const primaryGoal = answers.find(a => a.question.includes('primary fitness goal'))?.answer || '';
     const equipment = answers.find(a => a.question.includes('equipment'))?.answer || '';
-    const timePerWorkout = answers.find(a => a.question.includes('time'))?.answer || '';
+    const _timePerWorkout = answers.find(a => a.question.includes('time'))?.answer || '';
     
     let planName = "Personalized 5-Day Training Plan";
     let planDescription = "A balanced workout plan tailored to your goals and fitness level.";
@@ -460,7 +461,7 @@ Format as JSON:
 
       console.log("Generating personalized fitness plan with OpenAI...");
       
-      const API_KEY = "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";
+      const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -634,6 +635,7 @@ Format as JSON:
     if (generatedPlan) {
       setTodaysWorkout(getTodaysWorkout(generatedPlan));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [generatedPlan, workoutLogs]);
 
   React.useEffect(() => {
@@ -641,6 +643,7 @@ Format as JSON:
       setGeneratedPlan(customWorkoutPlan);
       setTodaysWorkout(getTodaysWorkout(customWorkoutPlan));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customWorkoutPlan, generatedPlan]);
 
   React.useEffect(() => {
@@ -718,18 +721,24 @@ Format as JSON:
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
+      <LinearGradient
+        colors={['#0D0F13', '#131820', '#0D0F13']}
+        style={styles.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
         <View style={styles.headerContent}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.headerTitle}>Gym Workouts</Text>
+              <Text style={styles.headerTitle}>Gym</Text>
               <View style={styles.subtitleRow}>
-                <Text style={styles.headerSubtitle}>Your daily training plan</Text>
+                <Text style={styles.headerSubtitle}>
+                  {todaysWorkout ? 'Ready to train' : generatedPlan ? 'Rest day' : 'Get started'}
+                </Text>
                 {generatedPlan && (
                   <View style={styles.countdownContainer}>
-                    <Clock size={14} color="#FFFFFF" />
+                    <Clock size={12} color="#00E5FF" />
                     <Text style={styles.countdownText}>{timeRemaining}</Text>
-                    <Text style={styles.countdownLabel}>left</Text>
                   </View>
                 )}
               </View>
@@ -739,17 +748,17 @@ Format as JSON:
                 style={styles.settingsButton}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowSettings(true);
                 }}
               >
-                <Settings size={24} color="#FFFFFF" />
+                <Settings size={22} color="#9CA3AF" />
               </TouchableOpacity>
             )}
           </View>
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView 
         style={styles.content} 
@@ -762,7 +771,7 @@ Format as JSON:
               style={styles.customPlanCTA}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 setShowQuiz(true);
               }}
@@ -783,7 +792,7 @@ Format as JSON:
               style={styles.buildWorkoutCTA}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 router.push('/workout-builder');
               }}
@@ -809,7 +818,7 @@ Format as JSON:
                 style={styles.todaysWorkoutCard}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
                   startCustomWorkout(todaysWorkout);
                 }}
@@ -851,7 +860,7 @@ Format as JSON:
                     style={styles.viewPlanButton}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }
                       setShowCustomPlan(true);
                     }}
@@ -870,7 +879,7 @@ Format as JSON:
             style={styles.buildWorkoutCTA}
             onPress={() => {
               if (Platform.OS !== 'web') {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
               router.push('/workout-builder');
             }}
@@ -915,7 +924,7 @@ Format as JSON:
               style={styles.toggleButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowRecentWorkouts(!showRecentWorkouts);
               }}
@@ -1046,7 +1055,7 @@ Format as JSON:
               style={styles.closeButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 resetQuiz();
               }}
@@ -1083,7 +1092,7 @@ Format as JSON:
                         ]}
                         onPress={() => {
                           if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
                           if (isSelected) {
                             setSelectedWorkoutDays(prev => prev.filter(d => d !== dayKey));
@@ -1110,7 +1119,7 @@ Format as JSON:
                   onPress={() => {
                     if (selectedWorkoutDays.length > 0) {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       }
                       setShowDaySelector(false);
                       if (currentQuizStep < quizQuestions.length - 1) {
@@ -1170,9 +1179,9 @@ Format as JSON:
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     }
-                    generateCustomPlan();
+                    void generateCustomPlan();
                   }}
                   disabled={isGeneratingPlan}
                 >
@@ -1204,7 +1213,7 @@ Format as JSON:
                 style={styles.closeButton}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowCustomPlan(false);
                 }}
@@ -1228,7 +1237,7 @@ Format as JSON:
                         style={styles.startDayButton}
                         onPress={() => {
                           if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                           }
                           startCustomWorkout(day);
                         }}
@@ -1271,7 +1280,7 @@ Format as JSON:
                 style={styles.newPlanButton}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowCustomPlan(false);
                   setShowQuiz(true);
@@ -1299,7 +1308,7 @@ Format as JSON:
                 style={styles.closeButton}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowSettings(false);
                 }}
@@ -1313,7 +1322,7 @@ Format as JSON:
                 style={styles.settingsOption}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   handleDayAdjustment();
                 }}
@@ -1334,7 +1343,7 @@ Format as JSON:
                 style={styles.settingsOption}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   retakeQuiz();
                 }}
@@ -1367,7 +1376,7 @@ Format as JSON:
               style={styles.closeButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowDayAdjustment(false);
               }}
@@ -1398,7 +1407,7 @@ Format as JSON:
                       ]}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                         }
                         if (isSelected) {
                           setAdjustedWorkoutDays(prev => prev.filter(d => d !== dayKey));
@@ -1428,7 +1437,7 @@ Format as JSON:
               ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 }
                 saveDayAdjustment();
               }}
@@ -1450,9 +1459,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
-    backgroundColor: "#0D0F13",
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   headerContent: {
     marginTop: 10,
@@ -1463,40 +1471,38 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   subtitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     gap: 10,
-    marginTop: 5,
+    marginTop: 4,
   },
   countdownContainer: {
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    alignItems: "center" as const,
+    backgroundColor: "rgba(0, 229, 255, 0.1)",
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    flexDirection: "row",
+    paddingVertical: 3,
+    borderRadius: 10,
+    flexDirection: "row" as const,
     gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0, 229, 255, 0.2)",
   },
   countdownText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-  },
-  countdownLabel: {
-    fontSize: 10,
-    color: "#FFFFFF",
-    opacity: 0.9,
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#00E5FF",
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: 30,
+    fontWeight: "800" as const,
     color: "#FFFFFF",
+    letterSpacing: -0.8,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: "#FFFFFF",
+    fontSize: 15,
+    color: "#00E5FF",
+    fontWeight: "500" as const,
     opacity: 0.9,
-    marginTop: 5,
   },
   content: {
     flex: 1,
@@ -2308,9 +2314,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   settingsButton: {
-    padding: 8,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    padding: 10,
+    borderRadius: 14,
+    backgroundColor: "#171B22",
+    borderWidth: 1,
+    borderColor: "#1F2937",
   },
   settingsModalOverlay: {
     flex: 1,

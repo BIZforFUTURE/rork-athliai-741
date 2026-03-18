@@ -11,21 +11,20 @@ import {
   Platform,
   Alert,
   KeyboardAvoidingView,
-  Keyboard,
   Animated,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera, Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Blend, Plus, Trash2, TrendingDown, TrendingUp, Target, FileText, Drumstick, Wheat, Droplet, Sparkles } from "lucide-react-native";
+import { Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
 
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
 const callOpenAI = async (prompt: string): Promise<string> => {
-  const API_KEY = "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";
+  const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
   
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -62,8 +61,8 @@ const callOpenAI = async (prompt: string): Promise<string> => {
 };
 
 export default function NutritionScreen() {
-  const router = useRouter();
-  const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries, personalStats, addWeightEntry, weightHistory } = useApp();
+  const _router = useRouter();
+  const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries } = useApp();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
 
   const [timeUntilReset, setTimeUntilReset] = useState<string>("");
@@ -72,20 +71,20 @@ export default function NutritionScreen() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [showAIInput, setShowAIInput] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showProteinShake, setShowProteinShake] = useState(false);
-  const [proteinIngredients, setProteinIngredients] = useState("");
+  const [_showCalendar, setShowCalendar] = useState(false);
+  const [_selectedDate, _setSelectedDate] = useState(new Date());
+  const [_showProteinShake, setShowProteinShake] = useState(false);
+  const [_proteinIngredients, setProteinIngredients] = useState("");
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [foodSearchQuery, setFoodSearchQuery] = useState("");
-  const [foodSearchResults, setFoodSearchResults] = useState<any[]>([]);
+  const [_foodSearchResults, setFoodSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isMealPrep, setIsMealPrep] = useState(false);
   const [mealPrepDate, setMealPrepDate] = useState(new Date());
-  const [showQuickMealPrep, setShowQuickMealPrep] = useState(false);
-  const [quickMealName, setQuickMealName] = useState("");
-  const [showBulkMealPrep, setShowBulkMealPrep] = useState(false);
-  const [bulkMealPrepFoods, setBulkMealPrepFoods] = useState<{
+  const [_showQuickMealPrep, setShowQuickMealPrep] = useState(false);
+  const [_quickMealName, setQuickMealName] = useState("");
+  const [_showBulkMealPrep, _setShowBulkMealPrep] = useState(false);
+  const [_bulkMealPrepFoods, _setBulkMealPrepFoods] = useState<{
     id: string;
     name: string;
     calories: string;
@@ -93,7 +92,7 @@ export default function NutritionScreen() {
     carbs: string;
     fat: string;
   }[]>([]);
-  const [bulkMealPrepDate, setBulkMealPrepDate] = useState(new Date());
+  const [_bulkMealPrepDate, _setBulkMealPrepDate] = useState(new Date());
   const [showRefineFood, setShowRefineFood] = useState(false);
   const [selectedFoodEntry, setSelectedFoodEntry] = useState<any>(null);
   const [refinementInput, setRefinementInput] = useState("");
@@ -107,17 +106,17 @@ export default function NutritionScreen() {
     carbsGoal: nutrition.carbsGoal.toString(),
     fatGoal: nutrition.fatGoal.toString(),
   });
-  const [showWeightTracker, setShowWeightTracker] = useState(false);
-  const [newWeight, setNewWeight] = useState("");
+
   const [foodName, setFoodName] = useState("");
   const [calories, setCalories] = useState("");
   const [protein, setProtein] = useState("");
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
   const [aiInput, setAiInput] = useState("");
+  const [_capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
   const cameraRef = React.useRef<any>(null);
 
   useEffect(() => {
@@ -162,9 +161,7 @@ export default function NutritionScreen() {
     dietDuration: "",
   });
 
-  const calculatePercentage = (value: number, goal: number): number => {
-    return Math.min((value / goal) * 100, 100);
-  };
+
 
   const calculateHealthScore = (entry: any): { score: number; color: string; label: string } => {
     const { calories, protein, carbs, fat } = entry;
@@ -405,7 +402,7 @@ export default function NutritionScreen() {
     });
   };
 
-  const analyzeQuickMeal = async (mealName: string, targetDate: Date) => {
+  const _analyzeQuickMeal = async (mealName: string, targetDate: Date) => {
     setIsAnalyzing(true);
     try {
       const prompt = `You are a nutrition expert. Analyze meal names and provide accurate nutritional estimates based on typical serving sizes and preparation methods. Consider common ingredients, cooking methods, and standard portion sizes for the described meal.
@@ -478,7 +475,7 @@ Analyze this meal: "${mealName}". Estimate nutritional content based on a typica
     }
   };
 
-  const analyzeProteinShake = async (ingredients: string) => {
+  const _analyzeProteinShake = async (ingredients: string) => {
     setIsAnalyzing(true);
     try {
       const prompt = `You are a nutrition expert specializing in protein shakes and supplements. Analyze the ingredients list and provide accurate nutritional estimates based on typical serving sizes for protein shakes. Consider protein powders, fruits, liquids, nuts, seeds, and other common shake ingredients.
@@ -861,7 +858,7 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
       } else {
         pulseAnim.setValue(1);
       }
-    }, [percentage]);
+    }, [percentage, animatedPercentage, pulseAnim]);
 
     const size = 110;
     const strokeWidth = 8;
@@ -916,9 +913,8 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
     const [localQuizAnswers, setLocalQuizAnswers] = useState(quizAnswers);
     
     React.useEffect(() => {
-      if (showQuiz) {
-        setLocalQuizAnswers(quizAnswers);
-      }
+      setLocalQuizAnswers(quizAnswers);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showQuiz]);
     
     const questions = [
@@ -1051,7 +1047,7 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
                     ]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }
                       setLocalQuizAnswers({ ...localQuizAnswers, [currentQuestion.key]: choice.value });
                     }}
@@ -1076,7 +1072,7 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
                   style={[styles.quizButton, styles.quizButtonSecondary]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setQuizStep(quizStep - 1);
                   }}
@@ -1088,7 +1084,7 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
                 style={[styles.quizButton, styles.quizButtonPrimary]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   if (quizStep < filteredQuestions.length - 1) {
                     setQuizAnswers(localQuizAnswers);
@@ -1146,7 +1142,7 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
             style={styles.weeklyReviewButtonInner}
             onPress={async () => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setIsGeneratingReview(true);
                 setShowWeeklyReview(true);
@@ -1227,7 +1223,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
             <View style={styles.progressIcons}>
               <TouchableOpacity onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setEditGoals({
                   calorieGoal: nutrition.calorieGoal.toString(),
@@ -1241,7 +1237,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               </TouchableOpacity>
               <TouchableOpacity onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowCalendar(true);
               }}>
@@ -1249,7 +1245,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               </TouchableOpacity>
               <TouchableOpacity onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowQuiz(true);
               }}>
@@ -1336,7 +1332,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.datePickerButton}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     const tomorrow = new Date();
                     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1432,7 +1428,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 style={[styles.addButton, styles.cancelButton]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowAddFood(false);
                   setIsMealPrep(false);
@@ -1442,7 +1438,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               </TouchableOpacity>
               <TouchableOpacity style={styles.addButton} onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 handleAddFood();
               }}>
@@ -1481,7 +1477,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.startQuizButton}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setShowQuiz(true);
                   }}
@@ -1496,7 +1492,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.scanButton}
                   onPress={async () => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     if (!permission.granted) {
                       const result = await requestPermission();
@@ -1516,7 +1512,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.aiButton}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setShowAIInput(true);
                   }}
@@ -1529,7 +1525,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.foodSearchButton}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setShowFoodSearch(true);
                   }}
@@ -1544,7 +1540,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.manualButton}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setShowAddFood(true);
                   }}
@@ -1573,7 +1569,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   style={styles.mealCard}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setSelectedFoodEntry(entry);
                     setShowRefineFood(true);
@@ -1598,7 +1594,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                         onPress={(e) => {
                           e.stopPropagation();
                           if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
                           Alert.alert(
                             "Delete Food Entry",
@@ -1678,7 +1674,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 style={[styles.firstTimePromptButton, styles.firstTimeSkipButton]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowFirstTimePrompt(false);
                 }}
@@ -1689,7 +1685,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 style={[styles.firstTimePromptButton, styles.firstTimeStartButton]}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }
                   setShowFirstTimePrompt(false);
                   setShowQuiz(true);
@@ -1713,7 +1709,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               style={styles.modalClose}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowAIInput(false);
                 setAiInput("");
@@ -1741,9 +1737,9 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
-                analyzeWithAI(aiInput);
+                void analyzeWithAI(aiInput);
               }}
               disabled={!aiInput || isAnalyzing}
             >
@@ -1781,7 +1777,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                     style={styles.cameraClose}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }
                       setShowCamera(false);
                       setCapturedImage(null);
@@ -1804,9 +1800,9 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                       style={styles.captureButton}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                         }
-                        takePicture();
+                        void takePicture();
                       }}
                       disabled={isAnalyzing}
                     >
@@ -1837,7 +1833,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               style={styles.modalClose}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowFoodSearch(false);
                 setFoodSearchQuery("");
@@ -1865,7 +1861,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               ]}
               onPress={async () => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 setIsSearching(true);
                 try {
@@ -1954,7 +1950,7 @@ Analyze this food: "${foodSearchQuery}". Estimate nutritional content based on t
               style={styles.modalClose}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowEditGoals(false);
               }}
@@ -2018,7 +2014,7 @@ Analyze this food: "${foodSearchQuery}". Estimate nutritional content based on t
               style={styles.aiAnalyzeButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 handleEditGoals();
               }}
@@ -2039,7 +2035,7 @@ Analyze this food: "${foodSearchQuery}". Estimate nutritional content based on t
               style={styles.modalClose}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowRefineFood(false);
                 setSelectedFoodEntry(null);
@@ -2078,10 +2074,10 @@ Analyze this food: "${foodSearchQuery}". Estimate nutritional content based on t
               ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 if (selectedFoodEntry) {
-                  refineWithAI(selectedFoodEntry, refinementInput);
+                  void refineWithAI(selectedFoodEntry, refinementInput);
                 }
               }}
               disabled={!refinementInput || isAnalyzing}
@@ -2103,7 +2099,7 @@ Analyze this food: "${foodSearchQuery}". Estimate nutritional content based on t
               style={styles.modalClose}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowWeeklyReview(false);
                 setWeeklyReviewData("");

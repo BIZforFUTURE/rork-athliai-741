@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { BarChart3, Play, Utensils, User, Dumbbell } from "lucide-react-native";
+import { Home, Route, Utensils, Dumbbell, Trophy } from "lucide-react-native";
 import React from "react";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
@@ -17,7 +17,6 @@ export default function TabLayout() {
           borderTopColor: "rgba(0, 173, 181, 0.2)",
           position: "absolute" as const,
           elevation: 0,
-          height: 65,
         },
         tabBarLabelStyle: {
           fontWeight: "600" as const,
@@ -31,12 +30,12 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Dashboard",
-          tabBarIcon: ({ color }) => <BarChart3 size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
         }}
         listeners={{
           tabPress: () => {
             if (Platform.OS !== "web") {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           },
         }}
@@ -45,12 +44,12 @@ export default function TabLayout() {
         name="run"
         options={{
           title: "Run",
-          tabBarIcon: ({ color }) => <Play size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Route size={24} color={color} />,
         }}
         listeners={{
           tabPress: () => {
             if (Platform.OS !== "web") {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           },
         }}
@@ -64,7 +63,7 @@ export default function TabLayout() {
         listeners={{
           tabPress: () => {
             if (Platform.OS !== "web") {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           },
         }}
@@ -78,7 +77,7 @@ export default function TabLayout() {
         listeners={{
           tabPress: () => {
             if (Platform.OS !== "web") {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           },
         }}
@@ -87,12 +86,12 @@ export default function TabLayout() {
         name="leaderboard"
         options={{
           title: "Stats",
-          tabBarIcon: ({ color }) => <User size={24} color={color} />,
+          tabBarIcon: ({ color }) => <Trophy size={24} color={color} />,
         }}
         listeners={{
           tabPress: () => {
             if (Platform.OS !== "web") {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           },
         }}

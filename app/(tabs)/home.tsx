@@ -1,21 +1,81 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   StyleSheet,
   Text,
   View,
   ScrollView,
-  Platform,
 } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Activity, MapPin, Target, Calendar, Dumbbell, Flame } from "lucide-react-native";
-import * as Haptics from "expo-haptics";
+import { Activity, MapPin, Target, Calendar, Dumbbell, Flame, Zap } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
+
+function ProgressRing({ 
+  progress, 
+  size, 
+  strokeWidth, 
+  color, 
+  bgColor 
+}: { 
+  progress: number; 
+  size: number; 
+  strokeWidth: number; 
+  color: string; 
+  bgColor: string;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clampedProgress = Math.min(Math.max(progress, 0), 1);
+  const strokeDashoffset = circumference * (1 - clampedProgress);
+
+  return (
+    <Svg width={size} height={size}>
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={bgColor}
+        strokeWidth={strokeWidth}
+        fill="none"
+      />
+      <Circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        stroke={color}
+        strokeWidth={strokeWidth}
+        fill="none"
+        strokeDasharray={`${circumference}`}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+    </Svg>
+  );
+}
 
 export default function DashboardScreen() {
   const { stats, nutrition } = useApp();
-
   const insets = useSafeAreaInsets();
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 5) return "Late night grind";
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    if (hour < 21) return "Good evening";
+    return "Late night grind";
+  }, []);
+
+  const motivationalLine = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 5) return "Rest well, recover strong";
+    if (hour < 12) return "Time to move and make progress";
+    if (hour < 17) return "Keep the momentum going";
+    if (hour < 21) return "Finish the day strong";
+    return "Rest well, recover strong";
+  }, []);
 
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -27,21 +87,24 @@ export default function DashboardScreen() {
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const calProgress = nutrition.calorieGoal > 0 ? nutrition.calories / nutrition.calorieGoal : 0;
+  const proteinProgress = nutrition.proteinGoal > 0 ? nutrition.protein / nutrition.proteinGoal : 0;
+  const carbsProgress = nutrition.carbsGoal > 0 ? nutrition.carbs / nutrition.carbsGoal : 0;
 
-
-
+  const maxStreak = Math.max(stats.runStreak, stats.foodStreak, stats.workoutStreak);
+  const streakEmoji = maxStreak >= 7 ? "🔥" : maxStreak >= 3 ? "⚡" : "💪";
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0D0F13', '#1A1F2E', '#0D0F13']}
-        style={[styles.header, { paddingTop: insets.top + 20 }]}
+        colors={['#0D0F13', '#131820', '#0D0F13']}
+        style={[styles.header, { paddingTop: insets.top + 16 }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.headerContent}>
-          <Text style={styles.welcomeText}>Welcome back!</Text>
-          <Text style={styles.headerSubtitle}>Let&apos;s crush your goals today</Text>
+          <Text style={styles.greetingText}>{greeting}</Text>
+          <Text style={styles.headerSubtitle}>{motivationalLine}</Text>
         </View>
       </LinearGradient>
 
@@ -49,107 +112,151 @@ export default function DashboardScreen() {
         style={styles.scrollView} 
         showsVerticalScrollIndicator={false}
       >
-
         <View style={styles.content}>
-        
-        <View style={styles.streakContainer}>
-          <View style={[styles.streakCard, styles.glowCard]}>
-            <View style={styles.iconContainer}>
-              <Activity size={24} color="#00E5FF" strokeWidth={2.5} />
-            </View>
-            <Text style={styles.streakNumber}>{stats.runStreak}</Text>
-            <Text style={styles.streakLabel}>Run Streak</Text>
-          </View>
-          <View style={[styles.streakCard, styles.glowCard]}>
-            <View style={styles.iconContainer}>
-              <Flame size={24} color="#BFFF00" strokeWidth={2.5} />
-            </View>
-            <Text style={styles.streakNumber}>{stats.foodStreak}</Text>
-            <Text style={styles.streakLabel}>Food Streak</Text>
-          </View>
-          <View style={[styles.streakCard, styles.glowCard]}>
-            <View style={styles.iconContainer}>
-              <Dumbbell size={24} color="#00E5FF" strokeWidth={2.5} />
-            </View>
-            <Text style={styles.streakNumber}>{stats.workoutStreak}</Text>
-            <Text style={styles.streakLabel}>Gym Streak</Text>
-          </View>
-        </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Weekly Summary</Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={styles.weeklyScrollView}
-            contentContainerStyle={styles.weeklyScrollContent}
-          >
-            <View style={styles.weeklyStatCard}>
-              <View style={styles.weeklyStatHeader}>
-                <MapPin size={20} color="#00E5FF" strokeWidth={2.5} />
-                <Text style={styles.weeklyStatLabel}>Miles</Text>
+          <View style={styles.streakContainer}>
+            <View style={[styles.streakCard, { borderColor: stats.runStreak > 0 ? 'rgba(0, 229, 255, 0.2)' : '#1F2937' }]}>
+              <View style={[styles.iconContainer, { backgroundColor: stats.runStreak > 0 ? 'rgba(0, 229, 255, 0.1)' : '#1F2937' }]}>
+                <Activity size={22} color="#00E5FF" strokeWidth={2.5} />
               </View>
-              <Text style={styles.weeklyStatValue}>{stats.weeklyMiles.toFixed(1)}</Text>
-              <View style={styles.progressBarContainer}>
-                <View style={[styles.progressBar, { width: `${Math.min((stats.weeklyMiles / 20) * 100, 100)}%` }]} />
-              </View>
+              <Text style={styles.streakNumber}>{stats.runStreak}</Text>
+              <Text style={styles.streakLabel}>Run</Text>
+              {stats.runStreak >= 3 && <Text style={styles.streakBadge}>{streakEmoji}</Text>}
             </View>
-            <View style={styles.weeklyStatCard}>
-              <View style={styles.weeklyStatHeader}>
-                <Target size={20} color="#BFFF00" strokeWidth={2.5} />
-                <Text style={styles.weeklyStatLabel}>Runs</Text>
+            <View style={[styles.streakCard, { borderColor: stats.foodStreak > 0 ? 'rgba(191, 255, 0, 0.2)' : '#1F2937' }]}>
+              <View style={[styles.iconContainer, { backgroundColor: stats.foodStreak > 0 ? 'rgba(191, 255, 0, 0.1)' : '#1F2937' }]}>
+                <Flame size={22} color="#BFFF00" strokeWidth={2.5} />
               </View>
-              <Text style={styles.weeklyStatValue}>{stats.weeklyRuns}</Text>
-              <View style={styles.progressBarContainer}>
-                <View style={[styles.progressBar, { width: `${Math.min((stats.weeklyRuns / 5) * 100, 100)}%`, backgroundColor: '#BFFF00' }]} />
-              </View>
+              <Text style={styles.streakNumber}>{stats.foodStreak}</Text>
+              <Text style={styles.streakLabel}>Food</Text>
+              {stats.foodStreak >= 3 && <Text style={styles.streakBadge}>{streakEmoji}</Text>}
             </View>
-            <View style={styles.weeklyStatCard}>
-              <View style={styles.weeklyStatHeader}>
-                <Calendar size={20} color="#00E5FF" strokeWidth={2.5} />
-                <Text style={styles.weeklyStatLabel}>Time</Text>
+            <View style={[styles.streakCard, { borderColor: stats.workoutStreak > 0 ? 'rgba(0, 173, 181, 0.2)' : '#1F2937' }]}>
+              <View style={[styles.iconContainer, { backgroundColor: stats.workoutStreak > 0 ? 'rgba(0, 173, 181, 0.1)' : '#1F2937' }]}>
+                <Dumbbell size={22} color="#00ADB5" strokeWidth={2.5} />
               </View>
-              <Text style={styles.weeklyStatValue}>{formatTime(stats.weeklyTime)}</Text>
-              <View style={styles.progressBarContainer}>
-                <View style={[styles.progressBar, { width: `${Math.min((stats.weeklyTime / 3600) * 100, 100)}%` }]} />
-              </View>
+              <Text style={styles.streakNumber}>{stats.workoutStreak}</Text>
+              <Text style={styles.streakLabel}>Gym</Text>
+              {stats.workoutStreak >= 3 && <Text style={styles.streakBadge}>{streakEmoji}</Text>}
             </View>
-          </ScrollView>
-        </View>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today&apos;s Nutrition</Text>
-          <View style={styles.nutritionContainer}>
-            <View style={styles.nutritionRow}>
-              <View style={styles.nutritionItem}>
-                <View style={styles.nutritionIconWrapper}>
-                  <Flame size={20} color="#FF6B35" strokeWidth={2.5} />
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Today&apos;s Nutrition</Text>
+            <View style={styles.nutritionCard}>
+              <View style={styles.nutritionMainRing}>
+                <View style={styles.ringWrapper}>
+                  <ProgressRing
+                    progress={calProgress}
+                    size={120}
+                    strokeWidth={10}
+                    color="#FF6B35"
+                    bgColor="#2A1F1A"
+                  />
+                  <View style={styles.ringCenter}>
+                    <Text style={styles.ringValue}>{nutrition.calories}</Text>
+                    <Text style={styles.ringUnit}>cal</Text>
+                  </View>
                 </View>
-                <View style={styles.nutritionTextContainer}>
-                  <Text style={styles.nutritionValue}>{nutrition.calories}</Text>
-                  <Text style={styles.nutritionLabel}>/ {nutrition.calorieGoal} cal</Text>
-                </View>
-                <View style={styles.nutritionRing}>
-                  <Text style={styles.nutritionPercentage}>{Math.round((nutrition.calories / nutrition.calorieGoal) * 100)}%</Text>
+                <View style={styles.nutritionGoalText}>
+                  <Text style={styles.nutritionGoalLabel}>of {nutrition.calorieGoal} cal goal</Text>
+                  <Text style={styles.nutritionGoalPercent}>
+                    {Math.round(calProgress * 100)}%
+                  </Text>
                 </View>
               </View>
-            </View>
-            <View style={styles.nutritionRow}>
-              <View style={styles.nutritionItem}>
-                <View style={styles.nutritionIconWrapper}>
-                  <Dumbbell size={20} color="#00E5FF" strokeWidth={2.5} />
+
+              <View style={styles.macroRow}>
+                <View style={styles.macroItem}>
+                  <View style={styles.macroRingWrapper}>
+                    <ProgressRing
+                      progress={proteinProgress}
+                      size={52}
+                      strokeWidth={5}
+                      color="#00E5FF"
+                      bgColor="#1A2A2D"
+                    />
+                    <View style={styles.macroRingCenter}>
+                      <Zap size={14} color="#00E5FF" />
+                    </View>
+                  </View>
+                  <Text style={styles.macroValue}>{nutrition.protein}g</Text>
+                  <Text style={styles.macroLabel}>Protein</Text>
+                  <Text style={styles.macroGoal}>/ {nutrition.proteinGoal}g</Text>
                 </View>
-                <View style={styles.nutritionTextContainer}>
-                  <Text style={styles.nutritionValue}>{nutrition.protein}g</Text>
-                  <Text style={styles.nutritionLabel}>/ {nutrition.proteinGoal}g protein</Text>
+                <View style={styles.macroItem}>
+                  <View style={styles.macroRingWrapper}>
+                    <ProgressRing
+                      progress={carbsProgress}
+                      size={52}
+                      strokeWidth={5}
+                      color="#BFFF00"
+                      bgColor="#1F2A1A"
+                    />
+                    <View style={styles.macroRingCenter}>
+                      <Flame size={14} color="#BFFF00" />
+                    </View>
+                  </View>
+                  <Text style={styles.macroValue}>{nutrition.carbs}g</Text>
+                  <Text style={styles.macroLabel}>Carbs</Text>
+                  <Text style={styles.macroGoal}>/ {nutrition.carbsGoal}g</Text>
                 </View>
-                <View style={styles.nutritionRing}>
-                  <Text style={styles.nutritionPercentage}>{Math.round((nutrition.protein / nutrition.proteinGoal) * 100)}%</Text>
+                <View style={styles.macroItem}>
+                  <View style={styles.macroRingWrapper}>
+                    <ProgressRing
+                      progress={nutrition.fatGoal > 0 ? nutrition.fat / nutrition.fatGoal : 0}
+                      size={52}
+                      strokeWidth={5}
+                      color="#F59E0B"
+                      bgColor="#2A2518"
+                    />
+                    <View style={styles.macroRingCenter}>
+                      <Target size={14} color="#F59E0B" />
+                    </View>
+                  </View>
+                  <Text style={styles.macroValue}>{nutrition.fat}g</Text>
+                  <Text style={styles.macroLabel}>Fat</Text>
+                  <Text style={styles.macroGoal}>/ {nutrition.fatGoal}g</Text>
                 </View>
               </View>
             </View>
           </View>
-        </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Weekly Summary</Text>
+            <View style={styles.weeklyGrid}>
+              <View style={styles.weeklyStatCard}>
+                <View style={styles.weeklyStatHeader}>
+                  <MapPin size={18} color="#00E5FF" strokeWidth={2.5} />
+                  <Text style={styles.weeklyStatLabel}>Miles</Text>
+                </View>
+                <Text style={styles.weeklyStatValue}>{stats.weeklyMiles.toFixed(1)}</Text>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBar, { width: `${Math.min((stats.weeklyMiles / 20) * 100, 100)}%` }]} />
+                </View>
+              </View>
+              <View style={styles.weeklyStatCard}>
+                <View style={styles.weeklyStatHeader}>
+                  <Target size={18} color="#BFFF00" strokeWidth={2.5} />
+                  <Text style={styles.weeklyStatLabel}>Runs</Text>
+                </View>
+                <Text style={styles.weeklyStatValue}>{stats.weeklyRuns}</Text>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBar, { width: `${Math.min((stats.weeklyRuns / 5) * 100, 100)}%`, backgroundColor: '#BFFF00' }]} />
+                </View>
+              </View>
+              <View style={styles.weeklyStatCard}>
+                <View style={styles.weeklyStatHeader}>
+                  <Calendar size={18} color="#00ADB5" strokeWidth={2.5} />
+                  <Text style={styles.weeklyStatLabel}>Time</Text>
+                </View>
+                <Text style={styles.weeklyStatValue}>{formatTime(stats.weeklyTime)}</Text>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBar, { width: `${Math.min((stats.weeklyTime / 3600) * 100, 100)}%`, backgroundColor: '#00ADB5' }]} />
+                </View>
+              </View>
+            </View>
+          </View>
 
         </View>
       </ScrollView>
@@ -167,290 +274,213 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingBottom: 28,
   },
   headerContent: {
-    marginTop: 10,
+    marginTop: 8,
   },
-  welcomeText: {
-    fontSize: 36,
+  greetingText: {
+    fontSize: 32,
     fontWeight: "800" as const,
     color: "#FFFFFF",
-    letterSpacing: -1,
+    letterSpacing: -0.8,
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "500" as const,
     color: "#00E5FF",
-    letterSpacing: 0.5,
-  },
-  nameContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  userName: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: "#F9FAFB",
-    letterSpacing: -0.5,
-  },
-  editIcon: {
-    marginLeft: 10,
-    opacity: 0.8,
-  },
-  nameEditContainer: {
-    marginTop: 5,
-  },
-  nameInput: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: "#F9FAFB",
-    borderBottomWidth: 2,
-    borderBottomColor: "#00ADB5",
-    paddingBottom: 5,
-    minWidth: 200,
-    letterSpacing: -0.5,
+    letterSpacing: 0.3,
+    opacity: 0.9,
   },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 100,
-    marginTop: -10,
   },
   streakContainer: {
-    flexDirection: "row",
-    gap: 14,
-    marginTop: 24,
+    flexDirection: "row" as const,
+    gap: 12,
+    marginTop: 20,
   },
   streakCard: {
     flex: 1,
-    backgroundColor: "#171B22",
-    borderRadius: 20,
-    padding: 18,
-    alignItems: "center",
-    gap: 10,
+    backgroundColor: "#141820",
+    borderRadius: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 10,
+    alignItems: "center" as const,
+    gap: 6,
     borderWidth: 1,
-    borderColor: "#1F2937",
-  },
-  glowCard: {
-    shadowColor: "#00E5FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#1F2937",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
   streakNumber: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "800" as const,
     color: "#FFFFFF",
     letterSpacing: -1,
   },
   streakLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
-    textAlign: "center" as const,
-    letterSpacing: 0.5,
+    color: "#6B7280",
+    textTransform: "uppercase" as const,
+    letterSpacing: 1,
+  },
+  streakBadge: {
+    fontSize: 14,
+    marginTop: -2,
   },
   section: {
-    marginTop: 32,
+    marginTop: 28,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700" as const,
     color: "#FFFFFF",
-    marginBottom: 16,
+    marginBottom: 14,
+    letterSpacing: -0.2,
+  },
+  nutritionCard: {
+    backgroundColor: "#141820",
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "#1F2937",
+  },
+  nutritionMainRing: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 20,
+    marginBottom: 24,
+  },
+  ringWrapper: {
+    position: "relative" as const,
+    width: 120,
+    height: 120,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  ringCenter: {
+    position: "absolute" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  ringValue: {
+    fontSize: 24,
+    fontWeight: "800" as const,
+    color: "#FFFFFF",
+    letterSpacing: -1,
+  },
+  ringUnit: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#9CA3AF",
+    marginTop: -2,
+  },
+  nutritionGoalText: {
+    flex: 1,
+  },
+  nutritionGoalLabel: {
+    fontSize: 14,
+    fontWeight: "500" as const,
+    color: "#9CA3AF",
+    marginBottom: 4,
+  },
+  nutritionGoalPercent: {
+    fontSize: 36,
+    fontWeight: "800" as const,
+    color: "#FF6B35",
+    letterSpacing: -1,
+  },
+  macroRow: {
+    flexDirection: "row" as const,
+    justifyContent: "space-around" as const,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#1F2937",
+  },
+  macroItem: {
+    alignItems: "center" as const,
+    gap: 4,
+  },
+  macroRingWrapper: {
+    position: "relative" as const,
+    width: 52,
+    height: 52,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: 4,
+  },
+  macroRingCenter: {
+    position: "absolute" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  macroValue: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
     letterSpacing: -0.3,
-    paddingLeft: 4,
   },
-  weeklyScrollView: {
-    marginHorizontal: -24,
+  macroLabel: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
   },
-  weeklyScrollContent: {
-    paddingHorizontal: 24,
-    gap: 14,
+  macroGoal: {
+    fontSize: 11,
+    fontWeight: "500" as const,
+    color: "#4B5563",
+  },
+  weeklyGrid: {
+    flexDirection: "row" as const,
+    gap: 12,
   },
   weeklyStatCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 18,
+    flex: 1,
+    backgroundColor: "#141820",
+    borderRadius: 16,
     padding: 14,
-    width: 105,
     borderWidth: 1,
     borderColor: "#1F2937",
   },
   weeklyStatHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     gap: 6,
     marginBottom: 10,
   },
   weeklyStatLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
-    letterSpacing: 0.3,
+    color: "#6B7280",
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
   },
   weeklyStatValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800" as const,
     color: "#FFFFFF",
     marginBottom: 10,
     letterSpacing: -1,
   },
   progressBarContainer: {
-    height: 6,
+    height: 4,
     backgroundColor: "#1F2937",
-    borderRadius: 3,
-    overflow: "hidden",
+    borderRadius: 2,
+    overflow: "hidden" as const,
   },
   progressBar: {
-    height: "100%",
+    height: "100%" as const,
     backgroundColor: "#00E5FF",
-    borderRadius: 3,
-  },
-  statItem: {
-    alignItems: "center",
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: "700" as const,
-    color: "#F9FAFB",
-    marginTop: 12,
-    letterSpacing: -0.5,
-  },
-  statLabel: {
-    fontSize: 13,
-    fontWeight: "400" as const,
-    color: "#9CA3AF",
-    marginTop: 6,
-  },
-  nutritionContainer: {
-    backgroundColor: "#171B22",
-    borderRadius: 18,
-    padding: 20,
-    gap: 14,
-    borderWidth: 1,
-    borderColor: "#1F2937",
-  },
-  nutritionRow: {
-    width: "100%",
-  },
-  nutritionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  nutritionIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#1F2937",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nutritionTextContainer: {
-    flex: 1,
-  },
-  nutritionIcon: {
-    fontSize: 24,
-  },
-  nutritionValue: {
-    fontSize: 20,
-    fontWeight: "700" as const,
-    color: "#FFFFFF",
-    letterSpacing: -0.3,
-    marginBottom: 2,
-  },
-  nutritionLabel: {
-    fontSize: 13,
-    fontWeight: "500" as const,
-    color: "#9CA3AF",
-  },
-  nutritionRing: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#1F2937",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
-    borderColor: "#00E5FF",
-  },
-  nutritionPercentage: {
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: "#00E5FF",
-    letterSpacing: -0.3,
-  },
-  todoCard: {
-    backgroundColor: "#161B22",
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-    borderLeftWidth: 4,
-    borderLeftColor: "#7C3AED",
-    borderWidth: 1,
-    borderColor: "#1C2128",
-  },
-  todoCardCompleted: {
-    borderLeftColor: "#10B981",
-    backgroundColor: "#0F1F1A",
-  },
-  todoHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  todoIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#1C2128",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 15,
-  },
-  todoContent: {
-    flex: 1,
-  },
-  todoTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 4,
-  },
-  todoTitleCompleted: {
-    color: "#10B981",
-  },
-  todoSubtitle: {
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-  todoStatus: {
-    marginLeft: 10,
-  },
-  todoExercises: {
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#1C2128",
-  },
-  todoExercisesText: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    lineHeight: 20,
+    borderRadius: 2,
   },
 });
