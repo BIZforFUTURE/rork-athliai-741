@@ -418,7 +418,7 @@ export default function PersonalStatsScreen() {
         <Text style={styles.headerSubtitle}>Track your fitness journey</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
         {personalStats.targetWeight && personalStats.weight && (
           <TouchableOpacity 
             style={styles.weightProgressCard}
@@ -910,7 +910,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     marginTop: -20,
-    paddingBottom: 100,
+  },
+  contentContainer: {
+    paddingBottom: 120,
   },
   statsCard: {
     backgroundColor: "#171B22",
