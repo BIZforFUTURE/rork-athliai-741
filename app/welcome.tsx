@@ -1134,7 +1134,6 @@ Format as JSON:
                   <Text
                     style={[
                       styles.optionText,
-                      { color: '#000000' },
                       nutritionGoal === 'lose' && styles.optionTextSelected,
                     ]}
                   >
@@ -1157,7 +1156,6 @@ Format as JSON:
                   <Text
                     style={[
                       styles.optionText,
-                      { color: '#000000' },
                       nutritionGoal === 'maintain' && styles.optionTextSelected,
                     ]}
                   >
@@ -1180,7 +1178,6 @@ Format as JSON:
                   <Text
                     style={[
                       styles.optionText,
-                      { color: '#000000' },
                       nutritionGoal === 'gain' && styles.optionTextSelected,
                     ]}
                   >
