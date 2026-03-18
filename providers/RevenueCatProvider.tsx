@@ -11,17 +11,16 @@ import Purchases, {
 const ENTITLEMENT_ID = "AthliAI Premium";
 
 function getRCApiKey(): string {
-  const testKey = process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY ?? "";
+  if (Platform.OS === "web") {
+    return "";
+  }
   const iosKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY ?? "";
   const androidKey = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY ?? "";
 
-  if (__DEV__ || Platform.OS === "web") {
-    return testKey || iosKey;
-  }
   return Platform.select({
     ios: iosKey,
     android: androidKey,
-    default: testKey || iosKey,
+    default: iosKey,
   }) as string;
 }
 
