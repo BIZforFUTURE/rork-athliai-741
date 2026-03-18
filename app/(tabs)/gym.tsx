@@ -496,15 +496,16 @@ Format as JSON:
       let cleanedResponse = aiResponse
         .replace(/```json/gi, '')
         .replace(/```/g, '')
-        .replace(/^[^{]*/, '')
-        .replace(/[^}]*$/, '')
         .trim();
       
-      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) {
-        cleanedResponse = jsonMatch[0];
+      const firstBrace = cleanedResponse.indexOf('{');
+      const lastBrace = cleanedResponse.lastIndexOf('}');
+      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+        throw new Error('No valid JSON found in AI response');
       }
+      cleanedResponse = cleanedResponse.substring(firstBrace, lastBrace + 1);
       
+      console.log('Cleaned JSON length:', cleanedResponse.length);
       const planData = JSON.parse(cleanedResponse);
       
       await processPlanData(planData);
@@ -535,10 +536,33 @@ Format as JSON:
           workoutDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
         }
 
+        const safeDays = Array.isArray(planData.days) ? planData.days.map((day: any, idx: number) => ({
+          day: day.day ?? idx + 1,
+          name: day.name ?? `Day ${idx + 1}`,
+          exercises: Array.isArray(day.exercises) ? day.exercises.map((ex: any) => ({
+            name: ex.name ?? 'Exercise',
+            sets: typeof ex.sets === 'number' ? ex.sets : 3,
+            reps: ex.reps ?? '8-12',
+            restTime: typeof ex.restTime === 'number' ? ex.restTime : 90,
+            videoUrl: ex.videoUrl ?? getVideoUrlForExercise(ex.name ?? ''),
+            equipment: ex.equipment ?? 'Bodyweight',
+            description: ex.description ?? '',
+          })) : [],
+        })) : [];
+
+        if (safeDays.length === 0) {
+          throw new Error('Plan has no workout days');
+        }
+
         const enhancedPlan: CustomWorkoutPlan = {
-          ...planData,
-          workoutDays
+          id: planData.id ?? `ai-plan-${Date.now()}`,
+          name: planData.name ?? 'Custom Training Plan',
+          description: planData.description ?? 'A personalized workout plan.',
+          workoutDays,
+          days: safeDays,
         };
+
+        console.log('Enhanced plan created:', enhancedPlan.name, 'with', enhancedPlan.days.length, 'days');
           
         setGeneratedPlan(enhancedPlan);
         updateCustomWorkoutPlan(enhancedPlan);
