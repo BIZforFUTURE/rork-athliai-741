@@ -1058,7 +1058,7 @@ Format as JSON:
         <View style={styles.loadingContainer}>
           <View style={styles.loadingGradient}>
             <View style={styles.loadingContent}>
-              <Zap size={64} color="#FFFFFF" />
+              <Zap size={56} color="#4ADE80" />
               <Text style={styles.loadingTitle}>Creating Your Plan</Text>
               <Text style={styles.loadingMessage}>
                 This might take a second.{"\n"}Thank you for your patience.
@@ -1266,7 +1266,7 @@ Format as JSON:
                           startCustomWorkout(day);
                         }}
                       >
-                        <Play size={16} color="#FFFFFF" />
+                        <Play size={14} color="#2E7D32" />
                         <Text style={styles.startDayButtonText}>Start</Text>
                       </TouchableOpacity>
                     </View>
@@ -1310,7 +1310,7 @@ Format as JSON:
                   setShowQuiz(true);
                 }}
               >
-                <Plus size={20} color="#00ADB5" />
+                <Plus size={20} color="#C0C8D4" />
                 <Text style={styles.newPlanButtonText}>Create New Plan</Text>
               </TouchableOpacity>
             </View>
@@ -1681,22 +1681,23 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#111318",
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: "#171B22",
+    paddingVertical: 18,
+    backgroundColor: "#161A21",
     borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    borderBottomColor: "rgba(255,255,255,0.06)",
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F9FAFB",
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F0F0F0",
+    letterSpacing: -0.3,
   },
   closeButton: {
     padding: 5,
@@ -1765,9 +1766,9 @@ const styles = StyleSheet.create({
   },
   modalFooter: {
     padding: 20,
-    backgroundColor: "#171B22",
+    backgroundColor: "#161A21",
     borderTopWidth: 1,
-    borderTopColor: "#0D0F13",
+    borderTopColor: "rgba(255,255,255,0.06)",
   },
   startWorkoutButton: {
     backgroundColor: "#00ADB5",
@@ -2098,27 +2099,26 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   planOverview: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
+    backgroundColor: "#1A1E27",
+    borderRadius: 14,
     padding: 20,
     marginTop: 20,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
   },
   planOverviewText: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    lineHeight: 24,
+    fontSize: 15,
+    color: "#A0A8B8",
+    lineHeight: 23,
   },
   dayCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
+    backgroundColor: "#1A1E27",
+    borderRadius: 14,
     padding: 20,
     marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
   },
   dayHeader: {
     flexDirection: "row",
@@ -2127,47 +2127,48 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    borderBottomColor: "rgba(255,255,255,0.06)",
     flexWrap: "nowrap",
   },
   dayTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#F9FAFB",
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#E8ECF0",
     flex: 1,
     marginRight: 10,
   },
   exerciseCount: {
     fontSize: 12,
-    color: "#9CA3AF",
-    backgroundColor: "#0D0F13",
+    color: "#8B95A5",
+    backgroundColor: "rgba(255,255,255,0.06)",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
     textAlign: "center",
     minWidth: 80,
+    overflow: "hidden" as const,
   },
   customExerciseCard: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
   },
   newPlanButton: {
-    backgroundColor: "#171B22",
+    backgroundColor: "transparent",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 15,
     borderRadius: 25,
     gap: 10,
-    borderWidth: 2,
-    borderColor: "#00ADB5",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.15)",
   },
   newPlanButtonText: {
-    color: "#00ADB5",
+    color: "#C0C8D4",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "600" as const,
   },
   dayHeaderRight: {
     flexDirection: "row",
@@ -2178,16 +2179,16 @@ const styles = StyleSheet.create({
   startDayButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00ADB5",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: "#E8F5E9",
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 15,
     gap: 5,
   },
   startDayButtonText: {
-    color: "#FFFFFF",
+    color: "#2E7D32",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700" as const,
   },
   daySelectionSubtext: {
     fontSize: 16,
@@ -2436,7 +2437,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#111318",
   },
   loadingContent: {
     alignItems: "center",
@@ -2444,18 +2445,18 @@ const styles = StyleSheet.create({
   },
   loadingTitle: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#FFFFFF",
+    fontWeight: "800" as const,
+    color: "#F0F0F0",
     marginTop: 30,
     marginBottom: 20,
     textAlign: "center",
+    letterSpacing: -0.5,
   },
   loadingMessage: {
-    fontSize: 18,
-    color: "#FFFFFF",
-    opacity: 0.9,
+    fontSize: 16,
+    color: "#8B95A5",
     textAlign: "center",
-    lineHeight: 28,
+    lineHeight: 26,
   },
   buildWorkoutCTA: {
     marginTop: 15,
