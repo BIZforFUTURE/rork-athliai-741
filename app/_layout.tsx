@@ -7,7 +7,18 @@ import { AppProvider } from "@/providers/AppProvider";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 import { RevenueCatProvider } from "@/providers/RevenueCatProvider";
 
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
+
+if (Platform.OS === "web" && typeof window !== "undefined") {
+  const originalConsoleError = console.error;
+  console.error = (...args: unknown[]) => {
+    const message = typeof args[0] === "string" ? args[0] : "";
+    if (message.includes("non-boolean attribute") && message.includes("collapsable")) {
+      return;
+    }
+    originalConsoleError(...args);
+  };
+}
 
 
 void SplashScreen.preventAutoHideAsync();
