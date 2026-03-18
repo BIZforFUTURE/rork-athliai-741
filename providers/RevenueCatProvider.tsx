@@ -1,216 +1,182 @@
 import createContextHook from "@nkzw/create-context-hook";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Platform, Alert } from "react-native";
-import { useApp } from "./AppProvider";
-import * as Linking from "expo-linking";
+import Purchases, {
+  PurchasesOffering,
+  PurchasesPackage,
+  CustomerInfo,
+  LOG_LEVEL,
+} from "react-native-purchases";
 
-const REVENUECAT_API_KEY = "appl_cyGTZILgAZKTgfzcpRDRAnwrDok";
 const ENTITLEMENT_ID = "AthliAI Premium";
-const PRODUCT_ID = "Oliver20011";
-const OFFERING_ID = "default";
 
-interface Entitlement {
-  expires_date: string | null;
-  product_identifier: string;
-  purchase_date: string;
+function getRCApiKey(): string {
+  const testKey = process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY ?? "";
+  const iosKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY ?? "";
+  const androidKey = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY ?? "";
+
+  if (__DEV__ || Platform.OS === "web") {
+    return testKey || iosKey;
+  }
+  return Platform.select({
+    ios: iosKey,
+    android: androidKey,
+    default: testKey || iosKey,
+  }) as string;
 }
 
-interface CustomerInfo {
-  subscriber: {
-    entitlements: {
-      [key: string]: Entitlement;
-    };
-    subscriptions: {
-      [key: string]: {
-        expires_date: string | null;
-        purchase_date: string;
-        billing_issues_detected_at: string | null;
-      };
-    };
-  };
+const apiKey = getRCApiKey();
+
+if (apiKey) {
+  void Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+  Purchases.configure({ apiKey });
+  console.log("[RevenueCat] Configured with platform:", Platform.OS);
+} else {
+  console.warn("[RevenueCat] No API key found for platform:", Platform.OS);
 }
 
 export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
-  const { user } = useApp();
   const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentOffering, setCurrentOffering] =
+    useState<PurchasesOffering | null>(null);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
 
-  const checkSubscriptionStatus = useCallback(async () => {
-    if (!user?.id) {
+  const checkPremiumStatus = useCallback((info: CustomerInfo) => {
+    const entitlement = info.entitlements.active[ENTITLEMENT_ID];
+    const hasPremium = !!entitlement;
+    console.log("[RevenueCat] Premium status:", hasPremium);
+    setIsPremium(hasPremium);
+    setCustomerInfo(info);
+  }, []);
+
+  useEffect(() => {
+    if (!apiKey) {
       setIsLoading(false);
       return;
     }
 
-    try {
-      const response = await fetch(
-        `https://api.revenuecat.com/v1/subscribers/${user.id}`,
-        {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${REVENUECAT_API_KEY}`,
-            "Content-Type": "application/json",
-            "X-Platform": Platform.OS === "ios" ? "ios" : "android",
-          },
-        }
-      );
+    const init = async () => {
+      try {
+        const info = await Purchases.getCustomerInfo();
+        checkPremiumStatus(info);
 
-      if (response.ok) {
-        const data: CustomerInfo = await response.json();
-        setCustomerInfo(data);
-
-        const entitlement = data.subscriber?.entitlements?.[ENTITLEMENT_ID];
-        if (entitlement) {
-          const expiresDate = entitlement.expires_date;
-          if (!expiresDate || new Date(expiresDate) > new Date()) {
-            setIsPremium(true);
-          } else {
-            setIsPremium(false);
-          }
+        const offerings = await Purchases.getOfferings();
+        if (offerings.current) {
+          setCurrentOffering(offerings.current);
+          console.log(
+            "[RevenueCat] Loaded offering:",
+            offerings.current.identifier,
+            "packages:",
+            offerings.current.availablePackages.length
+          );
         } else {
-          setIsPremium(false);
+          console.warn("[RevenueCat] No current offering found");
         }
-      } else if (response.status === 404) {
-        setIsPremium(false);
-        setCustomerInfo(null);
-      } else {
-        console.error("Error checking subscription:", response.status);
+      } catch (error) {
+        console.error("[RevenueCat] Init error:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
+    };
 
-  useEffect(() => {
-    checkSubscriptionStatus();
-  }, [checkSubscriptionStatus]);
+    void init();
 
-  const restorePurchases = useCallback(async () => {
-    setIsLoading(true);
-    await checkSubscriptionStatus();
-  }, [checkSubscriptionStatus]);
+    Purchases.addCustomerInfoUpdateListener((info) => {
+      console.log("[RevenueCat] Customer info updated");
+      checkPremiumStatus(info);
+    });
+  }, [checkPremiumStatus]);
 
-  const getOfferings = useCallback(async () => {
-    try {
-      const response = await fetch(
-        "https://api.revenuecat.com/v1/offerings",
-        {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${REVENUECAT_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        return data;
+  const purchasePackage = useCallback(
+    async (pkg?: PurchasesPackage) => {
+      if (!apiKey) {
+        Alert.alert("Error", "In-app purchases are not configured.");
+        return { success: false };
       }
-      return null;
-    } catch (error) {
-      console.error("Error fetching offerings:", error);
-      return null;
-    }
-  }, []);
 
-  const purchasePackage = useCallback(async () => {
-    if (!user?.id) {
-      Alert.alert("Error", "User not found. Please try again.");
-      return { success: false };
-    }
+      const targetPkg =
+        pkg ?? currentOffering?.availablePackages?.[0] ?? null;
 
-    try {
-      console.log("Initiating purchase for user:", user.id);
-      
-      if (Platform.OS === 'ios') {
-        const url = `https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions`;
-        const canOpen = await Linking.canOpenURL(url);
-        
-        if (canOpen) {
-          await Linking.openURL(url);
-          
-          setTimeout(() => {
-            Alert.alert(
-              "Purchase Complete?",
-              "If you completed the purchase, tap 'Yes' to refresh your subscription status.",
-              [
-                {
-                  text: "Not Yet",
-                  style: "cancel"
-                },
-                {
-                  text: "Yes",
-                  onPress: async () => {
-                    await checkSubscriptionStatus();
-                  }
-                }
-              ]
-            );
-          }, 2000);
-          
-          return { success: true };
-        } else {
-          Alert.alert("Error", "Unable to open App Store. Please try again.");
-          return { success: false };
-        }
-      } else if (Platform.OS === 'android') {
-        const url = 'https://play.google.com/store/account/subscriptions';
-        const canOpen = await Linking.canOpenURL(url);
-        
-        if (canOpen) {
-          await Linking.openURL(url);
-          
-          setTimeout(() => {
-            Alert.alert(
-              "Purchase Complete?",
-              "If you completed the purchase, tap 'Yes' to refresh your subscription status.",
-              [
-                {
-                  text: "Not Yet",
-                  style: "cancel"
-                },
-                {
-                  text: "Yes",
-                  onPress: async () => {
-                    await checkSubscriptionStatus();
-                  }
-                }
-              ]
-            );
-          }, 2000);
-          
-          return { success: true };
-        } else {
-          Alert.alert("Error", "Unable to open Play Store. Please try again.");
-          return { success: false };
-        }
-      } else {
+      if (!targetPkg) {
         Alert.alert(
-          "Web Platform",
-          "In-app purchases are only available on iOS and Android. Please download the mobile app."
+          "Error",
+          "No subscription package available. Please try again later."
         );
         return { success: false };
       }
-    } catch (error) {
-      console.error("Error initiating purchase:", error);
-      Alert.alert(
-        "Purchase Error",
-        "Unable to complete purchase. Please try again later."
-      );
-      return { success: false };
-    }
-  }, [user?.id, checkSubscriptionStatus]);
 
-  return useMemo(() => ({
-    isPremium,
-    isLoading,
-    customerInfo,
-    checkSubscriptionStatus,
-    restorePurchases,
-    getOfferings,
-    purchasePackage,
-  }), [isPremium, isLoading, customerInfo, checkSubscriptionStatus, restorePurchases, getOfferings, purchasePackage]);
+      try {
+        console.log("[RevenueCat] Purchasing:", targetPkg.identifier);
+        const { customerInfo: info } =
+          await Purchases.purchasePackage(targetPkg);
+        checkPremiumStatus(info);
+
+        if (info.entitlements.active[ENTITLEMENT_ID]) {
+          console.log("[RevenueCat] Purchase successful!");
+          return { success: true };
+        }
+        return { success: false };
+      } catch (error: any) {
+        if (error.userCancelled) {
+          console.log("[RevenueCat] Purchase cancelled by user");
+          return { success: false };
+        }
+        console.error("[RevenueCat] Purchase error:", error);
+        Alert.alert(
+          "Purchase Failed",
+          "Something went wrong. Please try again later."
+        );
+        return { success: false };
+      }
+    },
+    [currentOffering, checkPremiumStatus]
+  );
+
+  const restorePurchases = useCallback(async () => {
+    if (!apiKey) {
+      Alert.alert("Error", "In-app purchases are not configured.");
+      return false;
+    }
+
+    try {
+      console.log("[RevenueCat] Restoring purchases...");
+      const info = await Purchases.restorePurchases();
+      checkPremiumStatus(info);
+
+      if (info.entitlements.active[ENTITLEMENT_ID]) {
+        Alert.alert("Restored!", "Your premium subscription has been restored.");
+        return true;
+      } else {
+        Alert.alert(
+          "No Subscription Found",
+          "We couldn't find an active subscription for this account."
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error("[RevenueCat] Restore error:", error);
+      Alert.alert("Error", "Failed to restore purchases. Please try again.");
+      return false;
+    }
+  }, [checkPremiumStatus]);
+
+  return useMemo(
+    () => ({
+      isPremium,
+      isLoading,
+      currentOffering,
+      customerInfo,
+      purchasePackage,
+      restorePurchases,
+    }),
+    [
+      isPremium,
+      isLoading,
+      currentOffering,
+      customerInfo,
+      purchasePackage,
+      restorePurchases,
+    ]
+  );
 });

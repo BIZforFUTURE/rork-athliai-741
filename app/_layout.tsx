@@ -10,7 +10,7 @@ import { RevenueCatProvider } from "@/providers/RevenueCatProvider";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
 
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
@@ -21,6 +21,7 @@ function RootLayoutNav() {
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
       <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
       <Stack.Screen name="workout/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="paywall" options={{ headerShown: false, presentation: "modal" }} />
     </Stack>
   );
 }
@@ -40,7 +41,7 @@ export default function RootLayout() {
     // Give the app a moment to initialize
     const timer = setTimeout(() => {
       setIsReady(true);
-      SplashScreen.hideAsync();
+      void SplashScreen.hideAsync();
     }, 100);
     return () => clearTimeout(timer);
   }, []);

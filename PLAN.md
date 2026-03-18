@@ -1,42 +1,35 @@
-# Set up RevenueCat In-App Purchases properly
+# RevenueCat In-App Purchases - Setup Complete
 
-## What needs to happen
+## Completed
 
-### Step 1 — You need to add 3 API keys (your action required)
-Your RevenueCat project is connected, but the app needs 3 API keys set as environment variables in your Rork project settings:
+- [x] Installed `react-native-purchases` SDK
+- [x] Rewrote `providers/RevenueCatProvider.tsx` with real SDK (was using raw API calls)
+- [x] Auto-selects API key per platform (iOS key for iPhone, Android key for Android, falls back to iOS key for web/dev)
+- [x] Fetches subscription offering from RevenueCat on init
+- [x] Handles purchasing, restoring, and premium status checking
+- [x] Created `app/paywall.tsx` — dark-themed modal paywall with $9.99/year + 3-day trial
+- [x] Registered paywall as modal route in `app/_layout.tsx`
+- [x] Updated `app/welcome.tsx` — "Start Free Trial" opens paywall modal
+- [x] Created Android product (`athliai_unlimited:annual`) in RevenueCat
+- [x] Attached both iOS and Android products to "AthliAI Premium" entitlement
+- [x] Attached both products to the default offering package
 
-1. **Test Store key** → `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY` (for development/web preview)
-2. **iOS App Store key** → `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY` (for production iOS)
-3. **Android Play Store key** → `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY` (for production Android)
+## RevenueCat Dashboard Config
 
-**How to find them:** Go to your [RevenueCat dashboard](https://app.revenuecat.com) → Your project → Apps → click each app → copy the "Public API Key" for each one. Then paste them into your Rork project's environment variable settings.
+- **Entitlement:** `AthliAI Premium`
+- **Offering:** `default` (current)
+- **Package:** `$rc_annual`
+- **iOS Product:** `Oliver20011` (subscription)
+- **Android Product:** `athliai_unlimited:annual` (subscription)
 
-If you don't have all 3 apps created in RevenueCat yet, you'll need to create them there (Test Store is auto-created, but you may need to add App Store and Play Store apps).
+## Environment Variables
 
----
+- `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY` — configured
+- `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY` — configured
+- `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY` — not set (no Stripe linked to RC project; iOS key used as fallback)
 
-### Step 2 — I'll rebuild the RevenueCat integration (code changes)
+## How to open the paywall
 
-**Features:**
-- Install the `react-native-purchases` SDK (the official RevenueCat package)
-- Rewrite the RevenueCat provider to use the real SDK instead of raw API calls
-- Automatically pick the right API key based on platform (Test for web/dev, iOS key for iPhone, Android key for Android)
-- Fetch your subscription offering ($9.99/year with 3-day trial) from RevenueCat
-- Handle purchasing, restoring purchases, and checking premium status
-- Show errors gracefully if something goes wrong
-
-**Paywall screen:**
-- Clean, minimal design matching your app's dark theme
-- Shows the subscription price ($9.99/year) and 3-day free trial info
-- A single "Start Free Trial" button
-- A "Restore Purchases" link below
-- Appears as a modal when a user tries to access a locked feature
-
-**Locked feature flow:**
-- When a non-premium user taps a premium feature, the paywall modal slides up
-- After successful purchase, the modal closes and the feature unlocks
-- Premium status is checked and cached so it doesn't block the UI
-
-**Restore purchases:**
-- Available on the paywall screen
-- Checks RevenueCat for any existing subscriptions tied to the user
+- From welcome flow: "Start Free Trial" button navigates to `/paywall`
+- From anywhere in the app: `router.push('/paywall')`
+- Check premium status: `const { isPremium } = useRevenueCat()`

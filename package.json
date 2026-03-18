@@ -15,6 +15,7 @@
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/datetimepicker": "8.4.1",
     "@react-navigation/native": "^7.1.6",
+    "@rork-ai/toolkit-sdk": "latest",
     "@stardazed/streams-text-encoding": "^1.0.2",
     "@tanstack/react-query": "^5.87.4",
     "@trpc/client": "^11.5.1",
@@ -51,14 +52,14 @@
     "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-maps": "1.20.1",
+    "react-native-purchases": "^9.13.0",
     "react-native-safe-area-context": "5.3.0",
     "react-native-screens": "~4.10.0",
     "react-native-svg": "15.11.2",
     "react-native-web": "^0.20.0",
     "superjson": "^2.2.2",
     "zod": "^4.1.8",
-    "zustand": "^5.0.2",
-    "@rork-ai/toolkit-sdk": "latest"
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

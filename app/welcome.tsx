@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   TextInput,
   Platform,
   KeyboardAvoidingView,
@@ -15,12 +14,12 @@ import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, Activity, Trophy, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check } from 'lucide-react-native';
+import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check } from 'lucide-react-native';
 import { useApp } from '@/providers/AppProvider';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Linking from 'expo-linking';
+
 
 interface WelcomeSlide {
   id: number;
@@ -197,7 +196,7 @@ export default function WelcomeScreen() {
   const [isRequestingPermissions, setIsRequestingPermissions] = useState(false);
   const [showNutritionQuiz, setShowNutritionQuiz] = useState(false);
   const [showGymQuiz, setShowGymQuiz] = useState(false);
-  const [nutritionQuizStep, setNutritionQuizStep] = useState(0);
+
   const [showPaywall, setShowPaywall] = useState(false);
   const [nutritionGoal, setNutritionGoal] = useState<'lose' | 'maintain' | 'gain' | null>(null);
   const [currentWeight, setCurrentWeight] = useState('');
@@ -212,14 +211,14 @@ export default function WelcomeScreen() {
   const [selectedWorkoutDays, setSelectedWorkoutDays] = useState<string[]>([]);
   const [showDaySelector, setShowDaySelector] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
-  const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, personalStats, updateCustomWorkoutPlan } = useApp();
+  const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, updateCustomWorkoutPlan } = useApp();
   const { requestPermissions, scheduleDailyWorkoutReminder } = useNotifications();
-  const { isPremium, isLoading: isLoadingSubscription, purchasePackage } = useRevenueCat();
+  useRevenueCat();
   const insets = useSafeAreaInsets();
 
   const handleNext = async () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     if (currentSlide === 3) {
       setIsRequestingPermissions(true);
@@ -244,7 +243,7 @@ export default function WelcomeScreen() {
 
   const handleSkip = () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     handleGetStarted();
   };
@@ -260,8 +259,6 @@ export default function WelcomeScreen() {
     const currentWeightNum = parseFloat(currentWeight);
     const heightNum = (parseFloat(heightFeet) * 12) + parseFloat(heightInches);
     const targetWeightNum = targetWeight ? parseFloat(targetWeight) : currentWeightNum;
-    const weightDiff = targetWeightNum - currentWeightNum;
-
     let calorieGoal = 2000;
     let proteinGoal = 150;
     let carbsGoal = 200;
@@ -302,7 +299,7 @@ export default function WelcomeScreen() {
 
   const handleSkipNutrition = () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     updateNutrition({ quizCompleted: true });
     setShowNutritionQuiz(false);
@@ -311,7 +308,7 @@ export default function WelcomeScreen() {
 
   const handleSkipGym = () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     setShowGymQuiz(false);
     setShowNutritionQuiz(true);
@@ -368,7 +365,7 @@ export default function WelcomeScreen() {
 
   const handleGymAnswer = (answer: string) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     const newAnswers = [...gymAnswers];
     newAnswers[currentGymStep] = {
@@ -859,15 +856,11 @@ Format as JSON:
 
             <TouchableOpacity
               style={styles.startTrialButton}
-              onPress={async () => {
+              onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
                 }
-                console.log('Starting purchase flow...');
-                const result = await purchasePackage();
-                if (result.success) {
-                  console.log('Purchase initiated successfully');
-                }
+                router.push('/paywall');
               }}
             >
               <Text style={styles.startTrialButtonText}>Start Free Trial</Text>
@@ -878,7 +871,7 @@ Format as JSON:
               style={styles.continueButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 handleGetStarted();
               }}
@@ -968,7 +961,7 @@ Format as JSON:
                           ]}
                           onPress={() => {
                             if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }
                             if (isSelected) {
                               setSelectedWorkoutDays(prev => prev.filter(d => d !== dayKey));
@@ -997,7 +990,7 @@ Format as JSON:
                     ]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       }
                       if (selectedWorkoutDays.length > 0) {
                         setShowDaySelector(false);
@@ -1053,9 +1046,9 @@ Format as JSON:
                     ]}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       }
-                      generateGymPlan();
+                      void generateGymPlan();
                     }}
                     disabled={!customGoals.trim()}
                   >
@@ -1133,7 +1126,7 @@ Format as JSON:
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setNutritionGoal('lose');
                   }}
@@ -1156,7 +1149,7 @@ Format as JSON:
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setNutritionGoal('maintain');
                   }}
@@ -1179,7 +1172,7 @@ Format as JSON:
                   ]}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                     setNutritionGoal('gain');
                   }}
@@ -1258,7 +1251,7 @@ Format as JSON:
                     style={styles.datePickerButton}
                     onPress={() => {
                       if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       }
                       setShowDatePicker(true);
                     }}
@@ -1298,7 +1291,7 @@ Format as JSON:
               ]}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 }
                 calculateNutritionGoals();
               }}
@@ -1317,11 +1310,7 @@ Format as JSON:
     );
   }
 
-  const isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
-  const textColor = isWhiteBackground ? '#000000' : '#FFFFFF';
-  const buttonColor = isWhiteBackground ? '#000000' : '#FFFFFF';
-  const buttonTextColor = isWhiteBackground ? '#FFFFFF' : '#000000';
-  const isDarkBackground = currentSlideData.gradient[0] === '#000000';
+  const _isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#FFFFFF' }]}>
@@ -1393,7 +1382,7 @@ Format as JSON:
               style={styles.skipNotificationsButton} 
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setCurrentSlide(currentSlide + 1);
               }}
