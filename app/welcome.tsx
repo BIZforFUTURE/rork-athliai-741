@@ -1015,7 +1015,7 @@ Format as JSON:
                         onPress={() => handleGymAnswer(option)}
                         activeOpacity={0.7}
                       >
-                        <Text style={[styles.optionText, { color: '#000000' }]}>{option}</Text>
+                        <Text style={styles.optionText}>{option}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
