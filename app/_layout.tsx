@@ -22,6 +22,9 @@ function RootLayoutNav() {
       <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
       <Stack.Screen name="workout/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="paywall" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen name="run-details/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="notification-settings" options={{ headerShown: false }} />
+      <Stack.Screen name="workout-complete" options={{ headerShown: false }} />
     </Stack>
   );
 }
