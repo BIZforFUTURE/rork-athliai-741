@@ -17,7 +17,7 @@ import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet } from "lucide-react-native";
+import { Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
 
@@ -77,7 +77,7 @@ export default function NutritionScreen() {
   const [_proteinIngredients, setProteinIngredients] = useState("");
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [foodSearchQuery, setFoodSearchQuery] = useState("");
-  const [_foodSearchResults, setFoodSearchResults] = useState<any[]>([]);
+  const [foodSearchResults, setFoodSearchResults] = useState<{name: string; calories: number; protein: number; carbs: number; fat: number; serving: string}[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isMealPrep, setIsMealPrep] = useState(false);
   const [mealPrepDate, setMealPrepDate] = useState(new Date());
@@ -1530,7 +1530,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                     setShowFoodSearch(true);
                   }}
                 >
-                  <Brain size={24} color="#FFFFFF" />
+                  <Search size={24} color="#FFFFFF" />
                   <Text style={styles.foodSearchButtonText}>Search Foods</Text>
                 </TouchableOpacity>
 
@@ -1828,7 +1828,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
           style={styles.modalOverlay}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View style={styles.aiModal}>
+          <View style={styles.foodSearchModal}>
             <TouchableOpacity 
               style={styles.modalClose}
               onPress={() => {
@@ -1843,98 +1843,179 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               <X size={24} color="#1F2937" />
             </TouchableOpacity>
             <Text style={styles.aiModalTitle}>Search Foods</Text>
-            <Text style={styles.aiModalSubtitle}>
-              Search for a food to get nutrition info
-            </Text>
-            <TextInput
-              style={styles.aiTextInput}
-              placeholder="e.g., 'apple', 'chicken breast', 'pizza'"
-              placeholderTextColor="#9CA3AF"
-              value={foodSearchQuery}
-              onChangeText={setFoodSearchQuery}
-              autoFocus
-            />
-            <TouchableOpacity
-              style={[
-                styles.aiAnalyzeButton,
-                (!foodSearchQuery || isSearching) && styles.disabledButton,
-              ]}
-              onPress={async () => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                setIsSearching(true);
-                try {
-                  const prompt = `You are a professional nutritionist. Provide accurate nutritional estimates based on standard serving sizes and preparation methods. Return ONLY valid JSON without any markdown formatting or code blocks.
-
-Analyze this food: "${foodSearchQuery}". Estimate nutritional content based on typical serving sizes. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
-
-                  console.log("Searching for food...");
-                  const response = await callOpenAI(prompt);
-                  
-                  let cleanedResponse = response
-                    .replace(/```json/gi, '')
-                    .replace(/```/g, '')
-                    .replace(/^[^{]*/, '')
-                    .replace(/[^}]*$/, '')
-                    .trim();
-                  
-                  const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-                  if (jsonMatch) {
-                    cleanedResponse = jsonMatch[0];
+            <View style={styles.foodSearchInputRow}>
+              <TextInput
+                style={styles.foodSearchInput}
+                placeholder="e.g., apple, chicken breast, pizza"
+                placeholderTextColor="#9CA3AF"
+                value={foodSearchQuery}
+                onChangeText={setFoodSearchQuery}
+                autoFocus
+                returnKeyType="search"
+                onSubmitEditing={async () => {
+                  if (!foodSearchQuery || isSearching) return;
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                   }
-                  
-                  const nutritionData = JSON.parse(cleanedResponse);
-                  
-                  const name = nutritionData.name || foodSearchQuery;
-                  const calories = Number(nutritionData.calories) || 0;
-                  const protein = Number(nutritionData.protein) || 0;
-                  const carbs = Number(nutritionData.carbs) || 0;
-                  const fat = Number(nutritionData.fat) || 0;
-                  
-                  if (calories === 0) {
-                    throw new Error("Invalid nutrition data");
+                  setIsSearching(true);
+                  setFoodSearchResults([]);
+                  try {
+                    const prompt = `You are a nutrition database. For the food query "${foodSearchQuery}", return 6 different variations/options a user might mean including different serving sizes and preparations. Return ONLY a valid JSON array (no markdown, no code blocks) with format: [{"name": "food description with serving", "calories": number, "protein": number, "carbs": number, "fat": number, "serving": "serving size description"}]. All numeric values must be numbers. Include variety: different portions, cooking methods, or related foods.`;
+                    console.log("Searching for food options...");
+                    const response = await callOpenAI(prompt);
+                    let cleaned = response.replace(/```json/gi, '').replace(/```/g, '').trim();
+                    const arrMatch = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
+                    if (arrMatch) cleaned = arrMatch[0];
+                    const results = JSON.parse(cleaned);
+                    if (Array.isArray(results) && results.length > 0) {
+                      setFoodSearchResults(results.map((r: any) => ({
+                        name: r.name || foodSearchQuery,
+                        calories: Math.round(Number(r.calories) || 0),
+                        protein: Math.round(Number(r.protein) || 0),
+                        carbs: Math.round(Number(r.carbs) || 0),
+                        fat: Math.round(Number(r.fat) || 0),
+                        serving: r.serving || "1 serving",
+                      })));
+                    } else {
+                      throw new Error("No results");
+                    }
+                  } catch (error: any) {
+                    console.error("Food search error:", error.message);
+                    Alert.alert("Search Failed", "Unable to find foods. Please try a different search.");
+                  } finally {
+                    setIsSearching(false);
                   }
-                  
-                  setFoodName(name);
-                  setCalories(Math.round(calories).toString());
-                  setProtein(Math.round(protein).toString());
-                  setCarbs(Math.round(carbs).toString());
-                  setFat(Math.round(fat).toString());
-                  
-                  setShowFoodSearch(false);
-                  setFoodSearchQuery("");
-                  setShowAddFood(true);
-                  
-                  Alert.alert(
-                    "Food Found", 
-                    `${name}\nCalories: ${Math.round(calories)}\nProtein: ${Math.round(protein)}g\nCarbs: ${Math.round(carbs)}g\nFat: ${Math.round(fat)}g\n\nYou can adjust the values if needed.`
-                  );
-                } catch (error: any) {
-                  console.error("Food search error:", error.message);
-                  Alert.alert(
-                    "Search Failed", 
-                    "Unable to find the food. Please try again or enter manually.",
-                    [
-                      { text: "Try Again", onPress: () => {} },
-                      { text: "Enter Manually", onPress: () => { 
-                        setShowFoodSearch(false);
-                        setFoodSearchQuery("");
-                        setShowAddFood(true); 
-                      } }
-                    ]
-                  );
-                } finally {
-                  setIsSearching(false);
-                }
-              }}
-              disabled={!foodSearchQuery || isSearching}
-            >
-              {isSearching ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.aiAnalyzeButtonText}>Search</Text>
+                }}
+              />
+              <TouchableOpacity
+                style={[styles.foodSearchBtn, (!foodSearchQuery || isSearching) && styles.disabledButton]}
+                onPress={async () => {
+                  if (!foodSearchQuery || isSearching) return;
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  setIsSearching(true);
+                  setFoodSearchResults([]);
+                  try {
+                    const prompt = `You are a nutrition database. For the food query "${foodSearchQuery}", return 6 different variations/options a user might mean including different serving sizes and preparations. Return ONLY a valid JSON array (no markdown, no code blocks) with format: [{"name": "food description with serving", "calories": number, "protein": number, "carbs": number, "fat": number, "serving": "serving size description"}]. All numeric values must be numbers. Include variety: different portions, cooking methods, or related foods.`;
+                    console.log("Searching for food options...");
+                    const response = await callOpenAI(prompt);
+                    let cleaned = response.replace(/```json/gi, '').replace(/```/g, '').trim();
+                    const arrMatch = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
+                    if (arrMatch) cleaned = arrMatch[0];
+                    const results = JSON.parse(cleaned);
+                    if (Array.isArray(results) && results.length > 0) {
+                      setFoodSearchResults(results.map((r: any) => ({
+                        name: r.name || foodSearchQuery,
+                        calories: Math.round(Number(r.calories) || 0),
+                        protein: Math.round(Number(r.protein) || 0),
+                        carbs: Math.round(Number(r.carbs) || 0),
+                        fat: Math.round(Number(r.fat) || 0),
+                        serving: r.serving || "1 serving",
+                      })));
+                    } else {
+                      throw new Error("No results");
+                    }
+                  } catch (error: any) {
+                    console.error("Food search error:", error.message);
+                    Alert.alert("Search Failed", "Unable to find foods. Please try a different search.");
+                  } finally {
+                    setIsSearching(false);
+                  }
+                }}
+                disabled={!foodSearchQuery || isSearching}
+              >
+                {isSearching ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Search size={20} color="#FFFFFF" />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.foodSearchResultsList} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              {isSearching && foodSearchResults.length === 0 && (
+                <View style={styles.foodSearchLoading}>
+                  <ActivityIndicator size="large" color="#00ADB5" />
+                  <Text style={styles.foodSearchLoadingText}>Finding food options...</Text>
+                </View>
               )}
+              {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length > 0 && (
+                <View style={styles.foodSearchEmpty}>
+                  <UtensilsCrossed size={40} color="#D1D5DB" />
+                  <Text style={styles.foodSearchEmptyText}>Press search to find foods</Text>
+                </View>
+              )}
+              {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length === 0 && (
+                <View style={styles.foodSearchEmpty}>
+                  <Search size={40} color="#D1D5DB" />
+                  <Text style={styles.foodSearchEmptyText}>Search for any food</Text>
+                  <Text style={styles.foodSearchEmptyHint}>Try "banana", "grilled chicken", or "pasta"</Text>
+                </View>
+              )}
+              {foodSearchResults.map((item, index) => (
+                <TouchableOpacity
+                  key={`${item.name}-${index}`}
+                  style={styles.foodSearchResultItem}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    }
+                    const newEntry = {
+                      id: Date.now().toString(),
+                      name: item.name,
+                      calories: item.calories,
+                      protein: item.protein,
+                      carbs: item.carbs,
+                      fat: item.fat,
+                      date: new Date().toISOString(),
+                    };
+                    addFoodEntry(newEntry);
+                    updateNutrition({
+                      calories: nutrition.calories + newEntry.calories,
+                      protein: nutrition.protein + newEntry.protein,
+                      carbs: nutrition.carbs + newEntry.carbs,
+                      fat: nutrition.fat + newEntry.fat,
+                    });
+                    setShowFoodSearch(false);
+                    setFoodSearchQuery("");
+                    setFoodSearchResults([]);
+                    Alert.alert("Food Added", `"${item.name}" has been added to today's log.`);
+                  }}
+                >
+                  <View style={styles.foodSearchResultLeft}>
+                    <Text style={styles.foodSearchResultName} numberOfLines={2}>{item.name}</Text>
+                    <Text style={styles.foodSearchResultServing}>{item.serving}</Text>
+                    <View style={styles.foodSearchResultMacros}>
+                      <Text style={styles.foodSearchMacroP}>P: {item.protein}g</Text>
+                      <Text style={styles.foodSearchMacroC}>C: {item.carbs}g</Text>
+                      <Text style={styles.foodSearchMacroF}>F: {item.fat}g</Text>
+                    </View>
+                  </View>
+                  <View style={styles.foodSearchResultRight}>
+                    <Text style={styles.foodSearchResultCal}>{item.calories}</Text>
+                    <Text style={styles.foodSearchResultCalLabel}>cal</Text>
+                    <ChevronRight size={16} color="#9CA3AF" style={{ marginTop: 4 }} />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.foodSearchManualBtn}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+                setShowFoodSearch(false);
+                setFoodSearchQuery("");
+                setFoodSearchResults([]);
+                setShowAddFood(true);
+              }}
+            >
+              <Plus size={16} color="#6B7280" />
+              <Text style={styles.foodSearchManualText}>Enter manually instead</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -2797,6 +2878,139 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "600",
+  },
+  foodSearchModal: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 24,
+    width: "92%",
+    maxWidth: 420,
+    maxHeight: "85%",
+  },
+  foodSearchInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 10,
+  },
+  foodSearchInput: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: "#1F2937",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  foodSearchBtn: {
+    backgroundColor: "#00ADB5",
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  foodSearchResultsList: {
+    marginTop: 16,
+    maxHeight: 380,
+  },
+  foodSearchLoading: {
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  foodSearchLoadingText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: "#6B7280",
+  },
+  foodSearchEmpty: {
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  foodSearchEmptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#9CA3AF",
+    fontWeight: "500" as const,
+  },
+  foodSearchEmptyHint: {
+    marginTop: 4,
+    fontSize: 13,
+    color: "#D1D5DB",
+  },
+  foodSearchResultItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  foodSearchResultLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  foodSearchResultName: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#1F2937",
+    lineHeight: 20,
+  },
+  foodSearchResultServing: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+  foodSearchResultMacros: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 6,
+  },
+  foodSearchMacroP: {
+    fontSize: 12,
+    color: "#FF4FB6",
+    fontWeight: "600" as const,
+  },
+  foodSearchMacroC: {
+    fontSize: 12,
+    color: "#00FFC6",
+    fontWeight: "600" as const,
+  },
+  foodSearchMacroF: {
+    fontSize: 12,
+    color: "#FFB400",
+    fontWeight: "600" as const,
+  },
+  foodSearchResultRight: {
+    alignItems: "center",
+    minWidth: 50,
+  },
+  foodSearchResultCal: {
+    fontSize: 20,
+    fontWeight: "700" as const,
+    color: "#00ADB5",
+  },
+  foodSearchResultCalLabel: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    fontWeight: "500" as const,
+  },
+  foodSearchManualBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+    marginTop: 4,
+  },
+  foodSearchManualText: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500" as const,
   },
   addFoodHeader: {
     flexDirection: "row",
