@@ -281,7 +281,7 @@ export default function NotificationSettingsScreen() {
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>12:30 PM</Text>
-                <Text style={styles.timelineLabel}>🏃 Run Quest (+50 XP)</Text>
+                <Text style={styles.timelineLabel}>🏃 Run Quest (+25 XP)</Text>
                 <Text style={styles.timelineDesc}>Every mile = +10 bonus XP</Text>
               </View>
             </View>
@@ -356,7 +356,7 @@ export default function NotificationSettingsScreen() {
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Run Quest</Text>
-                  <Text style={styles.settingDescription}>12:30 PM — Earn +50 XP per run</Text>
+                  <Text style={styles.settingDescription}>12:30 PM — Earn +25 XP per run</Text>
                 </View>
               </View>
               <Switch

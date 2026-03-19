@@ -168,7 +168,7 @@ function DailyQuests() {
     {
       id: "run",
       label: "Complete a run",
-      xp: "+50 XP",
+      xp: "+25 XP",
       icon: <Footprints size={16} color="#00E5FF" />,
       color: "#00E5FF",
       done: stats.weeklyRuns > 0,

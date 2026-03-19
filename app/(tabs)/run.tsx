@@ -464,7 +464,7 @@ export default function RunScreen() {
         </View>
         <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "15", borderColor: xpInfo.rank.color + "30" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
-          <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+50 XP</Text>
+          <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+25 XP</Text>
         </View>
       </View>
 
@@ -584,7 +584,7 @@ export default function RunScreen() {
               </View>
               <View style={styles.startBtnXp}>
                 <Zap size={10} color="#00E5FF" fill="#00E5FF" />
-                <Text style={styles.startBtnXpText}>+50 XP</Text>
+                <Text style={styles.startBtnXpText}>+25 XP</Text>
               </View>
             </Animated.View>
           </Pressable>

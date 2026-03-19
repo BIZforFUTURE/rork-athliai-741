@@ -357,8 +357,8 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       }
 
       const messages = [
-        { title: '🏃 Boss Battle: The Open Road', body: 'Earn 50+ XP per run. The further you go, the more XP you collect!' },
-        { title: '⚔️ Quest Available: Go for a Run', body: 'Every mile = +10 XP. Lace up and grind those levels!' },
+        { title: '🏃 Boss Battle: The Open Road', body: 'Earn 25+ XP per run. The further you go, the more XP you collect!' },
+        { title: '⚔️ Quest Available: Go for a Run', body: 'Every 0.25 mi = +15 XP. Lace up and grind those levels!' },
         { title: '🔥 Your Run Streak is Calling', body: 'Keep the streak alive for massive bonus XP. Don\'t let it reset!' },
       ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
