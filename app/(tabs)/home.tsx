@@ -157,64 +157,108 @@ function StreakStrip() {
   );
 }
 
+function MacroRing({ value, goal, color, icon, label }: { value: number; goal: number; color: string; icon: React.ReactNode; label: string }) {
+  const size = 48;
+  const stroke = 3.5;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const pct = goal > 0 ? Math.min(value / goal, 1) : 0;
+  const offset = circ * (1 - pct);
+
+  return (
+    <View style={nutStyles.macroCol}>
+      <View style={{ width: size, height: size, alignItems: 'center' as const, justifyContent: 'center' as const }}>
+        <Svg width={size} height={size}>
+          <Circle cx={size / 2} cy={size / 2} r={r} stroke={color + '25'} strokeWidth={stroke} fill="none" />
+          <Circle
+            cx={size / 2} cy={size / 2} r={r}
+            stroke={color} strokeWidth={stroke} fill="none"
+            strokeDasharray={`${circ}`} strokeDashoffset={offset}
+            strokeLinecap="round" transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+        </Svg>
+        <View style={nutStyles.macroIconWrap}>
+          {icon}
+        </View>
+      </View>
+      <Text style={nutStyles.macroValue}>{value}g</Text>
+      <Text style={nutStyles.macroLabel}>{label}</Text>
+      <Text style={[nutStyles.macroGoal, { color: color + 'AA' }]}>/ {goal}g</Text>
+    </View>
+  );
+}
+
 function TodayNutrition() {
   const { nutrition } = useApp();
   const router = useRouter();
 
   const calPct = nutrition.calorieGoal > 0 ? Math.min(nutrition.calories / nutrition.calorieGoal, 1) : 0;
+  const calPctDisplay = Math.round(calPct * 100);
 
-  const dialSize = 80;
-  const stroke = 5;
-  const r = (dialSize - stroke) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - calPct);
-
-  const macros = [
-    { label: "P", value: nutrition.protein, goal: nutrition.proteinGoal, color: "#00E5FF" },
-    { label: "C", value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#BFFF00" },
-    { label: "F", value: nutrition.fat, goal: nutrition.fatGoal, color: "#F59E0B" },
-  ];
+  const ringSize = 120;
+  const ringStroke = 10;
+  const ringR = (ringSize - ringStroke) / 2;
+  const ringCirc = 2 * Math.PI * ringR;
+  const ringOffset = ringCirc * (1 - calPct);
 
   return (
     <Pressable
       onPress={() => router.push("/(tabs)/nutrition")}
       style={({ pressed }) => [nutStyles.card, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
     >
-      <View style={nutStyles.left}>
-        <Svg width={dialSize} height={dialSize}>
-          <Circle cx={dialSize / 2} cy={dialSize / 2} r={r} stroke="rgba(255,107,53,0.1)" strokeWidth={stroke} fill="none" />
-          <Circle
-            cx={dialSize / 2} cy={dialSize / 2} r={r}
-            stroke="#FF6B35" strokeWidth={stroke} fill="none"
-            strokeDasharray={`${circ}`} strokeDashoffset={offset}
-            strokeLinecap="round" transform={`rotate(-90 ${dialSize / 2} ${dialSize / 2})`}
-          />
-        </Svg>
-        <View style={nutStyles.dialInner}>
-          <Text style={nutStyles.calNum}>{nutrition.calories}</Text>
-          <Text style={nutStyles.calUnit}>cal</Text>
+      <View style={nutStyles.topSection}>
+        <View style={{ width: ringSize, height: ringSize, alignItems: 'center' as const, justifyContent: 'center' as const }}>
+          <Svg width={ringSize} height={ringSize}>
+            <Defs>
+              <SvgGradient id="calRing" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#FF6B35" stopOpacity="1" />
+                <Stop offset="1" stopColor="#FF6B35" stopOpacity="0.4" />
+              </SvgGradient>
+            </Defs>
+            <Circle cx={ringSize / 2} cy={ringSize / 2} r={ringR} stroke="rgba(255,107,53,0.12)" strokeWidth={ringStroke} fill="none" />
+            <Circle
+              cx={ringSize / 2} cy={ringSize / 2} r={ringR}
+              stroke="url(#calRing)" strokeWidth={ringStroke} fill="none"
+              strokeDasharray={`${ringCirc}`} strokeDashoffset={ringOffset}
+              strokeLinecap="round" transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`}
+            />
+          </Svg>
+          <View style={nutStyles.ringCenter}>
+            <Text style={nutStyles.calNum}>{nutrition.calories}</Text>
+            <Text style={nutStyles.calUnit}>cal</Text>
+          </View>
+        </View>
+
+        <View style={nutStyles.goalInfo}>
+          <Text style={nutStyles.goalText}>of {nutrition.calorieGoal} cal goal</Text>
+          <Text style={nutStyles.pctText}>{calPctDisplay}%</Text>
         </View>
       </View>
 
-      <View style={nutStyles.right}>
-        <Text style={nutStyles.heading}>Today's Fuel</Text>
-        <View style={nutStyles.macroRow}>
-          {macros.map((m) => {
-            const pct = m.goal > 0 ? Math.min(m.value / m.goal, 1) : 0;
-            return (
-              <View key={m.label} style={nutStyles.macroItem}>
-                <View style={nutStyles.macroHeader}>
-                  <View style={[nutStyles.macroDot, { backgroundColor: m.color }]} />
-                  <Text style={nutStyles.macroLabel}>{m.label}</Text>
-                </View>
-                <Text style={nutStyles.macroVal}>{m.value}<Text style={nutStyles.macroGoal}>/{m.goal}</Text></Text>
-                <View style={nutStyles.macroTrack}>
-                  <View style={[nutStyles.macroFill, { width: `${pct * 100}%`, backgroundColor: m.color }]} />
-                </View>
-              </View>
-            );
-          })}
-        </View>
+      <View style={nutStyles.divider} />
+
+      <View style={nutStyles.macroRow}>
+        <MacroRing
+          value={nutrition.protein}
+          goal={nutrition.proteinGoal}
+          color="#00B4D8"
+          icon={<Zap size={16} color="#00B4D8" />}
+          label="PROTEIN"
+        />
+        <MacroRing
+          value={nutrition.carbs}
+          goal={nutrition.carbsGoal}
+          color="#A3B826"
+          icon={<Flame size={16} color="#A3B826" />}
+          label="CARBS"
+        />
+        <MacroRing
+          value={nutrition.fat}
+          goal={nutrition.fatGoal}
+          color="#D4820A"
+          icon={<Award size={16} color="#D4820A" />}
+          label="FAT"
+        />
       </View>
     </Pressable>
   );
@@ -622,86 +666,87 @@ const nutStyles = StyleSheet.create({
   card: {
     backgroundColor: "#111318",
     borderRadius: 20,
-    padding: 18,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 18,
+    padding: 22,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
   },
-  left: {
-    width: 80,
-    height: 80,
+  topSection: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 20,
+    paddingBottom: 18,
+  },
+  ringCenter: {
+    position: "absolute" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  dialInner: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-  },
   calNum: {
-    fontSize: 19,
+    fontSize: 28,
     fontWeight: "800" as const,
     color: "#FFFFFF",
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
   calUnit: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: "500" as const,
     color: "#6B7280",
     marginTop: -2,
   },
-  right: {
+  goalInfo: {
     flex: 1,
-    gap: 10,
+    gap: 2,
   },
-  heading: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#9CA3AF",
+  goalText: {
+    fontSize: 15,
+    fontWeight: "500" as const,
+    color: "#6B7280",
+  },
+  pctText: {
+    fontSize: 36,
+    fontWeight: "900" as const,
+    color: "#FF6B35",
+    letterSpacing: -1.5,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.06)",
   },
   macroRow: {
     flexDirection: "row" as const,
-    gap: 12,
+    justifyContent: "space-around" as const,
+    paddingTop: 18,
   },
-  macroItem: {
-    flex: 1,
-    gap: 4,
-  },
-  macroHeader: {
-    flexDirection: "row" as const,
+  macroCol: {
     alignItems: "center" as const,
     gap: 4,
   },
-  macroDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
+  macroIconWrap: {
+    position: "absolute" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  macroValue: {
+    fontSize: 16,
+    fontWeight: "800" as const,
+    color: "#E5E7EB",
+    letterSpacing: -0.3,
+    marginTop: 4,
   },
   macroLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
     color: "#6B7280",
-  },
-  macroVal: {
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: "#E5E7EB",
+    letterSpacing: 0.8,
   },
   macroGoal: {
     fontSize: 11,
     fontWeight: "500" as const,
     color: "#374151",
-  },
-  macroTrack: {
-    height: 3,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderRadius: 2,
-    overflow: "hidden" as const,
-  },
-  macroFill: {
-    height: "100%" as const,
-    borderRadius: 2,
   },
 });
 
