@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -17,19 +17,22 @@ import {
   Dumbbell, 
   Clock, 
   Play, 
-  Trophy, 
   TrendingUp,
   Calendar,
   X,
   ChevronRight,
-  Plus,
   Zap,
   Settings,
   Hammer,
   Target,
   Activity,
   Sparkles,
-  Check
+  Check,
+  Flame,
+  ArrowRight,
+  RotateCcw,
+  Moon,
+  Sun,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -37,7 +40,6 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
 import { getVideoUrlForExercise } from "@/utils/videoUrls";
-
 
 interface QuizAnswer {
   question: string;
@@ -64,6 +66,9 @@ const GYM_TIPS = [
   "Creatine monohydrate is the most researched and effective supplement for strength gains.",
   "Drinking water before meals can reduce calorie intake by up to 13%.",
 ];
+
+const WEEK_DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const WEEK_DAYS_FULL = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 function GymLoadingScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -279,6 +284,80 @@ interface CustomWorkoutPlan {
   }[];
 }
 
+function WeekDayIndicator({ workoutDays }: { workoutDays: string[] }) {
+  const today = new Date().getDay();
+  const todayIndex = today === 0 ? 6 : today - 1;
+
+  return (
+    <View style={styles.weekDayRow}>
+      {WEEK_DAYS_SHORT.map((letter, i) => {
+        const isWorkoutDay = workoutDays.includes(WEEK_DAYS_FULL[i]);
+        const isToday = i === todayIndex;
+        return (
+          <View
+            key={`${letter}-${i}`}
+            style={[
+              styles.weekDayDot,
+              isWorkoutDay && styles.weekDayDotActive,
+              isToday && styles.weekDayDotToday,
+            ]}
+          >
+            <Text style={[
+              styles.weekDayLetter,
+              isWorkoutDay && styles.weekDayLetterActive,
+              isToday && styles.weekDayLetterToday,
+            ]}>
+              {letter}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function AnimatedStatCard({ icon: Icon, value, label, delay, color }: {
+  icon: React.ComponentType<any>;
+  value: number;
+  label: string;
+  delay: number;
+  color: string;
+}) {
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 6,
+        tension: 80,
+        useNativeDriver: true,
+        delay,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 400,
+        delay,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [scaleAnim, opacityAnim, delay]);
+
+  return (
+    <Animated.View style={[
+      styles.statCard,
+      { transform: [{ scale: scaleAnim }], opacity: opacityAnim },
+    ]}>
+      <View style={[styles.statIconWrap, { backgroundColor: `${color}15` }]}>
+        <Icon size={18} color={color} strokeWidth={2.5} />
+      </View>
+      <Text style={styles.statNumber}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </Animated.View>
+  );
+}
+
 export default function GymScreen() {
   const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan } = useApp();
   const { isPremium } = useRevenueCat();
@@ -300,18 +379,15 @@ export default function GymScreen() {
   const [showDayAdjustment, setShowDayAdjustment] = useState(false);
   const [adjustedWorkoutDays, setAdjustedWorkoutDays] = useState<string[]>([]);
 
-  const _formatWeight = (weight: number): string => {
-    if (weight >= 1000) {
-      return `${(weight / 1000).toFixed(1)}k lbs`;
-    }
-    return `${weight.toFixed(0)} lbs`;
-  };
+  const heroFade = useRef(new Animated.Value(0)).current;
+  const heroSlide = useRef(new Animated.Value(20)).current;
 
-
-
-
-
-
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(heroFade, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.spring(heroSlide, { toValue: 0, tension: 50, friction: 12, useNativeDriver: true }),
+    ]).start();
+  }, [heroFade, heroSlide]);
 
   const quizQuestions = [
     {
@@ -401,7 +477,6 @@ export default function GymScreen() {
     const fitnessLevel = answers.find(a => a.question.includes('fitness level'))?.answer || '';
     const primaryGoal = answers.find(a => a.question.includes('primary fitness goal'))?.answer || '';
     const equipment = answers.find(a => a.question.includes('equipment'))?.answer || '';
-    const _timePerWorkout = answers.find(a => a.question.includes('time'))?.answer || '';
     
     let planName = "Personalized 5-Day Training Plan";
     let planDescription = "A balanced workout plan tailored to your goals and fitness level.";
@@ -422,190 +497,50 @@ export default function GymScreen() {
         day: 1,
         name: "Upper Body Push",
         exercises: [
-          {
-            name: "Bench Press",
-            sets: fitnessLevel.includes('Beginner') ? 3 : 4,
-            reps: primaryGoal.includes('strength') ? "4-6" : "8-12",
-            restTime: primaryGoal.includes('strength') ? 180 : 90,
-            equipment: equipment.includes('bodyweight') ? "Push-ups" : "Barbell/Dumbbells",
-            description: "Keep your core tight and lower the weight with control. Press up explosively."
-          },
-          {
-            name: "Overhead Press",
-            sets: 3,
-            reps: "8-10",
-            restTime: 90,
-            equipment: equipment.includes('bodyweight') ? "Pike Push-ups" : "Dumbbells",
-            description: "Press straight up, keeping your core engaged. Don't arch your back excessively."
-          },
-          {
-            name: "Dips",
-            sets: 3,
-            reps: "8-15",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Chair/Bench Dips" : "Dip Station",
-            description: "Lower until your shoulders are below your elbows, then press up strongly."
-          },
-          {
-            name: "Tricep Extensions",
-            sets: 3,
-            reps: "10-15",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Diamond Push-ups" : "Dumbbells",
-            description: "Keep your elbows stationary and focus on the tricep contraction."
-          }
+          { name: "Bench Press", sets: fitnessLevel.includes('Beginner') ? 3 : 4, reps: primaryGoal.includes('strength') ? "4-6" : "8-12", restTime: primaryGoal.includes('strength') ? 180 : 90, equipment: equipment.includes('bodyweight') ? "Push-ups" : "Barbell/Dumbbells", description: "Keep your core tight and lower the weight with control. Press up explosively." },
+          { name: "Overhead Press", sets: 3, reps: "8-10", restTime: 90, equipment: equipment.includes('bodyweight') ? "Pike Push-ups" : "Dumbbells", description: "Press straight up, keeping your core engaged. Don't arch your back excessively." },
+          { name: "Dips", sets: 3, reps: "8-15", restTime: 60, equipment: equipment.includes('bodyweight') ? "Chair/Bench Dips" : "Dip Station", description: "Lower until your shoulders are below your elbows, then press up strongly." },
+          { name: "Tricep Extensions", sets: 3, reps: "10-15", restTime: 60, equipment: equipment.includes('bodyweight') ? "Diamond Push-ups" : "Dumbbells", description: "Keep your elbows stationary and focus on the tricep contraction." }
         ]
       },
       {
         day: 2,
         name: "Lower Body Power",
         exercises: [
-          {
-            name: "Squats",
-            sets: fitnessLevel.includes('Beginner') ? 3 : 4,
-            reps: primaryGoal.includes('strength') ? "4-6" : "8-12",
-            restTime: primaryGoal.includes('strength') ? 180 : 90,
-            equipment: equipment.includes('bodyweight') ? "Bodyweight Squats" : "Barbell/Dumbbells",
-            description: "Keep your chest up, knees tracking over toes. Go down until thighs are parallel."
-          },
-          {
-            name: "Romanian Deadlifts",
-            sets: 3,
-            reps: "8-10",
-            restTime: 90,
-            equipment: equipment.includes('bodyweight') ? "Single Leg RDL" : "Dumbbells",
-            description: "Hinge at the hips, keep the bar close to your body. Feel the stretch in your hamstrings."
-          },
-          {
-            name: "Lunges",
-            sets: 3,
-            reps: "10-12 each leg",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Bodyweight Lunges" : "Dumbbells",
-            description: "Step forward and lower until both knees are at 90 degrees. Push back to start."
-          },
-          {
-            name: "Calf Raises",
-            sets: 3,
-            reps: "15-20",
-            restTime: 45,
-            equipment: "Bodyweight or Dumbbells",
-            description: "Rise up on your toes, squeeze at the top, then lower with control."
-          }
+          { name: "Squats", sets: fitnessLevel.includes('Beginner') ? 3 : 4, reps: primaryGoal.includes('strength') ? "4-6" : "8-12", restTime: primaryGoal.includes('strength') ? 180 : 90, equipment: equipment.includes('bodyweight') ? "Bodyweight Squats" : "Barbell/Dumbbells", description: "Keep your chest up, knees tracking over toes. Go down until thighs are parallel." },
+          { name: "Romanian Deadlifts", sets: 3, reps: "8-10", restTime: 90, equipment: equipment.includes('bodyweight') ? "Single Leg RDL" : "Dumbbells", description: "Hinge at the hips, keep the bar close to your body. Feel the stretch in your hamstrings." },
+          { name: "Lunges", sets: 3, reps: "10-12 each leg", restTime: 60, equipment: equipment.includes('bodyweight') ? "Bodyweight Lunges" : "Dumbbells", description: "Step forward and lower until both knees are at 90 degrees. Push back to start." },
+          { name: "Calf Raises", sets: 3, reps: "15-20", restTime: 45, equipment: "Bodyweight or Dumbbells", description: "Rise up on your toes, squeeze at the top, then lower with control." }
         ]
       },
       {
         day: 3,
         name: "Upper Body Pull",
         exercises: [
-          {
-            name: "Pull-ups/Rows",
-            sets: fitnessLevel.includes('Beginner') ? 3 : 4,
-            reps: equipment.includes('bodyweight') ? "5-10" : "8-12",
-            restTime: 90,
-            equipment: equipment.includes('bodyweight') ? "Pull-ups/Inverted Rows" : "Lat Pulldown",
-            description: "Pull your chest to the bar/handle. Squeeze your shoulder blades together."
-          },
-          {
-            name: "Bent Over Rows",
-            sets: 3,
-            reps: "8-12",
-            restTime: 90,
-            equipment: equipment.includes('bodyweight') ? "Inverted Rows" : "Dumbbells",
-            description: "Keep your back straight, pull the weight to your lower chest/upper abdomen."
-          },
-          {
-            name: "Face Pulls",
-            sets: 3,
-            reps: "12-15",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Reverse Fly" : "Resistance Band",
-            description: "Pull to your face level, focusing on rear deltoids and upper back."
-          },
-          {
-            name: "Bicep Curls",
-            sets: 3,
-            reps: "10-15",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Chin-ups" : "Dumbbells",
-            description: "Keep your elbows at your sides, curl with control and squeeze at the top."
-          }
+          { name: "Pull-ups/Rows", sets: fitnessLevel.includes('Beginner') ? 3 : 4, reps: equipment.includes('bodyweight') ? "5-10" : "8-12", restTime: 90, equipment: equipment.includes('bodyweight') ? "Pull-ups/Inverted Rows" : "Lat Pulldown", description: "Pull your chest to the bar/handle. Squeeze your shoulder blades together." },
+          { name: "Bent Over Rows", sets: 3, reps: "8-12", restTime: 90, equipment: equipment.includes('bodyweight') ? "Inverted Rows" : "Dumbbells", description: "Keep your back straight, pull the weight to your lower chest/upper abdomen." },
+          { name: "Face Pulls", sets: 3, reps: "12-15", restTime: 60, equipment: equipment.includes('bodyweight') ? "Reverse Fly" : "Resistance Band", description: "Pull to your face level, focusing on rear deltoids and upper back." },
+          { name: "Bicep Curls", sets: 3, reps: "10-15", restTime: 60, equipment: equipment.includes('bodyweight') ? "Chin-ups" : "Dumbbells", description: "Keep your elbows at your sides, curl with control and squeeze at the top." }
         ]
       },
       {
         day: 4,
         name: "Lower Body Hypertrophy",
         exercises: [
-          {
-            name: "Goblet Squats",
-            sets: 3,
-            reps: "12-15",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Bodyweight Squats" : "Dumbbell",
-            description: "Hold weight at chest level, squat down keeping your torso upright."
-          },
-          {
-            name: "Bulgarian Split Squats",
-            sets: 3,
-            reps: "10-12 each leg",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Bodyweight" : "Dumbbells",
-            description: "Rear foot elevated, lower into lunge position. Focus on front leg."
-          },
-          {
-            name: "Hip Thrusts",
-            sets: 3,
-            reps: "12-15",
-            restTime: 60,
-            equipment: equipment.includes('bodyweight') ? "Bodyweight" : "Dumbbell",
-            description: "Drive through your heels, squeeze glutes at the top. Keep core tight."
-          },
-          {
-            name: "Wall Sit",
-            sets: 3,
-            reps: "30-60 seconds",
-            restTime: 60,
-            equipment: "Bodyweight",
-            description: "Back against wall, thighs parallel to ground. Hold the position."
-          }
+          { name: "Goblet Squats", sets: 3, reps: "12-15", restTime: 60, equipment: equipment.includes('bodyweight') ? "Bodyweight Squats" : "Dumbbell", description: "Hold weight at chest level, squat down keeping your torso upright." },
+          { name: "Bulgarian Split Squats", sets: 3, reps: "10-12 each leg", restTime: 60, equipment: equipment.includes('bodyweight') ? "Bodyweight" : "Dumbbells", description: "Rear foot elevated, lower into lunge position. Focus on front leg." },
+          { name: "Hip Thrusts", sets: 3, reps: "12-15", restTime: 60, equipment: equipment.includes('bodyweight') ? "Bodyweight" : "Dumbbell", description: "Drive through your heels, squeeze glutes at the top. Keep core tight." },
+          { name: "Wall Sit", sets: 3, reps: "30-60 seconds", restTime: 60, equipment: "Bodyweight", description: "Back against wall, thighs parallel to ground. Hold the position." }
         ]
       },
       {
         day: 5,
         name: "Full Body Circuit",
         exercises: [
-          {
-            name: "Burpees",
-            sets: 3,
-            reps: "8-12",
-            restTime: 60,
-            equipment: "Bodyweight",
-            description: "Drop down, jump back, push-up, jump forward, jump up. Keep it explosive."
-          },
-          {
-            name: "Mountain Climbers",
-            sets: 3,
-            reps: "20-30",
-            restTime: 45,
-            equipment: "Bodyweight",
-            description: "In plank position, alternate bringing knees to chest rapidly."
-          },
-          {
-            name: "Plank",
-            sets: 3,
-            reps: "30-60 seconds",
-            restTime: 60,
-            equipment: "Bodyweight",
-            description: "Hold straight line from head to heels. Keep core tight, breathe normally."
-          },
-          {
-            name: "Jumping Jacks",
-            sets: 3,
-            reps: "20-30",
-            restTime: 45,
-            equipment: "Bodyweight",
-            description: "Jump feet apart while raising arms overhead, then return to start."
-          }
+          { name: "Burpees", sets: 3, reps: "8-12", restTime: 60, equipment: "Bodyweight", description: "Drop down, jump back, push-up, jump forward, jump up. Keep it explosive." },
+          { name: "Mountain Climbers", sets: 3, reps: "20-30", restTime: 45, equipment: "Bodyweight", description: "In plank position, alternate bringing knees to chest rapidly." },
+          { name: "Plank", sets: 3, reps: "30-60 seconds", restTime: 60, equipment: "Bodyweight", description: "Hold straight line from head to heels. Keep core tight, breathe normally." },
+          { name: "Jumping Jacks", sets: 3, reps: "20-30", restTime: 45, equipment: "Bodyweight", description: "Jump feet apart while raising arms overhead, then return to start." }
         ]
       }
     ];
@@ -798,8 +733,6 @@ Format as JSON:
     }
   };
 
-
-
   const resetQuiz = () => {
     setCurrentQuizStep(0);
     setQuizAnswers([]);
@@ -809,7 +742,7 @@ Format as JSON:
     setShowQuiz(false);
   };
 
-  const getTodaysWorkout = (plan: CustomWorkoutPlan): CustomWorkoutPlan['days'][0] | null => {
+  const getTodaysWorkout = useCallback((plan: CustomWorkoutPlan): CustomWorkoutPlan['days'][0] | null => {
     const today = new Date();
     const todayString = today.toDateString();
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -836,7 +769,7 @@ Format as JSON:
     
     const cycleIndex = workoutDayIndex % plan.days.length;
     return plan.days[cycleIndex] || null;
-  };
+  }, [workoutLogs]);
 
   const getNextWorkoutDay = (plan: CustomWorkoutPlan): string => {
     const today = new Date();
@@ -859,16 +792,14 @@ Format as JSON:
     if (generatedPlan) {
       setTodaysWorkout(getTodaysWorkout(generatedPlan));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [generatedPlan, workoutLogs]);
+  }, [generatedPlan, workoutLogs, getTodaysWorkout]);
 
   React.useEffect(() => {
     if (customWorkoutPlan && !generatedPlan) {
       setGeneratedPlan(customWorkoutPlan);
       setTodaysWorkout(getTodaysWorkout(customWorkoutPlan));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customWorkoutPlan, generatedPlan]);
+  }, [customWorkoutPlan, generatedPlan, getTodaysWorkout]);
 
   React.useEffect(() => {
     const updateTimer = () => {
@@ -894,7 +825,7 @@ Format as JSON:
       router.push('/paywall');
       return;
     }
-    const customWorkoutPlan: WorkoutPlan = {
+    const customWorkoutPlanData: WorkoutPlan = {
       id: `custom-day-${day.day}-${Date.now()}`,
       name: day.name,
       goal: 'hypertrophy',
@@ -911,12 +842,12 @@ Format as JSON:
       }))
     };
 
-    (global as any).customWorkout = customWorkoutPlan;
+    (global as any).customWorkout = customWorkoutPlanData;
     
     setShowCustomPlan(false);
     router.push({
       pathname: "/workout/[id]" as any,
-      params: { id: customWorkoutPlan.id }
+      params: { id: customWorkoutPlanData.id }
     });
   };
 
@@ -947,45 +878,73 @@ Format as JSON:
     setShowQuiz(true);
   };
 
+  const hasCompletedToday = workoutLogs.some(log => {
+    const logDate = new Date(log.date).toDateString();
+    return logDate === new Date().toDateString() && log.completed;
+  });
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <LinearGradient
-        colors={['#0D0F13', '#131820', '#0D0F13']}
+        colors={['#0D0F13', '#111520', '#0D0F13']}
         style={styles.header}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <View style={styles.headerContent}>
+        <Animated.View style={[styles.headerContent, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.headerTitle}>Gym</Text>
               <View style={styles.subtitleRow}>
-                <Text style={styles.headerSubtitle}>
-                  {todaysWorkout ? 'Ready to train' : generatedPlan ? 'Rest day' : 'Get started'}
-                </Text>
-                {generatedPlan && (
-                  <View style={styles.countdownContainer}>
-                    <Clock size={12} color="#00E5FF" />
-                    <Text style={styles.countdownText}>{timeRemaining}</Text>
+                {todaysWorkout ? (
+                  <View style={styles.statusBadge}>
+                    <Flame size={12} color="#FF6B35" />
+                    <Text style={styles.statusBadgeText}>Ready to train</Text>
                   </View>
+                ) : generatedPlan ? (
+                  hasCompletedToday ? (
+                    <View style={[styles.statusBadge, { backgroundColor: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.25)' }]}>
+                      <Check size={12} color="#10B981" strokeWidth={3} />
+                      <Text style={[styles.statusBadgeText, { color: '#10B981' }]}>Done for today</Text>
+                    </View>
+                  ) : (
+                    <View style={[styles.statusBadge, { backgroundColor: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.2)' }]}>
+                      <Moon size={12} color="#94A3B8" />
+                      <Text style={[styles.statusBadgeText, { color: '#94A3B8' }]}>Rest day</Text>
+                    </View>
+                  )
+                ) : (
+                  <Text style={styles.headerSubtitle}>Get started</Text>
                 )}
               </View>
             </View>
-            {generatedPlan && (
-              <TouchableOpacity
-                style={styles.settingsButton}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setShowSettings(true);
-                }}
-              >
-                <Settings size={22} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
+            <View style={styles.headerRight}>
+              {generatedPlan && (
+                <View style={styles.timerPill}>
+                  <Clock size={11} color="#00E5FF" />
+                  <Text style={styles.timerText}>{timeRemaining}</Text>
+                </View>
+              )}
+              {generatedPlan && (
+                <TouchableOpacity
+                  style={styles.settingsButton}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowSettings(true);
+                  }}
+                >
+                  <Settings size={20} color="#6B7280" />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        </View>
+
+          {generatedPlan && (
+            <WeekDayIndicator workoutDays={generatedPlan.workoutDays} />
+          )}
+        </Animated.View>
       </LinearGradient>
 
       <ScrollView 
@@ -997,6 +956,7 @@ Format as JSON:
           <>
             <TouchableOpacity 
               style={styles.customPlanCTA}
+              activeOpacity={0.85}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1004,20 +964,28 @@ Format as JSON:
                 setShowQuiz(true);
               }}
             >
-              <View style={styles.ctaGradient}>
-                <View style={styles.ctaContent}>
-                  <Zap size={32} color="#FFFFFF" />
-                  <View style={styles.ctaText}>
-                    <Text style={styles.ctaTitle}>Get Your Custom Plan</Text>
-                    <Text style={styles.ctaSubtitle}>Take a quick quiz for a personalized 5-day workout</Text>
-                  </View>
-                  <ChevronRight size={24} color="#FFFFFF" />
+              <LinearGradient
+                colors={['#00ADB5', '#0891B2']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.ctaGradientBg}
+              >
+                <View style={styles.ctaIconWrap}>
+                  <Zap size={28} color="#FFFFFF" strokeWidth={2.5} />
                 </View>
-              </View>
+                <View style={styles.ctaTextBlock}>
+                  <Text style={styles.ctaTitle}>Get Your Custom Plan</Text>
+                  <Text style={styles.ctaSubtitle}>Take a quick quiz for a personalized workout</Text>
+                </View>
+                <View style={styles.ctaArrow}>
+                  <ArrowRight size={20} color="rgba(255,255,255,0.7)" />
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.buildWorkoutCTA}
+              activeOpacity={0.85}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1029,16 +997,23 @@ Format as JSON:
                 router.push('/workout-builder');
               }}
             >
-              <View style={styles.buildCtaGradient}>
-                <View style={styles.ctaContent}>
-                  <Hammer size={32} color="#FFFFFF" />
-                  <View style={styles.ctaText}>
-                    <Text style={styles.ctaTitle}>Build Your Own Workout</Text>
-                    <Text style={styles.ctaSubtitle}>Choose exercises by body part and create a custom routine</Text>
-                  </View>
-                  <ChevronRight size={24} color="#FFFFFF" />
+              <LinearGradient
+                colors={['#6366F1', '#4F46E5']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.ctaGradientBg}
+              >
+                <View style={styles.ctaIconWrap}>
+                  <Hammer size={28} color="#FFFFFF" strokeWidth={2.5} />
                 </View>
-              </View>
+                <View style={styles.ctaTextBlock}>
+                  <Text style={styles.ctaTitle}>Build Your Own Workout</Text>
+                  <Text style={styles.ctaSubtitle}>Choose exercises and create a custom routine</Text>
+                </View>
+                <View style={styles.ctaArrow}>
+                  <ArrowRight size={20} color="rgba(255,255,255,0.7)" />
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           </>
         ) : null}
@@ -1048,6 +1023,7 @@ Format as JSON:
             {todaysWorkout ? (
               <TouchableOpacity 
                 style={styles.todaysWorkoutCard}
+                activeOpacity={0.9}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1055,52 +1031,76 @@ Format as JSON:
                   startCustomWorkout(todaysWorkout);
                 }}
               >
-                <View style={styles.todaysWorkoutGradient}>
-                  <View style={styles.todaysWorkoutHeader}>
-                    <View style={styles.todaysWorkoutTitleSection}>
-                      <Text style={styles.todaysWorkoutLabel}>Today&apos;s Workout</Text>
-                      <Text style={styles.todaysWorkoutName}>{todaysWorkout.name}</Text>
-                    </View>
-                    <Play size={32} color="#FFFFFF" />
+                <LinearGradient
+                  colors={['#00ADB5', '#0E7490']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.todaysWorkoutGradient}
+                >
+                  <View style={styles.todaysLabel}>
+                    <Sun size={14} color="rgba(255,255,255,0.8)" />
+                    <Text style={styles.todaysLabelText}>TODAY&apos;S WORKOUT</Text>
                   </View>
+                  <Text style={styles.todaysWorkoutName}>{todaysWorkout.name}</Text>
                   <View style={styles.todaysWorkoutMeta}>
-                    <Text style={styles.todaysWorkoutExercises}>
-                      {todaysWorkout.exercises.length} exercises
-                    </Text>
-                    <Text style={styles.todaysWorkoutDuration}>
-                      ~{Math.ceil(todaysWorkout.exercises.length * 12)} min
-                    </Text>
+                    <View style={styles.todayMetaPill}>
+                      <Dumbbell size={13} color="rgba(255,255,255,0.85)" />
+                      <Text style={styles.todayMetaText}>{todaysWorkout.exercises.length} exercises</Text>
+                    </View>
+                    <View style={styles.todayMetaPill}>
+                      <Clock size={13} color="rgba(255,255,255,0.85)" />
+                      <Text style={styles.todayMetaText}>~{Math.ceil(todaysWorkout.exercises.length * 12)} min</Text>
+                    </View>
                   </View>
-                </View>
+                  <View style={styles.todayStartRow}>
+                    <View style={styles.todayStartBtn}>
+                      <Play size={16} color="#0E7490" fill="#0E7490" />
+                      <Text style={styles.todayStartText}>Start Workout</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
               </TouchableOpacity>
             ) : (
               <View style={styles.restDayCard}>
-                <View style={styles.restDayGradient}>
-                  <View style={styles.restDayContent}>
-                    <Calendar size={40} color="#9CA3AF" />
-                    <View style={styles.restDayText}>
-                      <Text style={styles.restDayTitle}>Today is your off day</Text>
-                      <Text style={styles.restDaySubtitle}>
-                        Rest, recharge, and be ready.
-                      </Text>
-                      <Text style={styles.nextWorkoutText}>
-                        Next workout: {getNextWorkoutDay(generatedPlan)}
-                      </Text>
-                    </View>
+                <View style={styles.restDayInner}>
+                  <View style={styles.restDayIconWrap}>
+                    {hasCompletedToday ? (
+                      <View style={[styles.restDayIconCircle, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
+                        <Check size={28} color="#10B981" strokeWidth={2.5} />
+                      </View>
+                    ) : (
+                      <View style={styles.restDayIconCircle}>
+                        <Moon size={28} color="#64748B" />
+                      </View>
+                    )}
                   </View>
-                  <TouchableOpacity 
-                    style={styles.viewPlanButton}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setShowCustomPlan(true);
-                    }}
-                  >
-                    <Text style={styles.viewPlanButtonText}>View Plan</Text>
-                    <ChevronRight size={16} color="#00ADB5" />
-                  </TouchableOpacity>
+                  <View style={styles.restDayTextBlock}>
+                    <Text style={styles.restDayTitle}>
+                      {hasCompletedToday ? "Workout Complete" : "Rest Day"}
+                    </Text>
+                    <Text style={styles.restDaySubtitle}>
+                      {hasCompletedToday 
+                        ? "Great job today! Recovery starts now."
+                        : "Rest, recharge, and be ready."}
+                    </Text>
+                    <Text style={styles.nextWorkoutText}>
+                      Next workout: {getNextWorkoutDay(generatedPlan)}
+                    </Text>
+                  </View>
                 </View>
+                <TouchableOpacity 
+                  style={styles.viewPlanButton}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setShowCustomPlan(true);
+                  }}
+                >
+                  <Text style={styles.viewPlanButtonText}>View Full Plan</Text>
+                  <ChevronRight size={16} color="#00ADB5" />
+                </TouchableOpacity>
               </View>
             )}
           </View>
@@ -1108,52 +1108,44 @@ Format as JSON:
 
         {generatedPlan && (
           <TouchableOpacity 
-            style={styles.buildWorkoutCTA}
+            style={styles.buildWorkoutCTASmall}
+            activeOpacity={0.85}
             onPress={() => {
               if (Platform.OS !== 'web') {
                 void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               }
+              if (!isPremium) {
+                router.push('/paywall');
+                return;
+              }
               router.push('/workout-builder');
             }}
           >
-            <View style={styles.buildCtaGradient}>
-              <View style={styles.ctaContent}>
-                <Hammer size={32} color="#FFFFFF" />
-                <View style={styles.ctaText}>
-                  <Text style={styles.ctaTitle}>Build Your Own Workout</Text>
-                  <Text style={styles.ctaSubtitle}>Choose exercises by body part and create a custom routine</Text>
-                </View>
-                <ChevronRight size={24} color="#FFFFFF" />
+            <View style={styles.buildSmallInner}>
+              <View style={styles.buildSmallIcon}>
+                <Hammer size={18} color="#6366F1" />
               </View>
+              <View style={styles.buildSmallText}>
+                <Text style={styles.buildSmallTitle}>Build Custom Workout</Text>
+                <Text style={styles.buildSmallSub}>Pick exercises by body part</Text>
+              </View>
+              <ChevronRight size={18} color="#4B5563" />
             </View>
           </TouchableOpacity>
         )}
 
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Trophy size={24} color="#00ADB5" />
-            <Text style={styles.statNumber}>{stats.workoutStreak}</Text>
-            <Text style={styles.statLabel}>Day Streak</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Calendar size={24} color="#00ADB5" />
-            <Text style={styles.statNumber}>{stats.weeklyWorkouts}</Text>
-            <Text style={styles.statLabel}>This Week</Text>
-          </View>
-          <View style={styles.statCard}>
-            <TrendingUp size={24} color="#00ADB5" />
-            <Text style={styles.statNumber}>{stats.totalWorkouts}</Text>
-            <Text style={styles.statLabel}>Total</Text>
-          </View>
+          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label="Streak" delay={0} color="#FF6B35" />
+          <AnimatedStatCard icon={Calendar} value={stats.weeklyWorkouts} label="This Week" delay={80} color="#00ADB5" />
+          <AnimatedStatCard icon={TrendingUp} value={stats.totalWorkouts} label="Total" delay={160} color="#8B5CF6" />
         </View>
-
-
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Workouts</Text>
             <TouchableOpacity 
               style={styles.toggleButton}
+              activeOpacity={0.7}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1171,10 +1163,12 @@ Format as JSON:
             <View>
               {workoutLogs.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <Dumbbell size={48} color="#9CA3AF" />
-                  <Text style={styles.emptyStateText}>No workouts completed yet</Text>
+                  <View style={styles.emptyIconWrap}>
+                    <Dumbbell size={36} color="#4B5563" />
+                  </View>
+                  <Text style={styles.emptyStateText}>No workouts yet</Text>
                   <Text style={styles.emptyStateSubtext}>
-                    Create a custom plan to start your first workout
+                    Start your first workout to see it here
                   </Text>
                 </View>
               ) : (
@@ -1184,11 +1178,11 @@ Format as JSON:
                     const customWorkout = (global as any).customWorkout;
                     
                     let workoutName = 'Custom Workout';
-                    let muscleGroups: string[] = [];
+                    let _muscleGroups: string[] = [];
                     
                     if (workout) {
                       workoutName = workout.name;
-                      muscleGroups = getTargetedMuscleGroups(workout);
+                      _muscleGroups = getTargetedMuscleGroups(workout);
                     } else if (customWorkout && log.workoutPlanId === customWorkout.id) {
                       workoutName = customWorkout.name;
                     } else if (generatedPlan) {
@@ -1206,43 +1200,32 @@ Format as JSON:
                     
                     return (
                       <View key={log.id} style={styles.recentWorkoutCard}>
-                        <View style={styles.recentWorkoutHeader}>
-                          <Text style={styles.recentWorkoutName}>{workoutName}</Text>
-                          <Text style={styles.recentWorkoutDate}>
-                            {new Date(log.date).toLocaleDateString()}
-                          </Text>
-                        </View>
-                        
-                        <View style={styles.recentWorkoutStats}>
-                          <View style={styles.recentWorkoutStat}>
-                            <Text style={styles.recentWorkoutStatValue}>{duration}m</Text>
-                            <Text style={styles.recentWorkoutStatLabel}>Duration</Text>
-                          </View>
-                          <View style={styles.recentWorkoutStat}>
-                            <Text style={styles.recentWorkoutStatValue}>{completedExercises}</Text>
-                            <Text style={styles.recentWorkoutStatLabel}>Exercises</Text>
-                          </View>
-                          <View style={styles.recentWorkoutStat}>
-                            <Text style={styles.recentWorkoutStatValue}>{totalSets}</Text>
-                            <Text style={styles.recentWorkoutStatLabel}>Sets</Text>
-                          </View>
-                        </View>
-                        
-                        <View style={styles.recentWorkoutFooter}>
-                          <View style={styles.workoutBadges}>
-                            {muscleGroups.slice(0, 3).map((muscle) => (
-                              <View key={muscle} style={styles.muscleBadge}>
-                                <Text style={styles.muscleBadgeText}>{muscle}</Text>
-                              </View>
-                            ))}
-                          </View>
+                        <View style={styles.recentWorkoutLeft}>
                           <View style={[
-                            styles.completionBadge,
+                            styles.recentWorkoutIndicator,
                             { backgroundColor: log.completed ? '#00ADB5' : '#F59E0B' }
-                          ]}>
-                            <Text style={styles.completionBadgeText}>
-                              {log.completed ? 'Completed' : 'Partial'}
+                          ]} />
+                          <View style={styles.recentWorkoutInfo}>
+                            <Text style={styles.recentWorkoutName} numberOfLines={1}>{workoutName}</Text>
+                            <Text style={styles.recentWorkoutDate}>
+                              {new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </Text>
+                          </View>
+                        </View>
+                        <View style={styles.recentWorkoutMetrics}>
+                          <View style={styles.recentMetric}>
+                            <Text style={styles.recentMetricValue}>{duration}m</Text>
+                            <Text style={styles.recentMetricLabel}>Time</Text>
+                          </View>
+                          <View style={styles.recentMetricDivider} />
+                          <View style={styles.recentMetric}>
+                            <Text style={styles.recentMetricValue}>{completedExercises}</Text>
+                            <Text style={styles.recentMetricLabel}>Exer</Text>
+                          </View>
+                          <View style={styles.recentMetricDivider} />
+                          <View style={styles.recentMetric}>
+                            <Text style={styles.recentMetricValue}>{totalSets}</Text>
+                            <Text style={styles.recentMetricLabel}>Sets</Text>
                           </View>
                         </View>
                       </View>
@@ -1254,8 +1237,6 @@ Format as JSON:
           )}
         </View>
       </ScrollView>
-
-
 
       <Modal
         visible={isGeneratingPlan}
@@ -1292,6 +1273,10 @@ Format as JSON:
             </View>
           </View>
 
+          <View style={styles.quizProgressBar}>
+            <View style={[styles.quizProgressFill, { width: `${((currentQuizStep + 1) / (quizQuestions.length + 1)) * 100}%` }]} />
+          </View>
+
           <ScrollView style={styles.quizContent}>
             {showDaySelector ? (
               <View style={styles.questionContainer}>
@@ -1312,6 +1297,7 @@ Format as JSON:
                           styles.daySelectionButton,
                           isSelected && styles.daySelectionButtonSelected
                         ]}
+                        activeOpacity={0.7}
                         onPress={() => {
                           if (Platform.OS !== 'web') {
                             void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1323,6 +1309,9 @@ Format as JSON:
                           }
                         }}
                       >
+                        {isSelected && (
+                          <Check size={16} color="#FFFFFF" strokeWidth={3} />
+                        )}
                         <Text style={[
                           styles.daySelectionText,
                           isSelected && styles.daySelectionTextSelected
@@ -1367,10 +1356,11 @@ Format as JSON:
                     <TouchableOpacity
                       key={index}
                       style={styles.optionButton}
+                      activeOpacity={0.7}
                       onPress={() => handleQuizAnswer(option)}
                     >
                       <Text style={styles.optionText}>{option}</Text>
-                      <ChevronRight size={20} color="#9CA3AF" />
+                      <ChevronRight size={20} color="#4B5563" />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -1388,8 +1378,8 @@ Format as JSON:
                   style={styles.goalsInput}
                   multiline
                   numberOfLines={6}
-                  placeholder="e.g., I want to build bigger arms and chest, lose belly fat, improve my posture from sitting at a desk all day, and I have a previous knee injury that limits squatting..."
-                  placeholderTextColor="#9CA3AF"
+                  placeholder="e.g., I want to build bigger arms and chest, lose belly fat, improve my posture..."
+                  placeholderTextColor="#4B5563"
                   value={customGoals}
                   onChangeText={setCustomGoals}
                   textAlignVertical="top"
@@ -1399,6 +1389,7 @@ Format as JSON:
                     styles.generateButton,
                     { opacity: isGeneratingPlan ? 0.6 : 1 }
                   ]}
+                  activeOpacity={0.8}
                   onPress={() => {
                     if (Platform.OS !== 'web') {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1430,7 +1421,10 @@ Format as JSON:
         {generatedPlan && (
           <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{generatedPlan.name}</Text>
+              <View>
+                <Text style={styles.modalTitle}>{generatedPlan.name}</Text>
+                <Text style={styles.modalSubtitle}>{generatedPlan.days.length} day program</Text>
+              </View>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => {
@@ -1444,7 +1438,7 @@ Format as JSON:
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalContent}>
+            <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
               <View style={styles.planOverview}>
                 <Text style={styles.planOverviewText}>{generatedPlan.description}</Text>
               </View>
@@ -1452,54 +1446,63 @@ Format as JSON:
               {generatedPlan.days.map((day) => (
                 <View key={day.day} style={styles.dayCard}>
                   <View style={styles.dayHeader}>
-                    <Text style={styles.dayTitle}>Day {day.day}: {day.name}</Text>
-                    <View style={styles.dayHeaderRight}>
-                      <Text style={styles.exerciseCount}>{day.exercises.length} exercises</Text>
-                      <TouchableOpacity
-                        style={styles.startDayButton}
-                        onPress={() => {
-                          if (Platform.OS !== 'web') {
-                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                          }
-                          startCustomWorkout(day);
-                        }}
-                      >
-                        <Play size={14} color="#2E7D32" />
-                        <Text style={styles.startDayButtonText}>Start</Text>
-                      </TouchableOpacity>
+                    <View style={styles.dayNumberBadge}>
+                      <Text style={styles.dayNumberText}>{day.day}</Text>
                     </View>
+                    <View style={styles.dayTitleBlock}>
+                      <Text style={styles.dayTitle}>{day.name}</Text>
+                      <Text style={styles.exerciseCount}>{day.exercises.length} exercises</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.startDayButton}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') {
+                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        }
+                        startCustomWorkout(day);
+                      }}
+                    >
+                      <Play size={14} color="#FFFFFF" fill="#FFFFFF" />
+                    </TouchableOpacity>
                   </View>
                   
                   {day.exercises.map((exercise, index) => (
                     <View key={index} style={styles.customExerciseCard}>
-                      <View style={styles.exerciseHeader}>
-                        <Text style={styles.exerciseName}>
-                          {index + 1}. {exercise.name}
-                        </Text>
+                      <View style={styles.exerciseNameRow}>
+                        <View style={styles.exerciseIndex}>
+                          <Text style={styles.exerciseIndexText}>{index + 1}</Text>
+                        </View>
+                        <Text style={styles.exerciseName}>{exercise.name}</Text>
                       </View>
                       <View style={styles.exerciseMetaRow}>
-                        <Text style={styles.exerciseDetails}>
-                          {exercise.sets} sets × {exercise.reps} reps
-                        </Text>
-                        <Text style={styles.exerciseRest}>
-                          Rest: {Math.floor(exercise.restTime / 60)}:{(exercise.restTime % 60).toString().padStart(2, '0')}
-                        </Text>
+                        <View style={styles.exerciseMetaPill}>
+                          <Text style={styles.exerciseMetaPillText}>{exercise.sets} x {exercise.reps}</Text>
+                        </View>
+                        <View style={styles.exerciseMetaPill}>
+                          <Text style={styles.exerciseMetaPillText}>
+                            Rest {Math.floor(exercise.restTime / 60)}:{(exercise.restTime % 60).toString().padStart(2, '0')}
+                          </Text>
+                        </View>
+                        <View style={styles.exerciseMetaPill}>
+                          <Text style={styles.exerciseMetaPillText}>{exercise.equipment}</Text>
+                        </View>
                       </View>
-                      <Text style={styles.exerciseEquipment}>
-                        Equipment: {exercise.equipment}
-                      </Text>
-                      <Text style={styles.exerciseDescription}>
-                        {exercise.description}
-                      </Text>
+                      {exercise.description ? (
+                        <Text style={styles.exerciseDescription}>{exercise.description}</Text>
+                      ) : null}
                     </View>
                   ))}
                 </View>
               ))}
+
+              <View style={{ height: 20 }} />
             </ScrollView>
 
             <View style={styles.modalFooter}>
               <TouchableOpacity
                 style={styles.newPlanButton}
+                activeOpacity={0.7}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1508,7 +1511,7 @@ Format as JSON:
                   setShowQuiz(true);
                 }}
               >
-                <Plus size={20} color="#C0C8D4" />
+                <RotateCcw size={18} color="#9CA3AF" />
                 <Text style={styles.newPlanButtonText}>Create New Plan</Text>
               </TouchableOpacity>
             </View>
@@ -1523,7 +1526,8 @@ Format as JSON:
         transparent={true}
       >
         <View style={styles.settingsModalOverlay}>
-          <View style={[styles.settingsModalContainer, { paddingBottom: insets.bottom }]}>
+          <View style={[styles.settingsModalContainer, { paddingBottom: insets.bottom + 16 }]}>
+            <View style={styles.settingsHandle} />
             <View style={styles.settingsModalHeader}>
               <Text style={styles.settingsModalTitle}>Workout Settings</Text>
               <TouchableOpacity
@@ -1535,13 +1539,14 @@ Format as JSON:
                   setShowSettings(false);
                 }}
               >
-                <X size={24} color="#9CA3AF" />
+                <X size={22} color="#6B7280" />
               </TouchableOpacity>
             </View>
 
             <View style={styles.settingsContent}>
               <TouchableOpacity
                 style={styles.settingsOption}
+                activeOpacity={0.7}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1549,20 +1554,44 @@ Format as JSON:
                   handleDayAdjustment();
                 }}
               >
-                <View style={styles.settingsOptionLeft}>
-                  <Calendar size={24} color="#00ADB5" />
-                  <View style={styles.settingsOptionText}>
-                    <Text style={styles.settingsOptionTitle}>Adjust Workout Days</Text>
-                    <Text style={styles.settingsOptionSubtitle}>
-                      Change which days you want to workout
-                    </Text>
-                  </View>
+                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(0, 173, 181, 0.12)' }]}>
+                  <Calendar size={20} color="#00ADB5" />
                 </View>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <View style={styles.settingsOptionText}>
+                  <Text style={styles.settingsOptionTitle}>Adjust Workout Days</Text>
+                  <Text style={styles.settingsOptionSubtitle}>
+                    Change which days you train
+                  </Text>
+                </View>
+                <ChevronRight size={18} color="#4B5563" />
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.settingsOption}
+                activeOpacity={0.7}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setShowSettings(false);
+                  setShowCustomPlan(true);
+                }}
+              >
+                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(99, 102, 241, 0.12)' }]}>
+                  <Dumbbell size={20} color="#6366F1" />
+                </View>
+                <View style={styles.settingsOptionText}>
+                  <Text style={styles.settingsOptionTitle}>View Full Plan</Text>
+                  <Text style={styles.settingsOptionSubtitle}>
+                    Browse all workout days
+                  </Text>
+                </View>
+                <ChevronRight size={18} color="#4B5563" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.settingsOption, { borderBottomWidth: 0 }]}
+                activeOpacity={0.7}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1570,16 +1599,16 @@ Format as JSON:
                   retakeQuiz();
                 }}
               >
-                <View style={styles.settingsOptionLeft}>
-                  <Zap size={24} color="#F59E0B" />
-                  <View style={styles.settingsOptionText}>
-                    <Text style={styles.settingsOptionTitle}>Retake Quiz</Text>
-                    <Text style={styles.settingsOptionSubtitle}>
-                      Create a completely new workout plan
-                    </Text>
-                  </View>
+                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
+                  <RotateCcw size={20} color="#F59E0B" />
                 </View>
-                <ChevronRight size={20} color="#9CA3AF" />
+                <View style={styles.settingsOptionText}>
+                  <Text style={styles.settingsOptionTitle}>Retake Quiz</Text>
+                  <Text style={styles.settingsOptionSubtitle}>
+                    Generate a completely new plan
+                  </Text>
+                </View>
+                <ChevronRight size={18} color="#4B5563" />
               </TouchableOpacity>
             </View>
           </View>
@@ -1613,7 +1642,7 @@ Format as JSON:
                 Select your workout days
               </Text>
               <Text style={styles.dayAdjustmentSubtext}>
-                Choose which days of the week you want to workout. Your plan will adapt to your schedule.
+                Your plan will adapt to your schedule.
               </Text>
               
               <View style={styles.daySelectionContainer}>
@@ -1627,6 +1656,7 @@ Format as JSON:
                         styles.daySelectionButton,
                         isSelected && styles.daySelectionButtonSelected
                       ]}
+                      activeOpacity={0.7}
                       onPress={() => {
                         if (Platform.OS !== 'web') {
                           void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1638,6 +1668,9 @@ Format as JSON:
                         }
                       }}
                     >
+                      {isSelected && (
+                        <Check size={16} color="#FFFFFF" strokeWidth={3} />
+                      )}
                       <Text style={[
                         styles.daySelectionText,
                         isSelected && styles.daySelectionTextSelected
@@ -1657,6 +1690,7 @@ Format as JSON:
                 styles.saveDaysButton,
                 { opacity: adjustedWorkoutDays.length === 0 ? 0.5 : 1 }
               ]}
+              activeOpacity={0.8}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -1681,732 +1715,623 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingTop: 12,
+    paddingBottom: 20,
   },
-  headerContent: {
-    marginTop: 10,
-  },
+  headerContent: {},
   headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: "800" as const,
+    color: "#FFFFFF",
+    letterSpacing: -1,
+  },
   subtitleRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 10,
-    marginTop: 4,
+    marginTop: 6,
   },
-  countdownContainer: {
-    alignItems: "center" as const,
-    backgroundColor: "rgba(0, 229, 255, 0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
+  statusBadge: {
     flexDirection: "row" as const,
-    gap: 4,
+    alignItems: "center" as const,
+    gap: 5,
+    backgroundColor: "rgba(255, 107, 53, 0.12)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.2)",
+    borderColor: "rgba(255, 107, 53, 0.25)",
   },
-  countdownText: {
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#FF6B35",
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "500" as const,
+  },
+  headerRight: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  timerPill: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    backgroundColor: "rgba(0, 229, 255, 0.08)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(0, 229, 255, 0.15)",
+  },
+  timerText: {
     fontSize: 11,
     fontWeight: "700" as const,
     color: "#00E5FF",
   },
-  headerTitle: {
-    fontSize: 30,
-    fontWeight: "800" as const,
-    color: "#FFFFFF",
-    letterSpacing: -0.8,
+  settingsButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.04)",
   },
-  headerSubtitle: {
-    fontSize: 15,
-    color: "#00E5FF",
-    fontWeight: "500" as const,
-    opacity: 0.9,
+  weekDayRow: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    marginTop: 16,
+    paddingHorizontal: 4,
+  },
+  weekDayDot: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  weekDayDotActive: {
+    backgroundColor: "rgba(0, 173, 181, 0.15)",
+    borderWidth: 1.5,
+    borderColor: "rgba(0, 173, 181, 0.3)",
+  },
+  weekDayDotToday: {
+    borderWidth: 2,
+    borderColor: "#00ADB5",
+  },
+  weekDayLetter: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#4B5563",
+  },
+  weekDayLetterActive: {
+    color: "#00ADB5",
+  },
+  weekDayLetterToday: {
+    color: "#FFFFFF",
+    fontWeight: "700" as const,
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    marginTop: -20,
   },
   scrollContent: {
     paddingBottom: 100,
   },
+
+  customPlanCTA: {
+    marginTop: 24,
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#00ADB5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  ctaGradientBg: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    padding: 18,
+    gap: 14,
+  },
+  ctaIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  ctaTextBlock: {
+    flex: 1,
+  },
+  ctaTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+    marginBottom: 3,
+  },
+  ctaSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.75)",
+    lineHeight: 18,
+  },
+  ctaArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+
+  buildWorkoutCTA: {
+    marginTop: 12,
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#6366F1",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+
+  buildWorkoutCTASmall: {
+    marginTop: 14,
+    backgroundColor: "#171B22",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+  },
+  buildSmallInner: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    padding: 14,
+    gap: 12,
+  },
+  buildSmallIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "rgba(99, 102, 241, 0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  buildSmallText: {
+    flex: 1,
+  },
+  buildSmallTitle: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#E5E7EB",
+  },
+  buildSmallSub: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 1,
+  },
+
+  todaysWorkoutSection: {
+    marginTop: 24,
+  },
+  todaysWorkoutCard: {
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#00ADB5",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  todaysWorkoutGradient: {
+    padding: 22,
+  },
+  todaysLabel: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+    marginBottom: 10,
+  },
+  todaysLabelText: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "rgba(255,255,255,0.7)",
+    letterSpacing: 1.5,
+  },
+  todaysWorkoutName: {
+    fontSize: 26,
+    fontWeight: "800" as const,
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
+    marginBottom: 14,
+  },
+  todaysWorkoutMeta: {
+    flexDirection: "row" as const,
+    gap: 10,
+    marginBottom: 18,
+  },
+  todayMetaPill: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  todayMetaText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "rgba(255,255,255,0.85)",
+  },
+  todayStartRow: {
+    alignItems: "flex-start" as const,
+  },
+  todayStartBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 24,
+  },
+  todayStartText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#0E7490",
+  },
+
+  restDayCard: {
+    backgroundColor: "#171B22",
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  restDayInner: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    padding: 20,
+    gap: 16,
+  },
+  restDayIconWrap: {},
+  restDayIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(100, 116, 139, 0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  restDayTextBlock: {
+    flex: 1,
+  },
+  restDayTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#F1F5F9",
+    marginBottom: 3,
+  },
+  restDaySubtitle: {
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  nextWorkoutText: {
+    fontSize: 12,
+    color: "#00ADB5",
+    fontWeight: "600" as const,
+  },
+  viewPlanButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 6,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.04)",
+  },
+  viewPlanButtonText: {
+    fontSize: 14,
+    color: "#00ADB5",
+    fontWeight: "600" as const,
+  },
+
   statsContainer: {
-    flexDirection: "row",
-    gap: 15,
-    marginTop: 30,
+    flexDirection: "row" as const,
+    gap: 10,
+    marginTop: 24,
   },
   statCard: {
     flex: 1,
     backgroundColor: "#171B22",
+    borderRadius: 16,
+    padding: 16,
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  statIconWrap: {
+    width: 36,
+    height: 36,
     borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: 8,
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 10,
-    color: "#F9FAFB",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    marginTop: 5,
-  },
-  section: {
-    marginTop: 30,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 15,
-  },
-  goalsContainer: {
-    gap: 15,
-  },
-  goalCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  goalIcon: {
-    fontSize: 32,
-    marginBottom: 10,
-  },
-  goalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  goalDescription: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    lineHeight: 20,
-  },
-  workoutsContainer: {
-    gap: 15,
-  },
-  workoutCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 20,
-    borderLeftWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  workoutHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  workoutName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    flex: 1,
-  },
-  workoutMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  workoutDuration: {
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-  workoutExerciseCount: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 15,
-  },
-  workoutFooter: {
-    alignItems: "flex-end",
-  },
-  startButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 25,
-    gap: 8,
-  },
-  startButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  emptyState: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 40,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#F9FAFB",
-    marginTop: 15,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 5,
-    textAlign: "center",
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#111318",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    backgroundColor: "#161A21",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.06)",
-  },
-  modalTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#F0F0F0",
-    letterSpacing: -0.3,
-  },
-  closeButton: {
-    padding: 5,
-  },
-  modalContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  workoutInfo: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 20,
-    gap: 15,
-  },
-  workoutInfoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  workoutInfoText: {
-    fontSize: 16,
     color: "#F9FAFB",
+    letterSpacing: -0.5,
   },
-  exercisesTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginTop: 25,
-    marginBottom: 15,
+  statLabel: {
+    fontSize: 11,
+    color: "#6B7280",
+    marginTop: 2,
+    fontWeight: "500" as const,
   },
-  exercisePreview: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-  },
-  exerciseHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#F9FAFB",
-    flex: 1,
-  },
-  videoButton: {
-    padding: 5,
-  },
-  exerciseDetails: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 4,
-  },
-  exerciseRest: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 4,
-  },
-  exerciseEquipment: {
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-  modalFooter: {
-    padding: 20,
-    backgroundColor: "#161A21",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.06)",
-  },
-  startWorkoutButton: {
-    backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 25,
-    gap: 10,
-  },
-  startWorkoutButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+
+  section: {
+    marginTop: 28,
   },
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#E5E7EB",
+    letterSpacing: -0.3,
   },
   toggleButton: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: "#171B22",
-    borderRadius: 15,
+    paddingVertical: 5,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 12,
   },
   toggleButtonText: {
     fontSize: 12,
-    color: "#9CA3AF",
-    fontWeight: "600",
+    color: "#6B7280",
+    fontWeight: "600" as const,
   },
+
+  emptyState: {
+    backgroundColor: "#171B22",
+    borderRadius: 16,
+    padding: 36,
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "rgba(75, 85, 99, 0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: 14,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+  },
+  emptyStateSubtext: {
+    fontSize: 13,
+    color: "#4B5563",
+    marginTop: 4,
+    textAlign: "center" as const,
+  },
+
   recentWorkoutsContainer: {
-    gap: 15,
+    gap: 8,
   },
   recentWorkoutCard: {
     backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 2,
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
   },
-  recentWorkoutHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
+  recentWorkoutLeft: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    flex: 1,
+    gap: 12,
+  },
+  recentWorkoutIndicator: {
+    width: 4,
+    height: 36,
+    borderRadius: 2,
+  },
+  recentWorkoutInfo: {
+    flex: 1,
   },
   recentWorkoutName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#F9FAFB",
-    flex: 1,
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#E5E7EB",
+    marginBottom: 2,
   },
   recentWorkoutDate: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#6B7280",
   },
-  recentWorkoutStats: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 12,
+  recentWorkoutMetrics: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
   },
-  recentWorkoutStat: {
-    alignItems: "center",
+  recentMetric: {
+    alignItems: "center" as const,
+    minWidth: 32,
   },
-  recentWorkoutStatValue: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-  },
-  recentWorkoutStatLabel: {
-    fontSize: 11,
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
-  recentWorkoutFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  workoutBadges: {
-    flexDirection: "row",
-    gap: 6,
-    flex: 1,
-  },
-  muscleBadge: {
-    backgroundColor: "#0D0F13",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  muscleBadgeText: {
-    fontSize: 10,
-    color: "#9CA3AF",
-    fontWeight: "500",
-  },
-  completionBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  completionBadgeText: {
-    fontSize: 10,
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  workoutInfoRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 15,
-  },
-  workoutMetaInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  difficultyBadge: {
-    backgroundColor: "#FEF3C7",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-  },
-  difficultyBadgeText: {
-    fontSize: 12,
-    color: "#92400E",
-    fontWeight: "600",
-  },
-  muscleGroupsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  muscleGroupBadge: {
-    backgroundColor: "#EDE9FE",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  muscleGroupBadgeText: {
-    fontSize: 10,
-    color: "#7C3AED",
-    fontWeight: "500",
-  },
-  exerciseMetaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  exerciseDescription: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    fontStyle: "italic",
-    marginTop: 4,
-  },
-  customPlanCTA: {
-    marginTop: 30,
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  ctaGradient: {
-    padding: 20,
-    backgroundColor: "#00ADB5",
-  },
-  ctaContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-  },
-  ctaText: {
-    flex: 1,
-  },
-  ctaTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-    marginBottom: 4,
-  },
-  ctaSubtitle: {
+  recentMetricValue: {
     fontSize: 14,
-    color: "#FFFFFF",
-    opacity: 0.9,
+    fontWeight: "700" as const,
+    color: "#D1D5DB",
   },
-  generatedPlanCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 30,
-    borderLeftWidth: 4,
-    borderLeftColor: "#00ADB5",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+  recentMetricLabel: {
+    fontSize: 10,
+    color: "#4B5563",
+    marginTop: 1,
   },
-  planHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 8,
+  recentMetricDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(255,255,255,0.06)",
   },
-  planTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-  },
-  planDescription: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-  planDays: {
-    fontSize: 12,
-    color: "#00ADB5",
-    fontWeight: "600",
-  },
+
   quizContainer: {
     flex: 1,
     backgroundColor: "#0D0F13",
   },
   quizHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: "#171B22",
-    borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    paddingVertical: 14,
   },
   quizTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F9FAFB",
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#E5E7EB",
   },
   quizProgress: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "rgba(255,255,255,0.06)",
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   progressText: {
     fontSize: 12,
     color: "#9CA3AF",
-    fontWeight: "600",
+    fontWeight: "600" as const,
+  },
+  quizProgressBar: {
+    height: 3,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    marginHorizontal: 20,
+    borderRadius: 2,
+    marginBottom: 8,
+  },
+  quizProgressFill: {
+    height: "100%",
+    backgroundColor: "#00ADB5",
+    borderRadius: 2,
   },
   quizContent: {
     flex: 1,
     paddingHorizontal: 20,
   },
   questionContainer: {
-    marginTop: 30,
+    marginTop: 24,
   },
   questionText: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 30,
+    fontWeight: "800" as const,
+    color: "#F1F5F9",
+    marginBottom: 24,
     lineHeight: 32,
+    letterSpacing: -0.5,
   },
   optionsContainer: {
-    gap: 15,
+    gap: 10,
   },
   optionButton: {
-    backgroundColor: "#1E2330",
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: "#171B22",
+    borderRadius: 14,
+    padding: 18,
     flexDirection: "row" as const,
     justifyContent: "space-between" as const,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "#2A3040",
+    borderColor: "rgba(255,255,255,0.05)",
   },
   optionText: {
-    fontSize: 16,
-    color: "#F9FAFB",
+    fontSize: 15,
+    color: "#E5E7EB",
     fontWeight: "500" as const,
     flex: 1,
+    lineHeight: 22,
   },
   quizGoalsContainer: {
-    marginTop: 30,
+    marginTop: 24,
   },
   goalsSubtext: {
-    fontSize: 16,
-    color: "#9CA3AF",
+    fontSize: 15,
+    color: "#64748B",
     marginBottom: 20,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   goalsInput: {
     backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 20,
-    fontSize: 16,
-    color: "#F9FAFB",
+    borderRadius: 14,
+    padding: 18,
+    fontSize: 15,
+    color: "#E5E7EB",
     minHeight: 120,
     borderWidth: 1,
-    borderColor: "#0D0F13",
-    marginBottom: 30,
+    borderColor: "rgba(255,255,255,0.05)",
+    marginBottom: 24,
+    lineHeight: 22,
   },
   generateButton: {
     backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 25,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 16,
+    borderRadius: 16,
     gap: 10,
   },
   generateButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
-  },
-  planOverview: {
-    backgroundColor: "#1A1E27",
-    borderRadius: 14,
-    padding: 20,
-    marginTop: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-  },
-  planOverviewText: {
-    fontSize: 15,
-    color: "#A0A8B8",
-    lineHeight: 23,
-  },
-  dayCard: {
-    backgroundColor: "#1A1E27",
-    borderRadius: 14,
-    padding: 20,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-  },
-  dayHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.06)",
-    flexWrap: "nowrap",
-  },
-  dayTitle: {
-    fontSize: 17,
-    fontWeight: "700" as const,
-    color: "#E8ECF0",
-    flex: 1,
-    marginRight: 10,
-  },
-  exerciseCount: {
-    fontSize: 12,
-    color: "#8B95A5",
-    backgroundColor: "rgba(255,255,255,0.06)",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 10,
-    textAlign: "center",
-    minWidth: 80,
-    overflow: "hidden" as const,
-  },
-  customExerciseCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-  },
-  newPlanButton: {
-    backgroundColor: "transparent",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 25,
-    gap: 10,
-    borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.15)",
-  },
-  newPlanButtonText: {
-    color: "#C0C8D4",
-    fontSize: 16,
-    fontWeight: "600" as const,
-  },
-  dayHeaderRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    flexShrink: 0,
-  },
-  startDayButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E8F5E9",
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 15,
-    gap: 5,
-  },
-  startDayButtonText: {
-    color: "#2E7D32",
-    fontSize: 12,
     fontWeight: "700" as const,
   },
   daySelectionSubtext: {
-    fontSize: 16,
-    color: "#9CA3AF",
+    fontSize: 15,
+    color: "#64748B",
     marginBottom: 20,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   daySelectionContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
     gap: 10,
-    marginBottom: 30,
+    marginBottom: 28,
   },
   daySelectionButton: {
     backgroundColor: "#171B22",
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderWidth: 2,
-    borderColor: "#0D0F13",
-    minWidth: 100,
-    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.06)",
+    minWidth: 105,
+    alignItems: "center" as const,
+    flexDirection: "row" as const,
+    justifyContent: "center" as const,
+    gap: 6,
   },
   daySelectionButtonSelected: {
     backgroundColor: "#00ADB5",
@@ -2414,218 +2339,314 @@ const styles = StyleSheet.create({
   },
   daySelectionText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#9CA3AF",
+    fontWeight: "600" as const,
+    color: "#6B7280",
   },
   daySelectionTextSelected: {
     color: "#FFFFFF",
   },
   continueButton: {
     backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 25,
-    gap: 10,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 8,
   },
   continueButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700" as const,
   },
-  todaysWorkoutSection: {
-    marginTop: 30,
-  },
-  todaysWorkoutCard: {
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  todaysWorkoutGradient: {
-    padding: 20,
-    backgroundColor: "#00ADB5",
-  },
-  todaysWorkoutHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  todaysWorkoutTitleSection: {
+
+  modalContainer: {
     flex: 1,
+    backgroundColor: "#0D0F13",
   },
-  todaysWorkoutLabel: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    opacity: 0.9,
-    marginBottom: 4,
+  modalHeader: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.04)",
   },
-  todaysWorkoutName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-  },
-  todaysWorkoutMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  todaysWorkoutExercises: {
-    fontSize: 16,
-    color: "#FFFFFF",
-    opacity: 0.9,
-  },
-  todaysWorkoutDuration: {
-    fontSize: 16,
-    color: "#FFFFFF",
-    opacity: 0.9,
-  },
-  restDayCard: {
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  restDayGradient: {
-    padding: 20,
-    backgroundColor: "#171B22",
-  },
-  restDayContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-    marginBottom: 15,
-  },
-  restDayText: {
-    flex: 1,
-  },
-  restDayTitle: {
+  modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 4,
+    fontWeight: "800" as const,
+    color: "#F1F5F9",
+    letterSpacing: -0.3,
   },
-  restDaySubtitle: {
+  modalSubtitle: {
+    fontSize: 13,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  closeButton: {
+    padding: 6,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.04)",
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  planOverview: {
+    backgroundColor: "#171B22",
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  planOverviewText: {
+    fontSize: 14,
+    color: "#94A3B8",
+    lineHeight: 22,
+  },
+  dayCard: {
+    backgroundColor: "#171B22",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  dayHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    marginBottom: 16,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.04)",
+  },
+  dayNumberBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 173, 181, 0.12)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  dayNumberText: {
     fontSize: 16,
-    color: "#9CA3AF",
-    fontStyle: "italic",
+    fontWeight: "800" as const,
+    color: "#00ADB5",
+  },
+  dayTitleBlock: {
+    flex: 1,
+  },
+  dayTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#E5E7EB",
+    marginBottom: 2,
+  },
+  exerciseCount: {
+    fontSize: 12,
+    color: "#64748B",
+  },
+  startDayButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#00ADB5",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  customExerciseCard: {
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 12,
+    padding: 14,
     marginBottom: 8,
   },
-  nextWorkoutText: {
-    fontSize: 14,
-    color: "#9CA3AF",
+  exerciseNameRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+    marginBottom: 8,
   },
-  viewPlanButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
+  exerciseIndex: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
-  viewPlanButtonText: {
-    fontSize: 16,
-    color: "#00ADB5",
-    fontWeight: "600",
+  exerciseIndexText: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#6B7280",
   },
-  settingsButton: {
-    padding: 10,
+  exerciseHeader: {
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    marginBottom: 8,
+  },
+  exerciseName: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#D1D5DB",
+    flex: 1,
+  },
+  exerciseMetaRow: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 6,
+    marginBottom: 4,
+  },
+  exerciseMetaPill: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  exerciseMetaPillText: {
+    fontSize: 11,
+    color: "#94A3B8",
+    fontWeight: "500" as const,
+  },
+  exerciseDescription: {
+    fontSize: 12,
+    color: "#4B5563",
+    marginTop: 6,
+    lineHeight: 18,
+  },
+  exerciseDetails: {
+    fontSize: 13,
+    color: "#94A3B8",
+  },
+  exerciseRest: {
+    fontSize: 13,
+    color: "#94A3B8",
+  },
+  exerciseEquipment: {
+    fontSize: 13,
+    color: "#94A3B8",
+  },
+
+  modalFooter: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.04)",
+  },
+  newPlanButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: "#171B22",
-    borderWidth: 1,
-    borderColor: "#1F2937",
+    gap: 8,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.08)",
   },
+  newPlanButtonText: {
+    color: "#9CA3AF",
+    fontSize: 15,
+    fontWeight: "600" as const,
+  },
+
   settingsModalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "flex-end" as const,
   },
   settingsModalContainer: {
     backgroundColor: "#171B22",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: 20,
-    maxHeight: "50%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 8,
+  },
+  settingsHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignSelf: "center" as const,
+    marginBottom: 12,
   },
   settingsModalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    borderBottomColor: "rgba(255,255,255,0.04)",
   },
   settingsModalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#F9FAFB",
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#E5E7EB",
   },
   settingsContent: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 8,
   },
   settingsOption: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    paddingVertical: 14,
+    gap: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    borderBottomColor: "rgba(255,255,255,0.04)",
   },
-  settingsOptionLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 15,
-    flex: 1,
+  settingsIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
   settingsOptionText: {
     flex: 1,
   },
   settingsOptionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#F9FAFB",
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#E5E7EB",
     marginBottom: 2,
   },
   settingsOptionSubtitle: {
-    fontSize: 14,
-    color: "#9CA3AF",
+    fontSize: 13,
+    color: "#64748B",
   },
+
   dayAdjustmentContainer: {
     paddingTop: 20,
   },
   dayAdjustmentTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 10,
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F1F5F9",
+    marginBottom: 8,
+    letterSpacing: -0.3,
   },
   dayAdjustmentSubtext: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    marginBottom: 30,
-    lineHeight: 24,
+    fontSize: 15,
+    color: "#64748B",
+    marginBottom: 24,
+    lineHeight: 22,
   },
   saveDaysButton: {
     backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 15,
-    borderRadius: 25,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 16,
+    borderRadius: 16,
   },
   saveDaysButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700" as const,
   },
+
   loadingContainer: {
     flex: 1,
     backgroundColor: '#0D0F13',
@@ -2773,19 +2794,5 @@ const styles = StyleSheet.create({
     color: '#D1D5DB',
     lineHeight: 22,
     fontWeight: '400' as const,
-  },
-  buildWorkoutCTA: {
-    marginTop: 15,
-    borderRadius: 12,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  buildCtaGradient: {
-    padding: 20,
-    backgroundColor: "#6366F1",
   },
 });
