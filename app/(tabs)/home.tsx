@@ -37,15 +37,6 @@ function HeroSection() {
     ]).start();
   }, [fadeIn, slideUp]);
 
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour < 5) return "Night owl mode";
-    if (hour < 12) return "Morning";
-    if (hour < 17) return "Afternoon";
-    if (hour < 21) return "Evening";
-    return "Night owl mode";
-  }, []);
-
   const xpRemaining = xpInfo.neededXP - xpInfo.currentXP;
   const currentIdx = RANKS.findIndex(r => r.title === xpInfo.rank.title);
   const nextRank = currentIdx < RANKS.length - 1 ? RANKS[currentIdx + 1] : null;
@@ -59,7 +50,6 @@ function HeroSection() {
   return (
     <Animated.View style={[heroStyles.container, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
       <View style={heroStyles.topRow}>
-        <Text style={heroStyles.greeting}>{greeting}</Text>
         <View style={heroStyles.totalXpBadge}>
           <Zap size={11} color={xpInfo.rank.color} />
           <Text style={[heroStyles.totalXpText, { color: xpInfo.rank.color }]}>{xpInfo.totalXP.toLocaleString()} XP</Text>
@@ -367,13 +357,31 @@ function XPFeed() {
   );
 }
 
+function useGreeting() {
+  return useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 5) return "Night owl mode 🦉";
+    if (hour < 12) return "Good morning 🌅";
+    if (hour < 17) return "Good afternoon ☀️";
+    if (hour < 21) return "Good evening 🌙";
+    return "Night owl mode 🦉";
+  }, []);
+}
+
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
+  const greeting = useGreeting();
+  const { xpInfo } = useApp();
 
   return (
     <View style={styles.container}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.appName}>Dashboard</Text>
+      <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
+        <Text style={styles.greetingText}>{greeting}</Text>
+        <View style={styles.topBarRight}>
+          <View style={[styles.levelPill, { borderColor: xpInfo.rank.color + '40' }]}>
+            <Text style={[styles.levelPillText, { color: xpInfo.rank.color }]}>Lv {xpInfo.level}</Text>
+          </View>
+        </View>
       </View>
       <ScrollView
         style={styles.scroll}
@@ -399,13 +407,32 @@ const styles = StyleSheet.create({
   },
   topBar: {
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 14,
     backgroundColor: "#0A0C10",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
   },
-  appName: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: "#6B7280",
+  greetingText: {
+    fontSize: 24,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.6,
+  },
+  topBarRight: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  levelPill: {
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  levelPillText: {
+    fontSize: 13,
+    fontWeight: "800" as const,
     letterSpacing: -0.3,
   },
   scroll: {
@@ -429,13 +456,8 @@ const heroStyles = StyleSheet.create({
   topRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    justifyContent: "space-between" as const,
+    justifyContent: "flex-end" as const,
     marginBottom: 16,
-  },
-  greeting: {
-    fontSize: 14,
-    fontWeight: "500" as const,
-    color: "#6B7280",
   },
   totalXpBadge: {
     flexDirection: "row" as const,
