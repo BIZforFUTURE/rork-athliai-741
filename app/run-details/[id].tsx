@@ -8,7 +8,6 @@ import {
   Image,
   TextInput,
   Alert,
-  Platform,
   Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,6 +30,7 @@ import {
 import { useApp } from "@/providers/AppProvider";
 import * as ImagePicker from "expo-image-picker";
 import RunMap from "@/components/RunMap";
+import colors from "@/constants/colors";
 
 export default function RunDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -200,7 +200,7 @@ export default function RunDetailsScreen() {
       />
       
       <LinearGradient
-        colors={["#3B82F6", "#8B5CF6"]}
+        colors={[colors.accent.teal, colors.accent.violet]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
@@ -230,7 +230,7 @@ export default function RunDetailsScreen() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.dateCard}>
-          <Calendar size={20} color="#3B82F6" />
+          <Calendar size={20} color={colors.accent.teal} />
           <View style={styles.dateInfo}>
             <Text style={styles.dateText}>{formatDate(run.date)}</Text>
             <Text style={styles.timeText}>{formatDateTime(run.date)}</Text>
@@ -239,7 +239,7 @@ export default function RunDetailsScreen() {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <MapPin size={24} color="#3B82F6" />
+            <MapPin size={24} color={colors.accent.teal} />
             <Text style={styles.statLabel}>DISTANCE</Text>
             <Text style={styles.statValue}>{run.distance.toFixed(2)}</Text>
             <Text style={styles.statUnit}>miles</Text>
@@ -319,7 +319,7 @@ export default function RunDetailsScreen() {
               onPress={showPhotoOptions}
               testID="add-photo-button"
             >
-              <Plus size={20} color="#3B82F6" />
+              <Plus size={20} color={colors.accent.teal} />
               <Text style={styles.addPhotoText}>Add Photo</Text>
             </TouchableOpacity>
           </View>
@@ -399,7 +399,7 @@ export default function RunDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background.primary,
   },
   header: {
     paddingHorizontal: 20,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: "bold" as const,
     color: "#FFFFFF",
     flex: 1,
     textAlign: "center",
@@ -432,30 +432,25 @@ const styles = StyleSheet.create({
     marginTop: -20,
   },
   dateCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background.secondary,
     borderRadius: 20,
     padding: 20,
     flexDirection: "row",
     alignItems: "center",
     marginTop: 30,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   dateInfo: {
     marginLeft: 15,
   },
   dateText: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#1F2937",
+    fontWeight: "600" as const,
+    color: colors.text.primary,
   },
   timeText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.text.secondary,
     marginTop: 2,
   },
   statsGrid: {
@@ -467,77 +462,62 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     minWidth: "45%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background.secondary,
     borderRadius: 20,
     padding: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   statLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: colors.text.tertiary,
     letterSpacing: 1,
     marginTop: 10,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "bold" as const,
+    color: colors.text.primary,
     marginTop: 5,
   },
   statUnit: {
     fontSize: 12,
-    color: "#6B7280",
+    color: colors.text.secondary,
   },
   detailsSection: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background.secondary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#1F2937",
+    fontWeight: "600" as const,
+    color: colors.text.primary,
     marginBottom: 10,
   },
   detailText: {
     fontSize: 16,
-    color: "#4B5563",
+    color: colors.text.secondary,
     lineHeight: 24,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.background.tertiary,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    color: "#1F2937",
-    backgroundColor: "#F9FAFB",
+    color: colors.text.primary,
+    backgroundColor: colors.background.tertiary,
   },
   notesInput: {
     minHeight: 100,
     textAlignVertical: "top",
   },
   photosSection: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background.secondary,
     borderRadius: 20,
     padding: 20,
     marginBottom: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   photosSectionHeader: {
     flexDirection: "row",
@@ -548,7 +528,7 @@ const styles = StyleSheet.create({
   addPhotoButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EBF4FF",
+    backgroundColor: "rgba(0, 173, 181, 0.15)",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
@@ -556,8 +536,8 @@ const styles = StyleSheet.create({
   },
   addPhotoText: {
     fontSize: 14,
-    color: "#3B82F6",
-    fontWeight: "500",
+    color: colors.accent.teal,
+    fontWeight: "500" as const,
   },
   photosGrid: {
     flexDirection: "row",
@@ -588,7 +568,7 @@ const styles = StyleSheet.create({
   },
   emptyPhotosText: {
     fontSize: 16,
-    color: "#6B7280",
+    color: colors.text.tertiary,
     textAlign: "center",
     marginTop: 15,
     lineHeight: 24,
@@ -612,27 +592,27 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: "#EF4444",
+    color: colors.error,
     textAlign: "center",
     marginTop: 50,
   },
   placeholderPhoto: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.background.tertiary,
     justifyContent: "center",
     alignItems: "center",
   },
   fullScreenImagePlaceholder: {
     width: "90%",
     height: "80%",
-    backgroundColor: "#1F2937",
+    backgroundColor: colors.background.secondary,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
   },
   placeholderText: {
-    color: "#9CA3AF",
+    color: colors.text.secondary,
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "500" as const,
   },
 });
