@@ -904,6 +904,7 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView 
         style={styles.content} 
+        contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
@@ -1979,6 +1980,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  contentContainer: {
+    paddingBottom: 120,
   },
   progressCard: {
     borderRadius: 24,

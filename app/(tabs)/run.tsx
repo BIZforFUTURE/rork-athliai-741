@@ -593,7 +593,7 @@ export default function RunScreen() {
         <Text style={styles.headerSubtitle}>Ready to run?</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.mainCard}>
           <Text style={styles.timeLabel}>TIME</Text>
           <Text style={styles.timeValue}>{formatTime(runState.elapsedTime)}</Text>
@@ -752,7 +752,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 100,
+  },
+  contentContainer: {
+    paddingBottom: 120,
   },
   mainCard: {
     backgroundColor: "#171B22",
