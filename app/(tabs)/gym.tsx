@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
   Platform,
+  Animated,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,7 +25,11 @@ import {
   Plus,
   Zap,
   Settings,
-  Hammer
+  Hammer,
+  Target,
+  Activity,
+  Sparkles,
+  Check
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -37,6 +42,221 @@ import { getVideoUrlForExercise } from "@/utils/videoUrls";
 interface QuizAnswer {
   question: string;
   answer: string;
+}
+
+const GYM_LOADING_STEPS = [
+  { label: 'Analyzing your goals', icon: Target },
+  { label: 'Selecting exercises', icon: Dumbbell },
+  { label: 'Optimizing sets & reps', icon: Activity },
+  { label: 'Building your schedule', icon: Calendar },
+  { label: 'Finalizing your plan', icon: Sparkles },
+];
+
+const GYM_TIPS = [
+  "Progressive overload is the #1 driver of muscle growth — aim to increase weight or reps each week.",
+  "Sleep 7-9 hours per night. Your muscles grow during recovery, not during the workout.",
+  "Protein timing matters less than total daily intake. Aim for 0.7-1g per pound of bodyweight.",
+  "Compound movements like squats and deadlifts recruit more muscle fibers than isolation exercises.",
+  "Consistency beats intensity. Showing up 4x a week at 80% effort outperforms 1x at 100%.",
+  "Rest periods of 2-3 min for strength, 60-90s for hypertrophy, and 30-45s for endurance.",
+  "Warming up with dynamic stretches reduces injury risk by up to 30%.",
+  "Mind-muscle connection is real — focusing on the target muscle improves activation by 20%.",
+  "Creatine monohydrate is the most researched and effective supplement for strength gains.",
+  "Drinking water before meals can reduce calorie intake by up to 13%.",
+];
+
+function GymLoadingScreen() {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const tipOpacity = useRef(new Animated.Value(1)).current;
+  const tipTranslateY = useRef(new Animated.Value(0)).current;
+  const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * GYM_TIPS.length));
+  const [activeStep, setActiveStep] = useState(0);
+  const [fakeProgress, setFakeProgress] = useState(0);
+  const stepAnims = useRef(GYM_LOADING_STEPS.map(() => new Animated.Value(0))).current;
+  const stepScaleAnims = useRef(GYM_LOADING_STEPS.map(() => new Animated.Value(0.8))).current;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFakeProgress(prev => {
+        if (prev >= 0.95) {
+          clearInterval(interval);
+          return prev;
+        }
+        const increment = prev < 0.3 ? 0.04 : prev < 0.6 ? 0.025 : prev < 0.85 ? 0.015 : 0.005;
+        return Math.min(prev + increment + Math.random() * 0.02, 0.95);
+      });
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const stepIndex = Math.min(Math.floor(fakeProgress * GYM_LOADING_STEPS.length), GYM_LOADING_STEPS.length - 1);
+    if (stepIndex !== activeStep) {
+      setActiveStep(stepIndex);
+      if (Platform.OS !== 'web') {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    }
+  }, [fakeProgress, activeStep]);
+
+  useEffect(() => {
+    GYM_LOADING_STEPS.forEach((_, index) => {
+      if (index <= activeStep) {
+        Animated.parallel([
+          Animated.timing(stepAnims[index], {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.spring(stepScaleAnims[index], {
+            toValue: 1,
+            friction: 6,
+            tension: 100,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
+    });
+  }, [activeStep, stepAnims, stepScaleAnims]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      Animated.parallel([
+        Animated.timing(tipOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(tipTranslateY, { toValue: -12, duration: 300, useNativeDriver: true }),
+      ]).start(() => {
+        setCurrentTipIndex(prev => (prev + 1) % GYM_TIPS.length);
+        tipTranslateY.setValue(12);
+        Animated.parallel([
+          Animated.timing(tipOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(tipTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+        ]).start();
+      });
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [tipOpacity, tipTranslateY]);
+
+  useEffect(() => {
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
+      ])
+    );
+    const rotateAnimation = Animated.loop(
+      Animated.timing(rotateAnim, { toValue: 1, duration: 2500, useNativeDriver: true })
+    );
+    pulseAnimation.start();
+    rotateAnimation.start();
+    return () => { pulseAnimation.stop(); rotateAnimation.stop(); };
+  }, [pulseAnim, rotateAnim]);
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: fakeProgress,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  }, [fakeProgress, progressAnim]);
+
+  const rotate = rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const progressWidth = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
+  const percentText = Math.round(fakeProgress * 100);
+
+  return (
+    <View style={styles.loadingContainer}>
+      <ScrollView
+        contentContainerStyle={styles.loadingScrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.loadingTopSection}>
+          <View style={styles.loadingIconArea}>
+            <Animated.View style={[styles.loadingRing, { transform: [{ rotate }] }]}>
+              <View style={styles.loadingRingInner} />
+            </Animated.View>
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <View style={styles.loadingIconCircle}>
+                <Dumbbell size={44} color="#00ADB5" strokeWidth={2.5} />
+              </View>
+            </Animated.View>
+          </View>
+
+          <Text style={styles.loadingTitle}>Building Your Plan</Text>
+          <Text style={styles.loadingPercent}>{percentText}%</Text>
+
+          <View style={styles.loadingProgressBarContainer}>
+            <View style={styles.loadingProgressBarBg}>
+              <Animated.View style={[styles.loadingProgressBarFill, { width: progressWidth }]} />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.loadingStepsContainer}>
+          {GYM_LOADING_STEPS.map((step, index) => {
+            const IconComponent = step.icon;
+            const isActive = index === activeStep;
+            const isComplete = index < activeStep;
+            return (
+              <Animated.View
+                key={step.label}
+                style={[
+                  styles.loadingStepRow,
+                  {
+                    opacity: stepAnims[index].interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.3, 1],
+                    }),
+                    transform: [{ scale: stepScaleAnims[index] }],
+                  },
+                ]}
+              >
+                <View style={[
+                  styles.loadingStepDot,
+                  isComplete && styles.loadingStepDotComplete,
+                  isActive && styles.loadingStepDotActive,
+                ]}>
+                  {isComplete ? (
+                    <Check size={14} color="#FFFFFF" strokeWidth={3} />
+                  ) : (
+                    <IconComponent size={14} color={isActive ? '#00ADB5' : '#6B7280'} />
+                  )}
+                </View>
+                <Text style={[
+                  styles.loadingStepLabel,
+                  isActive && styles.loadingStepLabelActive,
+                  isComplete && styles.loadingStepLabelComplete,
+                ]}>
+                  {step.label}
+                </Text>
+                {isActive && (
+                  <View style={styles.loadingStepPulse} />
+                )}
+              </Animated.View>
+            );
+          })}
+        </View>
+
+        <View style={styles.loadingTipCard}>
+          <View style={styles.loadingTipHeader}>
+            <Sparkles size={14} color="#00ADB5" />
+            <Text style={styles.loadingTipHeaderText}>DID YOU KNOW?</Text>
+          </View>
+          <Animated.Text
+            style={[
+              styles.loadingTipText,
+              { opacity: tipOpacity, transform: [{ translateY: tipTranslateY }] },
+            ]}
+          >
+            {GYM_TIPS[currentTipIndex]}
+          </Animated.Text>
+        </View>
+
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
+  );
 }
 
 interface CustomWorkoutPlan {
@@ -1043,17 +1263,7 @@ Format as JSON:
         presentationStyle="fullScreen"
         transparent={false}
       >
-        <View style={styles.loadingContainer}>
-          <View style={styles.loadingGradient}>
-            <View style={styles.loadingContent}>
-              <Zap size={56} color="#4ADE80" />
-              <Text style={styles.loadingTitle}>Creating Your Plan</Text>
-              <Text style={styles.loadingMessage}>
-                This might take a second.{"\n"}Thank you for your patience.
-              </Text>
-            </View>
-          </View>
-        </View>
+        <GymLoadingScreen />
       </Modal>
 
       <Modal
@@ -2418,31 +2628,151 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    backgroundColor: '#0D0F13',
   },
-  loadingGradient: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#111318",
+  loadingScrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 28,
+    paddingTop: 80,
+    paddingBottom: 40,
+    alignItems: 'center' as const,
   },
-  loadingContent: {
-    alignItems: "center",
-    paddingHorizontal: 40,
+  loadingTopSection: {
+    alignItems: 'center' as const,
+    marginBottom: 36,
+  },
+  loadingIconArea: {
+    width: 120,
+    height: 120,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginBottom: 24,
+  },
+  loadingIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(0, 173, 181, 0.12)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  loadingRing: {
+    position: 'absolute' as const,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2.5,
+    borderColor: 'transparent',
+    borderTopColor: '#00ADB5',
+    borderRightColor: '#00E5FF',
+  },
+  loadingRingInner: {
+    width: '100%',
+    height: '100%',
   },
   loadingTitle: {
-    fontSize: 28,
-    fontWeight: "800" as const,
-    color: "#F0F0F0",
-    marginTop: 30,
-    marginBottom: 20,
-    textAlign: "center",
-    letterSpacing: -0.5,
+    fontSize: 26,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    textAlign: 'center' as const,
+    marginBottom: 8,
   },
-  loadingMessage: {
-    fontSize: 16,
-    color: "#8B95A5",
-    textAlign: "center",
-    lineHeight: 26,
+  loadingPercent: {
+    fontSize: 40,
+    fontWeight: '800' as const,
+    color: '#00ADB5',
+    textAlign: 'center' as const,
+    marginBottom: 16,
+  },
+  loadingProgressBarContainer: {
+    width: '100%',
+    alignItems: 'center' as const,
+  },
+  loadingProgressBarBg: {
+    width: '80%',
+    height: 6,
+    backgroundColor: '#1F2937',
+    borderRadius: 3,
+    overflow: 'hidden' as const,
+  },
+  loadingProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#00ADB5',
+    borderRadius: 3,
+  },
+  loadingStepsContainer: {
+    width: '100%',
+    backgroundColor: '#151921',
+    borderRadius: 16,
+    padding: 20,
+    gap: 16,
+    marginBottom: 24,
+  },
+  loadingStepRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 14,
+  },
+  loadingStepDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#1F2937',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  loadingStepDotComplete: {
+    backgroundColor: '#00ADB5',
+  },
+  loadingStepDotActive: {
+    backgroundColor: 'rgba(0, 173, 181, 0.2)',
+    borderWidth: 2,
+    borderColor: '#00ADB5',
+  },
+  loadingStepLabel: {
+    fontSize: 15,
+    color: '#6B7280',
+    fontWeight: '500' as const,
+    flex: 1,
+  },
+  loadingStepLabelActive: {
+    color: '#FFFFFF',
+    fontWeight: '600' as const,
+  },
+  loadingStepLabelComplete: {
+    color: '#9CA3AF',
+  },
+  loadingStepPulse: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00ADB5',
+  },
+  loadingTipCard: {
+    width: '100%',
+    backgroundColor: '#151921',
+    borderRadius: 16,
+    padding: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: '#00ADB5',
+  },
+  loadingTipHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+    marginBottom: 10,
+  },
+  loadingTipHeaderText: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+    color: '#00ADB5',
+    letterSpacing: 1.2,
+  },
+  loadingTipText: {
+    fontSize: 14,
+    color: '#D1D5DB',
+    lineHeight: 22,
+    fontWeight: '400' as const,
   },
   buildWorkoutCTA: {
     marginTop: 15,
