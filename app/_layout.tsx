@@ -11,12 +11,18 @@ import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
 
 if (Platform.OS === "web" && typeof window !== "undefined") {
   const originalConsoleError = console.error;
-  console.error = (...args: unknown[]) => {
+  const originalConsoleWarn = console.warn;
+  const shouldSuppress = (args: unknown[]) => {
     const message = typeof args[0] === "string" ? args[0] : "";
-    if (message.includes("non-boolean attribute") && message.includes("collapsable")) {
-      return;
-    }
+    return message.includes("non-boolean attribute") || message.includes("collapsable");
+  };
+  console.error = (...args: unknown[]) => {
+    if (shouldSuppress(args)) return;
     originalConsoleError(...args);
+  };
+  console.warn = (...args: unknown[]) => {
+    if (shouldSuppress(args)) return;
+    originalConsoleWarn(...args);
   };
 }
 
