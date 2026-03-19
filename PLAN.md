@@ -12,7 +12,7 @@
 
 | Action | XP Earned |
 |---|---|
-| Complete a run | 50 XP + 10 XP per mile |
+| Complete a run | 25 XP + 15 XP per 0.25 miles |
 | Complete a workout | 75 XP |
 | Log a food entry | 15 XP |
 | Hit calorie goal for the day | 50 XP bonus |

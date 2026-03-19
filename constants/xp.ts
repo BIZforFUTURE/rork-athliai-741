@@ -17,8 +17,8 @@ export const RANKS: RankInfo[] = [
 ];
 
 export const XP_REWARDS = {
-  RUN_BASE: 100,
-  RUN_PER_MILE: 25,
+  RUN_BASE: 25,
+  RUN_PER_QUARTER_MILE: 15,
   WORKOUT_COMPLETE: 75,
   FOOD_LOG: 15,
   CALORIE_GOAL_HIT: 50,

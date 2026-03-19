@@ -603,7 +603,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
         lastRunDate: today,
       };
 
-      const runXP = XP_REWARDS.RUN_BASE + Math.round(run.distance * XP_REWARDS.RUN_PER_MILE);
+      const quarterMiles = Math.floor(run.distance * 4);
+      const runXP = XP_REWARDS.RUN_BASE + (quarterMiles * XP_REWARDS.RUN_PER_QUARTER_MILE);
       state = awardXP(state, runXP, 'run', `Completed a ${run.distance.toFixed(1)} mi run`);
 
       if (newRunStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
