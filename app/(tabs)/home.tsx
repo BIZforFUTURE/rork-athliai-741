@@ -6,6 +6,7 @@ import {
   ScrollView,
   Animated,
   Pressable,
+  Dimensions,
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,7 +23,7 @@ import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
 import { RANKS } from "@/constants/xp";
 
-
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 function HeroSection() {
   const { xpInfo } = useApp();
@@ -722,10 +723,10 @@ const weekStyles = StyleSheet.create({
   grid: {
     flexDirection: "row" as const,
     flexWrap: "wrap" as const,
-    justifyContent: "space-between" as const,
+    gap: 1,
   },
   cell: {
-    width: "25%" as const,
+    width: (SCREEN_WIDTH - 32 - 36 - 3) / 4,
     alignItems: "center" as const,
     gap: 3,
     paddingVertical: 4,
