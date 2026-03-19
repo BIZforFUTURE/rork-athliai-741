@@ -24,16 +24,6 @@ function getRCApiKey(): string {
   }) as string;
 }
 
-const apiKey = getRCApiKey();
-
-if (apiKey) {
-  void Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-  Purchases.configure({ apiKey });
-  console.log("[RevenueCat] Configured with platform:", Platform.OS);
-} else {
-  console.warn("[RevenueCat] No API key found for platform:", Platform.OS);
-}
-
 export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,10 +40,17 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   }, []);
 
   useEffect(() => {
+    const apiKey = getRCApiKey();
+
     if (!apiKey) {
+      console.warn("[RevenueCat] No API key found for platform:", Platform.OS);
       setIsLoading(false);
       return;
     }
+
+    void Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey });
+    console.log("[RevenueCat] Configured with platform:", Platform.OS);
 
     const init = async () => {
       try {
@@ -85,11 +82,12 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       console.log("[RevenueCat] Customer info updated");
       checkPremiumStatus(info);
     });
-  }, [checkPremiumStatus]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const purchasePackage = useCallback(
     async (pkg?: PurchasesPackage) => {
-      if (!apiKey) {
+      if (!getRCApiKey()) {
         Alert.alert("Error", "In-app purchases are not configured.");
         return { success: false };
       }
@@ -133,7 +131,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   );
 
   const restorePurchases = useCallback(async () => {
-    if (!apiKey) {
+    if (!getRCApiKey()) {
       Alert.alert("Error", "In-app purchases are not configured.");
       return false;
     }

@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect, useCallback, useMemo } from "react";
 
-import { WorkoutLog, GymStats, calculateWorkoutVolume } from "@/constants/workouts";
+import { WorkoutLog, calculateWorkoutVolume } from "@/constants/workouts";
 import { useNotifications } from "@/providers/NotificationProvider";
 
 interface User {
@@ -187,34 +187,29 @@ const defaultState: AppState = {
   hasSeenWelcome: false,
 };
 
-// Storage hook for run state persistence
-const useRunStorage = () => {
-  const getItem = async (key: string): Promise<string | null> => {
+const runStorage = {
+  getItem: async (key: string): Promise<string | null> => {
     try {
       return await AsyncStorage.getItem(key);
     } catch (error) {
       console.error('Error getting item from storage:', error);
       return null;
     }
-  };
-
-  const setItem = async (key: string, value: string): Promise<void> => {
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
     try {
       await AsyncStorage.setItem(key, value);
     } catch (error) {
       console.error('Error setting item in storage:', error);
     }
-  };
-
-  const removeItem = async (key: string): Promise<void> => {
+  },
+  removeItem: async (key: string): Promise<void> => {
     try {
       await AsyncStorage.removeItem(key);
     } catch (error) {
       console.error('Error removing item from storage:', error);
     }
-  };
-
-  return { getItem, setItem, removeItem };
+  },
 };
 
 export const [AppProvider, useApp] = createContextHook(() => {
@@ -226,6 +221,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
 
   // Check for daily reset and update streaks
+  const getWeeklyRunsFromState = useCallback((state: AppState) => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return state.runs.filter(run => new Date(run.date) >= oneWeekAgo);
+  }, []);
+  
+  const getWeeklyWorkoutsFromState = useCallback((state: AppState) => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return state.workoutLogs.filter(log => new Date(log.date) >= oneWeekAgo);
+  }, []);
+
   const checkDailyReset = useCallback((state: AppState): AppState => {
     const now = new Date();
     const today = now.toDateString();
@@ -233,19 +240,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayString = yesterday.toDateString();
     
-    // Check if we need to reset (new day)
     if (state.lastResetDate !== today) {
       console.log('Daily reset triggered - resetting nutrition values');
       let newRunStreak = state.stats.runStreak;
       let newFoodStreak = state.stats.foodStreak;
-      
-      // Check if streaks should be reset
       let newWorkoutStreak = state.stats.workoutStreak;
       
       if (state.lastRunDate) {
         const lastRunDate = new Date(state.lastRunDate).toDateString();
         if (lastRunDate !== yesterdayString && lastRunDate !== today) {
-          // Streak broken - last run was not yesterday or today
           newRunStreak = 0;
         }
       }
@@ -253,7 +256,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (state.lastFoodDate) {
         const lastFoodDate = new Date(state.lastFoodDate).toDateString();
         if (lastFoodDate !== yesterdayString && lastFoodDate !== today) {
-          // Streak broken - last food log was not yesterday or today
           newFoodStreak = 0;
         }
       }
@@ -261,15 +263,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (state.lastWorkoutDate) {
         const lastWorkoutDate = new Date(state.lastWorkoutDate).toDateString();
         if (lastWorkoutDate !== yesterdayString && lastWorkoutDate !== today) {
-          // Streak broken - last workout was not yesterday or today
           newWorkoutStreak = 0;
         }
       }
       
-      // Check if it's Sunday (end of week) and send weekly report
-      const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      if (dayOfWeek === 0) { // Sunday
-        // Send weekly report with current stats
+      const dayOfWeek = now.getDay();
+      if (dayOfWeek === 0) {
         const weeklyRuns = getWeeklyRunsFromState(state);
         const weeklyWorkouts = getWeeklyWorkoutsFromState(state);
         const weeklyMiles = weeklyRuns.reduce((sum, run) => sum + run.distance, 0);
@@ -287,7 +286,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
         });
       }
       
-      // Reset daily nutrition values to 0 but keep goals and history
       return {
         ...state,
         nutrition: {
@@ -307,20 +305,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       };
     }
     return state;
-  }, [sendWeeklyReport]);
-
-  // Helper functions to get weekly data from state
-  const getWeeklyRunsFromState = useCallback((state: AppState) => {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return state.runs.filter(run => new Date(run.date) >= oneWeekAgo);
-  }, []);
-  
-  const getWeeklyWorkoutsFromState = useCallback((state: AppState) => {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    return state.workoutLogs.filter(log => new Date(log.date) >= oneWeekAgo);
-  }, []);
+  }, [sendWeeklyReport, getWeeklyRunsFromState, getWeeklyWorkoutsFromState]);
 
   const { data: storedState, isLoading: isLoadingState } = useQuery({
     queryKey: ["appState"],
@@ -882,7 +867,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
   
   // Get weight history for a specific period
   const getWeightHistory = useCallback((period: '7d' | '30d' | '90d' | '1y') => {
-    const now = new Date();
     let daysBack = 7;
     
     switch (period) {
@@ -950,7 +934,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     getWeightHistory,
     subtractCaloriesFromRun,
     markWelcomeAsSeen,
-    runStorage: useRunStorage(),
+    runStorage,
     isLoading: !isInitialized || isLoadingState,
   }), [mergedStats, appState, updateUser, updateStats, updateNutrition, addRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, isInitialized, isLoadingState, getTodaysFoodEntries, getWeeklyRuns, getWeeklyWorkouts]);
 });

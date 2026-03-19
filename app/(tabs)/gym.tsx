@@ -30,6 +30,7 @@ import { useApp } from "@/providers/AppProvider";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
+import { getVideoUrlForExercise } from "@/utils/videoUrls";
 
 
 interface QuizAnswer {
@@ -575,30 +576,7 @@ Format as JSON:
     }
   };
 
-  const getVideoUrlForExercise = (exerciseName: string): string => {
-    const name = exerciseName.toLowerCase();
-    if (name.includes('squat')) return 'https://www.youtube.com/watch?v=ultWZbUMPL8';
-    if (name.includes('deadlift')) return 'https://www.youtube.com/watch?v=op9kVnSso6Q';
-    if (name.includes('bench') || name.includes('press')) return 'https://www.youtube.com/watch?v=rT7DgCr-3pg';
-    if (name.includes('row')) return 'https://www.youtube.com/watch?v=FWJR5Ve8bnQ';
-    if (name.includes('pull')) return 'https://www.youtube.com/watch?v=eGo4IYlbE5g';
-    if (name.includes('curl')) return 'https://www.youtube.com/watch?v=ykJmrZ5v0Oo';
-    if (name.includes('lunge')) return 'https://www.youtube.com/watch?v=L8fvypPrzzs';
-    if (name.includes('plank')) return 'https://www.youtube.com/watch?v=ASdvN_XEl_c';
-    if (name.includes('push')) return 'https://www.youtube.com/watch?v=IODxDxX7oi4';
-    if (name.includes('burpee')) return 'https://www.youtube.com/watch?v=TU8QYVW0gDU';
-    if (name.includes('mountain')) return 'https://www.youtube.com/watch?v=nmwgirgXLYM';
-    if (name.includes('jumping')) return 'https://www.youtube.com/watch?v=c4DAnQ6DtF8';
-    if (name.includes('dip')) return 'https://www.youtube.com/watch?v=2z8JmcrW-As';
-    if (name.includes('tricep')) return 'https://www.youtube.com/watch?v=nRiJVZDpdL0';
-    if (name.includes('calf')) return 'https://www.youtube.com/watch?v=gwLzBJYoWlI';
-    if (name.includes('face')) return 'https://www.youtube.com/watch?v=rep-qVOkqgk';
-    if (name.includes('bulgarian')) return 'https://www.youtube.com/watch?v=2C-uNgKwPLE';
-    if (name.includes('hip thrust')) return 'https://www.youtube.com/watch?v=xDmFkJxPzeM';
-    if (name.includes('wall sit')) return 'https://www.youtube.com/watch?v=y-wV4Venusw';
-    if (name.includes('goblet')) return 'https://www.youtube.com/watch?v=MeIiIdhvXT4';
-    return 'https://www.youtube.com/watch?v=rT7DgCr-3pg';
-  };
+
 
   const resetQuiz = () => {
     setCurrentQuizStep(0);

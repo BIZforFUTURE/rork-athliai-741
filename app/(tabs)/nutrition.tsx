@@ -11,130 +11,20 @@ import {
   Platform,
   Alert,
   KeyboardAvoidingView,
-  Animated,
 } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
-
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { callOpenAI } from "@/utils/openai";
+import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
+import { calculateHealthScore } from "@/utils/healthScore";
+import CircularProgress from "@/components/CircularProgress";
 
-interface USDAFoodNutrient {
-  nutrientId: number;
-  nutrientName: string;
-  value: number;
-  unitName: string;
-}
 
-interface USDAFoodResult {
-  fdcId: number;
-  description: string;
-  foodNutrients: USDAFoodNutrient[];
-  servingSize?: number;
-  servingSizeUnit?: string;
-  brandName?: string;
-  brandOwner?: string;
-  dataType?: string;
-}
-
-const searchUSDAFoods = async (query: string): Promise<{name: string; calories: number; protein: number; carbs: number; fat: number; serving: string}[]> => {
-  const USDA_API_KEY = 'DEMO_KEY';
-  const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(query)}&pageSize=15&dataType=Foundation,SR Legacy,Survey (FNDDS),Branded`;
-
-  console.log('Searching USDA FoodData Central for:', query);
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('USDA API Error:', response.status, errorText);
-    throw new Error(`USDA API Error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const foods: USDAFoodResult[] = data.foods || [];
-
-  if (foods.length === 0) {
-    throw new Error('No results found');
-  }
-
-  const getNutrient = (nutrients: USDAFoodNutrient[], id: number): number => {
-    const n = nutrients.find(n => n.nutrientId === id);
-    return n ? Math.round(n.value) : 0;
-  };
-
-  const seen = new Set<string>();
-  const results: {name: string; calories: number; protein: number; carbs: number; fat: number; serving: string}[] = [];
-
-  for (const food of foods) {
-    const name = food.brandName
-      ? `${food.description} (${food.brandName})`
-      : food.description;
-
-    const normalizedName = name.toLowerCase().trim();
-    if (seen.has(normalizedName)) continue;
-    seen.add(normalizedName);
-
-    const calories = getNutrient(food.foodNutrients, 1008);
-    const protein = getNutrient(food.foodNutrients, 1003);
-    const carbs = getNutrient(food.foodNutrients, 1005);
-    const fat = getNutrient(food.foodNutrients, 1004);
-
-    let serving = '100g';
-    if (food.servingSize && food.servingSizeUnit) {
-      serving = `${Math.round(food.servingSize)}${food.servingSizeUnit.toLowerCase()}`;
-    }
-
-    if (calories > 0) {
-      results.push({ name, calories, protein, carbs, fat, serving });
-    }
-
-    if (results.length >= 10) break;
-  }
-
-  console.log(`Found ${results.length} food results from USDA`);
-  return results;
-};
-
-const callOpenAI = async (prompt: string): Promise<string> => {
-  const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
-  
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.1,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API Error:', response.status, errorData);
-      throw new Error(`OpenAI API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
-  } catch (error: any) {
-    console.error('OpenAI API call failed:', error);
-    throw error;
-  }
-};
 
 export default function NutritionScreen() {
   const _router = useRouter();
@@ -153,7 +43,7 @@ export default function NutritionScreen() {
   const [_proteinIngredients, setProteinIngredients] = useState("");
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [foodSearchQuery, setFoodSearchQuery] = useState("");
-  const [foodSearchResults, setFoodSearchResults] = useState<{name: string; calories: number; protein: number; carbs: number; fat: number; serving: string}[]>([]);
+  const [foodSearchResults, setFoodSearchResults] = useState<FoodSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isMealPrep, setIsMealPrep] = useState(false);
   const [mealPrepDate, setMealPrepDate] = useState(new Date());
@@ -238,158 +128,6 @@ export default function NutritionScreen() {
   });
 
 
-
-  const calculateHealthScore = (entry: any): { score: number; color: string; label: string } => {
-    const { calories, protein, carbs, fat } = entry;
-    const foodName = (entry.name || '').toLowerCase().trim();
-
-    if (calories === 0 && protein === 0 && carbs === 0 && fat === 0) {
-      return { score: 5, color: '#6B7280', label: 'Unknown' };
-    }
-
-    const proteinCals = protein * 4;
-    const fatCals = fat * 9;
-    const carbsCals = carbs * 4;
-    const totalMacroCals = proteinCals + fatCals + carbsCals;
-
-    const proteinPercent = totalMacroCals > 0 ? (proteinCals / totalMacroCals) * 100 : 0;
-    const fatPercent = totalMacroCals > 0 ? (fatCals / totalMacroCals) * 100 : 0;
-    const carbsPercent = totalMacroCals > 0 ? (carbsCals / totalMacroCals) * 100 : 0;
-
-    const proteinPerCal = calories > 0 ? (protein / calories) * 100 : 0;
-
-    const nameMatchesAny = (keywords: string[]) =>
-      keywords.some(kw => foodName.includes(kw));
-
-    const superfoods = ['salmon', 'sardine', 'mackerel', 'tuna', 'quinoa', 'lentil', 'chickpea',
-      'kale', 'spinach', 'broccoli', 'sweet potato', 'avocado', 'blueberr', 'almond',
-      'walnut', 'flaxseed', 'chia', 'oat', 'greek yogurt', 'cottage cheese', 'edamame',
-      'tofu', 'tempeh', 'turkey breast', 'chicken breast', 'egg white'];
-
-    const wholeFoods = ['apple', 'banana', 'orange', 'grape', 'strawberr', 'raspberr',
-      'mango', 'peach', 'pear', 'plum', 'watermelon', 'pineapple', 'cherry', 'kiwi',
-      'carrot', 'celery', 'cucumber', 'tomato', 'pepper', 'onion', 'garlic', 'mushroom',
-      'zucchini', 'cauliflower', 'asparagus', 'green bean', 'pea', 'corn', 'lettuce',
-      'cabbage', 'beet', 'squash', 'brown rice', 'whole wheat', 'whole grain',
-      'bean', 'legume', 'hummus', 'olive oil', 'honey', 'nuts', 'seed',
-      'yogurt', 'milk', 'egg', 'fish', 'shrimp', 'chicken', 'turkey'];
-
-    const moderateFoods = ['rice', 'pasta', 'bread', 'tortilla', 'wrap', 'cereal',
-      'granola', 'cheese', 'beef', 'pork', 'steak', 'ham', 'sausage', 'bacon',
-      'butter', 'cream', 'pancake', 'waffle', 'muffin', 'bagel', 'cracker',
-      'peanut butter', 'protein bar', 'protein shake', 'smoothie', 'juice',
-      'soup', 'sandwich', 'burrito', 'taco', 'sub', 'salad dressing'];
-
-    const unhealthyFoods = ['fried', 'deep fried', 'french fries', 'fries', 'onion ring',
-      'mozzarella stick', 'chicken nugget', 'chicken tender', 'fish stick',
-      'corn dog', 'hot dog', 'pizza', 'burger', 'cheeseburger', 'fast food',
-      'nachos', 'loaded', 'alfredo', 'cream sauce', 'battered'];
-
-    const junkFoods = ['candy', 'chocolate bar', 'gummy', 'skittles', 'm&m',
-      'cake', 'cookie', 'brownie', 'donut', 'doughnut', 'pastry', 'pie',
-      'ice cream', 'sundae', 'milkshake', 'frappuccino', 'soda', 'pop',
-      'cola', 'energy drink', 'red bull', 'monster', 'mountain dew',
-      'chips', 'cheetos', 'doritos', 'pringles', 'popcorn butter',
-      'funnel cake', 'churro', 'cinnamon roll', 'frosting', 'syrup',
-      'cotton candy', 'caramel', 'fudge', 'cupcake'];
-
-    let nameBonus = 0;
-    if (nameMatchesAny(superfoods)) {
-      nameBonus = 2.5;
-    } else if (nameMatchesAny(wholeFoods)) {
-      nameBonus = 1.5;
-    } else if (nameMatchesAny(junkFoods)) {
-      nameBonus = -3;
-    } else if (nameMatchesAny(unhealthyFoods)) {
-      nameBonus = -2;
-    } else if (nameMatchesAny(moderateFoods)) {
-      nameBonus = 0;
-    }
-
-    if (nameMatchesAny(['grilled', 'baked', 'steamed', 'roasted', 'raw', 'fresh', 'organic', 'whole'])) {
-      nameBonus += 0.5;
-    }
-    if (nameMatchesAny(['fried', 'deep', 'battered', 'breaded', 'creamy', 'smothered', 'loaded'])) {
-      nameBonus -= 0.5;
-    }
-
-    let macroScore = 5;
-
-    if (proteinPercent >= 35) {
-      macroScore += 2;
-    } else if (proteinPercent >= 25) {
-      macroScore += 1.5;
-    } else if (proteinPercent >= 15) {
-      macroScore += 0.5;
-    } else if (proteinPercent < 5 && calories > 100) {
-      macroScore -= 1;
-    }
-
-    if (proteinPerCal > 8) {
-      macroScore += 1;
-    } else if (proteinPerCal > 5) {
-      macroScore += 0.5;
-    }
-
-    if (fatPercent >= 20 && fatPercent <= 40) {
-      macroScore += 0.5;
-    } else if (fatPercent > 65) {
-      macroScore -= 1.5;
-    } else if (fatPercent > 50) {
-      macroScore -= 0.5;
-    }
-
-    if (carbsPercent > 85 && calories > 150) {
-      macroScore -= 1;
-    } else if (carbsPercent >= 35 && carbsPercent <= 55) {
-      macroScore += 0.5;
-    }
-
-    let densityScore = 0;
-    const calDensity = totalMacroCals > 0 ? calories / (protein + carbs + fat) : 0;
-
-    if (calories < 80 && (protein > 0 || carbs > 0)) {
-      densityScore = 1.5;
-    } else if (calories < 200) {
-      densityScore = 0.5;
-    } else if (calories > 800) {
-      densityScore = -1;
-    } else if (calories > 500) {
-      densityScore = -0.5;
-    }
-
-    if (calDensity > 7) {
-      densityScore -= 0.5;
-    }
-
-    const rawScore = macroScore + nameBonus + densityScore;
-    const finalScore = Math.max(1, Math.min(10, Math.round(rawScore * 10) / 10));
-
-    let color: string;
-    let label: string;
-
-    if (finalScore >= 9) {
-      color = '#10B981';
-      label = 'Excellent';
-    } else if (finalScore >= 7.5) {
-      color = '#34D399';
-      label = 'Great';
-    } else if (finalScore >= 6) {
-      color = '#6EE7B7';
-      label = 'Good';
-    } else if (finalScore >= 4.5) {
-      color = '#F59E0B';
-      label = 'Fair';
-    } else if (finalScore >= 3) {
-      color = '#F97316';
-      label = 'Poor';
-    } else {
-      color = '#EF4444';
-      label = 'Unhealthy';
-    }
-
-    return { score: finalScore, color, label };
-  };
 
   const handleEditGoals = () => {
     const calorieGoal = parseInt(editGoals.calorieGoal) || nutrition.calorieGoal;
@@ -950,89 +688,6 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
       Alert.alert("Camera Error", "Camera is not ready. Please try again.");
       setIsAnalyzing(false);
     }
-  };
-
-  const CircularProgress = ({ value, goal, color, label }: any) => {
-    const percentage = Math.min((value / goal) * 100, 100);
-    const exceeds = value > goal;
-    const [animatedPercentage] = useState(new Animated.Value(0));
-    const [pulseAnim] = useState(new Animated.Value(1));
-
-    useEffect(() => {
-      Animated.spring(animatedPercentage, {
-        toValue: percentage,
-        useNativeDriver: false,
-        tension: 40,
-        friction: 8,
-      }).start();
-
-      if (percentage >= 95 && percentage <= 100) {
-        Animated.loop(
-          Animated.sequence([
-            Animated.timing(pulseAnim, {
-              toValue: 1.05,
-              duration: 800,
-              useNativeDriver: true,
-            }),
-            Animated.timing(pulseAnim, {
-              toValue: 1,
-              duration: 800,
-              useNativeDriver: true,
-            }),
-          ])
-        ).start();
-      } else {
-        pulseAnim.setValue(1);
-      }
-    }, [percentage, animatedPercentage, pulseAnim]);
-
-    const size = 110;
-    const strokeWidth = 8;
-    const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-
-    const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-
-    const strokeDashoffset = animatedPercentage.interpolate({
-      inputRange: [0, 100],
-      outputRange: [circumference, 0],
-    });
-
-    return (
-      <View style={styles.progressContainer}>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
-            <Circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={`${color}15`}
-              strokeWidth={strokeWidth}
-              fill="none"
-            />
-            <AnimatedCircle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke={exceeds ? "#EF4444" : color}
-              strokeWidth={strokeWidth}
-              fill="none"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-            />
-          </Svg>
-          <View style={styles.progressRingCenter}>
-            <Text style={[styles.progressPercentage, { color: exceeds ? "#EF4444" : color }]}>
-              {Math.round(percentage)}%
-            </Text>
-          </View>
-        </Animated.View>
-        <Text style={styles.progressValue}>
-          {value}{label === "Calories" ? "" : "g"} / {goal}{label === "Calories" ? "" : "g"}
-        </Text>
-      </View>
-    );
   };
 
   const QuizModal = () => {
