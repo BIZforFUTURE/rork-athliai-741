@@ -27,6 +27,7 @@ import {
   Hammer
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
+import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
@@ -60,6 +61,7 @@ interface CustomWorkoutPlan {
 
 export default function GymScreen() {
   const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan } = useApp();
+  const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
 
   const [showRecentWorkouts, setShowRecentWorkouts] = useState(true);
@@ -668,6 +670,10 @@ Format as JSON:
   }, []);
 
   const startCustomWorkout = (day: CustomWorkoutPlan['days'][0]) => {
+    if (!isPremium) {
+      router.push('/paywall');
+      return;
+    }
     const customWorkoutPlan: WorkoutPlan = {
       id: `custom-day-${day.day}-${Date.now()}`,
       name: day.name,
@@ -795,6 +801,10 @@ Format as JSON:
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (!isPremium) {
+                  router.push('/paywall');
+                  return;
                 }
                 router.push('/workout-builder');
               }}

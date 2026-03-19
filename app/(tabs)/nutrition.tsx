@@ -17,7 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
-import { useRouter } from "expo-router";
+import { useRouter, router } from "expo-router";
+import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { callOpenAI } from "@/utils/openai";
 import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
@@ -29,6 +30,7 @@ import CircularProgress from "@/components/CircularProgress";
 export default function NutritionScreen() {
   const _router = useRouter();
   const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries } = useApp();
+  const { isPremium } = useRevenueCat();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
 
   const [timeUntilReset, setTimeUntilReset] = useState<string>("");
@@ -1275,6 +1277,10 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                     if (Platform.OS !== 'web') {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
+                    if (!isPremium) {
+                      router.push('/paywall');
+                      return;
+                    }
                     if (!permission.granted) {
                       const result = await requestPermission();
                       if (result.granted) {
@@ -1295,6 +1301,10 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                     if (Platform.OS !== 'web') {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
+                    if (!isPremium) {
+                      router.push('/paywall');
+                      return;
+                    }
                     setShowAIInput(true);
                   }}
                 >
@@ -1307,6 +1317,10 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   onPress={() => {
                     if (Platform.OS !== 'web') {
                       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    if (!isPremium) {
+                      router.push('/paywall');
+                      return;
                     }
                     setShowFoodSearch(true);
                   }}

@@ -19,6 +19,7 @@ import * as Haptics from "expo-haptics";
 
 import { useApp } from "@/providers/AppProvider";
 import { useNotifications } from "@/providers/NotificationProvider";
+import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { router } from "expo-router";
 import RunMap from "@/components/RunMap";
 import RunHistorySection from "@/components/RunHistorySection";
@@ -45,6 +46,7 @@ const STORAGE_KEY = 'activeRunState';
 export default function RunScreen() {
   const { addRun, recentRuns, subtractCaloriesFromRun, runStorage } = useApp();
   const { sendRunStartNotification, cancelRunNotification, sendRunCompletionNotification } = useNotifications();
+  const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
 
   // Core run state
@@ -287,6 +289,10 @@ export default function RunScreen() {
   const startRun = async () => {
     if (Platform.OS !== 'web') {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    if (!isPremium) {
+      router.push('/paywall');
+      return;
     }
     // Request location permission
     if (Platform.OS !== "web") {
@@ -823,7 +829,6 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   startButton: {
-    background: "linear-gradient(135deg, #00ADB5 0%, #009DA8 100%)",
     backgroundColor: "#00ADB5",
     flexDirection: "row",
     alignItems: "center",
