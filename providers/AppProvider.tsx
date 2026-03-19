@@ -5,6 +5,16 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 
 import { WorkoutLog, calculateWorkoutVolume } from "@/constants/workouts";
 import { useNotifications } from "@/providers/NotificationProvider";
+import {
+  XPState,
+  XPEvent,
+  XPSource,
+  defaultXPState,
+  XP_REWARDS,
+  getLevelFromTotalXP,
+  getXPProgress,
+  getRankForLevel,
+} from "@/constants/xp";
 
 interface User {
   id: string;
@@ -129,6 +139,7 @@ interface AppState {
   savedWorkouts: SavedWorkout[];
   personalStats: PersonalStats;
   weightHistory: WeightEntry[];
+  xp: XPState;
 
   lastResetDate: string;
   lastRunDate: string | null;
@@ -179,6 +190,7 @@ const defaultState: AppState = {
   savedWorkouts: [],
   personalStats: {},
   weightHistory: [],
+  xp: defaultXPState,
 
   lastResetDate: new Date().toDateString(),
   lastRunDate: null,
@@ -215,6 +227,7 @@ const runStorage = {
 export const [AppProvider, useApp] = createContextHook(() => {
   const [appState, setAppState] = useState<AppState>(defaultState);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [pendingLevelUp, setPendingLevelUp] = useState<{ level: number; previousLevel: number } | null>(null);
   const { sendWeeklyReport } = useNotifications();
   
 
@@ -393,6 +406,11 @@ export const [AppProvider, useApp] = createContextHook(() => {
           savedWorkouts: Array.isArray(parsed.savedWorkouts) ? parsed.savedWorkouts : [],
           personalStats: parsed.personalStats || {},
           weightHistory: Array.isArray(parsed.weightHistory) ? parsed.weightHistory : [],
+          xp: parsed.xp ? {
+            ...defaultXPState,
+            ...parsed.xp,
+            xpEvents: Array.isArray(parsed.xp.xpEvents) ? parsed.xp.xpEvents : [],
+          } : defaultXPState,
         };
         
         console.log('State loaded successfully');
@@ -523,6 +541,34 @@ export const [AppProvider, useApp] = createContextHook(() => {
     });
   }, [mutate, checkDailyReset]);
 
+  const awardXP = useCallback((state: AppState, amount: number, source: XPSource, description: string): AppState => {
+    const event: XPEvent = {
+      id: `xp-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      source,
+      amount,
+      description,
+      date: new Date().toISOString(),
+    };
+    const newTotalXP = state.xp.totalXP + amount;
+    const previousLevel = getLevelFromTotalXP(state.xp.totalXP);
+    const newLevel = getLevelFromTotalXP(newTotalXP);
+    console.log(`XP awarded: +${amount} (${source}) | Total: ${newTotalXP} | Level: ${newLevel}`);
+    if (newLevel > previousLevel) {
+      console.log(`LEVEL UP! ${previousLevel} -> ${newLevel}`);
+      setPendingLevelUp({ level: newLevel, previousLevel });
+    }
+    const recentEvents = [...state.xp.xpEvents, event].slice(-100);
+    return {
+      ...state,
+      xp: {
+        ...state.xp,
+        totalXP: newTotalXP,
+        level: newLevel,
+        xpEvents: recentEvents,
+      },
+    };
+  }, []);
+
   const addRun = useCallback((run: Run) => {
     setAppState(prev => {
       const today = new Date().toDateString();
@@ -530,25 +576,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayString = yesterday.toDateString();
       
-      // Calculate new run streak
       let newRunStreak = prev.stats.runStreak;
       if (!prev.lastRunDate || prev.lastRunDate === today) {
-        // First run today - check if we're continuing a streak
         if (prev.lastRunDate !== today) {
-          // This is the first run today
           if (prev.lastRunDate === yesterdayString) {
-            // Continuing streak from yesterday
             newRunStreak = prev.stats.runStreak + 1;
           } else {
-            // Starting new streak
             newRunStreak = 1;
           }
         }
       }
-      
 
-      
-      const updated = {
+      let state = {
         ...prev,
         runs: [run, ...prev.runs],
         stats: {
@@ -557,37 +596,40 @@ export const [AppProvider, useApp] = createContextHook(() => {
         },
         lastRunDate: today,
       };
-      mutate(updated);
-      return updated;
+
+      const runXP = XP_REWARDS.RUN_BASE + Math.round(run.distance * XP_REWARDS.RUN_PER_MILE);
+      state = awardXP(state, runXP, 'run', `Completed a ${run.distance.toFixed(1)} mi run`);
+
+      if (newRunStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
+        const streakBonus = newRunStreak * XP_REWARDS.STREAK_RUN_BONUS;
+        state = awardXP(state, streakBonus, 'streak', `${newRunStreak}-day run streak bonus`);
+      }
+
+      mutate(state);
+      return state;
     });
-  }, [mutate]);
+  }, [mutate, awardXP]);
 
   const addFoodEntry = useCallback((entry: FoodEntry) => {
     setAppState(prev => {
-      // First check if we need a daily reset
       const resetState = checkDailyReset(prev);
       const today = new Date().toDateString();
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayString = yesterday.toDateString();
       
-      // Calculate new food streak
       let newFoodStreak = resetState.stats.foodStreak;
       if (!resetState.lastFoodDate || resetState.lastFoodDate === today) {
-        // First food entry today - check if we're continuing a streak
         if (resetState.lastFoodDate !== today) {
-          // This is the first food entry today
           if (resetState.lastFoodDate === yesterdayString) {
-            // Continuing streak from yesterday
             newFoodStreak = resetState.stats.foodStreak + 1;
           } else {
-            // Starting new streak
             newFoodStreak = 1;
           }
         }
       }
       
-      const updated = {
+      let state: AppState = {
         ...resetState,
         foodHistory: [entry, ...resetState.foodHistory],
         stats: {
@@ -596,10 +638,29 @@ export const [AppProvider, useApp] = createContextHook(() => {
         },
         lastFoodDate: today,
       };
-      mutate(updated);
-      return updated;
+
+      state = awardXP(state, XP_REWARDS.FOOD_LOG, 'food', `Logged ${entry.name}`);
+
+      const newCalories = state.nutrition.calories + entry.calories;
+      const newProtein = state.nutrition.protein + entry.protein;
+      if (newCalories >= state.nutrition.calorieGoal && state.nutrition.calorieGoal > 0 && state.xp.lastCalorieGoalDate !== today) {
+        state = awardXP(state, XP_REWARDS.CALORIE_GOAL_HIT, 'nutrition_goal', 'Hit daily calorie goal');
+        state = { ...state, xp: { ...state.xp, lastCalorieGoalDate: today } };
+      }
+      if (newProtein >= state.nutrition.proteinGoal && state.nutrition.proteinGoal > 0 && state.xp.lastProteinGoalDate !== today) {
+        state = awardXP(state, XP_REWARDS.PROTEIN_GOAL_HIT, 'nutrition_goal', 'Hit daily protein goal');
+        state = { ...state, xp: { ...state.xp, lastProteinGoalDate: today } };
+      }
+
+      if (newFoodStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
+        const streakBonus = newFoodStreak * XP_REWARDS.STREAK_FOOD_BONUS;
+        state = awardXP(state, streakBonus, 'streak', `${newFoodStreak}-day food streak bonus`);
+      }
+
+      mutate(state);
+      return state;
     });
-  }, [mutate, checkDailyReset]);
+  }, [mutate, checkDailyReset, awardXP]);
 
   const deleteFoodEntry = useCallback((entryId: string) => {
     setAppState(prev => {
@@ -755,7 +816,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     };
   }, [appState.workoutLogs, getWeeklyWorkouts]);
   
-  // Add workout log
   const addWorkoutLog = useCallback((log: WorkoutLog) => {
     setAppState(prev => {
       const today = new Date().toDateString();
@@ -763,23 +823,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayString = yesterday.toDateString();
       
-      // Calculate new workout streak
       let newWorkoutStreak = prev.stats.workoutStreak;
       if (!prev.lastWorkoutDate || prev.lastWorkoutDate === today) {
-        // First workout today - check if we're continuing a streak
         if (prev.lastWorkoutDate !== today) {
-          // This is the first workout today
           if (prev.lastWorkoutDate === yesterdayString) {
-            // Continuing streak from yesterday
             newWorkoutStreak = prev.stats.workoutStreak + 1;
           } else {
-            // Starting new streak
             newWorkoutStreak = 1;
           }
         }
       }
       
-      const updated = {
+      let state: AppState = {
         ...prev,
         workoutLogs: [log, ...prev.workoutLogs],
         stats: {
@@ -788,10 +843,18 @@ export const [AppProvider, useApp] = createContextHook(() => {
         },
         lastWorkoutDate: today,
       };
-      mutate(updated);
-      return updated;
+
+      state = awardXP(state, XP_REWARDS.WORKOUT_COMPLETE, 'workout', `Completed ${log.workoutName}`);
+
+      if (newWorkoutStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
+        const streakBonus = newWorkoutStreak * XP_REWARDS.STREAK_WORKOUT_BONUS;
+        state = awardXP(state, streakBonus, 'streak', `${newWorkoutStreak}-day workout streak bonus`);
+      }
+
+      mutate(state);
+      return state;
     });
-  }, [mutate]);
+  }, [mutate, awardXP]);
   
   // Update custom workout plan
   const updateCustomWorkoutPlan = useCallback((plan: CustomWorkoutPlan | null) => {
@@ -837,7 +900,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     });
   }, [mutate]);
   
-  // Mark welcome as seen
   const markWelcomeAsSeen = useCallback(() => {
     setAppState(prev => {
       const updated = { ...prev, hasSeenWelcome: true };
@@ -845,6 +907,25 @@ export const [AppProvider, useApp] = createContextHook(() => {
       return updated;
     });
   }, [mutate]);
+
+  const setStartingXP = useCallback((totalXP: number, level: number) => {
+    setAppState(prev => {
+      const updated = {
+        ...prev,
+        xp: {
+          ...prev.xp,
+          totalXP,
+          level,
+        },
+      };
+      mutate(updated);
+      return updated;
+    });
+  }, [mutate]);
+
+  const dismissLevelUp = useCallback(() => {
+    setPendingLevelUp(null);
+  }, []);
   
   // Add weight entry
   const addWeightEntry = useCallback((entry: WeightEntry) => {
@@ -902,6 +983,21 @@ export const [AppProvider, useApp] = createContextHook(() => {
     };
   }, [appState.stats, getWeeklyStats, getGymStats]);
 
+  const xpInfo = useMemo(() => {
+    const level = getLevelFromTotalXP(appState.xp.totalXP);
+    const progress = getXPProgress(appState.xp.totalXP);
+    const rank = getRankForLevel(level);
+    return {
+      totalXP: appState.xp.totalXP,
+      level,
+      rank,
+      currentXP: progress.current,
+      neededXP: progress.needed,
+      progress: progress.progress,
+      xpEvents: appState.xp.xpEvents,
+    };
+  }, [appState.xp]);
+
   return useMemo(() => ({
     user: appState.user,
     stats: mergedStats,
@@ -917,6 +1013,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     todaysFoodEntries: getTodaysFoodEntries(),
     weeklyRuns: getWeeklyRuns(),
     weeklyWorkouts: getWeeklyWorkouts(),
+    xpInfo,
+    pendingLevelUp,
     updateUser,
     updateStats,
     updateNutrition,
@@ -934,7 +1032,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
     getWeightHistory,
     subtractCaloriesFromRun,
     markWelcomeAsSeen,
+    setStartingXP,
+    dismissLevelUp,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState, updateUser, updateStats, updateNutrition, addRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, isInitialized, isLoadingState, getTodaysFoodEntries, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState, updateUser, updateStats, updateNutrition, addRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getWeeklyRuns, getWeeklyWorkouts]);
 });

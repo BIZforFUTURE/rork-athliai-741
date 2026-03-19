@@ -3,9 +3,10 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AppProvider } from "@/providers/AppProvider";
+import { AppProvider, useApp } from "@/providers/AppProvider";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 import { RevenueCatProvider } from "@/providers/RevenueCatProvider";
+import LevelUpModal from "@/components/LevelUpModal";
 
 import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
 
@@ -31,18 +32,34 @@ void SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+function LevelUpOverlay() {
+  const { pendingLevelUp, dismissLevelUp } = useApp();
+  if (!pendingLevelUp) return null;
+  return (
+    <LevelUpModal
+      visible={!!pendingLevelUp}
+      level={pendingLevelUp.level}
+      previousLevel={pendingLevelUp.previousLevel}
+      onDismiss={dismissLevelUp}
+    />
+  );
+}
+
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="welcome" options={{ headerShown: false }} />
-      <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
-      <Stack.Screen name="workout/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="paywall" options={{ headerShown: false, presentation: "modal" }} />
-      <Stack.Screen name="run-details/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="notification-settings" options={{ headerShown: false }} />
-      <Stack.Screen name="workout-complete" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerBackTitle: "Back" }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="welcome" options={{ headerShown: false }} />
+        <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
+        <Stack.Screen name="workout/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="paywall" options={{ headerShown: false, presentation: "modal" }} />
+        <Stack.Screen name="run-details/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="notification-settings" options={{ headerShown: false }} />
+        <Stack.Screen name="workout-complete" options={{ headerShown: false }} />
+      </Stack>
+      <LevelUpOverlay />
+    </>
   );
 }
 

@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check } from 'lucide-react-native';
 import { useApp } from '@/providers/AppProvider';
+import { getStartingLevelFromQuiz } from '@/constants/xp';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -288,7 +289,7 @@ export default function WelcomeScreen() {
   const [selectedWorkoutDays, setSelectedWorkoutDays] = useState<string[]>([]);
   const [showDaySelector, setShowDaySelector] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
-  const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, updateCustomWorkoutPlan } = useApp();
+  const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, updateCustomWorkoutPlan, setStartingXP } = useApp();
   const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
   const insets = useSafeAreaInsets();
@@ -841,6 +842,11 @@ Format as JSON:
         
       updateCustomWorkoutPlan(enhancedPlan);
       setGenerationProgress(1);
+
+      const fitnessLevelAnswer = gymAnswers.find(a => a.question.includes('fitness level'))?.answer || '';
+      const starting = getStartingLevelFromQuiz(fitnessLevelAnswer);
+      console.log('Setting starting XP from quiz:', starting);
+      setStartingXP(starting.totalXP, starting.level);
       
       setTimeout(() => {
         setShowGymQuiz(false);

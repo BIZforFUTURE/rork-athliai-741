@@ -30,6 +30,7 @@ import {
   CheckCircle,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
+import { RANKS, XPSource } from "@/constants/xp";
 
 interface WeightEntry {
   date: string;
@@ -39,7 +40,7 @@ interface WeightEntry {
 type StatPeriod = '7d' | '30d' | '90d' | '1y';
 
 export default function PersonalStatsScreen() {
-  const { recentRuns, weeklyRuns, personalStats, updatePersonalStats, addWeightEntry, getWeightHistory, isLoading: appLoading } = useApp();
+  const { recentRuns, weeklyRuns, personalStats, updatePersonalStats, addWeightEntry, getWeightHistory, xpInfo, isLoading: appLoading } = useApp();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
   const [showStatsModal, setShowStatsModal] = useState(false);
@@ -419,6 +420,92 @@ export default function PersonalStatsScreen() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.statsCard}>
+          <Text style={styles.cardTitle}>XP &amp; Rank</Text>
+          
+          <View style={xpStatStyles.rankHeader}>
+            <Text style={xpStatStyles.rankEmoji}>{xpInfo.rank.emoji}</Text>
+            <View style={xpStatStyles.rankInfo}>
+              <Text style={[xpStatStyles.rankLevel, { color: xpInfo.rank.color }]}>Level {xpInfo.level}</Text>
+              <Text style={[xpStatStyles.rankName, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
+            </View>
+            <View style={xpStatStyles.totalXPBadge}>
+              <Text style={xpStatStyles.totalXPText}>{xpInfo.totalXP.toLocaleString()} XP</Text>
+            </View>
+          </View>
+
+          <View style={xpStatStyles.progressContainer}>
+            <View style={xpStatStyles.progressBar}>
+              <View style={[xpStatStyles.progressFill, { width: `${Math.round(xpInfo.progress * 100)}%`, backgroundColor: xpInfo.rank.color }]} />
+            </View>
+            <Text style={xpStatStyles.progressText}>{xpInfo.currentXP} / {xpInfo.neededXP} XP to next level</Text>
+          </View>
+
+          <View style={xpStatStyles.rankTimeline}>
+            {RANKS.map((rank, index) => {
+              const isCurrentOrPast = xpInfo.level >= rank.minLevel;
+              const isCurrent = index < RANKS.length - 1
+                ? xpInfo.level >= rank.minLevel && xpInfo.level < RANKS[index + 1].minLevel
+                : xpInfo.level >= rank.minLevel;
+              return (
+                <View key={rank.title} style={xpStatStyles.rankTimelineItem}>
+                  <View style={[
+                    xpStatStyles.rankDot,
+                    { backgroundColor: isCurrentOrPast ? rank.color : '#1F2937' },
+                    isCurrent && { borderWidth: 2, borderColor: '#FFFFFF' },
+                  ]} />
+                  <Text style={[xpStatStyles.rankTimelineLabel, isCurrentOrPast && { color: rank.color }]}>
+                    {rank.emoji}
+                  </Text>
+                  <Text style={[xpStatStyles.rankTimelineName, isCurrentOrPast && { color: '#9CA3AF' }]}>
+                    {rank.title}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+
+          {xpInfo.xpEvents.length > 0 && (
+            <View style={xpStatStyles.breakdownSection}>
+              <Text style={xpStatStyles.breakdownTitle}>XP Breakdown</Text>
+              {(() => {
+                const grouped: Record<XPSource, number> = { run: 0, workout: 0, food: 0, nutrition_goal: 0, streak: 0 };
+                xpInfo.xpEvents.forEach(e => { grouped[e.source] = (grouped[e.source] || 0) + e.amount; });
+                const labels: Record<XPSource, string> = { run: 'Runs', workout: 'Workouts', food: 'Food Logging', nutrition_goal: 'Nutrition Goals', streak: 'Streaks' };
+                const colors: Record<XPSource, string> = { run: '#00E5FF', workout: '#00ADB5', food: '#BFFF00', nutrition_goal: '#F59E0B', streak: '#E879F9' };
+                const totalXPFromEvents = Object.values(grouped).reduce((a, b) => a + b, 0);
+                return Object.entries(grouped)
+                  .filter(([, v]) => v > 0)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([key, value]) => (
+                    <View key={key} style={xpStatStyles.breakdownRow}>
+                      <View style={xpStatStyles.breakdownLabelRow}>
+                        <View style={[xpStatStyles.breakdownColorDot, { backgroundColor: colors[key as XPSource] }]} />
+                        <Text style={xpStatStyles.breakdownLabel}>{labels[key as XPSource]}</Text>
+                      </View>
+                      <View style={xpStatStyles.breakdownBarContainer}>
+                        <View style={[xpStatStyles.breakdownBar, { width: `${totalXPFromEvents > 0 ? (value / totalXPFromEvents) * 100 : 0}%`, backgroundColor: colors[key as XPSource] }]} />
+                      </View>
+                      <Text style={xpStatStyles.breakdownValue}>{value}</Text>
+                    </View>
+                  ));
+              })()}
+            </View>
+          )}
+
+          {xpInfo.xpEvents.length > 0 && (
+            <View style={xpStatStyles.recentSection}>
+              <Text style={xpStatStyles.breakdownTitle}>Recent XP</Text>
+              {xpInfo.xpEvents.slice(-5).reverse().map(event => (
+                <View key={event.id} style={xpStatStyles.recentRow}>
+                  <Text style={xpStatStyles.recentDesc} numberOfLines={1}>{event.description}</Text>
+                  <Text style={xpStatStyles.recentAmount}>+{event.amount}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
         {personalStats.targetWeight && personalStats.weight && (
           <TouchableOpacity 
             style={styles.weightProgressCard}
@@ -1459,5 +1546,169 @@ const styles = StyleSheet.create({
   },
   paceIndicatorTextBehind: {
     color: "#D97706",
+  },
+});
+
+const xpStatStyles = StyleSheet.create({
+  rankHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  rankEmoji: {
+    fontSize: 40,
+  },
+  rankInfo: {
+    flex: 1,
+  },
+  rankLevel: {
+    fontSize: 24,
+    fontWeight: '900' as const,
+    letterSpacing: -0.5,
+  },
+  rankName: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
+    marginTop: -2,
+  },
+  totalXPBadge: {
+    backgroundColor: '#1F2937',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  totalXPText: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: '#9CA3AF',
+  },
+  progressContainer: {
+    marginBottom: 20,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#1F2937',
+    borderRadius: 4,
+    overflow: 'hidden' as const,
+    marginBottom: 6,
+  },
+  progressFill: {
+    height: '100%' as const,
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 12,
+    fontWeight: '500' as const,
+    color: '#6B7280',
+  },
+  rankTimeline: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#1F2937',
+  },
+  rankTimelineItem: {
+    alignItems: 'center' as const,
+    gap: 4,
+  },
+  rankDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  rankTimelineLabel: {
+    fontSize: 16,
+  },
+  rankTimelineName: {
+    fontSize: 8,
+    fontWeight: '600' as const,
+    color: '#374151',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.5,
+  },
+  breakdownSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#1F2937',
+  },
+  breakdownTitle: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#9CA3AF',
+    marginBottom: 12,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+  },
+  breakdownLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    width: 110,
+  },
+  breakdownColorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  breakdownLabel: {
+    fontSize: 12,
+    fontWeight: '500' as const,
+    color: '#9CA3AF',
+  },
+  breakdownBarContainer: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#1F2937',
+    borderRadius: 3,
+    overflow: 'hidden' as const,
+  },
+  breakdownBar: {
+    height: '100%' as const,
+    borderRadius: 3,
+  },
+  breakdownValue: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+    color: '#D1D5DB',
+    width: 40,
+    textAlign: 'right' as const,
+  },
+  recentSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#1F2937',
+  },
+  recentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1A1E26',
+  },
+  recentDesc: {
+    fontSize: 13,
+    fontWeight: '500' as const,
+    color: '#9CA3AF',
+    flex: 1,
+    marginRight: 12,
+  },
+  recentAmount: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#10B981',
   },
 });

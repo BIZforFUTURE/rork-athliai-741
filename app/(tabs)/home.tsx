@@ -1,14 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
   View,
   ScrollView,
+  Animated,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Activity, MapPin, Target, Calendar, Dumbbell, Flame, Zap } from "lucide-react-native";
+import { Activity, MapPin, Target, Calendar, Dumbbell, Flame, Zap, Shield } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 
 function ProgressRing({ 
@@ -52,6 +53,89 @@ function ProgressRing({
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
       />
     </Svg>
+  );
+}
+
+function XPCard() {
+  const { xpInfo } = useApp();
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: xpInfo.progress,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [xpInfo.progress, progressAnim]);
+
+  useEffect(() => {
+    const glow = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, { toValue: 0.8, duration: 1500, useNativeDriver: false }),
+        Animated.timing(glowAnim, { toValue: 0.4, duration: 1500, useNativeDriver: false }),
+      ])
+    );
+    glow.start();
+    return () => glow.stop();
+  }, [glowAnim]);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
+  const glowOpacity = glowAnim;
+
+  return (
+    <View style={[xpStyles.card, { borderColor: xpInfo.rank.color + '30' }]}>
+      <View style={xpStyles.topRow}>
+        <View style={xpStyles.levelBadge}>
+          <Text style={xpStyles.levelEmoji}>{xpInfo.rank.emoji}</Text>
+          <View>
+            <Text style={[xpStyles.levelNumber, { color: xpInfo.rank.color }]}>Lv {xpInfo.level}</Text>
+            <Text style={[xpStyles.rankTitle, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
+          </View>
+        </View>
+        <View style={xpStyles.xpTotal}>
+          <Shield size={14} color="#6B7280" />
+          <Text style={xpStyles.totalXPText}>{xpInfo.totalXP.toLocaleString()} XP</Text>
+        </View>
+      </View>
+
+      <View style={xpStyles.barContainer}>
+        <View style={xpStyles.barBackground}>
+          <Animated.View
+            style={[
+              xpStyles.barFill,
+              {
+                width: progressWidth,
+                backgroundColor: xpInfo.rank.color,
+              },
+            ]}
+          />
+          <Animated.View
+            style={[
+              xpStyles.barGlow,
+              {
+                width: progressWidth,
+                backgroundColor: xpInfo.rank.color,
+                opacity: glowOpacity,
+              },
+            ]}
+          />
+        </View>
+      </View>
+
+      <View style={xpStyles.bottomRow}>
+        <Text style={xpStyles.xpProgressText}>
+          {xpInfo.currentXP} / {xpInfo.neededXP} XP
+        </Text>
+        <Text style={xpStyles.xpToNext}>
+          {xpInfo.neededXP - xpInfo.currentXP} XP to next level
+        </Text>
+      </View>
+    </View>
   );
 }
 
@@ -113,6 +197,8 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
+
+          <XPCard />
 
           <View style={styles.streakContainer}>
             <View style={[styles.streakCard, { borderColor: stats.runStreak > 0 ? 'rgba(0, 229, 255, 0.2)' : '#1F2937' }]}>
@@ -482,5 +568,94 @@ const styles = StyleSheet.create({
     height: "100%" as const,
     backgroundColor: "#00E5FF",
     borderRadius: 2,
+  },
+});
+
+const xpStyles = StyleSheet.create({
+  card: {
+    backgroundColor: '#141820',
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 8,
+    borderWidth: 1,
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  levelBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  levelEmoji: {
+    fontSize: 32,
+  },
+  levelNumber: {
+    fontSize: 22,
+    fontWeight: '900' as const,
+    letterSpacing: -0.5,
+  },
+  rankTitle: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+    letterSpacing: 1,
+    textTransform: 'uppercase' as const,
+    marginTop: -2,
+  },
+  xpTotal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#1F2937',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  totalXPText: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: '#9CA3AF',
+  },
+  barContainer: {
+    marginBottom: 10,
+  },
+  barBackground: {
+    height: 8,
+    backgroundColor: '#1F2937',
+    borderRadius: 4,
+    overflow: 'hidden' as const,
+    position: 'relative' as const,
+  },
+  barFill: {
+    height: '100%' as const,
+    borderRadius: 4,
+    position: 'absolute' as const,
+    left: 0,
+    top: 0,
+  },
+  barGlow: {
+    height: '100%' as const,
+    borderRadius: 4,
+    position: 'absolute' as const,
+    left: 0,
+    top: 0,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  xpProgressText: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: '#6B7280',
+  },
+  xpToNext: {
+    fontSize: 11,
+    fontWeight: '500' as const,
+    color: '#4B5563',
   },
 });

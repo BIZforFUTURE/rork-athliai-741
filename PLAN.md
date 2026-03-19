@@ -1,35 +1,49 @@
-# RevenueCat In-App Purchases - Setup Complete
+# RPG-Style XP & Leveling System
 
-## Completed
+## Features
 
-- [x] Installed `react-native-purchases` SDK
-- [x] Rewrote `providers/RevenueCatProvider.tsx` with real SDK (was using raw API calls)
-- [x] Auto-selects API key per platform (iOS key for iPhone, Android key for Android, falls back to iOS key for web/dev)
-- [x] Fetches subscription offering from RevenueCat on init
-- [x] Handles purchasing, restoring, and premium status checking
-- [x] Created `app/paywall.tsx` — dark-themed modal paywall with $9.99/year + 3-day trial
-- [x] Registered paywall as modal route in `app/_layout.tsx`
-- [x] Updated `app/welcome.tsx` — "Start Free Trial" opens paywall modal
-- [x] Created Android product (`athliai_unlimited:annual`) in RevenueCat
-- [x] Attached both iOS and Android products to "AthliAI Premium" entitlement
-- [x] Attached both products to the default offering package
+- **XP from everything**: Earn XP for completing runs, finishing workouts, logging food, hitting daily nutrition goals, and maintaining streaks
+- **Starting level from quiz**: After the onboarding quiz, your fitness level determines your starting level (Beginner → Lv 1, Intermediate → Lv 5, Advanced → Lv 10)
+- **RPG rank titles**: Each level range has a unique title — Rookie, Warrior, Gladiator, Champion, Titan, Legend, and more
+- **Level-up celebration**: When you level up, a big animated popup appears with confetti-style particles, haptic feedback, your new rank title, and a motivational message
+- **XP breakdown visibility**: A card on the Dashboard shows your current level, rank title, XP progress bar, and how much XP until next level
 
-## RevenueCat Dashboard Config
+## XP Earning Rules
 
-- **Entitlement:** `AthliAI Premium`
-- **Offering:** `default` (current)
-- **Package:** `$rc_annual`
-- **iOS Product:** `Oliver20011` (subscription)
-- **Android Product:** `athliai_unlimited:annual` (subscription)
+| Action | XP Earned |
+|---|---|
+| Complete a run | 50 XP + 10 XP per mile |
+| Complete a workout | 75 XP |
+| Log a food entry | 15 XP |
+| Hit calorie goal for the day | 50 XP bonus |
+| Hit protein goal for the day | 30 XP bonus |
+| Each day of run streak (3+) | +10 XP bonus per day |
+| Each day of workout streak (3+) | +10 XP bonus per day |
+| Each day of food streak (3+) | +5 XP bonus per day |
 
-## Environment Variables
+## RPG Ranks
 
-- `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY` — configured
-- `EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY` — configured
-- `EXPO_PUBLIC_REVENUECAT_TEST_API_KEY` — not set (no Stripe linked to RC project; iOS key used as fallback)
+- **Lv 1–4**: Rookie 🌱
+- **Lv 5–9**: Warrior ⚔️
+- **Lv 10–14**: Gladiator 🛡️
+- **Lv 15–19**: Champion 🏆
+- **Lv 20–29**: Titan ⚡
+- **Lv 30–39**: Legend 🔥
+- **Lv 40+**: Mythic 👑
 
-## How to open the paywall
+## Leveling Curve
 
-- From welcome flow: "Start Free Trial" button navigates to `/paywall`
-- From anywhere in the app: `router.push('/paywall')`
-- Check premium status: `const { isPremium } = useRevenueCat()`
+XP required increases per level (e.g. Lv 1→2 = 100 XP, Lv 10→11 = 250 XP, Lv 20→21 = 500 XP), so early levels feel fast and rewarding while higher levels require real dedication.
+
+## Design
+
+- **Dashboard XP Card**: A dark card with a glowing accent-colored XP progress bar, your rank icon/emoji, level number in bold, rank title, and "X XP to next level" underneath. Sits near the top of the Dashboard, below the greeting.
+- **Level-up popup**: Full-screen overlay with a dark semi-transparent background, animated particles radiating outward, the new level number scaling up with a spring animation, the rank title and emoji, and a "Continue" button. Strong haptic feedback on trigger.
+- **Rank badge**: A small badge next to your level on the Dashboard card, colored to match the rank tier (green for Rookie, blue for Warrior, purple for Gladiator, gold for Champion, orange for Titan, red for Legend, prismatic for Mythic).
+
+## Screens / Changes
+
+- **Dashboard (home tab)**: New XP card added below the greeting header, showing level, rank, and XP progress
+- **Onboarding quiz**: After the gym quiz determines fitness level, the starting level and XP are calculated and stored
+- **Level-up modal**: A new overlay component that appears app-wide whenever a level-up is detected
+- **Stats tab**: A section showing total XP earned, XP history breakdown by category (runs, workouts, food), and current rank progress
