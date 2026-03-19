@@ -31,127 +31,203 @@ interface WelcomeSlide {
   gradient: string[];
 }
 
+const LOADING_STEPS = [
+  { label: 'Analyzing your goals', icon: Target },
+  { label: 'Selecting exercises', icon: Dumbbell },
+  { label: 'Optimizing sets & reps', icon: Activity },
+  { label: 'Building your schedule', icon: Calendar },
+  { label: 'Finalizing your plan', icon: Sparkles },
+];
+
+const FITNESS_TIPS = [
+  "Progressive overload is the #1 driver of muscle growth — aim to increase weight or reps each week.",
+  "Sleep 7-9 hours per night. Your muscles grow during recovery, not during the workout.",
+  "Protein timing matters less than total daily intake. Aim for 0.7-1g per pound of bodyweight.",
+  "Compound movements like squats and deadlifts recruit more muscle fibers than isolation exercises.",
+  "Drinking water before meals can reduce calorie intake by up to 13%.",
+  "Consistency beats intensity. Showing up 4x a week at 80% effort outperforms 1x at 100%.",
+  "Rest periods of 2-3 min for strength, 60-90s for hypertrophy, and 30-45s for endurance.",
+  "Warming up with dynamic stretches reduces injury risk by up to 30%.",
+  "Mind-muscle connection is real — focusing on the target muscle improves activation by 20%.",
+  "Creatine monohydrate is the most researched and effective supplement for strength gains.",
+];
+
 function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: number; left: number; right: number }, progress: number }) {
-  const dumbbellAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const tipOpacity = useRef(new Animated.Value(1)).current;
+  const tipTranslateY = useRef(new Animated.Value(0)).current;
+  const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * FITNESS_TIPS.length));
+  const [activeStep, setActiveStep] = useState(0);
+  const stepAnims = useRef(LOADING_STEPS.map(() => new Animated.Value(0))).current;
+  const stepScaleAnims = useRef(LOADING_STEPS.map(() => new Animated.Value(0.8))).current;
 
   useEffect(() => {
-    const liftAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(dumbbellAnim, {
-          toValue: -30,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(dumbbellAnim, {
-          toValue: 0,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
+    const stepIndex = Math.min(Math.floor(progress * LOADING_STEPS.length), LOADING_STEPS.length - 1);
+    if (stepIndex !== activeStep) {
+      setActiveStep(stepIndex);
+      if (Platform.OS !== 'web') {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    }
+  }, [progress, activeStep]);
 
+  useEffect(() => {
+    LOADING_STEPS.forEach((_, index) => {
+      if (index <= activeStep) {
+        Animated.parallel([
+          Animated.timing(stepAnims[index], {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.spring(stepScaleAnims[index], {
+            toValue: 1,
+            friction: 6,
+            tension: 100,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
+    });
+  }, [activeStep, stepAnims, stepScaleAnims]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      Animated.parallel([
+        Animated.timing(tipOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(tipTranslateY, { toValue: -12, duration: 300, useNativeDriver: true }),
+      ]).start(() => {
+        setCurrentTipIndex(prev => (prev + 1) % FITNESS_TIPS.length);
+        tipTranslateY.setValue(12);
+        Animated.parallel([
+          Animated.timing(tipOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(tipTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+        ]).start();
+      });
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [tipOpacity, tipTranslateY]);
+
+  useEffect(() => {
     const pulseAnimation = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
       ])
     );
-
     const rotateAnimation = Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 3000,
-        useNativeDriver: true,
-      })
+      Animated.timing(rotateAnim, { toValue: 1, duration: 2500, useNativeDriver: true })
     );
-
-    liftAnimation.start();
     pulseAnimation.start();
     rotateAnimation.start();
-
-    return () => {
-      liftAnimation.stop();
-      pulseAnimation.stop();
-      rotateAnimation.stop();
-    };
-  }, [dumbbellAnim, pulseAnim, rotateAnim]);
+    return () => { pulseAnimation.stop(); rotateAnimation.stop(); };
+  }, [pulseAnim, rotateAnim]);
 
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: progress,
-      duration: 300,
+      duration: 500,
       useNativeDriver: false,
     }).start();
   }, [progress, progressAnim]);
 
-  const rotate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
-  });
+  const rotate = rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const progressWidth = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
+  const percentText = Math.round(progress * 100);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.loadingBackground}>
-        <View style={styles.loadingContainer}>
-          <View style={styles.iconContainer}>
-            <Animated.View
-              style={{
-                transform: [
-                  { translateY: dumbbellAnim },
-                  { scale: pulseAnim },
-                ],
-              }}
-            >
-              <Dumbbell size={100} color="#00ADB5" strokeWidth={2.5} />
-            </Animated.View>
-            
-            <Animated.View
-              style={[
-                styles.loadingRing,
-                {
-                  transform: [{ rotate }],
-                },
-              ]}
-            >
-              <View style={styles.loadingRingInner} />
-            </Animated.View>
-          </View>
-          
-          <View style={styles.contentContainer}>
-            <Text style={styles.loadingTitle}>Creating Your Plan</Text>
-            <Text style={styles.loadingSubtitle}>This might take a second.</Text>
-            <Text style={styles.loadingDescription}>
-              Thank you for your patience.
-            </Text>
-            
+        <ScrollView
+          contentContainerStyle={styles.loadingScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.loadingTopSection}>
+            <View style={styles.loadingIconArea}>
+              <Animated.View style={[styles.loadingRing, { transform: [{ rotate }] }]}>
+                <View style={styles.loadingRingInner} />
+              </Animated.View>
+              <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                <View style={styles.loadingIconCircle}>
+                  <Dumbbell size={44} color="#00ADB5" strokeWidth={2.5} />
+                </View>
+              </Animated.View>
+            </View>
+
+            <Text style={styles.loadingTitle}>Building Your Plan</Text>
+            <Text style={styles.loadingPercent}>{percentText}%</Text>
+
             <View style={styles.progressBarContainer}>
               <View style={styles.progressBarBackground}>
-                <Animated.View 
-                  style={[
-                    styles.progressBarFill,
-                    { width: progressWidth }
-                  ]} 
-                />
+                <Animated.View style={[styles.progressBarFill, { width: progressWidth }]} />
               </View>
             </View>
           </View>
-        </View>
+
+          <View style={styles.loadingStepsContainer}>
+            {LOADING_STEPS.map((step, index) => {
+              const IconComponent = step.icon;
+              const isActive = index === activeStep;
+              const isComplete = index < activeStep;
+              return (
+                <Animated.View
+                  key={step.label}
+                  style={[
+                    styles.loadingStepRow,
+                    {
+                      opacity: stepAnims[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.3, 1],
+                      }),
+                      transform: [{ scale: stepScaleAnims[index] }],
+                    },
+                  ]}
+                >
+                  <View style={[
+                    styles.loadingStepDot,
+                    isComplete && styles.loadingStepDotComplete,
+                    isActive && styles.loadingStepDotActive,
+                  ]}>
+                    {isComplete ? (
+                      <Check size={14} color="#FFFFFF" strokeWidth={3} />
+                    ) : (
+                      <IconComponent size={14} color={isActive ? '#00ADB5' : '#6B7280'} />
+                    )}
+                  </View>
+                  <Text style={[
+                    styles.loadingStepLabel,
+                    isActive && styles.loadingStepLabelActive,
+                    isComplete && styles.loadingStepLabelComplete,
+                  ]}>
+                    {step.label}
+                  </Text>
+                  {isActive && (
+                    <View style={styles.loadingStepPulse} />
+                  )}
+                </Animated.View>
+              );
+            })}
+          </View>
+
+          <View style={styles.loadingTipCard}>
+            <View style={styles.loadingTipHeader}>
+              <Sparkles size={14} color="#00ADB5" />
+              <Text style={styles.loadingTipHeaderText}>DID YOU KNOW?</Text>
+            </View>
+            <Animated.Text
+              style={[
+                styles.loadingTipText,
+                { opacity: tipOpacity, transform: [{ translateY: tipTranslateY }] },
+              ]}
+            >
+              {FITNESS_TIPS[currentTipIndex]}
+            </Animated.Text>
+          </View>
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </View>
     </View>
   );
@@ -1821,6 +1897,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0D0F13',
   },
+  loadingScrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 28,
+    paddingTop: 60,
+    alignItems: 'center',
+  },
+  loadingTopSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  loadingIconArea: {
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 28,
+  },
+  loadingIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(0, 173, 181, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -1828,11 +1929,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   loadingTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700' as const,
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  loadingPercent: {
+    fontSize: 40,
+    fontWeight: '800' as const,
+    color: '#00ADB5',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   loadingSubtitle: {
     fontSize: 18,
@@ -1840,7 +1948,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     opacity: 0.7,
-    fontWeight: '500',
+    fontWeight: '500' as const,
   },
   loadingDescription: {
     fontSize: 16,
@@ -1852,10 +1960,10 @@ const styles = StyleSheet.create({
   },
   loadingRing: {
     position: 'absolute' as const,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 3,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2.5,
     borderColor: 'transparent',
     borderTopColor: '#00ADB5',
     borderRightColor: '#00E5FF',
@@ -1864,22 +1972,95 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  loadingStepsContainer: {
+    width: '100%',
+    backgroundColor: '#151921',
+    borderRadius: 16,
+    padding: 20,
+    gap: 16,
+    marginBottom: 24,
+  },
+  loadingStepRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 14,
+  },
+  loadingStepDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#1F2937',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  loadingStepDotComplete: {
+    backgroundColor: '#00ADB5',
+  },
+  loadingStepDotActive: {
+    backgroundColor: 'rgba(0, 173, 181, 0.2)',
+    borderWidth: 2,
+    borderColor: '#00ADB5',
+  },
+  loadingStepLabel: {
+    fontSize: 15,
+    color: '#6B7280',
+    fontWeight: '500' as const,
+    flex: 1,
+  },
+  loadingStepLabelActive: {
+    color: '#FFFFFF',
+    fontWeight: '600' as const,
+  },
+  loadingStepLabelComplete: {
+    color: '#9CA3AF',
+  },
+  loadingStepPulse: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00ADB5',
+  },
+  loadingTipCard: {
+    width: '100%',
+    backgroundColor: '#151921',
+    borderRadius: 16,
+    padding: 20,
+    borderLeftWidth: 3,
+    borderLeftColor: '#00ADB5',
+  },
+  loadingTipHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 8,
+    marginBottom: 10,
+  },
+  loadingTipHeaderText: {
+    fontSize: 11,
+    fontWeight: '700' as const,
+    color: '#00ADB5',
+    letterSpacing: 1.2,
+  },
+  loadingTipText: {
+    fontSize: 14,
+    color: '#D1D5DB',
+    lineHeight: 22,
+    fontWeight: '400' as const,
+  },
   progressBarContainer: {
     width: '100%',
-    marginTop: 40,
-    alignItems: 'center',
+    alignItems: 'center' as const,
   },
   progressBarBackground: {
     width: '80%',
-    height: 8,
+    height: 6,
     backgroundColor: '#1F2937',
-    borderRadius: 4,
-    overflow: 'hidden',
+    borderRadius: 3,
+    overflow: 'hidden' as const,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#00ADB5',
-    borderRadius: 4,
+    borderRadius: 3,
   },
   heightInputContainer: {
     flexDirection: 'row',
