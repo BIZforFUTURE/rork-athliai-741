@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,93 +6,24 @@ import {
   ScrollView,
   Animated,
   Pressable,
-  Platform,
   Dimensions,
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  ChevronRight,
   Dumbbell,
   Flame,
   Zap,
   TrendingUp,
   Footprints,
   UtensilsCrossed,
-  Play,
   Award,
 } from "lucide-react-native";
-import * as Haptics from "expo-haptics";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
 import { RANKS } from "@/constants/xp";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
-function LevelRing() {
-  const { xpInfo } = useApp();
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  const scaleIn = useRef(new Animated.Value(0.85)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scaleIn, {
-        toValue: 1,
-        tension: 50,
-        friction: 8,
-        useNativeDriver: true,
-      }),
-      Animated.timing(progressAnim, {
-        toValue: xpInfo.progress,
-        duration: 1200,
-        delay: 300,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, [xpInfo.progress, progressAnim, scaleIn]);
-
-  const ringSize = 96;
-  const ringStroke = 6;
-  const ringRadius = (ringSize - ringStroke) / 2;
-  const ringCircumference = 2 * Math.PI * ringRadius;
-  const ringOffset = ringCircumference * (1 - Math.min(Math.max(xpInfo.progress, 0), 1));
-
-  return (
-    <Animated.View style={[levelStyles.ringWrapper, { transform: [{ scale: scaleIn }] }]}>
-      <Svg width={ringSize} height={ringSize}>
-        <Defs>
-          <SvgGradient id="lvlRing" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={xpInfo.rank.color} stopOpacity="1" />
-            <Stop offset="1" stopColor={xpInfo.rank.color} stopOpacity="0.5" />
-          </SvgGradient>
-        </Defs>
-        <Circle
-          cx={ringSize / 2}
-          cy={ringSize / 2}
-          r={ringRadius}
-          stroke="rgba(255,255,255,0.06)"
-          strokeWidth={ringStroke}
-          fill="none"
-        />
-        <Circle
-          cx={ringSize / 2}
-          cy={ringSize / 2}
-          r={ringRadius}
-          stroke="url(#lvlRing)"
-          strokeWidth={ringStroke}
-          fill="none"
-          strokeDasharray={`${ringCircumference}`}
-          strokeDashoffset={ringOffset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`}
-        />
-      </Svg>
-      <View style={levelStyles.ringInner}>
-        <Text style={[levelStyles.levelNum, { color: xpInfo.rank.color }]}>{xpInfo.level}</Text>
-      </View>
-    </Animated.View>
-  );
-}
 
 function HeroSection() {
   const { xpInfo } = useApp();
@@ -116,71 +47,87 @@ function HeroSection() {
   }, []);
 
   const xpRemaining = xpInfo.neededXP - xpInfo.currentXP;
+  const currentIdx = RANKS.findIndex(r => r.title === xpInfo.rank.title);
+  const nextRank = currentIdx < RANKS.length - 1 ? RANKS[currentIdx + 1] : null;
+
+  const ringSize = 130;
+  const ringStroke = 8;
+  const ringRadius = (ringSize - ringStroke) / 2;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - Math.min(Math.max(xpInfo.progress, 0), 1));
 
   return (
     <Animated.View style={[heroStyles.container, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
-      <View style={heroStyles.row}>
-        <LevelRing />
-        <View style={heroStyles.info}>
-          <Text style={heroStyles.greeting}>{greeting}</Text>
+      <View style={heroStyles.topRow}>
+        <Text style={heroStyles.greeting}>{greeting}</Text>
+        <View style={heroStyles.totalXpBadge}>
+          <Zap size={11} color={xpInfo.rank.color} />
+          <Text style={[heroStyles.totalXpText, { color: xpInfo.rank.color }]}>{xpInfo.totalXP.toLocaleString()} XP</Text>
+        </View>
+      </View>
+
+      <View style={heroStyles.centerBlock}>
+        <View style={heroStyles.ringArea}>
+          <Svg width={ringSize} height={ringSize}>
+            <Defs>
+              <SvgGradient id="heroRing" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor={xpInfo.rank.color} stopOpacity="1" />
+                <Stop offset="1" stopColor={xpInfo.rank.color} stopOpacity="0.4" />
+              </SvgGradient>
+            </Defs>
+            <Circle
+              cx={ringSize / 2}
+              cy={ringSize / 2}
+              r={ringRadius}
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth={ringStroke}
+              fill="none"
+            />
+            <Circle
+              cx={ringSize / 2}
+              cy={ringSize / 2}
+              r={ringRadius}
+              stroke="url(#heroRing)"
+              strokeWidth={ringStroke}
+              fill="none"
+              strokeDasharray={`${ringCircumference}`}
+              strokeDashoffset={ringOffset}
+              strokeLinecap="round"
+              transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`}
+            />
+          </Svg>
+          <View style={heroStyles.ringInner}>
+            <Text style={[heroStyles.levelNum, { color: xpInfo.rank.color }]}>{xpInfo.level}</Text>
+            <Text style={heroStyles.levelLabel}>LEVEL</Text>
+          </View>
+        </View>
+
+        <View style={heroStyles.infoBlock}>
           <View style={heroStyles.rankRow}>
             <Text style={heroStyles.rankEmoji}>{xpInfo.rank.emoji}</Text>
             <Text style={[heroStyles.rankTitle, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
           </View>
+
           <View style={heroStyles.xpBarOuter}>
             <View style={[heroStyles.xpBarFill, { width: `${xpInfo.progress * 100}%`, backgroundColor: xpInfo.rank.color }]} />
           </View>
           <Text style={heroStyles.xpText}>
             <Text style={{ color: "#D1D5DB", fontWeight: "700" as const }}>{xpInfo.currentXP}</Text>
             <Text style={{ color: "#4B5563" }}> / {xpInfo.neededXP} XP</Text>
-            <Text style={{ color: "#374151" }}>  ·  </Text>
-            <Text style={{ color: xpInfo.rank.color + "BB" }}>{xpRemaining} to go</Text>
           </Text>
+          <Text style={[heroStyles.xpRemaining, { color: xpInfo.rank.color + "CC" }]}>{xpRemaining} XP to level {xpInfo.level + 1}</Text>
+
+          {nextRank && (
+            <View style={heroStyles.nextRankRow}>
+              <Text style={heroStyles.nextRankLabel}>Next rank</Text>
+              <Text style={heroStyles.nextRankEmoji}>{nextRank.emoji}</Text>
+              <Text style={[heroStyles.nextRankName, { color: nextRank.color }]}>{nextRank.title}</Text>
+              <Text style={heroStyles.nextRankLevel}>Lv {nextRank.minLevel}</Text>
+            </View>
+          )}
         </View>
       </View>
     </Animated.View>
-  );
-}
-
-function QuickActions() {
-  const router = useRouter();
-  const scaleAnims = useRef([new Animated.Value(1), new Animated.Value(1), new Animated.Value(1)]).current;
-
-  const press = useCallback((i: number, route: string) => {
-    if (Platform.OS !== "web") {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    Animated.sequence([
-      Animated.spring(scaleAnims[i], { toValue: 0.93, useNativeDriver: true, tension: 300, friction: 10 }),
-      Animated.spring(scaleAnims[i], { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }),
-    ]).start();
-    setTimeout(() => {
-      if (route === "run") router.push("/(tabs)/run");
-      else if (route === "nutrition") router.push("/(tabs)/nutrition");
-      else if (route === "gym") router.push("/(tabs)/gym");
-    }, 80);
-  }, [router, scaleAnims]);
-
-  const actions = [
-    { icon: <Play size={20} color="#0A0C10" fill="#0A0C10" strokeWidth={0} />, label: "Run", bg: "#00E5FF", route: "run" },
-    { icon: <UtensilsCrossed size={18} color="#0A0C10" strokeWidth={2.5} />, label: "Log Food", bg: "#BFFF00", route: "nutrition" },
-    { icon: <Dumbbell size={18} color="#0A0C10" strokeWidth={2.5} />, label: "Workout", bg: "#FF6B35", route: "gym" },
-  ];
-
-  return (
-    <View style={qaStyles.container}>
-      {actions.map((a, i) => (
-        <Animated.View key={a.label} style={[qaStyles.btnWrap, { transform: [{ scale: scaleAnims[i] }] }]}>
-          <Pressable onPress={() => press(i, a.route)} style={qaStyles.btn}>
-            <View style={[qaStyles.iconCircle, { backgroundColor: a.bg }]}>
-              {a.icon}
-            </View>
-            <Text style={qaStyles.label}>{a.label}</Text>
-            <ChevronRight size={14} color="#374151" />
-          </Pressable>
-        </Animated.View>
-      ))}
-    </View>
   );
 }
 
@@ -435,7 +382,6 @@ export default function DashboardScreen() {
       >
         <HeroSection />
         <StreakStrip />
-        <QuickActions />
         <RankProgress />
         <TodayNutrition />
         <WeeklyStats />
@@ -472,10 +418,47 @@ const styles = StyleSheet.create({
   },
 });
 
-const levelStyles = StyleSheet.create({
-  ringWrapper: {
-    width: 96,
-    height: 96,
+const heroStyles = StyleSheet.create({
+  container: {
+    backgroundColor: "#111318",
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+  },
+  topRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    marginBottom: 16,
+  },
+  greeting: {
+    fontSize: 14,
+    fontWeight: "500" as const,
+    color: "#6B7280",
+  },
+  totalXpBadge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  totalXpText: {
+    fontSize: 12,
+    fontWeight: "700" as const,
+    letterSpacing: -0.3,
+  },
+  centerBlock: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 20,
+  },
+  ringArea: {
+    width: 130,
+    height: 130,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -485,96 +468,81 @@ const levelStyles = StyleSheet.create({
     justifyContent: "center" as const,
   },
   levelNum: {
-    fontSize: 36,
+    fontSize: 44,
     fontWeight: "900" as const,
     letterSpacing: -2,
   },
-});
-
-const heroStyles = StyleSheet.create({
-  container: {
-    backgroundColor: "#111318",
-    borderRadius: 20,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+  levelLabel: {
+    fontSize: 9,
+    fontWeight: "700" as const,
+    color: "#4B5563",
+    letterSpacing: 2,
+    marginTop: -2,
   },
-  row: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 16,
-  },
-  info: {
+  infoBlock: {
     flex: 1,
-    gap: 6,
-  },
-  greeting: {
-    fontSize: 14,
-    fontWeight: "500" as const,
-    color: "#6B7280",
+    gap: 8,
   },
   rankRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 6,
+    gap: 7,
   },
   rankEmoji: {
-    fontSize: 18,
+    fontSize: 22,
   },
   rankTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "800" as const,
     letterSpacing: -0.8,
   },
   xpBarOuter: {
-    height: 5,
+    height: 6,
     backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: 3,
     overflow: "hidden" as const,
-    marginTop: 2,
   },
   xpBarFill: {
     height: "100%" as const,
     borderRadius: 3,
   },
   xpText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "500" as const,
     color: "#4B5563",
-    marginTop: 1,
   },
-});
-
-const qaStyles = StyleSheet.create({
-  container: {
-    gap: 6,
+  xpRemaining: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    marginTop: -2,
   },
-  btnWrap: {
-    flex: 1,
-  },
-  btn: {
-    backgroundColor: "#111318",
-    borderRadius: 14,
+  nextRankRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    gap: 5,
+    marginTop: 4,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
-  iconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+  nextRankLabel: {
+    fontSize: 10,
+    fontWeight: "500" as const,
+    color: "#374151",
   },
-  label: {
+  nextRankEmoji: {
+    fontSize: 13,
+  },
+  nextRankName: {
+    fontSize: 11,
+    fontWeight: "700" as const,
     flex: 1,
-    fontSize: 15,
+  },
+  nextRankLevel: {
+    fontSize: 10,
     fontWeight: "600" as const,
-    color: "#D1D5DB",
+    color: "#374151",
   },
 });
 
