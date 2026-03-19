@@ -23,6 +23,10 @@ import {
   XCircle,
   AlertCircle,
   UtensilsCrossed,
+  Zap,
+  Flame,
+  Trophy,
+  Swords,
 } from 'lucide-react-native';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { useApp } from '@/providers/AppProvider';
@@ -34,6 +38,10 @@ interface NotificationSettings {
   eveningWorkoutReminder: boolean;
   workoutCompletionCelebration: boolean;
   weeklyProgressSummary: boolean;
+  morningXPReminder: boolean;
+  streakWarning: boolean;
+  levelUpAlerts: boolean;
+  streakMilestones: boolean;
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
@@ -42,6 +50,10 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   eveningWorkoutReminder: true,
   workoutCompletionCelebration: true,
   weeklyProgressSummary: true,
+  morningXPReminder: true,
+  streakWarning: true,
+  levelUpAlerts: true,
+  streakMilestones: true,
 };
 
 const STORAGE_KEY = 'notification_settings';
@@ -58,6 +70,8 @@ export default function NotificationSettingsScreen() {
     sendWeeklyReport,
     cancelAllNotifications,
     checkPermissionStatus,
+    scheduleMorningXPReminder,
+    scheduleStreakWarning,
   } = useNotifications();
 
   const { stats, weeklyRuns, weeklyWorkouts } = useApp();
@@ -117,7 +131,7 @@ export default function NotificationSettingsScreen() {
       }
       Alert.alert(
         'Notifications Enabled!',
-        'You\'ll receive 3 daily reminders:\n\n8:00 AM - Nutrition\n12:30 PM - Running\n6:00 PM - Workout'
+        'Your daily quest notifications are active!\n\n7:30 AM - Daily XP Quests\n8:00 AM - Nutrition Quest\n12:30 PM - Run Quest\n6:00 PM - Workout Raid\n9:00 PM - Streak Warning'
       );
     } else {
       Alert.alert(
@@ -132,38 +146,13 @@ export default function NotificationSettingsScreen() {
     await saveSettings(newSettings);
 
     if (permissionStatus === 'granted') {
-      if (key === 'morningFoodReminder') {
-        if (value) {
-          await scheduleMorningFoodReminder();
-        } else {
-          await cancelAllNotifications();
-          if (newSettings.middayRunReminder) await scheduleMiddayRunReminder();
-          if (newSettings.eveningWorkoutReminder) await scheduleEveningWorkoutReminder();
-          if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
-        }
-      } else if (key === 'middayRunReminder') {
-        if (value) {
-          await scheduleMiddayRunReminder();
-        } else {
-          await cancelAllNotifications();
-          if (newSettings.morningFoodReminder) await scheduleMorningFoodReminder();
-          if (newSettings.eveningWorkoutReminder) await scheduleEveningWorkoutReminder();
-          if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
-        }
-      } else if (key === 'eveningWorkoutReminder') {
-        if (value) {
-          await scheduleEveningWorkoutReminder();
-        } else {
-          await cancelAllNotifications();
-          if (newSettings.morningFoodReminder) await scheduleMorningFoodReminder();
-          if (newSettings.middayRunReminder) await scheduleMiddayRunReminder();
-          if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
-        }
-      } else if (key === 'weeklyProgressSummary') {
-        if (value) {
-          await scheduleWeeklyReport();
-        }
-      }
+      await cancelAllNotifications();
+      if (newSettings.morningXPReminder) await scheduleMorningXPReminder();
+      if (newSettings.morningFoodReminder) await scheduleMorningFoodReminder();
+      if (newSettings.middayRunReminder) await scheduleMiddayRunReminder();
+      if (newSettings.eveningWorkoutReminder) await scheduleEveningWorkoutReminder();
+      if (newSettings.streakWarning) await scheduleStreakWarning();
+      if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
     }
   };
 
@@ -230,17 +219,17 @@ export default function NotificationSettingsScreen() {
       />
 
       <LinearGradient
-        colors={['#3B82F6', '#8B5CF6']}
+        colors={['#1A1A2E', '#16213E', '#0F3460']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
         <View style={styles.headerContent}>
-          <Bell size={32} color="#FFFFFF" />
-          <Text style={styles.headerTitle}>Notifications</Text>
+          <Text style={styles.headerEmoji}>⚔️</Text>
+          <Text style={styles.headerTitle}>Quest Alerts</Text>
         </View>
         <Text style={styles.headerSubtitle}>
-          3 daily reminders to keep you on track
+          Daily quests, XP reminders & streak warnings
         </Text>
       </LinearGradient>
 
@@ -267,15 +256,24 @@ export default function NotificationSettingsScreen() {
         </View>
 
         <View style={styles.scheduleCard}>
-          <Text style={styles.cardTitle}>Daily Schedule</Text>
+          <Text style={styles.cardTitle}>Daily Quest Schedule</Text>
           <View style={styles.scheduleTimeline}>
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#E879F9' }]} />
+              <View style={styles.timelineLine} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTime}>7:30 AM</Text>
+                <Text style={styles.timelineLabel}>⚔️ Daily Quests Available</Text>
+                <Text style={styles.timelineDesc}>New day, new XP to earn!</Text>
+              </View>
+            </View>
             <View style={styles.timelineItem}>
               <View style={[styles.timelineDot, { backgroundColor: '#F97316' }]} />
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>8:00 AM</Text>
-                <Text style={styles.timelineLabel}>Nutrition Reminder</Text>
-                <Text style={styles.timelineDesc}>Scan your breakfast & track meals</Text>
+                <Text style={styles.timelineLabel}>🍳 Nutrition Quest (+15 XP)</Text>
+                <Text style={styles.timelineDesc}>Log food to earn XP</Text>
               </View>
             </View>
             <View style={styles.timelineItem}>
@@ -283,33 +281,62 @@ export default function NotificationSettingsScreen() {
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>12:30 PM</Text>
-                <Text style={styles.timelineLabel}>Running Reminder</Text>
-                <Text style={styles.timelineDesc}>Time to lace up and go for a run</Text>
+                <Text style={styles.timelineLabel}>🏃 Run Quest (+50 XP)</Text>
+                <Text style={styles.timelineDesc}>Every mile = +10 bonus XP</Text>
               </View>
             </View>
             <View style={styles.timelineItem}>
               <View style={[styles.timelineDot, { backgroundColor: '#10B981' }]} />
+              <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>6:00 PM</Text>
-                <Text style={styles.timelineLabel}>Workout Reminder</Text>
-                <Text style={styles.timelineDesc}>End your day with a workout</Text>
+                <Text style={styles.timelineLabel}>💪 Workout Raid (+75 XP)</Text>
+                <Text style={styles.timelineDesc}>Crush the final quest of the day</Text>
+              </View>
+            </View>
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#EF4444' }]} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTime}>9:00 PM</Text>
+                <Text style={styles.timelineLabel}>⚠️ Streak Warning</Text>
+                <Text style={styles.timelineDesc}>Don't lose your bonus XP!</Text>
               </View>
             </View>
           </View>
         </View>
 
         <View style={styles.settingsCard}>
-          <Text style={styles.cardTitle}>Toggle Reminders</Text>
+          <Text style={styles.cardTitle}>⚔️ Daily Quest Alerts</Text>
 
           <View style={styles.settingsList}>
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.settingIcon, { backgroundColor: '#FAE8FF' }]}>
+                  <Swords size={20} color="#E879F9" />
+                </View>
+                <View style={styles.settingText}>
+                  <Text style={styles.settingTitle}>Morning XP Quests</Text>
+                  <Text style={styles.settingDescription}>7:30 AM — Daily quest reset reminder</Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.morningXPReminder}
+                onValueChange={(value) => handleSettingChange('morningXPReminder', value)}
+                trackColor={{ false: '#E5E7EB', true: '#E879F9' }}
+                thumbColor={settings.morningXPReminder ? '#FFFFFF' : '#9CA3AF'}
+                disabled={permissionStatus !== 'granted'}
+                testID="morning-xp-switch"
+              />
+            </View>
+
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <View style={[styles.settingIcon, { backgroundColor: '#FFF7ED' }]}>
                   <UtensilsCrossed size={20} color="#F97316" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Morning - Nutrition</Text>
-                  <Text style={styles.settingDescription}>8:00 AM daily</Text>
+                  <Text style={styles.settingTitle}>Nutrition Quest</Text>
+                  <Text style={styles.settingDescription}>8:00 AM — Earn +15 XP per food log</Text>
                 </View>
               </View>
               <Switch
@@ -328,8 +355,8 @@ export default function NotificationSettingsScreen() {
                   <Activity size={20} color="#3B82F6" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Midday - Running</Text>
-                  <Text style={styles.settingDescription}>12:30 PM daily</Text>
+                  <Text style={styles.settingTitle}>Run Quest</Text>
+                  <Text style={styles.settingDescription}>12:30 PM — Earn +50 XP per run</Text>
                 </View>
               </View>
               <Switch
@@ -348,8 +375,8 @@ export default function NotificationSettingsScreen() {
                   <Dumbbell size={20} color="#10B981" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Evening - Workout</Text>
-                  <Text style={styles.settingDescription}>6:00 PM daily</Text>
+                  <Text style={styles.settingTitle}>Workout Raid</Text>
+                  <Text style={styles.settingDescription}>6:00 PM — Earn +75 XP per workout</Text>
                 </View>
               </View>
               <Switch
@@ -362,7 +389,71 @@ export default function NotificationSettingsScreen() {
               />
             </View>
 
-            <View style={styles.divider} />
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.settingIcon, { backgroundColor: '#FEF2F2' }]}>
+                  <Flame size={20} color="#EF4444" />
+                </View>
+                <View style={styles.settingText}>
+                  <Text style={styles.settingTitle}>Streak Warning</Text>
+                  <Text style={styles.settingDescription}>9:00 PM — Protect your bonus XP</Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.streakWarning}
+                onValueChange={(value) => handleSettingChange('streakWarning', value)}
+                trackColor={{ false: '#E5E7EB', true: '#EF4444' }}
+                thumbColor={settings.streakWarning ? '#FFFFFF' : '#9CA3AF'}
+                disabled={permissionStatus !== 'granted'}
+                testID="streak-warning-switch"
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.settingsCard}>
+          <Text style={styles.cardTitle}>⚡ XP & Achievement Alerts</Text>
+
+          <View style={styles.settingsList}>
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.settingIcon, { backgroundColor: '#FEF3C7' }]}>
+                  <Trophy size={20} color="#F59E0B" />
+                </View>
+                <View style={styles.settingText}>
+                  <Text style={styles.settingTitle}>Level Up Alerts</Text>
+                  <Text style={styles.settingDescription}>When you reach a new level or rank</Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.levelUpAlerts}
+                onValueChange={(value) => handleSettingChange('levelUpAlerts', value)}
+                trackColor={{ false: '#E5E7EB', true: '#F59E0B' }}
+                thumbColor={settings.levelUpAlerts ? '#FFFFFF' : '#9CA3AF'}
+                disabled={permissionStatus !== 'granted'}
+                testID="level-up-switch"
+              />
+            </View>
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.settingIcon, { backgroundColor: '#FFF7ED' }]}>
+                  <Zap size={20} color="#F97316" />
+                </View>
+                <View style={styles.settingText}>
+                  <Text style={styles.settingTitle}>Streak Milestones</Text>
+                  <Text style={styles.settingDescription}>When you hit 3, 7, 14, 30 day streaks</Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.streakMilestones}
+                onValueChange={(value) => handleSettingChange('streakMilestones', value)}
+                trackColor={{ false: '#E5E7EB', true: '#F97316' }}
+                thumbColor={settings.streakMilestones ? '#FFFFFF' : '#9CA3AF'}
+                disabled={permissionStatus !== 'granted'}
+                testID="streak-milestones-switch"
+              />
+            </View>
 
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
@@ -370,8 +461,8 @@ export default function NotificationSettingsScreen() {
                   <CheckCircle size={20} color="#8B5CF6" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Workout Celebrations</Text>
-                  <Text style={styles.settingDescription}>When you complete a workout</Text>
+                  <Text style={styles.settingTitle}>Quest Complete</Text>
+                  <Text style={styles.settingDescription}>XP earned after runs & workouts</Text>
                 </View>
               </View>
               <Switch
@@ -390,7 +481,7 @@ export default function NotificationSettingsScreen() {
                   <Calendar size={20} color="#D97706" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Weekly Progress Summary</Text>
+                  <Text style={styles.settingTitle}>Weekly XP Report</Text>
                   <Text style={styles.settingDescription}>Every Sunday at 7:00 PM</Text>
                 </View>
               </View>
@@ -438,13 +529,13 @@ export default function NotificationSettingsScreen() {
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
             <Settings size={20} color="#6B7280" />
-            <Text style={styles.infoTitle}>About Notifications</Text>
+            <Text style={styles.infoTitle}>How Quest Alerts Work</Text>
           </View>
           <Text style={styles.infoText}>
-            You receive 3 daily reminders to help you stay consistent: morning for nutrition, midday for running, and evening for your workout.
+            You receive 5 daily quest notifications to maximize your XP gains: morning XP reminder, nutrition quest, run quest, workout raid, and a streak warning before midnight.
           </Text>
           <Text style={styles.infoText}>
-            Weekly reports are sent every Sunday at 7 PM with your fitness progress summary.
+            Level up and rank up alerts fire instantly when you earn enough XP. Streak milestones trigger at 3, 7, 14, and 30 days.
           </Text>
           <Text style={styles.infoText}>
             All notifications are sent locally from your device and respect your privacy.
@@ -479,6 +570,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  headerEmoji: {
+    fontSize: 32,
   },
   headerTitle: {
     fontSize: 32,

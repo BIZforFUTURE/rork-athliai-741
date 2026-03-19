@@ -228,7 +228,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const [appState, setAppState] = useState<AppState>(defaultState);
   const [isInitialized, setIsInitialized] = useState(false);
   const [pendingLevelUp, setPendingLevelUp] = useState<{ level: number; previousLevel: number } | null>(null);
-  const { sendWeeklyReport } = useNotifications();
+  const { sendWeeklyReport, sendLevelUpNotification, sendRankUpNotification, sendStreakMilestoneNotification } = useNotifications();
   
 
 
@@ -556,6 +556,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
     if (newLevel > previousLevel) {
       console.log(`LEVEL UP! ${previousLevel} -> ${newLevel}`);
       setPendingLevelUp({ level: newLevel, previousLevel });
+      const newRank = getRankForLevel(newLevel);
+      const oldRank = getRankForLevel(previousLevel);
+      sendLevelUpNotification(newLevel, newRank).catch(e => console.error('Level up notification error:', e));
+      if (newRank.title !== oldRank.title) {
+        sendRankUpNotification(newRank, newLevel).catch(e => console.error('Rank up notification error:', e));
+      }
     }
     const recentEvents = [...state.xp.xpEvents, event].slice(-100);
     return {
@@ -567,7 +573,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         xpEvents: recentEvents,
       },
     };
-  }, []);
+  }, [sendLevelUpNotification, sendRankUpNotification]);
 
   const addRun = useCallback((run: Run) => {
     setAppState(prev => {
@@ -587,7 +593,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
 
-      let state = {
+      let state: AppState = {
         ...prev,
         runs: [run, ...prev.runs],
         stats: {
@@ -603,12 +609,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (newRunStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
         const streakBonus = newRunStreak * XP_REWARDS.STREAK_RUN_BONUS;
         state = awardXP(state, streakBonus, 'streak', `${newRunStreak}-day run streak bonus`);
+        if (newRunStreak % 7 === 0 || newRunStreak === 3 || newRunStreak === 14 || newRunStreak === 30) {
+          sendStreakMilestoneNotification('Run', newRunStreak).catch(e => console.error('Streak milestone error:', e));
+        }
       }
 
       mutate(state);
       return state;
     });
-  }, [mutate, awardXP]);
+  }, [mutate, awardXP, sendStreakMilestoneNotification]);
 
   const addFoodEntry = useCallback((entry: FoodEntry) => {
     setAppState(prev => {
@@ -655,12 +664,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
       if (newFoodStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
         const streakBonus = newFoodStreak * XP_REWARDS.STREAK_FOOD_BONUS;
         state = awardXP(state, streakBonus, 'streak', `${newFoodStreak}-day food streak bonus`);
+        if (newFoodStreak % 7 === 0 || newFoodStreak === 3 || newFoodStreak === 14 || newFoodStreak === 30) {
+          sendStreakMilestoneNotification('Food', newFoodStreak).catch(e => console.error('Streak milestone error:', e));
+        }
       }
 
       mutate(state);
       return state;
     });
-  }, [mutate, checkDailyReset, awardXP]);
+  }, [mutate, checkDailyReset, awardXP, sendStreakMilestoneNotification]);
 
   const deleteFoodEntry = useCallback((entryId: string) => {
     setAppState(prev => {
@@ -844,17 +856,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
         lastWorkoutDate: today,
       };
 
-      state = awardXP(state, XP_REWARDS.WORKOUT_COMPLETE, 'workout', `Completed ${log.workoutName}`);
+      state = awardXP(state, XP_REWARDS.WORKOUT_COMPLETE, 'workout', 'Completed workout');
 
       if (newWorkoutStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
         const streakBonus = newWorkoutStreak * XP_REWARDS.STREAK_WORKOUT_BONUS;
         state = awardXP(state, streakBonus, 'streak', `${newWorkoutStreak}-day workout streak bonus`);
+        if (newWorkoutStreak % 7 === 0 || newWorkoutStreak === 3 || newWorkoutStreak === 14 || newWorkoutStreak === 30) {
+          sendStreakMilestoneNotification('Workout', newWorkoutStreak).catch(e => console.error('Streak milestone error:', e));
+        }
       }
 
       mutate(state);
       return state;
     });
-  }, [mutate, awardXP]);
+  }, [mutate, awardXP, sendStreakMilestoneNotification]);
   
   // Update custom workout plan
   const updateCustomWorkoutPlan = useCallback((plan: CustomWorkoutPlan | null) => {

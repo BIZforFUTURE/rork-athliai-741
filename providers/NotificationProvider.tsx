@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import createContextHook from '@nkzw/create-context-hook';
+import { getRankForLevel, getXPProgress, type RankInfo } from '@/constants/xp';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -145,18 +146,28 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     return scheduleNotification(title, body, trigger);
   }, [scheduleNotification]);
 
-  const sendWorkoutCompletionNotification = useCallback(async (workoutType: string, duration: number): Promise<string | null> => {
+  const sendWorkoutCompletionNotification = useCallback(async (workoutType: string, duration: number, xpEarned?: number): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
 
     try {
       const hasPermission = await requestPermissions();
       if (!hasPermission) return null;
 
+      const xpText = xpEarned ? ` +${xpEarned} XP earned!` : '';
+      const titles = [
+        '⚔️ Victory! Workout Conquered!',
+        '🏆 Quest Complete!',
+        '💪 Boss Defeated!',
+        '🎯 Mission Accomplished!',
+      ];
+      const title = titles[Math.floor(Math.random() * titles.length)];
+
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Workout Complete!',
-          body: `Great job! You completed your ${workoutType} workout in ${Math.round(duration)} minutes. Keep up the amazing work!`,
+          title,
+          body: `${workoutType} crushed in ${Math.round(duration)} min.${xpText} The grind never stops!`,
           sound: 'default',
+          data: { type: 'workout-complete', timestamp: Date.now() },
         },
         trigger: null,
       });
@@ -169,18 +180,28 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     }
   }, [requestPermissions]);
 
-  const sendRunCompletionNotification = useCallback(async (distance: number, duration: number): Promise<string | null> => {
+  const sendRunCompletionNotification = useCallback(async (distance: number, duration: number, xpEarned?: number): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
 
     try {
       const hasPermission = await requestPermissions();
       if (!hasPermission) return null;
 
+      const xpText = xpEarned ? ` +${xpEarned} XP!` : '';
+      const titles = [
+        '🏃 Run Quest Complete!',
+        '⚡ Distance Conquered!',
+        '🔥 Trail Blazed!',
+        '🎯 Run Mission Done!',
+      ];
+      const title = titles[Math.floor(Math.random() * titles.length)];
+
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Run Complete!',
-          body: `Awesome run! You covered ${distance.toFixed(1)} miles in ${Math.round(duration)} minutes. Your dedication is paying off!`,
+          title,
+          body: `${distance.toFixed(1)} mi in ${Math.round(duration)} min.${xpText} Every step levels you up!`,
           sound: 'default',
+          data: { type: 'run-complete', timestamp: Date.now() },
         },
         trigger: null,
       });
@@ -295,10 +316,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
+      const messages = [
+        { title: '🍳 Daily Quest: Fuel Up!', body: 'Log your breakfast to earn +15 XP. Every meal tracked levels you up!' },
+        { title: '⚡ Morning XP Awaits', body: 'Scan your breakfast and stack that XP. Nutrition streaks = bonus XP!' },
+        { title: '🎯 Side Quest: Breakfast', body: 'Hit your calorie goal today for a +50 XP bonus. Start with breakfast!' },
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Good Morning! Time to Fuel Up',
-          body: 'Start your day right \u2014 scan your breakfast and track your nutrition.',
+          title: msg.title,
+          body: msg.body,
           sound: 'default',
           data: { type: 'morning-food-reminder', timestamp: Date.now() },
         },
@@ -328,10 +356,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
+      const messages = [
+        { title: '🏃 Boss Battle: The Open Road', body: 'Earn 50+ XP per run. The further you go, the more XP you collect!' },
+        { title: '⚔️ Quest Available: Go for a Run', body: 'Every mile = +10 XP. Lace up and grind those levels!' },
+        { title: '🔥 Your Run Streak is Calling', body: 'Keep the streak alive for massive bonus XP. Don\'t let it reset!' },
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Time for a Run!',
-          body: 'Perfect time to lace up and hit the road. Your body will thank you!',
+          title: msg.title,
+          body: msg.body,
           sound: 'default',
           data: { type: 'midday-run-reminder', timestamp: Date.now() },
         },
@@ -361,10 +396,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
+      const messages = [
+        { title: '💪 Raid Boss: Evening Workout', body: 'Earn +75 XP for completing today\'s workout. Time to level up!' },
+        { title: '🛡️ Final Quest of the Day', body: 'One workout = 75 XP closer to your next rank. Don\'t skip this one!' },
+        { title: '⚡ Power Hour: Workout Time', body: 'The gym is your arena. Crush it and collect your XP reward!' },
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Evening Workout Time',
-          body: 'End your day strong \u2014 time to crush your workout!',
+          title: msg.title,
+          body: msg.body,
           sound: 'default',
           data: { type: 'evening-workout-reminder', timestamp: Date.now() },
         },
@@ -381,13 +423,6 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error scheduling evening workout reminder:', error);
     }
   }, []);
-
-  const scheduleAllDailyReminders = useCallback(async (): Promise<void> => {
-    await scheduleMorningFoodReminder();
-    await scheduleMiddayRunReminder();
-    await scheduleEveningWorkoutReminder();
-    console.log('All 3 daily reminders scheduled');
-  }, [scheduleMorningFoodReminder, scheduleMiddayRunReminder, scheduleEveningWorkoutReminder]);
 
   const scheduleWeeklyReport = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') return;
@@ -524,6 +559,194 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     }
   }, []);
 
+  const sendLevelUpNotification = useCallback(async (newLevel: number, rankInfo: RankInfo): Promise<string | null> => {
+    if (Platform.OS === 'web') return null;
+
+    try {
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) return null;
+
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `🎉 LEVEL UP! You're now Level ${newLevel}!`,
+          body: `${rankInfo.emoji} New rank: ${rankInfo.title}! Keep grinding to unlock the next tier!`,
+          sound: 'default',
+          data: { type: 'level-up', level: newLevel, rank: rankInfo.title, timestamp: Date.now() },
+        },
+        trigger: null,
+      });
+
+      console.log('Sent level up notification:', identifier);
+      return identifier;
+    } catch (error) {
+      console.error('Error sending level up notification:', error);
+      return null;
+    }
+  }, [requestPermissions]);
+
+  const sendRankUpNotification = useCallback(async (newRank: RankInfo, level: number): Promise<string | null> => {
+    if (Platform.OS === 'web') return null;
+
+    try {
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) return null;
+
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `${newRank.emoji} NEW RANK UNLOCKED: ${newRank.title}!`,
+          body: `You've ascended to ${newRank.title} at Level ${level}. Few warriors reach this tier. Legendary!`,
+          sound: 'default',
+          data: { type: 'rank-up', rank: newRank.title, level, timestamp: Date.now() },
+        },
+        trigger: null,
+      });
+
+      console.log('Sent rank up notification:', identifier);
+      return identifier;
+    } catch (error) {
+      console.error('Error sending rank up notification:', error);
+      return null;
+    }
+  }, [requestPermissions]);
+
+  const sendStreakMilestoneNotification = useCallback(async (streakType: string, days: number): Promise<string | null> => {
+    if (Platform.OS === 'web') return null;
+
+    try {
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) return null;
+
+      const milestoneEmoji = days >= 30 ? '👑' : days >= 14 ? '🔥' : days >= 7 ? '⚡' : '🎯';
+      const bonusXP = streakType === 'food' ? days * 5 : days * 10;
+
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `${milestoneEmoji} ${days}-Day ${streakType} Streak!`,
+          body: `Unstoppable! Your ${streakType} streak earns +${bonusXP} bonus XP daily. Don't break the chain!`,
+          sound: 'default',
+          data: { type: 'streak-milestone', streakType, days, timestamp: Date.now() },
+        },
+        trigger: null,
+      });
+
+      console.log('Sent streak milestone notification:', identifier);
+      return identifier;
+    } catch (error) {
+      console.error('Error sending streak milestone notification:', error);
+      return null;
+    }
+  }, [requestPermissions]);
+
+  const sendXPEarnedNotification = useCallback(async (amount: number, source: string, totalXP: number, level: number): Promise<string | null> => {
+    if (Platform.OS === 'web') return null;
+
+    try {
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) return null;
+
+      const progress = getXPProgress(totalXP);
+      const rank = getRankForLevel(level);
+
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `+${amount} XP ${rank.emoji} ${source}`,
+          body: `${progress.current}/${progress.needed} XP to Level ${level + 1}. ${rank.title} rank — keep pushing!`,
+          sound: 'default',
+          data: { type: 'xp-earned', amount, source, timestamp: Date.now() },
+        },
+        trigger: null,
+      });
+
+      console.log('Sent XP earned notification:', identifier);
+      return identifier;
+    } catch (error) {
+      console.error('Error sending XP earned notification:', error);
+      return null;
+    }
+  }, [requestPermissions]);
+
+  const scheduleStreakWarning = useCallback(async (): Promise<void> => {
+    if (Platform.OS === 'web') return;
+
+    try {
+      const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+      const existing = scheduledNotifications.filter(n =>
+        n.content.data?.type === 'streak-warning'
+      );
+      for (const n of existing) {
+        await Notifications.cancelScheduledNotificationAsync(n.identifier);
+      }
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '⚠️ Streak in Danger!',
+          body: 'Your streaks reset at midnight! Log a meal, run, or workout to protect your bonus XP.',
+          sound: 'default',
+          data: { type: 'streak-warning', timestamp: Date.now() },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: 21,
+          minute: 0,
+          repeats: true,
+        },
+      });
+
+      console.log('Streak warning scheduled for 9:00 PM');
+    } catch (error) {
+      console.error('Error scheduling streak warning:', error);
+    }
+  }, []);
+
+  const scheduleMorningXPReminder = useCallback(async (): Promise<void> => {
+    if (Platform.OS === 'web') return;
+
+    try {
+      const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+      const existing = scheduledNotifications.filter(n =>
+        n.content.data?.type === 'morning-xp-reminder'
+      );
+      for (const n of existing) {
+        await Notifications.cancelScheduledNotificationAsync(n.identifier);
+      }
+
+      const messages = [
+        { title: '🌅 New Day, New XP!', body: 'Your daily quests have reset. Complete all 3 for max XP today!' },
+        { title: '⚔️ Daily Quests Available', body: 'Log food, go for a run, crush a workout — each one earns XP!' },
+        { title: '🎮 Ready Player One', body: 'A fresh day of XP grinding awaits. How much will you earn today?' },
+      ];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: msg.title,
+          body: msg.body,
+          sound: 'default',
+          data: { type: 'morning-xp-reminder', timestamp: Date.now() },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: 7,
+          minute: 30,
+          repeats: true,
+        },
+      });
+
+      console.log('Morning XP reminder scheduled for 7:30 AM');
+    } catch (error) {
+      console.error('Error scheduling morning XP reminder:', error);
+    }
+  }, []);
+
+  const scheduleAllDailyReminders = useCallback(async (): Promise<void> => {
+    await scheduleMorningXPReminder();
+    await scheduleMorningFoodReminder();
+    await scheduleMiddayRunReminder();
+    await scheduleEveningWorkoutReminder();
+    await scheduleStreakWarning();
+    console.log('All 5 daily reminders scheduled (including XP + streak warning)');
+  }, [scheduleMorningXPReminder, scheduleMorningFoodReminder, scheduleMiddayRunReminder, scheduleEveningWorkoutReminder, scheduleStreakWarning]);
+
   const checkPermissionStatus = useCallback(async (): Promise<string> => {
     if (Platform.OS === 'web') return 'unsupported';
 
@@ -556,6 +779,12 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     cancelAllNotifications,
     requestPermissions,
     checkPermissionStatus,
+    sendLevelUpNotification,
+    sendRankUpNotification,
+    sendStreakMilestoneNotification,
+    sendXPEarnedNotification,
+    scheduleStreakWarning,
+    scheduleMorningXPReminder,
   }), [
     expoPushToken,
     notification,
@@ -576,6 +805,12 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     cancelAllNotifications,
     requestPermissions,
     checkPermissionStatus,
+    sendLevelUpNotification,
+    sendRankUpNotification,
+    sendStreakMilestoneNotification,
+    sendXPEarnedNotification,
+    scheduleStreakWarning,
+    scheduleMorningXPReminder,
   ]);
 });
 
