@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import {
   Dumbbell,
   Flame,
@@ -404,65 +403,6 @@ function WeeklyStats() {
   );
 }
 
-function RankProgress() {
-  const { xpInfo } = useApp();
-
-  const currentIdx = RANKS.findIndex(r => r.title === xpInfo.rank.title);
-  const nextRank = currentIdx < RANKS.length - 1 ? RANKS[currentIdx + 1] : null;
-
-  if (!nextRank) return null;
-
-  const totalForCurrent = currentIdx > 0 ? RANKS[currentIdx].minLevel : 1;
-  const totalForNext = nextRank.minLevel;
-  const progress = Math.min((xpInfo.level - totalForCurrent) / (totalForNext - totalForCurrent), 1);
-
-  return (
-    <View style={rankStyles.card}>
-      <View style={rankStyles.header}>
-        <Text style={rankStyles.headerText}>Rank Progress</Text>
-      </View>
-      <View style={rankStyles.row}>
-        <View style={rankStyles.current}>
-          <View style={[rankStyles.emojiWrap, { backgroundColor: xpInfo.rank.color + "15" }]}>
-            <Text style={rankStyles.emoji}>{xpInfo.rank.emoji}</Text>
-          </View>
-          <Text style={[rankStyles.name, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
-        </View>
-        <View style={rankStyles.trackWrap}>
-          <View style={rankStyles.track}>
-            <View style={[rankStyles.fill, { width: `${progress * 100}%` }]}>
-              <LinearGradient
-                colors={[xpInfo.rank.color, nextRank.color]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </View>
-          </View>
-          <View style={rankStyles.dotRow}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <View
-                key={i}
-                style={[
-                  rankStyles.dot,
-                  { backgroundColor: i / 4 <= progress ? nextRank.color : "rgba(255,255,255,0.06)" },
-                ]}
-              />
-            ))}
-          </View>
-        </View>
-        <View style={rankStyles.next}>
-          <View style={[rankStyles.emojiWrap, { backgroundColor: nextRank.color + "15" }]}>
-            <Text style={rankStyles.emoji}>{nextRank.emoji}</Text>
-          </View>
-          <Text style={[rankStyles.name, { color: nextRank.color }]}>{nextRank.title}</Text>
-        </View>
-      </View>
-      <Text style={rankStyles.hint}>Level {nextRank.minLevel} to rank up</Text>
-    </View>
-  );
-}
-
 function XPFeed() {
   const { xpInfo } = useApp();
 
@@ -571,7 +511,6 @@ export default function DashboardScreen() {
         <StreakStrip />
         <DailyQuests />
         <TodayNutrition />
-        <RankProgress />
         <WeeklyStats />
         <XPFeed />
         <View style={{ height: 40 }} />
@@ -1090,85 +1029,6 @@ const weekStyles = StyleSheet.create({
   },
 });
 
-const rankStyles = StyleSheet.create({
-  card: {
-    backgroundColor: "#0E1015",
-    borderRadius: 18,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
-  },
-  header: {
-    marginBottom: 14,
-  },
-  headerText: {
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: "#9CA3AF",
-  },
-  row: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 12,
-  },
-  current: {
-    alignItems: "center" as const,
-    gap: 4,
-  },
-  next: {
-    alignItems: "center" as const,
-    gap: 4,
-  },
-  emojiWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  emoji: {
-    fontSize: 18,
-  },
-  name: {
-    fontSize: 9,
-    fontWeight: "800" as const,
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.5,
-  },
-  trackWrap: {
-    flex: 1,
-    gap: 6,
-  },
-  track: {
-    height: 6,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 3,
-    overflow: "hidden" as const,
-  },
-  fill: {
-    height: "100%" as const,
-    borderRadius: 3,
-    overflow: "hidden" as const,
-  },
-  dotRow: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    paddingHorizontal: 2,
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-  },
-  hint: {
-    fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#2A2E35",
-    textAlign: "center" as const,
-    marginTop: 10,
-  },
-});
 
 const feedStyles = StyleSheet.create({
   container: {
