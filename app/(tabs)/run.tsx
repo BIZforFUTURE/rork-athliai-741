@@ -9,13 +9,15 @@ import {
   Alert,
   Modal,
   AppState,
+  Animated,
+  Pressable,
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Pause, MapPin, TrendingUp, Flame, X } from "lucide-react-native";
+import { Play, Pause, TrendingUp, Flame, X, Zap, Route } from "lucide-react-native";
+import Svg, { Circle } from "react-native-svg";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
-
 
 import { useApp } from "@/providers/AppProvider";
 import { useNotifications } from "@/providers/NotificationProvider";
@@ -44,12 +46,11 @@ interface RunState {
 const STORAGE_KEY = 'activeRunState';
 
 export default function RunScreen() {
-  const { addRun, recentRuns, subtractCaloriesFromRun, runStorage } = useApp();
+  const { addRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo } = useApp();
   const { sendRunStartNotification, cancelRunNotification, sendRunCompletionNotification } = useNotifications();
   const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
 
-  // Core run state
   const [runState, setRunState] = useState<RunState>({
     isRunning: false,
     isPaused: false,
@@ -61,23 +62,53 @@ export default function RunScreen() {
     currentLocation: null,
   });
 
-  // UI state
   const [showCalorieModal, setShowCalorieModal] = useState(false);
   const [lastRunCalories, setLastRunCalories] = useState(0);
   const [runNotificationId, setRunNotificationId] = useState<string | null>(null);
   const [isStopping, setIsStopping] = useState(false);
 
-  // Refs
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const appState = useRef(AppState.currentState);
 
-  // Calculate distance between two coordinates
+  const fadeIn = useRef(new Animated.Value(0)).current;
+  const slideUp = useRef(new Animated.Value(20)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const buttonScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
+      Animated.spring(slideUp, { toValue: 0, tension: 50, friction: 12, useNativeDriver: true }),
+    ]).start();
+  }, [fadeIn, slideUp]);
+
+  useEffect(() => {
+    if (runState.isRunning && !runState.isPaused) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.03, duration: 1000, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [runState.isRunning, runState.isPaused, pulseAnim]);
+
+  const handleButtonPressIn = useCallback(() => {
+    Animated.spring(buttonScale, { toValue: 0.95, useNativeDriver: true, tension: 300, friction: 10 }).start();
+  }, [buttonScale]);
+
+  const handleButtonPressOut = useCallback(() => {
+    Animated.spring(buttonScale, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start();
+  }, [buttonScale]);
+
   const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 3959; // Earth's radius in miles
+    const R = 3959;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
+    const a =
       Math.sin(dLat/2) * Math.sin(dLat/2) +
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLon/2) * Math.sin(dLon/2);
@@ -85,10 +116,8 @@ export default function RunScreen() {
     return R * c;
   }, []);
 
-  // Calculate total route distance
   const calculateRouteDistance = useCallback((coordinates: RouteCoordinate[]): number => {
     if (coordinates.length < 2) return 0;
-    
     let totalDistance = 0;
     for (let i = 1; i < coordinates.length; i++) {
       const dist = calculateDistance(
@@ -99,11 +128,9 @@ export default function RunScreen() {
       );
       totalDistance += dist;
     }
-    
     return totalDistance;
   }, [calculateDistance]);
 
-  // Save run state to storage
   const saveRunState = useCallback(async (state: RunState) => {
     try {
       const stateJson = JSON.stringify(state);
@@ -117,7 +144,6 @@ export default function RunScreen() {
     }
   }, [runStorage]);
 
-  // Load run state from storage
   const loadRunState = useCallback(async () => {
     try {
       let stateJson: string | null = null;
@@ -130,18 +156,16 @@ export default function RunScreen() {
       if (stateJson) {
         const savedState: RunState = JSON.parse(stateJson);
         if (savedState.isRunning && savedState.startTime) {
-          // Resume run
           const currentTime = Date.now();
-          const elapsedTime = savedState.isPaused 
+          const elapsedTime = savedState.isPaused
             ? savedState.elapsedTime
             : Math.floor((currentTime - savedState.startTime - savedState.pausedTime) / 1000);
-          
+
           setRunState({
             ...savedState,
             elapsedTime,
           });
 
-          // Resume timer only if not paused
           if (!savedState.isPaused) {
             timerRef.current = setInterval(() => {
               setRunState(prev => ({
@@ -149,8 +173,6 @@ export default function RunScreen() {
                 elapsedTime: prev.elapsedTime + 1,
               }));
             }, 1000);
-
-            // Resume location tracking
             await startLocationTracking();
           }
         }
@@ -158,9 +180,9 @@ export default function RunScreen() {
     } catch (error) {
       console.error('Error loading run state:', error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runStorage]);
 
-  // Clear run state from storage
   const clearRunState = useCallback(async () => {
     try {
       if (Platform.OS === 'web') {
@@ -173,111 +195,61 @@ export default function RunScreen() {
     }
   }, [runStorage]);
 
-  // Optimize route coordinates for performance
   const optimizeRouteCoordinates = useCallback((coordinates: RouteCoordinate[]): RouteCoordinate[] => {
     if (coordinates.length <= 100) return coordinates;
-    
-    // Keep first and last points, then sample every nth point for middle section
-    const samplingRate = Math.ceil(coordinates.length / 80); // Target ~80 points max
-    const optimized = [coordinates[0]]; // Always keep start
-    
+    const samplingRate = Math.ceil(coordinates.length / 80);
+    const optimized = [coordinates[0]];
     for (let i = samplingRate; i < coordinates.length - 1; i += samplingRate) {
       optimized.push(coordinates[i]);
     }
-    
-    optimized.push(coordinates[coordinates.length - 1]); // Always keep end
+    optimized.push(coordinates[coordinates.length - 1]);
     return optimized;
   }, []);
 
-  // Start location tracking
   const startLocationTracking = useCallback(async () => {
     if (Platform.OS === 'web') {
-      // Web simulation
       let lat = 37.7749;
       let lng = -122.4194;
-      
       const simulateLocation = () => {
         lat += (Math.random() - 0.5) * 0.0001;
         lng += (Math.random() - 0.5) * 0.0001;
-        
         const newLocation: Location.LocationObject = {
-          coords: {
-            latitude: lat,
-            longitude: lng,
-            altitude: 0,
-            accuracy: 5,
-            altitudeAccuracy: 5,
-            heading: 0,
-            speed: 3,
-          },
+          coords: { latitude: lat, longitude: lng, altitude: 0, accuracy: 5, altitudeAccuracy: 5, heading: 0, speed: 3 },
           timestamp: Date.now(),
         };
-
         setRunState(prev => {
           const newCoordinate = { latitude: lat, longitude: lng };
           const newRoute = [...prev.routeCoordinates, newCoordinate];
           const newDistance = calculateRouteDistance(newRoute);
-
-          return {
-            ...prev,
-            currentLocation: newLocation,
-            routeCoordinates: newRoute,
-            distance: newDistance,
-          };
+          return { ...prev, currentLocation: newLocation, routeCoordinates: newRoute, distance: newDistance };
         });
       };
-
       const interval = setInterval(simulateLocation, 2000);
       return () => clearInterval(interval);
     } else {
-      // Real location tracking
       locationSubscription.current = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.BestForNavigation,
-          timeInterval: 2000, // Reduced from 1000ms to 2000ms
-          distanceInterval: 3, // Increased from 1m to 3m
-        },
+        { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 2000, distanceInterval: 3 },
         (newLocation: Location.LocationObject) => {
           setRunState(prev => {
-            const newCoordinate = {
-              latitude: newLocation.coords.latitude,
-              longitude: newLocation.coords.longitude,
-            };
-
-            // Only add if we've moved significantly
+            const newCoordinate = { latitude: newLocation.coords.latitude, longitude: newLocation.coords.longitude };
             let newRoute = prev.routeCoordinates;
             if (prev.routeCoordinates.length === 0) {
               newRoute = [newCoordinate];
             } else {
               const lastCoordinate = prev.routeCoordinates[prev.routeCoordinates.length - 1];
-              const distanceFromLast = calculateDistance(
-                lastCoordinate.latitude,
-                lastCoordinate.longitude,
-                newCoordinate.latitude,
-                newCoordinate.longitude
-              );
-
-              // Increased minimum distance to reduce coordinate density
-              if (distanceFromLast > 0.003) { // ~5 meters instead of 1.6 meters
+              const distanceFromLast = calculateDistance(lastCoordinate.latitude, lastCoordinate.longitude, newCoordinate.latitude, newCoordinate.longitude);
+              if (distanceFromLast > 0.003) {
                 newRoute = [...prev.routeCoordinates, newCoordinate];
               }
             }
-
             const newDistance = calculateRouteDistance(newRoute);
-
-            return {
-              ...prev,
-              currentLocation: newLocation,
-              routeCoordinates: newRoute,
-              distance: newDistance,
-            };
+            return { ...prev, currentLocation: newLocation, routeCoordinates: newRoute, distance: newDistance };
           });
         }
       );
     }
   }, [calculateDistance, calculateRouteDistance]);
 
-  // Stop location tracking
   const stopLocationTracking = useCallback(() => {
     if (locationSubscription.current) {
       locationSubscription.current.remove();
@@ -285,7 +257,6 @@ export default function RunScreen() {
     }
   }, []);
 
-  // Start run
   const startRun = async () => {
     if (Platform.OS !== 'web') {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -294,233 +265,131 @@ export default function RunScreen() {
       router.push('/paywall');
       return;
     }
-    // Request location permission
     if (Platform.OS !== "web") {
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Location Permission Required",
-          "We need location access to track your run.",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Open Settings", onPress: () => Location.requestForegroundPermissionsAsync() }
-          ]
-        );
+        Alert.alert("Location Permission Required", "We need location access to track your run.", [
+          { text: "Cancel", style: "cancel" },
+          { text: "Open Settings", onPress: () => Location.requestForegroundPermissionsAsync() }
+        ]);
         return;
       }
-
-      // Request background location permission
       const backgroundStatus = await Location.getBackgroundPermissionsAsync();
       if (backgroundStatus.status !== 'granted') {
         const { status: newStatus } = await Location.requestBackgroundPermissionsAsync();
         if (newStatus !== 'granted') {
-          Alert.alert(
-            'Background Location Required',
-            'Background location access is needed to continue tracking when the app is closed.',
-            [{ text: 'OK' }]
-          );
+          Alert.alert('Background Location Required', 'Background location access is needed to continue tracking when the app is closed.', [{ text: 'OK' }]);
         }
       }
     }
 
     const startTime = Date.now();
     const newRunState: RunState = {
-      isRunning: true,
-      isPaused: false,
-      startTime,
-      pausedTime: 0,
-      elapsedTime: 0,
-      distance: 0,
-      routeCoordinates: [],
-      currentLocation: null,
+      isRunning: true, isPaused: false, startTime, pausedTime: 0,
+      elapsedTime: 0, distance: 0, routeCoordinates: [], currentLocation: null,
     };
-
     setRunState(newRunState);
     await saveRunState(newRunState);
 
-    // Start foreground timer (for UI updates)
     timerRef.current = setInterval(() => {
       setRunState(prev => {
-        // Calculate elapsed time from start time for accuracy
         const currentTime = Date.now();
         const actualElapsedTime = Math.floor((currentTime - startTime - prev.pausedTime) / 1000);
         const updated = { ...prev, elapsedTime: actualElapsedTime };
-        saveRunState(updated);
+        void saveRunState(updated);
         return updated;
       });
     }, 1000);
 
-    // Start location tracking
-    await startLocationTracking();
-
-    // Send notification
+    void startLocationTracking();
     const notificationId = await sendRunStartNotification();
     setRunNotificationId(notificationId);
   };
 
-  // Stop run
   const stopRun = async () => {
     if (isStopping) return;
     setIsStopping(true);
-
     if (Platform.OS !== 'web') {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-
-    // Stop timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    // Stop location tracking
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     stopLocationTracking();
+    if (runNotificationId) { await cancelRunNotification(runNotificationId); setRunNotificationId(null); }
 
-    // Cancel notification
-    if (runNotificationId) {
-      await cancelRunNotification(runNotificationId);
-      setRunNotificationId(null);
-    }
-
-    // Get final elapsed time from actual time difference
-    const finalElapsedTime = runState.startTime 
+    const finalElapsedTime = runState.startTime
       ? Math.floor((Date.now() - runState.startTime - runState.pausedTime) / 1000)
       : runState.elapsedTime;
 
-    // Clear storage
     await clearRunState();
 
     if (finalElapsedTime > 0) {
       const pace = runState.distance > 0 ? finalElapsedTime / 60 / runState.distance : 0;
-      const calories = Math.round(runState.distance * 112.5); // ~112.5 cal/mile for 150lb person
-
-      // Save run
+      const calories = Math.round(runState.distance * 112.5);
       addRun({
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        distance: runState.distance,
-        time: finalElapsedTime,
-        pace,
-        calories,
-        routeCoordinates: runState.routeCoordinates,
+        id: Date.now().toString(), date: new Date().toISOString(),
+        distance: runState.distance, time: finalElapsedTime,
+        pace, calories, routeCoordinates: runState.routeCoordinates,
       });
-
       setLastRunCalories(calories);
       setShowCalorieModal(true);
-
-      // Send completion notification
       await sendRunCompletionNotification(runState.distance, finalElapsedTime / 60);
-
       if (Platform.OS !== 'web') {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     }
 
-    // Reset state
     setRunState({
-      isRunning: false,
-      isPaused: false,
-      startTime: null,
-      pausedTime: 0,
-      elapsedTime: 0,
-      distance: 0,
-      routeCoordinates: [],
-      currentLocation: null,
+      isRunning: false, isPaused: false, startTime: null, pausedTime: 0,
+      elapsedTime: 0, distance: 0, routeCoordinates: [], currentLocation: null,
     });
-
     setIsStopping(false);
   };
 
-  // Pause run
   const pauseRun = async () => {
     if (!runState.isRunning || runState.isPaused) return;
-
-    if (Platform.OS !== 'web') {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
-    // Stop timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    // Stop location tracking
+    if (Platform.OS !== 'web') { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     stopLocationTracking();
-
-    // Update state to paused
     const pauseStartTime = Date.now();
-    const updatedState = {
-      ...runState,
-      isPaused: true,
-      pauseStartTime,
-    };
-
+    const updatedState = { ...runState, isPaused: true, pauseStartTime };
     setRunState(updatedState);
     await saveRunState(updatedState);
   };
 
-  // Resume run
   const resumeRun = async () => {
     if (!runState.isRunning || !runState.isPaused) return;
-
-    if (Platform.OS !== 'web') {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
-    // Calculate total paused time
+    if (Platform.OS !== 'web') { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }
     const pauseEndTime = Date.now();
-    const pauseDuration = runState.pauseStartTime 
-      ? pauseEndTime - runState.pauseStartTime 
-      : 0;
-    
-    const updatedState = {
-      ...runState,
-      isPaused: false,
-      pausedTime: runState.pausedTime + pauseDuration,
-      pauseStartTime: undefined,
-    };
-
+    const pauseDuration = runState.pauseStartTime ? pauseEndTime - runState.pauseStartTime : 0;
+    const updatedState = { ...runState, isPaused: false, pausedTime: runState.pausedTime + pauseDuration, pauseStartTime: undefined };
     setRunState(updatedState);
     await saveRunState(updatedState);
 
-    // Resume timer
     timerRef.current = setInterval(() => {
       setRunState(prev => {
         const currentTime = Date.now();
         const actualElapsedTime = Math.floor((currentTime - prev.startTime! - prev.pausedTime) / 1000);
         const updated = { ...prev, elapsedTime: actualElapsedTime };
-        saveRunState(updated);
+        void saveRunState(updated);
         return updated;
       });
     }, 1000);
-
-    // Resume location tracking
-    await startLocationTracking();
+    void startLocationTracking();
   };
 
-  // Handle calorie subtraction
   const handleSubtractCalories = async () => {
-    if (Platform.OS !== 'web') {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
+    if (Platform.OS !== 'web') { await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }
     subtractCaloriesFromRun(lastRunCalories);
     setShowCalorieModal(false);
-    Alert.alert(
-      "Calories Subtracted",
-      `${lastRunCalories} calories have been subtracted from your daily intake.`,
-      [{ text: "OK" }]
-    );
+    Alert.alert("Calories Subtracted", `${lastRunCalories} calories have been subtracted from your daily intake.`, [{ text: "OK" }]);
   };
 
-  // Format time
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Format pace
   const formatPace = (paceValue: number): string => {
     if (!paceValue || paceValue === 0 || !isFinite(paceValue)) return "0:00";
     const cappedPace = Math.min(paceValue, 99.99);
@@ -529,24 +398,20 @@ export default function RunScreen() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Calculate current pace
-  const currentPace = runState.distance > 0 && runState.elapsedTime > 0 
-    ? runState.elapsedTime / 60 / runState.distance 
+  const currentPace = runState.distance > 0 && runState.elapsedTime > 0
+    ? runState.elapsedTime / 60 / runState.distance
     : 0;
 
-  // Load saved state on mount
-  useEffect(() => {
-    loadRunState();
+  const currentCalories = Math.round(runState.distance * 112.5);
 
-    // Handle app state changes
+  useEffect(() => {
+    void loadRunState();
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App came to foreground - sync timer with actual elapsed time
         setRunState(prev => {
           if (prev.isRunning && prev.startTime && !prev.isPaused) {
             const currentTime = Date.now();
             const actualElapsedTime = Math.floor((currentTime - prev.startTime - prev.pausedTime) / 1000);
-            console.log('Syncing timer on foreground:', actualElapsedTime);
             return { ...prev, elapsedTime: actualElapsedTime };
           }
           return prev;
@@ -554,56 +419,85 @@ export default function RunScreen() {
       }
       appState.current = nextAppState;
     };
-
     const subscription = AppState.addEventListener('change', handleAppStateChange);
-
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
+      if (timerRef.current) { clearInterval(timerRef.current); }
       stopLocationTracking();
       subscription?.remove();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync timer periodically when app is active
   useEffect(() => {
     if (runState.isRunning && runState.startTime && !runState.isPaused) {
       const syncInterval = setInterval(() => {
         const currentTime = Date.now();
         const actualElapsedTime = Math.floor((currentTime - runState.startTime! - runState.pausedTime) / 1000);
-        
         setRunState(prev => {
           if (Math.abs(prev.elapsedTime - actualElapsedTime) > 2) {
-            console.log('Correcting timer drift:', actualElapsedTime);
             return { ...prev, elapsedTime: actualElapsedTime };
           }
           return prev;
         });
-      }, 5000); // Check every 5 seconds
-
+      }, 5000);
       return () => clearInterval(syncInterval);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runState.isRunning, runState.startTime, runState.isPaused]);
+
+  const timeDialSize = 140;
+  const timeStroke = 6;
+  const timeR = (timeDialSize - timeStroke) / 2;
+  const timeCirc = 2 * Math.PI * timeR;
+  const maxRunTime = 3600;
+  const timeProgress = Math.min(runState.elapsedTime / maxRunTime, 1);
+  const timeOffset = timeCirc * (1 - timeProgress);
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <Text style={styles.headerTitle}>Run Tracker</Text>
-        <Text style={styles.headerSubtitle}>Ready to run?</Text>
+      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
+        <View>
+          <Text style={styles.screenTitle}>Run</Text>
+          <Text style={styles.screenSubtitle}>
+            {runState.isRunning ? (runState.isPaused ? "Paused" : "Running...") : "Ready to go?"}
+          </Text>
+        </View>
+        <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "15", borderColor: xpInfo.rank.color + "30" }]}>
+          <Zap size={12} color={xpInfo.rank.color} />
+          <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+50 XP</Text>
+        </View>
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.mainCard}>
-          <Text style={styles.timeLabel}>TIME</Text>
-          <Text style={styles.timeValue}>{formatTime(runState.elapsedTime)}</Text>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Animated.View style={[styles.timerCard, { opacity: fadeIn, transform: [{ translateY: slideUp }, { scale: pulseAnim }] }]}>
+          <View style={styles.timerDialWrap}>
+            <Svg width={timeDialSize} height={timeDialSize}>
+              <Circle
+                cx={timeDialSize / 2} cy={timeDialSize / 2} r={timeR}
+                stroke="rgba(0,229,255,0.06)" strokeWidth={timeStroke} fill="none"
+              />
+              {runState.isRunning && (
+                <Circle
+                  cx={timeDialSize / 2} cy={timeDialSize / 2} r={timeR}
+                  stroke="#00E5FF" strokeWidth={timeStroke} fill="none"
+                  strokeDasharray={`${timeCirc}`} strokeDashoffset={timeOffset}
+                  strokeLinecap="round" transform={`rotate(-90 ${timeDialSize / 2} ${timeDialSize / 2})`}
+                />
+              )}
+            </Svg>
+            <View style={styles.timerInner}>
+              <Text style={styles.timerValue}>{formatTime(runState.elapsedTime)}</Text>
+              <Text style={styles.timerLabel}>TIME</Text>
+            </View>
+          </View>
+
           {runState.isPaused && (
-            <View style={styles.pausedIndicator}>
-              <Pause size={16} color="#F59E0B" />
-              <Text style={styles.pausedText}>PAUSED</Text>
+            <View style={styles.pausedChip}>
+              <Pause size={12} color="#F59E0B" />
+              <Text style={styles.pausedChipText}>PAUSED</Text>
             </View>
           )}
-        </View>
+        </Animated.View>
 
         <RunMap
           currentLocation={runState.currentLocation}
@@ -612,68 +506,91 @@ export default function RunScreen() {
           isRunning={runState.isRunning && !runState.isPaused}
         />
 
-        <View style={styles.statsContainer}>
+        <Animated.View style={[styles.statsRow, { opacity: fadeIn }]}>
           <View style={styles.statCard}>
-            <MapPin size={20} color="#00ADB5" />
-            <Text style={styles.statLabel}>DISTANCE</Text>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(0,229,255,0.08)" }]}>
+              <Route size={14} color="#00E5FF" />
+            </View>
             <Text style={styles.statValue}>{runState.distance.toFixed(2)}</Text>
             <Text style={styles.statUnit}>miles</Text>
           </View>
           <View style={styles.statCard}>
-            <TrendingUp size={20} color="#14B8A6" />
-            <Text style={styles.statLabel}>PACE</Text>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(191,255,0,0.08)" }]}>
+              <TrendingUp size={14} color="#BFFF00" />
+            </View>
             <Text style={styles.statValue}>{formatPace(currentPace)}</Text>
             <Text style={styles.statUnit}>min/mi</Text>
           </View>
-        </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,107,53,0.08)" }]}>
+              <Flame size={14} color="#FF6B35" />
+            </View>
+            <Text style={styles.statValue}>{currentCalories}</Text>
+            <Text style={styles.statUnit}>cal</Text>
+          </View>
+        </Animated.View>
 
         {runState.isRunning ? (
-          <View style={styles.runningButtonsContainer}>
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                runState.isPaused ? styles.resumeButton : styles.pauseButton
-              ]}
+          <View style={styles.runningControls}>
+            <Pressable
               onPress={runState.isPaused ? resumeRun : pauseRun}
+              onPressIn={handleButtonPressIn}
+              onPressOut={handleButtonPressOut}
             >
-              {runState.isPaused ? (
-                <>
-                  <Play size={24} color="#FFFFFF" />
-                  <Text style={styles.actionButtonText}>RESUME</Text>
-                </>
-              ) : (
-                <>
-                  <Pause size={24} color="#FFFFFF" />
-                  <Text style={styles.actionButtonText}>PAUSE</Text>
-                </>
-              )}
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                styles.stopButton,
-                isStopping && styles.disabledButton
-              ]}
+              <Animated.View style={[
+                styles.controlBtn,
+                runState.isPaused ? styles.controlBtnResume : styles.controlBtnPause,
+                { transform: [{ scale: buttonScale }] }
+              ]}>
+                {runState.isPaused ? (
+                  <>
+                    <Play size={20} color="#FFFFFF" />
+                    <Text style={styles.controlBtnText}>RESUME</Text>
+                  </>
+                ) : (
+                  <>
+                    <Pause size={20} color="#FFFFFF" />
+                    <Text style={styles.controlBtnText}>PAUSE</Text>
+                  </>
+                )}
+              </Animated.View>
+            </Pressable>
+            <Pressable
               onPress={stopRun}
               disabled={isStopping}
+              onPressIn={handleButtonPressIn}
+              onPressOut={handleButtonPressOut}
             >
-              <Text style={styles.actionButtonText}>
-                {isStopping ? 'STOPPING...' : 'STOP'}
-              </Text>
-            </TouchableOpacity>
+              <Animated.View style={[
+                styles.controlBtn, styles.controlBtnStop,
+                isStopping && styles.controlBtnDisabled,
+                { transform: [{ scale: buttonScale }] }
+              ]}>
+                <View style={styles.stopIcon} />
+                <Text style={styles.controlBtnText}>{isStopping ? 'STOPPING...' : 'STOP'}</Text>
+              </Animated.View>
+            </Pressable>
           </View>
         ) : (
-          <TouchableOpacity
-            style={styles.startButton}
+          <Pressable
             onPress={startRun}
+            onPressIn={handleButtonPressIn}
+            onPressOut={handleButtonPressOut}
           >
-            <Play size={28} color="#FFFFFF" />
-            <Text style={styles.startButtonText}>START RUN</Text>
-          </TouchableOpacity>
+            <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
+              <View style={styles.startBtnInner}>
+                <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
+                <Text style={styles.startBtnText}>START RUN</Text>
+              </View>
+              <View style={styles.startBtnXp}>
+                <Zap size={10} color="#00E5FF" fill="#00E5FF" />
+                <Text style={styles.startBtnXpText}>+50 XP</Text>
+              </View>
+            </Animated.View>
+          </Pressable>
         )}
 
-        <RunHistorySection 
+        <RunHistorySection
           runs={recentRuns}
           onRunPress={(runId) => router.push(`/run-details/${runId}`)}
           formatTime={formatTime}
@@ -689,37 +606,28 @@ export default function RunScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.modalClose}
-              onPress={() => setShowCalorieModal(false)}
-            >
-              <X size={24} color="#6B7280" />
+            <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
+              <X size={20} color="#4B5563" />
             </TouchableOpacity>
-            
-            <View style={styles.modalIcon}>
-              <Flame size={48} color="#F59E0B" />
+
+            <View style={styles.modalIconWrap}>
+              <Flame size={40} color="#FF6B35" />
             </View>
-            
+
             <Text style={styles.modalTitle}>Great Run!</Text>
-            <Text style={styles.modalText}>
-              You burned {lastRunCalories} calories
+            <Text style={styles.modalCalText}>
+              {lastRunCalories} calories burned
             </Text>
             <Text style={styles.modalSubtext}>
-              Would you like to subtract these calories from your daily intake?
+              Subtract these from your daily intake?
             </Text>
-            
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalButtonSecondary]}
-                onPress={() => setShowCalorieModal(false)}
-              >
-                <Text style={styles.modalButtonTextSecondary}>No Thanks</Text>
+
+            <View style={styles.modalBtns}>
+              <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowCalorieModal(false)}>
+                <Text style={styles.modalBtnSecondaryText}>No Thanks</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalButtonPrimary]}
-                onPress={handleSubtractCalories}
-              >
-                <Text style={styles.modalButtonTextPrimary}>Subtract</Text>
+              <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleSubtractCalories}>
+                <Text style={styles.modalBtnPrimaryText}>Subtract</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -732,217 +640,283 @@ export default function RunScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#08090C",
   },
-  header: {
+  topBar: {
     paddingHorizontal: 20,
-    paddingBottom: 30,
-    backgroundColor: "#0D0F13",
+    paddingBottom: 12,
+    backgroundColor: "#08090C",
+    flexDirection: "row" as const,
+    alignItems: "flex-end" as const,
+    justifyContent: "space-between" as const,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    color: "#F9FAFB",
+  screenTitle: {
+    fontSize: 26,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.8,
   },
-  headerSubtitle: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    marginTop: 5,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  contentContainer: {
-    paddingBottom: 120,
-  },
-  mainCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 30,
-    alignItems: "center",
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  timeLabel: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    letterSpacing: 2,
+  screenSubtitle: {
+    fontSize: 13,
     fontWeight: "500" as const,
+    color: "#4B5563",
+    marginTop: 1,
   },
-  timeValue: {
-    fontSize: 64,
-    fontWeight: "600" as const,
-    color: "#F9FAFB",
-    marginTop: 10,
+  xpChip: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 2,
   },
-  pausedIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: "#1F2329",
-    borderRadius: 20,
-    gap: 6,
-  },
-  pausedText: {
+  xpChipText: {
     fontSize: 12,
-    fontWeight: "600" as const,
+    fontWeight: "800" as const,
+    letterSpacing: -0.3,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 110,
+    gap: 10,
+  },
+  timerCard: {
+    backgroundColor: "#0E1015",
+    borderRadius: 24,
+    padding: 28,
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  timerDialWrap: {
+    width: 140,
+    height: 140,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  timerInner: {
+    position: "absolute" as const,
+    alignItems: "center" as const,
+  },
+  timerValue: {
+    fontSize: 38,
+    fontWeight: "900" as const,
+    color: "#FFFFFF",
+    letterSpacing: -2,
+  },
+  timerLabel: {
+    fontSize: 9,
+    fontWeight: "700" as const,
+    color: "#4B5563",
+    letterSpacing: 3,
+    marginTop: -2,
+  },
+  pausedChip: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    backgroundColor: "rgba(245,158,11,0.1)",
+    borderRadius: 20,
+  },
+  pausedChipText: {
+    fontSize: 11,
+    fontWeight: "800" as const,
     color: "#F59E0B",
     letterSpacing: 1,
   },
-  statsContainer: {
-    flexDirection: "row",
-    gap: 15,
-    marginTop: 20,
+  statsRow: {
+    flexDirection: "row" as const,
+    gap: 8,
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    backgroundColor: "#0E1015",
+    borderRadius: 18,
+    padding: 14,
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+    gap: 6,
   },
-  statLabel: {
-    fontSize: 11,
-    color: "#9CA3AF",
-    letterSpacing: 1,
-    marginTop: 10,
-    fontWeight: "500" as const,
+  statIconWrap: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: "600" as const,
-    color: "#F9FAFB",
-    marginTop: 5,
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.5,
   },
   statUnit: {
-    fontSize: 13,
-    color: "#6B7280",
+    fontSize: 10,
+    fontWeight: "600" as const,
+    color: "#4B5563",
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
   },
-  startButton: {
-    backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-    borderRadius: 12,
-    marginTop: 30,
+  runningControls: {
+    flexDirection: "row" as const,
     gap: 10,
+    marginTop: 6,
   },
-  runningButtonsContainer: {
-    flexDirection: "row",
-    gap: 15,
-    marginTop: 30,
-  },
-  actionButton: {
+  controlBtn: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-    borderRadius: 12,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 16,
+    borderRadius: 16,
     gap: 8,
   },
-  pauseButton: {
+  controlBtnPause: {
     backgroundColor: "#F59E0B",
   },
-  resumeButton: {
+  controlBtnResume: {
     backgroundColor: "#00ADB5",
   },
-  stopButton: {
+  controlBtnStop: {
     backgroundColor: "#EF4444",
   },
-  disabledButton: {
-    backgroundColor: "#6B7280",
+  controlBtnDisabled: {
+    backgroundColor: "#374151",
     opacity: 0.7,
   },
-  startButtonText: {
+  controlBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "800" as const,
+    letterSpacing: 0.5,
+  },
+  stopIcon: {
+    width: 14,
+    height: 14,
+    borderRadius: 3,
+    backgroundColor: "#FFFFFF",
+  },
+  startBtn: {
+    backgroundColor: "#0E1015",
+    borderRadius: 20,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.15)",
+    marginTop: 6,
+  },
+  startBtnInner: {
+    backgroundColor: "#00ADB5",
+    borderRadius: 16,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingVertical: 18,
+    gap: 10,
+  },
+  startBtnText: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "600" as const,
+    fontWeight: "800" as const,
     letterSpacing: 1,
   },
-  actionButtonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600" as const,
-    letterSpacing: 0.5,
+  startBtnXp: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 4,
+    paddingVertical: 8,
+  },
+  startBtnXpText: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#00E5FF",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
   },
   modalContent: {
-    backgroundColor: "#171B22",
-    borderRadius: 16,
-    padding: 30,
+    backgroundColor: "#141720",
+    borderRadius: 24,
+    padding: 28,
     width: "85%",
-    alignItems: "center",
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   modalClose: {
-    position: "absolute",
-    top: 15,
-    right: 15,
+    position: "absolute" as const,
+    top: 14,
+    right: 14,
+    padding: 4,
   },
-  modalIcon: {
-    marginBottom: 20,
+  modalIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(255,107,53,0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: "600" as const,
-    color: "#F9FAFB",
-    marginBottom: 10,
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    marginBottom: 6,
   },
-  modalText: {
-    fontSize: 18,
-    color: "#F59E0B",
-    fontWeight: "600" as const,
-    marginBottom: 10,
+  modalCalText: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#FF6B35",
+    marginBottom: 6,
   },
   modalSubtext: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    textAlign: "center",
-    marginBottom: 30,
+    fontSize: 14,
+    color: "#6B7280",
+    textAlign: "center" as const,
+    marginBottom: 24,
   },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 15,
+  modalBtns: {
+    flexDirection: "row" as const,
+    gap: 10,
     width: "100%",
   },
-  modalButton: {
+  modalBtnSecondary: {
     flex: 1,
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center" as const,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
-  modalButtonPrimary: {
+  modalBtnPrimary: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center" as const,
     backgroundColor: "#00ADB5",
   },
-  modalButtonSecondary: {
-    backgroundColor: "#1F2329",
-  },
-  modalButtonTextPrimary: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600" as const,
-  },
-  modalButtonTextSecondary: {
+  modalBtnSecondaryText: {
     color: "#9CA3AF",
-    fontSize: 16,
-    fontWeight: "600" as const,
+    fontSize: 15,
+    fontWeight: "700" as const,
+  },
+  modalBtnPrimaryText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700" as const,
   },
 });

@@ -2,35 +2,49 @@ import { Tabs } from "expo-router";
 import { Home, Route, Utensils, Dumbbell, Trophy } from "lucide-react-native";
 import React from "react";
 import * as Haptics from "expo-haptics";
-import { Platform } from "react-native";
+import { Platform, View, StyleSheet } from "react-native";
+
+function TabIcon({ children, focused, color }: { children: React.ReactNode; focused: boolean; color: string }) {
+  return (
+    <View style={styles.iconWrap}>
+      {children}
+      {focused && <View style={[styles.activeIndicator, { backgroundColor: color }]} />}
+    </View>
+  );
+}
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#00ADB5",
-        tabBarInactiveTintColor: "#6B7280",
+        tabBarActiveTintColor: "#00E5FF",
+        tabBarInactiveTintColor: "#374151",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "rgba(14, 17, 23, 0.95)",
+          backgroundColor: "#0A0C10",
           borderTopWidth: 1,
-          borderTopColor: "rgba(0, 173, 181, 0.2)",
+          borderTopColor: "rgba(0,229,255,0.08)",
           position: "absolute" as const,
           elevation: 0,
         },
         tabBarLabelStyle: {
-          fontWeight: "600" as const,
-          fontSize: 11,
-          letterSpacing: 0.5,
-          marginBottom: 4,
+          fontWeight: "700" as const,
+          fontSize: 10,
+          letterSpacing: 0.8,
+          textTransform: "uppercase" as const,
+          marginTop: 2,
         },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
+          title: "Base",
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon focused={focused} color={color}>
+              <Home size={22} color={color} />
+            </TabIcon>
+          ),
         }}
         listeners={{
           tabPress: () => {
@@ -44,7 +58,11 @@ export default function TabLayout() {
         name="run"
         options={{
           title: "Run",
-          tabBarIcon: ({ color }) => <Route size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon focused={focused} color={color}>
+              <Route size={22} color={color} />
+            </TabIcon>
+          ),
         }}
         listeners={{
           tabPress: () => {
@@ -57,8 +75,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="nutrition"
         options={{
-          title: "Nutrition",
-          tabBarIcon: ({ color }) => <Utensils size={24} color={color} />,
+          title: "Fuel",
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon focused={focused} color={color}>
+              <Utensils size={22} color={color} />
+            </TabIcon>
+          ),
         }}
         listeners={{
           tabPress: () => {
@@ -72,7 +94,11 @@ export default function TabLayout() {
         name="gym"
         options={{
           title: "Gym",
-          tabBarIcon: ({ color }) => <Dumbbell size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon focused={focused} color={color}>
+              <Dumbbell size={22} color={color} />
+            </TabIcon>
+          ),
         }}
         listeners={{
           tabPress: () => {
@@ -86,7 +112,11 @@ export default function TabLayout() {
         name="leaderboard"
         options={{
           title: "Stats",
-          tabBarIcon: ({ color }) => <Trophy size={24} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon focused={focused} color={color}>
+              <Trophy size={22} color={color} />
+            </TabIcon>
+          ),
         }}
         listeners={{
           tabPress: () => {
@@ -99,3 +129,19 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  iconWrap: {
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    width: 36,
+    height: 28,
+  },
+  activeIndicator: {
+    position: "absolute" as const,
+    bottom: -4,
+    width: 16,
+    height: 3,
+    borderRadius: 2,
+  },
+});

@@ -1272,80 +1272,94 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
               </View>
             ) : (
               <>
-                <TouchableOpacity 
-                  style={styles.scanButton}
-                  onPress={async () => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    if (!isPremium) {
-                      router.push('/paywall');
-                      return;
-                    }
-                    if (!permission.granted) {
-                      const result = await requestPermission();
-                      if (result.granted) {
+                <View style={styles.actionGrid}>
+                  <TouchableOpacity 
+                    style={styles.actionTile}
+                    onPress={async () => {
+                      if (Platform.OS !== 'web') {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (!isPremium) {
+                        router.push('/paywall');
+                        return;
+                      }
+                      if (!permission.granted) {
+                        const result = await requestPermission();
+                        if (result.granted) {
+                          setShowCamera(true);
+                        }
+                      } else {
                         setShowCamera(true);
                       }
-                    } else {
-                      setShowCamera(true);
-                    }
-                  }}
-                >
-                  <ScanLine size={24} color="#FFFFFF" />
-                  <Text style={styles.scanButtonText}>Scan Food</Text>
-                </TouchableOpacity>
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(0,229,255,0.1)' }]}>
+                      <ScanLine size={22} color="#00E5FF" />
+                    </View>
+                    <Text style={styles.actionTileLabel}>Scan</Text>
+                    <Text style={styles.actionTileSub}>Camera</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.aiButton}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    if (!isPremium) {
-                      router.push('/paywall');
-                      return;
-                    }
-                    setShowAIInput(true);
-                  }}
-                >
-                  <Brain size={24} color="#FFFFFF" />
-                  <Text style={styles.aiButtonText}>Describe Food to AI</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionTile}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (!isPremium) {
+                        router.push('/paywall');
+                        return;
+                      }
+                      setShowAIInput(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(191,255,0,0.1)' }]}>
+                      <Brain size={22} color="#BFFF00" />
+                    </View>
+                    <Text style={styles.actionTileLabel}>Describe</Text>
+                    <Text style={styles.actionTileSub}>AI Powered</Text>
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.foodSearchButton}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    if (!isPremium) {
-                      router.push('/paywall');
-                      return;
-                    }
-                    setShowFoodSearch(true);
-                  }}
-                >
-                  <Search size={24} color="#FFFFFF" />
-                  <Text style={styles.foodSearchButtonText}>Search Foods</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.actionTile}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      if (!isPremium) {
+                        router.push('/paywall');
+                        return;
+                      }
+                      setShowFoodSearch(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(255,107,53,0.1)' }]}>
+                      <Search size={22} color="#FF6B35" />
+                    </View>
+                    <Text style={styles.actionTileLabel}>Search</Text>
+                    <Text style={styles.actionTileSub}>USDA DB</Text>
+                  </TouchableOpacity>
 
-
-
-                <TouchableOpacity
-                  style={styles.manualButton}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setShowAddFood(true);
-                  }}
-                >
-                  <Plus size={20} color="#FFFFFF" />
-                  <Text style={styles.manualButtonText}>Add Food</Text>
-                </TouchableOpacity>
-                
-
+                  <TouchableOpacity
+                    style={styles.actionTile}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setShowAddFood(true);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
+                      <Plus size={22} color="#F59E0B" />
+                    </View>
+                    <Text style={styles.actionTileLabel}>Manual</Text>
+                    <Text style={styles.actionTileSub}>Add Entry</Text>
+                  </TouchableOpacity>
+                </View>
               </>
             )}
           </>
@@ -1511,7 +1525,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 setAiInput("");
               }}
             >
-              <X size={24} color="#1F2937" />
+              <X size={24} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.aiModalTitle}>Describe Your Food</Text>
             <Text style={styles.aiModalSubtitle}>
@@ -1636,7 +1650,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 setFoodSearchResults([]);
               }}
             >
-              <X size={24} color="#1F2937" />
+              <X size={24} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.aiModalTitle}>Search Foods</Text>
             <View style={styles.foodSearchInputRow}>
@@ -1798,7 +1812,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 setShowEditGoals(false);
               }}
             >
-              <X size={24} color="#1F2937" />
+              <X size={24} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.aiModalTitle}>Edit Nutrition Goals</Text>
             <Text style={styles.aiModalSubtitle}>
@@ -1885,7 +1899,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 setRefinementInput("");
               }}
             >
-              <X size={24} color="#1F2937" />
+              <X size={24} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.aiModalTitle}>Refine Food Entry</Text>
             <Text style={styles.aiModalSubtitle}>
@@ -1893,7 +1907,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
             </Text>
             {selectedFoodEntry && (
               <View style={{ marginBottom: 15 }}>
-                <Text style={{ fontSize: 16, color: "#1F2937", fontWeight: "600" }}>
+                <Text style={{ fontSize: 16, color: "#F3F4F6", fontWeight: "600" as const }}>
                   {selectedFoodEntry.name}
                 </Text>
                 <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 4 }}>
@@ -1948,19 +1962,19 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 setWeeklyReviewData("");
               }}
             >
-              <X size={24} color="#1F2937" />
+              <X size={24} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.aiModalTitle}>Weekly Nutrition Review</Text>
             <ScrollView style={{ maxHeight: 400, marginTop: 20 }}>
               {isGeneratingReview ? (
-                <View style={{ alignItems: "center", paddingVertical: 40 }}>
-                  <ActivityIndicator size="large" color="#3B82F6" />
+                <View style={{ alignItems: "center" as const, paddingVertical: 40 }}>
+                  <ActivityIndicator size="large" color="#00ADB5" />
                   <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 16 }}>
                     Analyzing your week...
                   </Text>
                 </View>
               ) : (
-                <Text style={{ fontSize: 16, color: "#1F2937", lineHeight: 24 }}>
+                <Text style={{ fontSize: 16, color: "#D1D5DB", lineHeight: 24 }}>
                   {weeklyReviewData}
                 </Text>
               )}
@@ -2071,6 +2085,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9CA3AF",
     marginTop: 10,
+  },
+  actionGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 20,
+  },
+  actionTile: {
+    width: "48%",
+    backgroundColor: "#0E1015",
+    borderRadius: 18,
+    padding: 18,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+    gap: 8,
+  },
+  actionTileIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionTileLabel: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.3,
+  },
+  actionTileSub: {
+    fontSize: 11,
+    fontWeight: "500" as const,
+    color: "#4B5563",
   },
   scanButton: {
     backgroundColor: "#00ADB5",
@@ -2250,21 +2298,23 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
     justifyContent: "center",
     alignItems: "center",
   },
   quizModal: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    backgroundColor: "#141720",
+    borderRadius: 24,
     padding: 30,
     width: "90%",
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   quizTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#F3F4F6",
     marginBottom: 5,
   },
   quizProgress: {
@@ -2275,34 +2325,35 @@ const styles = StyleSheet.create({
   quizQuestion: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#E5E7EB",
     marginBottom: 20,
   },
   quizInput: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#0D0F13",
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.08)",
+    color: "#F3F4F6",
   },
   choicesContainer: {
     gap: 10,
   },
   choiceButton: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#0D0F13",
     borderRadius: 10,
     padding: 15,
     borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   choiceButtonActive: {
-    backgroundColor: "#3B82F6",
-    borderColor: "#3B82F6",
+    backgroundColor: "#00ADB5",
+    borderColor: "#00ADB5",
   },
   choiceText: {
     fontSize: 16,
-    color: "#1F2937",
+    color: "#D1D5DB",
     textAlign: "center",
   },
   choiceTextActive: {
@@ -2321,10 +2372,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   quizButtonPrimary: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#00ADB5",
   },
   quizButtonSecondary: {
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   quizButtonTextPrimary: {
     color: "#FFFFFF",
@@ -2332,16 +2385,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   quizButtonTextSecondary: {
-    color: "#6B7280",
+    color: "#9CA3AF",
     fontSize: 16,
     fontWeight: "600",
   },
   aiModal: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    backgroundColor: "#141720",
+    borderRadius: 24,
     padding: 30,
     width: "90%",
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   modalClose: {
     position: "absolute",
@@ -2350,12 +2405,12 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 5,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
   aiModalTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#F3F4F6",
     marginBottom: 10,
   },
   aiModalSubtitle: {
@@ -2364,19 +2419,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   aiTextInput: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#0D0F13",
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.08)",
     minHeight: 100,
     textAlignVertical: "top",
+    color: "#F3F4F6",
   },
   aiAnalyzeButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#00ADB5",
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 14,
     alignItems: "center",
     marginTop: 20,
   },
@@ -2564,15 +2620,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   quizRequiredCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#0E1015",
     borderRadius: 20,
     padding: 30,
     marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
     alignItems: "center",
   },
   quizRequiredHeader: {
@@ -2582,13 +2635,13 @@ const styles = StyleSheet.create({
   quizRequiredTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#F3F4F6",
     textAlign: "center",
     marginTop: 15,
   },
   quizRequiredDescription: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#9CA3AF",
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 25,
@@ -2604,17 +2657,17 @@ const styles = StyleSheet.create({
   },
   quizFeatureBullet: {
     fontSize: 18,
-    color: "#8B5CF6",
+    color: "#00ADB5",
     marginRight: 12,
     fontWeight: "bold",
   },
   quizFeatureText: {
     fontSize: 16,
-    color: "#4B5563",
+    color: "#9CA3AF",
     flex: 1,
   },
   startQuizButton: {
-    backgroundColor: "#8B5CF6",
+    backgroundColor: "#00ADB5",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -2645,12 +2698,14 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   foodSearchModal: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    backgroundColor: "#141720",
+    borderRadius: 24,
     padding: 24,
     width: "92%",
     maxWidth: 420,
     maxHeight: "85%",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   foodSearchInputRow: {
     flexDirection: "row",
@@ -2660,14 +2715,14 @@ const styles = StyleSheet.create({
   },
   foodSearchInput: {
     flex: 1,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#0D0F13",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#1F2937",
+    color: "#F3F4F6",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.08)",
   },
   foodSearchBtn: {
     backgroundColor: "#00ADB5",
@@ -2697,23 +2752,23 @@ const styles = StyleSheet.create({
   foodSearchEmptyText: {
     marginTop: 12,
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#6B7280",
     fontWeight: "500" as const,
   },
   foodSearchEmptyHint: {
     marginTop: 4,
     fontSize: 13,
-    color: "#D1D5DB",
+    color: "#4B5563",
   },
   foodSearchResultItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#0E1015",
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#F3F4F6",
+    borderColor: "rgba(255,255,255,0.04)",
   },
   foodSearchResultLeft: {
     flex: 1,
@@ -2722,7 +2777,7 @@ const styles = StyleSheet.create({
   foodSearchResultName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#1F2937",
+    color: "#F3F4F6",
     lineHeight: 20,
   },
   foodSearchResultServing: {
@@ -2862,16 +2917,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   firstTimePromptModal: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    backgroundColor: "#141720",
+    borderRadius: 24,
     padding: 30,
     width: "90%",
     maxWidth: 400,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   firstTimePromptHeader: {
     alignItems: "center",
@@ -2880,13 +2932,13 @@ const styles = StyleSheet.create({
   firstTimePromptTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#F3F4F6",
     textAlign: "center",
     marginTop: 15,
   },
   firstTimePromptDescription: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#9CA3AF",
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 25,
@@ -2903,12 +2955,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginRight: 15,
     width: 30,
-    color: "#8B5CF6",
+    color: "#00ADB5",
     fontWeight: "bold" as const,
   },
   firstTimeFeatureText: {
     fontSize: 16,
-    color: "#4B5563",
+    color: "#9CA3AF",
     flex: 1,
     lineHeight: 22,
   },
@@ -2925,9 +2977,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   firstTimeSkipButton: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   firstTimeStartButton: {
     backgroundColor: "#10B981",
@@ -2935,7 +2987,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   firstTimeSkipButtonText: {
-    color: "#6B7280",
+    color: "#9CA3AF",
     fontSize: 16,
     fontWeight: "600",
   },
