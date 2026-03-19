@@ -17,8 +17,8 @@ export const RANKS: RankInfo[] = [
 ];
 
 export const XP_REWARDS = {
-  RUN_BASE: 50,
-  RUN_PER_MILE: 10,
+  RUN_BASE: 100,
+  RUN_PER_MILE: 25,
   WORKOUT_COMPLETE: 75,
   FOOD_LOG: 15,
   CALORIE_GOAL_HIT: 50,
@@ -55,13 +55,8 @@ export const defaultXPState: XPState = {
   lastProteinGoalDate: null,
 };
 
-export function getXPForLevel(level: number): number {
-  if (level <= 1) return 0;
-  if (level <= 5) return 100 + (level - 2) * 25;
-  if (level <= 10) return 200 + (level - 6) * 30;
-  if (level <= 20) return 350 + (level - 11) * 40;
-  if (level <= 30) return 750 + (level - 21) * 60;
-  return 1350 + (level - 31) * 80;
+export function getXPForLevel(_level: number): number {
+  return 500;
 }
 
 export function getTotalXPForLevel(level: number): number {
