@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,7 +15,6 @@ import { Stack } from 'expo-router';
 import {
   Bell,
   BellOff,
-  Clock,
   Dumbbell,
   Activity,
   Calendar,
@@ -23,32 +22,26 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Scale,
+  UtensilsCrossed,
 } from 'lucide-react-native';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { useApp } from '@/providers/AppProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface NotificationSettings {
-  dailyWorkoutReminder: boolean;
+  morningFoodReminder: boolean;
+  middayRunReminder: boolean;
+  eveningWorkoutReminder: boolean;
   workoutCompletionCelebration: boolean;
   weeklyProgressSummary: boolean;
-  runningReminders: boolean;
-  nutritionReminders: boolean;
-  lunchReminder: boolean;
-  weightReminder: boolean;
-  reminderTime: string; // Format: "HH:MM"
 }
 
 const DEFAULT_SETTINGS: NotificationSettings = {
-  dailyWorkoutReminder: true,
+  morningFoodReminder: true,
+  middayRunReminder: true,
+  eveningWorkoutReminder: true,
   workoutCompletionCelebration: true,
   weeklyProgressSummary: true,
-  runningReminders: true,
-  nutritionReminders: false,
-  lunchReminder: true,
-  weightReminder: true,
-  reminderTime: '08:00',
 };
 
 const STORAGE_KEY = 'notification_settings';
@@ -57,28 +50,23 @@ export default function NotificationSettingsScreen() {
   const insets = useSafeAreaInsets();
   const {
     requestPermissions,
-    scheduleDailyWorkoutReminder,
-    scheduleMealReminders,
-    scheduleWeightReminder,
+    scheduleMorningFoodReminder,
+    scheduleMiddayRunReminder,
+    scheduleEveningWorkoutReminder,
+    scheduleAllDailyReminders,
     scheduleWeeklyReport,
     sendWeeklyReport,
     cancelAllNotifications,
     checkPermissionStatus,
   } = useNotifications();
-  
+
   const { stats, weeklyRuns, weeklyWorkouts } = useApp();
-  
+
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_SETTINGS);
   const [permissionStatus, setPermissionStatus] = useState<string>('undetermined');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load settings from storage
-  useEffect(() => {
-    loadSettings();
-    checkPermissions();
-  }, []);
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -90,21 +78,26 @@ export default function NotificationSettingsScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const saveSettings = async (newSettings: NotificationSettings) => {
+  const saveSettings = useCallback(async (newSettings: NotificationSettings) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
       setSettings(newSettings);
     } catch (error) {
       console.error('Error saving notification settings:', error);
     }
-  };
+  }, []);
 
-  const checkPermissions = async () => {
+  const checkPermissions = useCallback(async () => {
     const status = await checkPermissionStatus();
     setPermissionStatus(status);
-  };
+  }, [checkPermissionStatus]);
+
+  useEffect(() => {
+    void loadSettings();
+    void checkPermissions();
+  }, [loadSettings, checkPermissions]);
 
   const handlePermissionRequest = async () => {
     if (Platform.OS === 'web') {
@@ -118,54 +111,57 @@ export default function NotificationSettingsScreen() {
     const granted = await requestPermissions();
     if (granted) {
       setPermissionStatus('granted');
-      // Schedule enabled notifications
-      if (settings.dailyWorkoutReminder) {
-        await scheduleDailyWorkoutReminder();
-      }
+      await scheduleAllDailyReminders();
       if (settings.weeklyProgressSummary) {
         await scheduleWeeklyReport();
       }
-      if (settings.lunchReminder) {
-        await scheduleMealReminders();
-      }
-      if (settings.weightReminder) {
-        await scheduleWeightReminder();
-      }
       Alert.alert(
-        'Notifications Enabled! 🎉',
-        'You\'ll now receive workout reminders and progress updates to help you stay on track with your fitness goals.'
+        'Notifications Enabled!',
+        'You\'ll receive 3 daily reminders:\n\n8:00 AM - Nutrition\n12:30 PM - Running\n6:00 PM - Workout'
       );
     } else {
       Alert.alert(
         'Permission Denied',
-        'To receive workout reminders, please enable notifications in your device settings.'
+        'To receive reminders, please enable notifications in your device settings.'
       );
     }
   };
 
-  const handleSettingChange = async (key: keyof NotificationSettings, value: boolean | string) => {
+  const handleSettingChange = async (key: keyof NotificationSettings, value: boolean) => {
     const newSettings = { ...settings, [key]: value };
     await saveSettings(newSettings);
 
-    // Handle specific setting changes
     if (permissionStatus === 'granted') {
-      if (key === 'dailyWorkoutReminder') {
+      if (key === 'morningFoodReminder') {
         if (value) {
-          await scheduleDailyWorkoutReminder();
+          await scheduleMorningFoodReminder();
         } else {
           await cancelAllNotifications();
+          if (newSettings.middayRunReminder) await scheduleMiddayRunReminder();
+          if (newSettings.eveningWorkoutReminder) await scheduleEveningWorkoutReminder();
+          if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
+        }
+      } else if (key === 'middayRunReminder') {
+        if (value) {
+          await scheduleMiddayRunReminder();
+        } else {
+          await cancelAllNotifications();
+          if (newSettings.morningFoodReminder) await scheduleMorningFoodReminder();
+          if (newSettings.eveningWorkoutReminder) await scheduleEveningWorkoutReminder();
+          if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
+        }
+      } else if (key === 'eveningWorkoutReminder') {
+        if (value) {
+          await scheduleEveningWorkoutReminder();
+        } else {
+          await cancelAllNotifications();
+          if (newSettings.morningFoodReminder) await scheduleMorningFoodReminder();
+          if (newSettings.middayRunReminder) await scheduleMiddayRunReminder();
+          if (newSettings.weeklyProgressSummary) await scheduleWeeklyReport();
         }
       } else if (key === 'weeklyProgressSummary') {
         if (value) {
           await scheduleWeeklyReport();
-        }
-      } else if (key === 'lunchReminder') {
-        if (value) {
-          await scheduleMealReminders();
-        }
-      } else if (key === 'weightReminder') {
-        if (value) {
-          await scheduleWeightReminder();
         }
       }
     }
@@ -178,7 +174,7 @@ export default function NotificationSettingsScreen() {
           icon: CheckCircle,
           color: '#10B981',
           title: 'Notifications Enabled',
-          description: 'You\'ll receive workout reminders and progress updates',
+          description: 'You\'ll receive daily reminders for food, running, and workouts',
         };
       case 'denied':
         return {
@@ -192,7 +188,7 @@ export default function NotificationSettingsScreen() {
           icon: AlertCircle,
           color: '#F59E0B',
           title: 'Permission Required',
-          description: 'Allow notifications to receive workout reminders',
+          description: 'Allow notifications to receive your daily reminders',
         };
       case 'unsupported':
         return {
@@ -224,15 +220,15 @@ export default function NotificationSettingsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Stack.Screen 
-        options={{ 
+      <Stack.Screen
+        options={{
           title: 'Notifications',
           headerStyle: { backgroundColor: '#3B82F6' },
           headerTintColor: '#FFFFFF',
-          headerTitleStyle: { fontWeight: 'bold' },
-        }} 
+          headerTitleStyle: { fontWeight: 'bold' as const },
+        }}
       />
-      
+
       <LinearGradient
         colors={['#3B82F6', '#8B5CF6']}
         start={{ x: 0, y: 0 }}
@@ -244,12 +240,11 @@ export default function NotificationSettingsScreen() {
           <Text style={styles.headerTitle}>Notifications</Text>
         </View>
         <Text style={styles.headerSubtitle}>
-          Customize your workout reminders and progress updates
+          3 daily reminders to keep you on track
         </Text>
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Permission Status Card */}
         <View style={styles.statusCard}>
           <View style={styles.statusHeader}>
             <StatusIcon size={24} color={statusInfo.color} />
@@ -258,11 +253,12 @@ export default function NotificationSettingsScreen() {
             </Text>
           </View>
           <Text style={styles.statusDescription}>{statusInfo.description}</Text>
-          
+
           {permissionStatus !== 'granted' && permissionStatus !== 'unsupported' && (
             <TouchableOpacity
               style={[styles.enableButton, { backgroundColor: statusInfo.color }]}
               onPress={handlePermissionRequest}
+              testID="enable-notifications-button"
             >
               <Bell size={20} color="#FFFFFF" />
               <Text style={styles.enableButtonText}>Enable Notifications</Text>
@@ -270,192 +266,146 @@ export default function NotificationSettingsScreen() {
           )}
         </View>
 
-        {/* Notification Settings */}
+        <View style={styles.scheduleCard}>
+          <Text style={styles.cardTitle}>Daily Schedule</Text>
+          <View style={styles.scheduleTimeline}>
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#F97316' }]} />
+              <View style={styles.timelineLine} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTime}>8:00 AM</Text>
+                <Text style={styles.timelineLabel}>Nutrition Reminder</Text>
+                <Text style={styles.timelineDesc}>Scan your breakfast & track meals</Text>
+              </View>
+            </View>
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#3B82F6' }]} />
+              <View style={styles.timelineLine} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTime}>12:30 PM</Text>
+                <Text style={styles.timelineLabel}>Running Reminder</Text>
+                <Text style={styles.timelineDesc}>Time to lace up and go for a run</Text>
+              </View>
+            </View>
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#10B981' }]} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTime}>6:00 PM</Text>
+                <Text style={styles.timelineLabel}>Workout Reminder</Text>
+                <Text style={styles.timelineDesc}>End your day with a workout</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
         <View style={styles.settingsCard}>
-          <Text style={styles.cardTitle}>Notification Preferences</Text>
-          
+          <Text style={styles.cardTitle}>Toggle Reminders</Text>
+
           <View style={styles.settingsList}>
-            {/* Daily Workout Reminder */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <Dumbbell size={20} color="#3B82F6" />
+                <View style={[styles.settingIcon, { backgroundColor: '#FFF7ED' }]}>
+                  <UtensilsCrossed size={20} color="#F97316" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Daily Workout Reminder</Text>
-                  <Text style={styles.settingDescription}>
-                    Get reminded to work out every day at {settings.reminderTime}
-                  </Text>
+                  <Text style={styles.settingTitle}>Morning - Nutrition</Text>
+                  <Text style={styles.settingDescription}>8:00 AM daily</Text>
                 </View>
               </View>
               <Switch
-                value={settings.dailyWorkoutReminder}
-                onValueChange={(value) => handleSettingChange('dailyWorkoutReminder', value)}
-                trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
-                thumbColor={settings.dailyWorkoutReminder ? '#FFFFFF' : '#9CA3AF'}
+                value={settings.morningFoodReminder}
+                onValueChange={(value) => handleSettingChange('morningFoodReminder', value)}
+                trackColor={{ false: '#E5E7EB', true: '#F97316' }}
+                thumbColor={settings.morningFoodReminder ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
+                testID="morning-food-switch"
               />
             </View>
 
-            {/* Workout Completion */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <CheckCircle size={20} color="#10B981" />
+                <View style={[styles.settingIcon, { backgroundColor: '#EFF6FF' }]}>
+                  <Activity size={20} color="#3B82F6" />
                 </View>
                 <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Workout Completion</Text>
-                  <Text style={styles.settingDescription}>
-                    Celebrate when you complete a workout
-                  </Text>
+                  <Text style={styles.settingTitle}>Midday - Running</Text>
+                  <Text style={styles.settingDescription}>12:30 PM daily</Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.middayRunReminder}
+                onValueChange={(value) => handleSettingChange('middayRunReminder', value)}
+                trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
+                thumbColor={settings.middayRunReminder ? '#FFFFFF' : '#9CA3AF'}
+                disabled={permissionStatus !== 'granted'}
+                testID="midday-run-switch"
+              />
+            </View>
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.settingIcon, { backgroundColor: '#ECFDF5' }]}>
+                  <Dumbbell size={20} color="#10B981" />
+                </View>
+                <View style={styles.settingText}>
+                  <Text style={styles.settingTitle}>Evening - Workout</Text>
+                  <Text style={styles.settingDescription}>6:00 PM daily</Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.eveningWorkoutReminder}
+                onValueChange={(value) => handleSettingChange('eveningWorkoutReminder', value)}
+                trackColor={{ false: '#E5E7EB', true: '#10B981' }}
+                thumbColor={settings.eveningWorkoutReminder ? '#FFFFFF' : '#9CA3AF'}
+                disabled={permissionStatus !== 'granted'}
+                testID="evening-workout-switch"
+              />
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.settingItem}>
+              <View style={styles.settingInfo}>
+                <View style={[styles.settingIcon, { backgroundColor: '#F5F3FF' }]}>
+                  <CheckCircle size={20} color="#8B5CF6" />
+                </View>
+                <View style={styles.settingText}>
+                  <Text style={styles.settingTitle}>Workout Celebrations</Text>
+                  <Text style={styles.settingDescription}>When you complete a workout</Text>
                 </View>
               </View>
               <Switch
                 value={settings.workoutCompletionCelebration}
                 onValueChange={(value) => handleSettingChange('workoutCompletionCelebration', value)}
-                trackColor={{ false: '#E5E7EB', true: '#10B981' }}
+                trackColor={{ false: '#E5E7EB', true: '#8B5CF6' }}
                 thumbColor={settings.workoutCompletionCelebration ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
+                testID="workout-celebration-switch"
               />
             </View>
 
-            {/* Weekly Progress */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <Calendar size={20} color="#8B5CF6" />
+                <View style={[styles.settingIcon, { backgroundColor: '#FEF3C7' }]}>
+                  <Calendar size={20} color="#D97706" />
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Weekly Progress Summary</Text>
-                  <Text style={styles.settingDescription}>
-                    Get a summary of your weekly fitness progress
-                  </Text>
+                  <Text style={styles.settingDescription}>Every Sunday at 7:00 PM</Text>
                 </View>
               </View>
               <Switch
                 value={settings.weeklyProgressSummary}
                 onValueChange={(value) => handleSettingChange('weeklyProgressSummary', value)}
-                trackColor={{ false: '#E5E7EB', true: '#8B5CF6' }}
+                trackColor={{ false: '#E5E7EB', true: '#D97706' }}
                 thumbColor={settings.weeklyProgressSummary ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
-              />
-            </View>
-
-            {/* Running Reminders */}
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <Activity size={20} color="#F59E0B" />
-                </View>
-                <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Running Reminders</Text>
-                  <Text style={styles.settingDescription}>
-                    Get reminded to go for a run
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={settings.runningReminders}
-                onValueChange={(value) => handleSettingChange('runningReminders', value)}
-                trackColor={{ false: '#E5E7EB', true: '#F59E0B' }}
-                thumbColor={settings.runningReminders ? '#FFFFFF' : '#9CA3AF'}
-                disabled={permissionStatus !== 'granted'}
-              />
-            </View>
-
-            {/* Nutrition Reminders */}
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <Clock size={20} color="#EF4444" />
-                </View>
-                <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Nutrition Reminders</Text>
-                  <Text style={styles.settingDescription}>
-                    Get reminded to log your meals
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={settings.nutritionReminders}
-                onValueChange={(value) => handleSettingChange('nutritionReminders', value)}
-                trackColor={{ false: '#E5E7EB', true: '#EF4444' }}
-                thumbColor={settings.nutritionReminders ? '#FFFFFF' : '#9CA3AF'}
-                disabled={permissionStatus !== 'granted'}
-              />
-            </View>
-
-            {/* Lunch Reminder */}
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <Clock size={20} color="#F97316" />
-                </View>
-                <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Meal Reminders</Text>
-                  <Text style={styles.settingDescription}>
-                    Daily reminders at 1:00 PM and 5:00 PM to scan your meals
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={settings.lunchReminder}
-                onValueChange={(value) => handleSettingChange('lunchReminder', value)}
-                trackColor={{ false: '#E5E7EB', true: '#F97316' }}
-                thumbColor={settings.lunchReminder ? '#FFFFFF' : '#9CA3AF'}
-                disabled={permissionStatus !== 'granted'}
-              />
-            </View>
-
-            {/* Weight Reminder */}
-            <View style={styles.settingItem}>
-              <View style={styles.settingInfo}>
-                <View style={styles.settingIcon}>
-                  <Scale size={20} color="#06B6D4" />
-                </View>
-                <View style={styles.settingText}>
-                  <Text style={styles.settingTitle}>Weight Entry Reminder</Text>
-                  <Text style={styles.settingDescription}>
-                    Daily reminder at 8:00 PM to log your weight
-                  </Text>
-                </View>
-              </View>
-              <Switch
-                value={settings.weightReminder}
-                onValueChange={(value) => handleSettingChange('weightReminder', value)}
-                trackColor={{ false: '#E5E7EB', true: '#06B6D4' }}
-                thumbColor={settings.weightReminder ? '#FFFFFF' : '#9CA3AF'}
-                disabled={permissionStatus !== 'granted'}
+                testID="weekly-summary-switch"
               />
             </View>
           </View>
         </View>
 
-        {/* Reminder Time Settings */}
-        {settings.dailyWorkoutReminder && (
-          <View style={styles.settingsCard}>
-            <Text style={styles.cardTitle}>Reminder Time</Text>
-            <View style={styles.timeSelector}>
-              <Clock size={20} color="#6B7280" />
-              <Text style={styles.timeText}>
-                Daily reminders at {settings.reminderTime}
-              </Text>
-              <TouchableOpacity
-                style={styles.changeTimeButton}
-                onPress={() => {
-                  Alert.alert(
-                    'Change Reminder Time',
-                    'Time picker functionality would be implemented here. Currently set to 8:00 AM.'
-                  );
-                }}
-              >
-                <Text style={styles.changeTimeText}>Change</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* Weekly Report Test */}
         {settings.weeklyProgressSummary && permissionStatus === 'granted' && (
           <View style={styles.settingsCard}>
             <Text style={styles.cardTitle}>Weekly Report Preview</Text>
@@ -465,9 +415,9 @@ export default function NotificationSettingsScreen() {
             <TouchableOpacity
               style={styles.testButton}
               onPress={async () => {
-                const weeklyMiles = weeklyRuns.reduce((sum, run) => sum + run.distance, 0);
-                const caloriesBurned = weeklyRuns.reduce((sum, run) => sum + run.calories, 0);
-                
+                const weeklyMiles = weeklyRuns.reduce((sum: number, run: { distance: number }) => sum + run.distance, 0);
+                const caloriesBurned = weeklyRuns.reduce((sum: number, run: { calories: number }) => sum + run.calories, 0);
+
                 await sendWeeklyReport({
                   weeklyRuns: weeklyRuns.length,
                   weeklyMiles,
@@ -477,6 +427,7 @@ export default function NotificationSettingsScreen() {
                   caloriesBurned,
                 });
               }}
+              testID="test-weekly-report-button"
             >
               <Calendar size={20} color="#FFFFFF" />
               <Text style={styles.testButtonText}>Send Test Weekly Report</Text>
@@ -484,17 +435,16 @@ export default function NotificationSettingsScreen() {
           </View>
         )}
 
-        {/* Info Card */}
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
             <Settings size={20} color="#6B7280" />
             <Text style={styles.infoTitle}>About Notifications</Text>
           </View>
           <Text style={styles.infoText}>
-            Notifications help you stay consistent with your fitness goals. You can customize which reminders you receive and when you receive them.
+            You receive 3 daily reminders to help you stay consistent: morning for nutrition, midday for running, and evening for your workout.
           </Text>
           <Text style={styles.infoText}>
-            Weekly reports are automatically sent every Sunday at 7 PM with your fitness progress summary.
+            Weekly reports are sent every Sunday at 7 PM with your fitness progress summary.
           </Text>
           <Text style={styles.infoText}>
             All notifications are sent locally from your device and respect your privacy.
@@ -532,7 +482,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     color: '#FFFFFF',
   },
   headerSubtitle: {
@@ -565,7 +515,7 @@ const styles = StyleSheet.create({
   },
   statusTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
   },
   statusDescription: {
     fontSize: 14,
@@ -583,8 +533,64 @@ const styles = StyleSheet.create({
   },
   enableButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#FFFFFF',
+  },
+  scheduleCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  scheduleTimeline: {
+    gap: 0,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    minHeight: 72,
+  },
+  timelineDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginTop: 4,
+    zIndex: 1,
+  },
+  timelineLine: {
+    position: 'absolute' as const,
+    left: 6,
+    top: 18,
+    bottom: -4,
+    width: 2,
+    backgroundColor: '#E5E7EB',
+  },
+  timelineContent: {
+    flex: 1,
+    marginLeft: 14,
+    paddingBottom: 16,
+  },
+  timelineTime: {
+    fontSize: 13,
+    fontWeight: '700' as const,
+    color: '#6B7280',
+    letterSpacing: 0.5,
+  },
+  timelineLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#1F2937',
+    marginTop: 2,
+  },
+  timelineDesc: {
+    fontSize: 13,
+    color: '#9CA3AF',
+    marginTop: 2,
   },
   settingsCard: {
     backgroundColor: '#FFFFFF',
@@ -599,7 +605,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold' as const,
     color: '#1F2937',
     marginBottom: 20,
   },
@@ -621,8 +627,7 @@ const styles = StyleSheet.create({
   settingIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -631,7 +636,7 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#1F2937',
     marginBottom: 2,
   },
@@ -639,29 +644,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#6B7280',
   },
-  timeSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 16,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-  },
-  timeText: {
-    flex: 1,
-    fontSize: 16,
-    color: '#1F2937',
-  },
-  changeTimeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-  },
-  changeTimeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+  divider: {
+    height: 1,
+    backgroundColor: '#F3F4F6',
+    marginVertical: 4,
   },
   infoCard: {
     backgroundColor: '#FFFFFF',
@@ -683,7 +669,7 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#1F2937',
   },
   infoText: {
@@ -705,7 +691,7 @@ const styles = StyleSheet.create({
   },
   testButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#FFFFFF',
   },
 });

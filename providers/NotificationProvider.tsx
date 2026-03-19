@@ -4,7 +4,6 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import createContextHook from '@nkzw/create-context-hook';
 
-// Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -22,39 +21,34 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   const responseListener = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => {
-    // Only set up listeners, don't automatically request permissions
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      if (notification) {
-        setNotification(notification);
+    notificationListener.current = Notifications.addNotificationReceivedListener(n => {
+      if (n) {
+        setNotification(n);
       }
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       if (response) {
         console.log('Notification response:', response);
-        
-        // Handle notification tap - navigate to appropriate screen based on notification type
+
         const notificationData = response.notification.request.content.data;
-        if (notificationData?.type === 'run-start' || notificationData?.type === 'run-progress') {
-          // Import router dynamically to avoid circular dependencies
+        if (notificationData?.type === 'run-start' || notificationData?.type === 'run-progress' || notificationData?.type === 'midday-run-reminder') {
           import('expo-router').then(({ router }) => {
             router.push('/(tabs)/run');
           }).catch(error => {
             console.error('Error navigating to run screen:', error);
           });
-        } else if (notificationData?.type === 'lunch-reminder' || notificationData?.type === 'meal-reminder') {
-          // Navigate to nutrition tab for meal reminders
+        } else if (notificationData?.type === 'morning-food-reminder') {
           import('expo-router').then(({ router }) => {
             router.push('/(tabs)/nutrition');
           }).catch(error => {
             console.error('Error navigating to nutrition screen:', error);
           });
-        } else if (notificationData?.type === 'weight-reminder') {
-          // Navigate to home tab for weight entry
+        } else if (notificationData?.type === 'evening-workout-reminder') {
           import('expo-router').then(({ router }) => {
-            router.push('/(tabs)/home');
+            router.push('/(tabs)/gym');
           }).catch(error => {
-            console.error('Error navigating to home screen:', error);
+            console.error('Error navigating to gym screen:', error);
           });
         }
       }
@@ -79,7 +73,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     try {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      
+
       if (existingStatus !== 'granted') {
         console.log('Requesting notification permissions...');
         const { status } = await Notifications.requestPermissionsAsync({
@@ -91,18 +85,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         });
         finalStatus = status;
       }
-      
+
       const granted = finalStatus === 'granted';
       console.log('Notification permission status:', finalStatus, 'granted:', granted);
-      
-      // If permissions granted, get push token
+
       if (granted && !expoPushToken) {
         const token = await registerForPushNotificationsAsync();
         if (token?.trim()) {
           setExpoPushToken(token.trim());
         }
       }
-      
+
       return granted;
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
@@ -134,9 +127,9 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
           body: body.trim(),
           sound: 'default',
         },
-        trigger: { 
+        trigger: {
           type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: trigger 
+          date: trigger,
         } as Notifications.DateTriggerInput,
       });
 
@@ -153,28 +146,19 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, [scheduleNotification]);
 
   const sendWorkoutCompletionNotification = useCallback(async (workoutType: string, duration: number): Promise<string | null> => {
-    if (Platform.OS === 'web') {
-      console.log('Notifications not supported on web');
-      return null;
-    }
+    if (Platform.OS === 'web') return null;
 
     try {
       const hasPermission = await requestPermissions();
-      if (!hasPermission) {
-        console.log('No notification permissions');
-        return null;
-      }
-
-      const title = '🎉 Workout Complete!';
-      const body = `Great job! You completed your ${workoutType} workout in ${Math.round(duration)} minutes. Keep up the amazing work!`;
+      if (!hasPermission) return null;
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title,
-          body,
+          title: 'Workout Complete!',
+          body: `Great job! You completed your ${workoutType} workout in ${Math.round(duration)} minutes. Keep up the amazing work!`,
           sound: 'default',
         },
-        trigger: null, // Send immediately
+        trigger: null,
       });
 
       console.log('Sent workout completion notification:', identifier);
@@ -186,28 +170,19 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, [requestPermissions]);
 
   const sendRunCompletionNotification = useCallback(async (distance: number, duration: number): Promise<string | null> => {
-    if (Platform.OS === 'web') {
-      console.log('Notifications not supported on web');
-      return null;
-    }
+    if (Platform.OS === 'web') return null;
 
     try {
       const hasPermission = await requestPermissions();
-      if (!hasPermission) {
-        console.log('No notification permissions');
-        return null;
-      }
-
-      const title = '🏃‍♂️ Run Complete!';
-      const body = `Awesome run! You covered ${distance.toFixed(1)} miles in ${Math.round(duration)} minutes. Your dedication is paying off!`;
+      if (!hasPermission) return null;
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title,
-          body,
+          title: 'Run Complete!',
+          body: `Awesome run! You covered ${distance.toFixed(1)} miles in ${Math.round(duration)} minutes. Your dedication is paying off!`,
           sound: 'default',
         },
-        trigger: null, // Send immediately
+        trigger: null,
       });
 
       console.log('Sent run completion notification:', identifier);
@@ -219,35 +194,26 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, [requestPermissions]);
 
   const sendRunStartNotification = useCallback(async (): Promise<string | null> => {
-    if (Platform.OS === 'web') {
-      console.log('Notifications not supported on web');
-      return null;
-    }
+    if (Platform.OS === 'web') return null;
 
     try {
       const hasPermission = await requestPermissions();
-      if (!hasPermission) {
-        console.log('No notification permissions');
-        return null;
-      }
-
-      const title = '🏃‍♂️ Run Started - Tap to View Map';
-      const body = '📍 Tracking your route • ⏱️ Timer running • 🔥 Calories counting';
+      if (!hasPermission) return null;
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title,
-          body,
+          title: 'Run Started - Tap to View Map',
+          body: 'Tracking your route | Timer running | Calories counting',
           sound: 'default',
-          sticky: true, // Keep notification visible
+          sticky: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
           categoryIdentifier: 'run-tracking',
           data: {
             type: 'run-start',
-            timestamp: Date.now()
+            timestamp: Date.now(),
           },
         },
-        trigger: null, // Send immediately
+        trigger: null,
       });
 
       console.log('Sent run start notification:', identifier);
@@ -259,39 +225,32 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, [requestPermissions]);
 
   const updateRunProgressNotification = useCallback(async (identifier: string | null, distance: number, time: number, calories?: number): Promise<void> => {
-    if (Platform.OS === 'web' || !identifier) {
-      return;
-    }
+    if (Platform.OS === 'web' || !identifier) return;
 
     try {
       const formatTime = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
       };
 
       const pace = distance > 0 ? time / 60 / distance : 0;
       const formatPace = (paceValue: number): string => {
-        if (!paceValue || paceValue === 0 || !isFinite(paceValue)) return "0:00";
+        if (!paceValue || paceValue === 0 || !isFinite(paceValue)) return '0:00';
         const cappedPace = Math.min(paceValue, 99.99);
         const mins = Math.floor(cappedPace);
         const secs = Math.round((cappedPace - mins) * 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
       };
 
-      // Calculate estimated calories burned
-      const estimatedCalories = calories || Math.round(distance * 112.5); // ~112.5 cal/mile for 150lb person
-      
-      const title = '🏃‍♂️ Active Run - Tap to View Map';
-      const body = `📍 ${distance.toFixed(2)} mi • ⏱️ ${formatTime(time)} • 🏃 ${formatPace(pace)} pace • 🔥 ${estimatedCalories} cal`;
+      const estimatedCalories = calories || Math.round(distance * 112.5);
 
-      // Update the existing notification with enhanced content
       await Notifications.scheduleNotificationAsync({
-        identifier, // Use same identifier to update
+        identifier,
         content: {
-          title,
-          body,
-          sound: undefined, // Don't play sound for updates
+          title: 'Active Run - Tap to View Map',
+          body: `${distance.toFixed(2)} mi | ${formatTime(time)} | ${formatPace(pace)} pace | ${estimatedCalories} cal`,
+          sound: undefined,
           sticky: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
           categoryIdentifier: 'run-tracking',
@@ -301,7 +260,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
             time,
             pace,
             calories: estimatedCalories,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           },
         },
         trigger: null,
@@ -314,9 +273,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, []);
 
   const cancelRunNotification = useCallback(async (identifier: string | null): Promise<void> => {
-    if (Platform.OS === 'web' || !identifier) {
-      return;
-    }
+    if (Platform.OS === 'web' || !identifier) return;
 
     try {
       await Notifications.cancelScheduledNotificationAsync(identifier);
@@ -326,195 +283,142 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     }
   }, []);
 
-  const scheduleDailyWorkoutReminder = useCallback(async (): Promise<void> => {
-    if (Platform.OS === 'web') {
-      return;
-    }
+  const scheduleMorningFoodReminder = useCallback(async (): Promise<void> => {
+    if (Platform.OS === 'web') return;
 
     try {
-      // Cancel existing daily workout reminders
       const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-      const dailyReminders = scheduledNotifications.filter(n => 
-        (n.content.title?.includes('Workout Time') || n.content.title?.includes('athliAI')) &&
-        !n.content.title?.includes('Meal Time') && !n.content.title?.includes('Lunch Time')
+      const existing = scheduledNotifications.filter(n =>
+        n.content.data?.type === 'morning-food-reminder'
       );
-      
-      for (const reminder of dailyReminders) {
-        await Notifications.cancelScheduledNotificationAsync(reminder.identifier);
+      for (const n of existing) {
+        await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
-
-      // Schedule new daily reminder for 8 AM
-      const trigger: Notifications.CalendarTriggerInput = {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        hour: 8,
-        minute: 0,
-        repeats: true,
-      };
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '🏋️ Workout Time!',
-          body: 'Ready to crush your daily workout? Let\'s get moving!',
+          title: 'Good Morning! Time to Fuel Up',
+          body: 'Start your day right \u2014 scan your breakfast and track your nutrition.',
           sound: 'default',
+          data: { type: 'morning-food-reminder', timestamp: Date.now() },
         },
-        trigger,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: 8,
+          minute: 0,
+          repeats: true,
+        },
       });
 
-      console.log('Daily workout reminder scheduled for 8 AM');
+      console.log('Morning food reminder scheduled for 8:00 AM');
     } catch (error) {
-      console.error('Error scheduling daily reminder:', error);
+      console.error('Error scheduling morning food reminder:', error);
     }
   }, []);
 
-  const scheduleMealReminders = useCallback(async (): Promise<void> => {
-    if (Platform.OS === 'web') {
-      return;
-    }
+  const scheduleMiddayRunReminder = useCallback(async (): Promise<void> => {
+    if (Platform.OS === 'web') return;
 
     try {
-      // Cancel existing meal reminders
       const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-      const mealReminders = scheduledNotifications.filter(n => 
-        n.content.title?.includes('Meal Time') || 
-        n.content.title?.includes('Lunch Time') || 
-        n.content.title?.includes('Scan your lunch') ||
-        n.content.title?.includes('Scan your meal')
+      const existing = scheduledNotifications.filter(n =>
+        n.content.data?.type === 'midday-run-reminder'
       );
-      
-      for (const reminder of mealReminders) {
-        await Notifications.cancelScheduledNotificationAsync(reminder.identifier);
+      for (const n of existing) {
+        await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
-      // Schedule 1:00 PM meal reminder
-      const lunchTrigger: Notifications.CalendarTriggerInput = {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        hour: 13, // 1 PM in 24-hour format
-        minute: 0,
-        repeats: true,
-      };
-
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '🍽️ Meal Time!',
-          body: 'Time for lunch! Don\'t forget to scan your meal and track your nutrition.',
+          title: 'Time for a Run!',
+          body: 'Perfect time to lace up and hit the road. Your body will thank you!',
           sound: 'default',
-          data: {
-            type: 'meal-reminder',
-            mealTime: 'lunch',
-            timestamp: Date.now()
-          },
+          data: { type: 'midday-run-reminder', timestamp: Date.now() },
         },
-        trigger: lunchTrigger,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: 12,
+          minute: 30,
+          repeats: true,
+        },
       });
 
-      // Schedule 5:00 PM meal reminder
-      const dinnerTrigger: Notifications.CalendarTriggerInput = {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        hour: 17, // 5 PM in 24-hour format
-        minute: 0,
-        repeats: true,
-      };
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: '🍽️ Meal Time!',
-          body: 'Time for dinner! Don\'t forget to scan your meal and track your nutrition.',
-          sound: 'default',
-          data: {
-            type: 'meal-reminder',
-            mealTime: 'dinner',
-            timestamp: Date.now()
-          },
-        },
-        trigger: dinnerTrigger,
-      });
-
-      console.log('Daily meal reminders scheduled for 1:00 PM and 5:00 PM');
+      console.log('Midday run reminder scheduled for 12:30 PM');
     } catch (error) {
-      console.error('Error scheduling meal reminders:', error);
+      console.error('Error scheduling midday run reminder:', error);
     }
   }, []);
 
-  const scheduleWeightReminder = useCallback(async (): Promise<void> => {
-    if (Platform.OS === 'web') {
-      return;
-    }
+  const scheduleEveningWorkoutReminder = useCallback(async (): Promise<void> => {
+    if (Platform.OS === 'web') return;
 
     try {
-      // Cancel existing weight reminders
       const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-      const weightReminders = scheduledNotifications.filter(n => 
-        n.content.title?.includes('Weight Entry') || 
-        n.content.title?.includes('Track Your Weight')
+      const existing = scheduledNotifications.filter(n =>
+        n.content.data?.type === 'evening-workout-reminder'
       );
-      
-      for (const reminder of weightReminders) {
-        await Notifications.cancelScheduledNotificationAsync(reminder.identifier);
+      for (const n of existing) {
+        await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
-
-      // Schedule 8:00 PM weight reminder
-      const weightTrigger: Notifications.CalendarTriggerInput = {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        hour: 20, // 8 PM in 24-hour format
-        minute: 0,
-        repeats: true,
-      };
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '⚖️ Track Your Weight',
-          body: 'Time to log your daily weight entry. Stay consistent with your progress tracking!',
+          title: 'Evening Workout Time',
+          body: 'End your day strong \u2014 time to crush your workout!',
           sound: 'default',
-          data: {
-            type: 'weight-reminder',
-            timestamp: Date.now()
-          },
+          data: { type: 'evening-workout-reminder', timestamp: Date.now() },
         },
-        trigger: weightTrigger,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          hour: 18,
+          minute: 0,
+          repeats: true,
+        },
       });
 
-      console.log('Daily weight reminder scheduled for 8:00 PM');
+      console.log('Evening workout reminder scheduled for 6:00 PM');
     } catch (error) {
-      console.error('Error scheduling weight reminder:', error);
+      console.error('Error scheduling evening workout reminder:', error);
     }
   }, []);
+
+  const scheduleAllDailyReminders = useCallback(async (): Promise<void> => {
+    await scheduleMorningFoodReminder();
+    await scheduleMiddayRunReminder();
+    await scheduleEveningWorkoutReminder();
+    console.log('All 3 daily reminders scheduled');
+  }, [scheduleMorningFoodReminder, scheduleMiddayRunReminder, scheduleEveningWorkoutReminder]);
 
   const scheduleWeeklyReport = useCallback(async (): Promise<void> => {
-    if (Platform.OS === 'web') {
-      return;
-    }
+    if (Platform.OS === 'web') return;
 
     try {
-      // Cancel existing weekly reports
       const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
-      const weeklyReports = scheduledNotifications.filter(n => 
+      const weeklyReports = scheduledNotifications.filter(n =>
         n.content.title?.includes('Weekly Report') || n.content.title?.includes('Week Summary')
       );
-      
+
       for (const report of weeklyReports) {
         await Notifications.cancelScheduledNotificationAsync(report.identifier);
       }
 
-      // Schedule weekly report for Sunday at 7 PM
-      const trigger: Notifications.CalendarTriggerInput = {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-        weekday: 1, // Sunday (1 = Sunday, 2 = Monday, etc.)
-        hour: 19, // 7 PM
-        minute: 0,
-        repeats: true,
-      };
-
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '📊 Weekly Fitness Report',
+          title: 'Weekly Fitness Report',
           body: 'Your weekly progress summary is ready! Tap to see how you did this week.',
           sound: 'default',
           data: {
             type: 'weekly-report',
-            timestamp: Date.now()
+            timestamp: Date.now(),
           },
         },
-        trigger,
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+          weekday: 1,
+          hour: 19,
+          minute: 0,
+          repeats: true,
+        },
       });
 
       console.log('Weekly report scheduled for Sunday at 7 PM');
@@ -531,52 +435,44 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     workoutStreak: number;
     caloriesBurned: number;
   }): Promise<string | null> => {
-    if (Platform.OS === 'web') {
-      console.log('Notifications not supported on web');
-      return null;
-    }
+    if (Platform.OS === 'web') return null;
 
     try {
       const hasPermission = await requestPermissions();
-      if (!hasPermission) {
-        console.log('No notification permissions');
-        return null;
-      }
+      if (!hasPermission) return null;
 
-      // Generate report summary
       const { weeklyRuns, weeklyMiles, weeklyWorkouts, runStreak, workoutStreak, caloriesBurned } = reportData;
-      
-      let title = '📊 Your Weekly Fitness Report';
+
+      let title = 'Your Weekly Fitness Report';
       let body = '';
-      
+
       if (weeklyRuns > 0 || weeklyWorkouts > 0) {
-        const activities = [];
+        const activities: string[] = [];
         if (weeklyRuns > 0) {
           activities.push(`${weeklyRuns} run${weeklyRuns > 1 ? 's' : ''} (${weeklyMiles.toFixed(1)} mi)`);
         }
         if (weeklyWorkouts > 0) {
           activities.push(`${weeklyWorkouts} workout${weeklyWorkouts > 1 ? 's' : ''}`);
         }
-        
-        body = `This week: ${activities.join(' • ')}`;
-        
+
+        body = `This week: ${activities.join(' | ')}`;
+
         if (caloriesBurned > 0) {
-          body += ` • ${Math.round(caloriesBurned)} calories burned`;
+          body += ` | ${Math.round(caloriesBurned)} calories burned`;
         }
-        
-        // Add streak info
-        const streaks = [];
+
+        const streaks: string[] = [];
         if (runStreak > 0) streaks.push(`${runStreak} day run streak`);
         if (workoutStreak > 0) streaks.push(`${workoutStreak} day workout streak`);
-        
+
         if (streaks.length > 0) {
-          body += ` 🔥 ${streaks.join(' • ')}`;
+          body += ` ${streaks.join(' | ')}`;
         }
-        
-        body += ' Keep up the great work! 💪';
+
+        body += ' Keep up the great work!';
       } else {
-        title = '💪 Ready for a New Week?';
-        body = 'Last week was quiet - let\'s make this week amazing! Your fitness journey is waiting.';
+        title = 'Ready for a New Week?';
+        body = "Last week was quiet - let's make this week amazing! Your fitness journey is waiting.";
       }
 
       const identifier = await Notifications.scheduleNotificationAsync({
@@ -587,10 +483,10 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
           data: {
             type: 'weekly-report',
             reportData,
-            timestamp: Date.now()
+            timestamp: Date.now(),
           },
         },
-        trigger: null, // Send immediately
+        trigger: null,
       });
 
       console.log('Sent weekly report notification:', identifier);
@@ -602,9 +498,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, [requestPermissions]);
 
   const cancelNotification = useCallback(async (identifier: string): Promise<void> => {
-    if (Platform.OS === 'web') {
-      return;
-    }
+    if (Platform.OS === 'web') return;
 
     if (!identifier?.trim()) {
       console.log('Invalid notification identifier');
@@ -620,9 +514,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, []);
 
   const cancelAllNotifications = useCallback(async (): Promise<void> => {
-    if (Platform.OS === 'web') {
-      return;
-    }
+    if (Platform.OS === 'web') return;
 
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
@@ -633,10 +525,8 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
   }, []);
 
   const checkPermissionStatus = useCallback(async (): Promise<string> => {
-    if (Platform.OS === 'web') {
-      return 'unsupported';
-    }
-    
+    if (Platform.OS === 'web') return 'unsupported';
+
     try {
       const { status } = await Notifications.getPermissionsAsync();
       return status;
@@ -651,9 +541,10 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     notification,
     scheduleNotification,
     scheduleWorkoutReminder,
-    scheduleDailyWorkoutReminder,
-    scheduleMealReminders,
-    scheduleWeightReminder,
+    scheduleMorningFoodReminder,
+    scheduleMiddayRunReminder,
+    scheduleEveningWorkoutReminder,
+    scheduleAllDailyReminders,
     scheduleWeeklyReport,
     sendWeeklyReport,
     sendWorkoutCompletionNotification,
@@ -670,9 +561,10 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     notification,
     scheduleNotification,
     scheduleWorkoutReminder,
-    scheduleDailyWorkoutReminder,
-    scheduleMealReminders,
-    scheduleWeightReminder,
+    scheduleMorningFoodReminder,
+    scheduleMiddayRunReminder,
+    scheduleEveningWorkoutReminder,
+    scheduleAllDailyReminders,
     scheduleWeeklyReport,
     sendWeeklyReport,
     sendWorkoutCompletionNotification,
@@ -698,19 +590,19 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (Device.isDevice) {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== 'granted') {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
+
     if (finalStatus !== 'granted') {
       console.log('Failed to get push token for push notification!');
       return null;
     }
-    
+
     try {
-      const projectId = '4f46e5-4f46-4f46-4f46-4f46e54f46e5'; // Default project ID
+      const projectId = '4f46e5-4f46-4f46-4f46-4f46e54f46e5';
       token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
       console.log('Expo push token:', token);
     } catch (error) {
@@ -721,22 +613,20 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
   }
 
   if (Platform.OS === 'android') {
-    // Set up default notification channel
-    Notifications.setNotificationChannelAsync('default', {
+    void Notifications.setNotificationChannelAsync('default', {
       name: 'default',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
     });
 
-    // Set up run tracking notification channel
-    Notifications.setNotificationChannelAsync('run-tracking', {
+    void Notifications.setNotificationChannelAsync('run-tracking', {
       name: 'Run Tracking',
       description: 'Ongoing run tracking notifications',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 100, 100, 100],
       lightColor: '#3B82F6',
-      sound: undefined, // No sound for ongoing notifications
+      sound: undefined,
       enableLights: true,
       enableVibrate: false,
     });

@@ -289,7 +289,7 @@ export default function WelcomeScreen() {
   const [showDaySelector, setShowDaySelector] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, updateCustomWorkoutPlan } = useApp();
-  const { requestPermissions, scheduleDailyWorkoutReminder } = useNotifications();
+  const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
   const insets = useSafeAreaInsets();
 
@@ -302,7 +302,7 @@ export default function WelcomeScreen() {
       try {
         const granted = await requestPermissions();
         if (granted) {
-          await scheduleDailyWorkoutReminder();
+          await scheduleAllDailyReminders();
         }
       } catch (error) {
         console.error('Error requesting permissions:', error);
