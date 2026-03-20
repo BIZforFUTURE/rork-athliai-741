@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,11 +11,13 @@ import {
   Platform,
   Alert,
   KeyboardAvoidingView,
+  Animated,
+  Dimensions,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Settings, Zap, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed } from "lucide-react-native";
+import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Clock } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -23,9 +25,116 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { callOpenAI } from "@/utils/openai";
 import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
 import { calculateHealthScore } from "@/utils/healthScore";
-import CircularProgress from "@/components/CircularProgress";
+import Svg, { Circle } from "react-native-svg";
 
+const _SCREEN_WIDTH = Dimensions.get("window").width;
 
+const CalorieRing = React.memo(({ calories, goal }: { calories: number; goal: number }) => {
+  const percentage = Math.min((calories / goal) * 100, 100);
+  const exceeds = calories > goal;
+  const remaining = Math.max(goal - calories, 0);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (percentage >= 90 && percentage <= 100) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.03, duration: 1000, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      pulseAnim.setValue(1);
+    }
+  }, [percentage, pulseAnim]);
+
+  const size = 160;
+  const strokeWidth = 12;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+  const ringColor = exceeds ? "#EF4444" : "#00E5FF";
+
+  return (
+    <Animated.View style={[calorieRingStyles.container, { transform: [{ scale: pulseAnim }] }]}>
+      <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
+        <Circle
+          cx={size / 2} cy={size / 2} r={radius}
+          stroke="rgba(0,229,255,0.08)" strokeWidth={strokeWidth} fill="none"
+        />
+        <Circle
+          cx={size / 2} cy={size / 2} r={radius}
+          stroke={ringColor} strokeWidth={strokeWidth} fill="none"
+          strokeDasharray={`${circumference}`} strokeDashoffset={`${offset}`}
+          strokeLinecap="round"
+        />
+      </Svg>
+      <View style={calorieRingStyles.center}>
+        <Text style={[calorieRingStyles.value, exceeds && { color: "#EF4444" }]}>{calories}</Text>
+        <Text style={calorieRingStyles.label}>of {goal} cal</Text>
+        {!exceeds && remaining > 0 && (
+          <Text style={calorieRingStyles.remaining}>{remaining} left</Text>
+        )}
+        {exceeds && (
+          <Text style={calorieRingStyles.over}>{calories - goal} over</Text>
+        )}
+      </View>
+    </Animated.View>
+  );
+});
+CalorieRing.displayName = "CalorieRing";
+
+const calorieRingStyles = StyleSheet.create({
+  container: { alignItems: "center", justifyContent: "center" },
+  center: { position: "absolute", alignItems: "center" },
+  value: { fontSize: 36, fontWeight: "800" as const, color: "#F9FAFB", letterSpacing: -1 },
+  label: { fontSize: 13, color: "#6B7280", marginTop: 2, fontWeight: "500" as const },
+  remaining: { fontSize: 12, color: "#00E5FF", marginTop: 4, fontWeight: "600" as const },
+  over: { fontSize: 12, color: "#EF4444", marginTop: 4, fontWeight: "600" as const },
+});
+
+const MacroBar = React.memo(({ label, value, goal, color, icon }: { label: string; value: number; goal: number; color: string; icon: React.ReactNode }) => {
+  const percentage = Math.min((value / goal) * 100, 100);
+  const widthAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(widthAnim, { toValue: percentage, duration: 800, useNativeDriver: false }).start();
+  }, [percentage, widthAnim]);
+
+  const animatedWidth = widthAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ["0%", "100%"],
+  });
+
+  return (
+    <View style={macroBarStyles.container}>
+      <View style={macroBarStyles.header}>
+        <View style={macroBarStyles.labelRow}>
+          {icon}
+          <Text style={macroBarStyles.label}>{label}</Text>
+        </View>
+        <Text style={[macroBarStyles.values, { color }]}>
+          {value}g <Text style={macroBarStyles.goal}>/ {goal}g</Text>
+        </Text>
+      </View>
+      <View style={macroBarStyles.trackOuter}>
+        <Animated.View style={[macroBarStyles.trackFill, { width: animatedWidth, backgroundColor: color }]} />
+      </View>
+    </View>
+  );
+});
+MacroBar.displayName = "MacroBar";
+
+const macroBarStyles = StyleSheet.create({
+  container: { marginBottom: 16 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  labelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  label: { fontSize: 14, fontWeight: "600" as const, color: "#D1D5DB" },
+  values: { fontSize: 14, fontWeight: "700" as const },
+  goal: { fontSize: 12, fontWeight: "400" as const, color: "#6B7280" },
+  trackOuter: { height: 8, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 4, overflow: "hidden" },
+  trackFill: { height: "100%", borderRadius: 4 },
+});
 
 export default function NutritionScreen() {
   const _router = useRouter();
@@ -39,7 +148,7 @@ export default function NutritionScreen() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [showAIInput, setShowAIInput] = useState(false);
-  const [_showCalendar, setShowCalendar] = useState(false);
+  const [_showCalendar, _setShowCalendar] = useState(false);
   const [_selectedDate, _setSelectedDate] = useState(new Date());
   const [_showProteinShake, setShowProteinShake] = useState(false);
   const [_proteinIngredients, setProteinIngredients] = useState("");
@@ -86,6 +195,11 @@ export default function NutritionScreen() {
   const [permission, requestPermission] = useCameraPermissions();
 
   const cameraRef = React.useRef<any>(null);
+  const headerFadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(headerFadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+  }, [headerFadeAnim]);
 
   useEffect(() => {
     if (!nutrition.quizCompleted) {
@@ -129,21 +243,13 @@ export default function NutritionScreen() {
     dietDuration: "",
   });
 
-
-
   const handleEditGoals = () => {
     const calorieGoal = parseInt(editGoals.calorieGoal) || nutrition.calorieGoal;
     const proteinGoal = parseInt(editGoals.proteinGoal) || nutrition.proteinGoal;
     const carbsGoal = parseInt(editGoals.carbsGoal) || nutrition.carbsGoal;
     const fatGoal = parseInt(editGoals.fatGoal) || nutrition.fatGoal;
 
-    updateNutrition({
-      calorieGoal,
-      proteinGoal,
-      carbsGoal,
-      fatGoal,
-    });
-
+    updateNutrition({ calorieGoal, proteinGoal, carbsGoal, fatGoal });
     setShowEditGoals(false);
     Alert.alert("Goals Updated", "Your nutrition goals have been updated successfully!");
   };
@@ -185,10 +291,7 @@ export default function NutritionScreen() {
     setIsMealPrep(false);
     
     if (isMealPrep) {
-      Alert.alert(
-        "Meal Prepped!",
-        `Added "${newEntry.name}" for ${targetDate.toLocaleDateString()}`
-      );
+      Alert.alert("Meal Prepped!", `Added "${newEntry.name}" for ${targetDate.toLocaleDateString()}`);
     }
   };
 
@@ -211,11 +314,7 @@ export default function NutritionScreen() {
     }
 
     const activityMultipliers: { [key: string]: number } = {
-      sedentary: 1.2,
-      light: 1.375,
-      moderate: 1.55,
-      active: 1.725,
-      veryActive: 1.9,
+      sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, veryActive: 1.9,
     };
 
     let tdee = Math.round(bmr * (activityMultipliers[activity] || 1.55));
@@ -224,48 +323,21 @@ export default function NutritionScreen() {
     let deficitMultiplier = 0.8;
     let surplusMultiplier = 1.2;
     
-    if (dietDuration === "short") {
-      deficitMultiplier = 0.75;
-      surplusMultiplier = 1.25;
-    } else if (dietDuration === "medium") {
-      deficitMultiplier = 0.8;
-      surplusMultiplier = 1.2;
-    } else if (dietDuration === "long") {
-      deficitMultiplier = 0.85;
-      surplusMultiplier = 1.15;
-    }
+    if (dietDuration === "short") { deficitMultiplier = 0.75; surplusMultiplier = 1.25; }
+    else if (dietDuration === "medium") { deficitMultiplier = 0.8; surplusMultiplier = 1.2; }
+    else if (dietDuration === "long") { deficitMultiplier = 0.85; surplusMultiplier = 1.15; }
     
-    if (goal === "lose") {
-      tdee = Math.round(tdee * deficitMultiplier);
-    } else if (goal === "gain") {
-      tdee = Math.round(tdee * surplusMultiplier);
-    }
+    if (goal === "lose") { tdee = Math.round(tdee * deficitMultiplier); }
+    else if (goal === "gain") { tdee = Math.round(tdee * surplusMultiplier); }
 
     const proteinGoal = Math.round(weightKg * 1.6);
     const fatGoal = Math.round((tdee * 0.25) / 9);
     const carbsGoal = Math.round((tdee - (proteinGoal * 4 + fatGoal * 9)) / 4);
 
-    updateNutrition({
-      calorieGoal: tdee,
-      proteinGoal,
-      carbsGoal,
-      fatGoal,
-      quizCompleted: true,
-    });
-
+    updateNutrition({ calorieGoal: tdee, proteinGoal, carbsGoal, fatGoal, quizCompleted: true });
     setShowQuiz(false);
     setQuizStep(0);
-    setQuizAnswers({
-      age: "",
-      weight: "",
-      heightFeet: "",
-      heightInches: "",
-      gender: "",
-      activityLevel: "",
-      goal: "",
-      weightGoal: "",
-      dietDuration: "",
-    });
+    setQuizAnswers({ age: "", weight: "", heightFeet: "", heightInches: "", gender: "", activityLevel: "", goal: "", weightGoal: "", dietDuration: "" });
   };
 
   const _analyzeQuickMeal = async (mealName: string, targetDate: Date) => {
@@ -278,203 +350,107 @@ Analyze this meal: "${mealName}". Estimate nutritional content based on a typica
       console.log("Analyzing quick meal for meal prep...");
       const response = await callOpenAI(prompt);
       
-      let cleanedResponse = response
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .replace(/^[^{]*/, '')
-        .replace(/[^}]*$/, '')
-        .trim();
-      
+      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
       const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) {
-        cleanedResponse = jsonMatch[0];
-      }
+      if (jsonMatch) cleanedResponse = jsonMatch[0];
       
       const nutritionData = JSON.parse(cleanedResponse);
-      
       const name = nutritionData.name || mealName;
-      const calories = Number(nutritionData.calories) || 0;
-      const protein = Number(nutritionData.protein) || 0;
-      const carbs = Number(nutritionData.carbs) || 0;
-      const fat = Number(nutritionData.fat) || 0;
+      const cals = Number(nutritionData.calories) || 0;
+      const prot = Number(nutritionData.protein) || 0;
+      const carb = Number(nutritionData.carbs) || 0;
+      const fatVal = Number(nutritionData.fat) || 0;
       
-      if (calories === 0) {
-        throw new Error("Invalid nutrition data");
-      }
+      if (cals === 0) throw new Error("Invalid nutrition data");
       
-      const newEntry = {
-        id: Date.now().toString(),
-        name: name,
-        calories: Math.round(calories),
-        protein: Math.round(protein),
-        carbs: Math.round(carbs),
-        fat: Math.round(fat),
-        date: targetDate.toISOString(),
-      };
-
+      const newEntry = { id: Date.now().toString(), name, calories: Math.round(cals), protein: Math.round(prot), carbs: Math.round(carb), fat: Math.round(fatVal), date: targetDate.toISOString() };
       addFoodEntry(newEntry);
-      
       setShowQuickMealPrep(false);
       setQuickMealName("");
-      
-      Alert.alert(
-        "Meal Prepped!", 
-        `Added "${name}" for ${targetDate.toLocaleDateString()}\n\nCalories: ${Math.round(calories)}\nProtein: ${Math.round(protein)}g\nCarbs: ${Math.round(carbs)}g\nFat: ${Math.round(fat)}g`
-      );
+      Alert.alert("Meal Prepped!", `Added "${name}" for ${targetDate.toLocaleDateString()}\n\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g`);
     } catch (error: any) {
       console.error("Quick meal analysis error:", error.message);
-      Alert.alert(
-        "Analysis Failed", 
-        "Unable to analyze the meal. Please try again or use manual meal prep.",
-        [
-          { text: "Try Again", onPress: () => setShowQuickMealPrep(true) },
-          { text: "Manual Entry", onPress: () => { 
-            setShowQuickMealPrep(false); 
-            setIsMealPrep(true);
-            setMealPrepDate(targetDate);
-            setShowAddFood(true); 
-          } }
-        ]
-      );
-    } finally {
-      setIsAnalyzing(false);
-    }
+      Alert.alert("Analysis Failed", "Unable to analyze the meal. Please try again or use manual meal prep.", [
+        { text: "Try Again", onPress: () => setShowQuickMealPrep(true) },
+        { text: "Manual Entry", onPress: () => { setShowQuickMealPrep(false); setIsMealPrep(true); setMealPrepDate(targetDate); setShowAddFood(true); } }
+      ]);
+    } finally { setIsAnalyzing(false); }
   };
 
   const _analyzeProteinShake = async (ingredients: string) => {
     setIsAnalyzing(true);
     try {
-      const prompt = `You are a nutrition expert specializing in protein shakes and supplements. Analyze the ingredients list and provide accurate nutritional estimates based on typical serving sizes for protein shakes. Consider protein powders, fruits, liquids, nuts, seeds, and other common shake ingredients.
+      const prompt = `You are a nutrition expert specializing in protein shakes and supplements. Analyze the ingredients list and provide accurate nutritional estimates based on typical serving sizes for protein shakes.
 
 Analyze this protein shake recipe: "${ingredients}". Estimate the total nutritional content assuming this is one complete shake serving. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "Protein Shake with [main ingredients]", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
 
       console.log("Analyzing protein shake...");
       const response = await callOpenAI(prompt);
-      
-      let cleanedResponse = response
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .replace(/^[^{]*/, '')
-        .replace(/[^}]*$/, '')
-        .trim();
-      
+      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
       const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) {
-        cleanedResponse = jsonMatch[0];
-      }
+      if (jsonMatch) cleanedResponse = jsonMatch[0];
       
       const nutritionData = JSON.parse(cleanedResponse);
-      
       const name = nutritionData.name || "Protein Shake";
-      const calories = Number(nutritionData.calories) || 0;
-      const protein = Number(nutritionData.protein) || 0;
-      const carbs = Number(nutritionData.carbs) || 0;
-      const fat = Number(nutritionData.fat) || 0;
-      
-      if (calories === 0) {
-        throw new Error("Invalid nutrition data");
-      }
+      const cals = Number(nutritionData.calories) || 0;
+      const prot = Number(nutritionData.protein) || 0;
+      const carb = Number(nutritionData.carbs) || 0;
+      const fatVal = Number(nutritionData.fat) || 0;
+      if (cals === 0) throw new Error("Invalid nutrition data");
       
       setFoodName(name);
-      setCalories(Math.round(calories).toString());
-      setProtein(Math.round(protein).toString());
-      setCarbs(Math.round(carbs).toString());
-      setFat(Math.round(fat).toString());
-      
+      setCalories(Math.round(cals).toString());
+      setProtein(Math.round(prot).toString());
+      setCarbs(Math.round(carb).toString());
+      setFat(Math.round(fatVal).toString());
       setShowProteinShake(false);
       setShowAddFood(true);
-      
-      Alert.alert(
-        "Protein Shake Analyzed!", 
-        `${name}\nCalories: ${Math.round(calories)}\nProtein: ${Math.round(protein)}g\nCarbs: ${Math.round(carbs)}g\nFat: ${Math.round(fat)}g\n\nYou can adjust the values if needed.`
-      );
+      Alert.alert("Protein Shake Analyzed!", `${name}\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g\n\nYou can adjust the values if needed.`);
     } catch (error: any) {
       console.error("Protein shake analysis error:", error.message);
-      Alert.alert(
-        "Analysis Failed", 
-        "Unable to analyze the protein shake. Please try again or enter manually.",
-        [
-          { text: "Try Again", onPress: () => setShowProteinShake(true) },
-          { text: "Enter Manually", onPress: () => { setShowProteinShake(false); setShowAddFood(true); } }
-        ]
-      );
-    } finally {
-      setIsAnalyzing(false);
-      setProteinIngredients("");
-    }
+      Alert.alert("Analysis Failed", "Unable to analyze the protein shake. Please try again or enter manually.", [
+        { text: "Try Again", onPress: () => setShowProteinShake(true) },
+        { text: "Enter Manually", onPress: () => { setShowProteinShake(false); setShowAddFood(true); } }
+      ]);
+    } finally { setIsAnalyzing(false); setProteinIngredients(""); }
   };
 
   const refineWithAI = async (entry: any, refinementText: string) => {
     setIsAnalyzing(true);
     try {
-      const prompt = `You are a nutrition expert. The user has logged a food item and wants to refine its nutritional information with additional details. Use the original food entry and the user's additional information to provide a more accurate nutritional estimate. Consider portion sizes, preparation methods, ingredients, and any other details provided.
+      const prompt = `You are a nutrition expert. The user has logged a food item and wants to refine its nutritional information with additional details.
 
 Original food entry: "${entry.name}" with ${entry.calories} calories, ${entry.protein}g protein, ${entry.carbs}g carbs, ${entry.fat}g fat.
-
 Additional details: "${refinementText}"
 
-Please provide a refined nutritional estimate based on this additional information. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "refined food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
+Please provide a refined nutritional estimate. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "refined food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
 
       console.log("Refining food entry with AI...");
       const response = await callOpenAI(prompt);
-      
-      let cleanedResponse = response
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .replace(/^[^{]*/, '')
-        .replace(/[^}]*$/, '')
-        .trim();
-      
+      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
       const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) {
-        cleanedResponse = jsonMatch[0];
-      }
+      if (jsonMatch) cleanedResponse = jsonMatch[0];
       
       const nutritionData = JSON.parse(cleanedResponse);
-      
       const name = nutritionData.name || entry.name;
-      const calories = Number(nutritionData.calories) || entry.calories;
-      const protein = Number(nutritionData.protein) || entry.protein;
-      const carbs = Number(nutritionData.carbs) || entry.carbs;
-      const fat = Number(nutritionData.fat) || entry.fat;
+      const cals = Number(nutritionData.calories) || entry.calories;
+      const prot = Number(nutritionData.protein) || entry.protein;
+      const carb = Number(nutritionData.carbs) || entry.carbs;
+      const fatVal = Number(nutritionData.fat) || entry.fat;
+      if (cals === 0) throw new Error("Invalid nutrition data");
       
-      if (calories === 0) {
-        throw new Error("Invalid nutrition data");
-      }
-      
-      updateFoodEntry(entry.id, {
-        name: name,
-        calories: Math.round(calories),
-        protein: Math.round(protein),
-        carbs: Math.round(carbs),
-        fat: Math.round(fat),
-      });
-      
+      updateFoodEntry(entry.id, { name, calories: Math.round(cals), protein: Math.round(prot), carbs: Math.round(carb), fat: Math.round(fatVal) });
       setShowRefineFood(false);
       setSelectedFoodEntry(null);
       setRefinementInput("");
-      
-      Alert.alert(
-        "Food Refined!", 
-        `Updated "${name}"\n\nCalories: ${Math.round(calories)}\nProtein: ${Math.round(protein)}g\nCarbs: ${Math.round(carbs)}g\nFat: ${Math.round(fat)}g`
-      );
+      Alert.alert("Food Refined!", `Updated "${name}"\n\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g`);
     } catch (error: any) {
       console.error("Food refinement error:", error.message);
-      Alert.alert(
-        "Refinement Failed", 
-        "Unable to refine the food entry. Please try again.",
-        [
-          { text: "Try Again", onPress: () => setShowRefineFood(true) },
-          { text: "Cancel", onPress: () => { 
-            setShowRefineFood(false); 
-            setSelectedFoodEntry(null);
-            setRefinementInput("");
-          } }
-        ]
-      );
-    } finally {
-      setIsAnalyzing(false);
-    }
+      Alert.alert("Refinement Failed", "Unable to refine the food entry. Please try again.", [
+        { text: "Try Again", onPress: () => setShowRefineFood(true) },
+        { text: "Cancel", onPress: () => { setShowRefineFood(false); setSelectedFoodEntry(null); setRefinementInput(""); } }
+      ]);
+    } finally { setIsAnalyzing(false); }
   };
 
   const analyzeWithAI = async (input: string, isImage: boolean = false) => {
@@ -486,198 +462,93 @@ Please provide a refined nutritional estimate based on this additional informati
         try {
           const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer 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`,
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}` },
             body: JSON.stringify({
               model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'user',
-                  content: [
-                    {
-                      type: 'text',
-                      text: 'You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates based on what you can see. Identify the food items, estimate portion sizes, and calculate approximate nutritional values. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.'
-                    },
-                    {
-                      type: 'image_url',
-                      image_url: {
-                        url: `data:image/jpeg;base64,${input}`
-                      }
-                    }
-                  ]
-                }
-              ],
-              max_tokens: 500,
-              temperature: 0.1,
+              messages: [{ role: 'user', content: [
+                { type: 'text', text: 'You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Return ONLY a valid JSON object with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}.' },
+                { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${input}` } }
+              ]}],
+              max_tokens: 500, temperature: 0.1,
             }),
           });
           
-          if (!response.ok) {
-            const errorData = await response.text();
-            console.error('OpenAI Vision API Error:', response.status, errorData);
-            throw new Error('Image analysis failed');
-          }
-          
+          if (!response.ok) { const errorData = await response.text(); console.error('OpenAI Vision API Error:', response.status, errorData); throw new Error('Image analysis failed'); }
           const data = await response.json();
-          const analysisResult = data.choices[0].message.content;
-          console.log('Image analysis result:', analysisResult);
-          
-          prompt = analysisResult;
+          prompt = data.choices[0].message.content;
         } catch (imageError) {
           console.error('Image analysis failed:', imageError);
-          Alert.alert(
-            "Image Analysis Failed", 
-            "Unable to analyze the image. Please try describing your food instead.",
-            [
-              { text: "OK", onPress: () => {
-                setShowCamera(false);
-                setShowAIInput(true);
-              }}
-            ]
-          );
+          Alert.alert("Image Analysis Failed", "Unable to analyze the image. Please try describing your food instead.", [{ text: "OK", onPress: () => { setShowCamera(false); setShowAIInput(true); } }]);
           return;
         }
       } else {
-        prompt = `You are a professional nutritionist. Provide accurate nutritional estimates based on standard serving sizes and preparation methods. Return ONLY valid JSON without any markdown formatting or code blocks.
+        prompt = `You are a professional nutritionist. Provide accurate nutritional estimates based on standard serving sizes. Return ONLY valid JSON without any markdown formatting.
 
-Analyze this food: "${input}". Estimate nutritional content based on typical serving sizes. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
+Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers.`;
       }
 
       let response;
-      if (isImage) {
-        response = prompt;
-        console.log("Using image analysis result:", response);
-      } else {
-        console.log("Sending request to AI...");
-        response = await callOpenAI(prompt);
-        console.log("AI Response received:", response);
-      }
+      if (isImage) { response = prompt; } else { console.log("Sending request to AI..."); response = await callOpenAI(prompt); }
       
-      let cleanedResponse = response
-        .replace(/```json/gi, '')
-        .replace(/```/g, '')
-        .replace(/^[^{]*/, '')
-        .replace(/[^}]*$/, '')
-        .trim();
-      
+      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
       const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) {
-        cleanedResponse = jsonMatch[0];
-      }
-      
-      console.log("Cleaned response:", cleanedResponse);
+      if (jsonMatch) cleanedResponse = jsonMatch[0];
       
       try {
         const nutritionData = JSON.parse(cleanedResponse);
-        console.log("Parsed nutrition data:", nutritionData);
-        
         const name = nutritionData.name || "Unknown food";
-        const calories = Number(nutritionData.calories) || 0;
-        const protein = Number(nutritionData.protein) || 0;
-        const carbs = Number(nutritionData.carbs) || 0;
-        const fat = Number(nutritionData.fat) || 0;
-        
-        if (!name || calories === 0) {
-          throw new Error("Invalid nutrition data: missing name or calories");
-        }
+        const cals = Number(nutritionData.calories) || 0;
+        const prot = Number(nutritionData.protein) || 0;
+        const carb = Number(nutritionData.carbs) || 0;
+        const fatVal = Number(nutritionData.fat) || 0;
+        if (!name || cals === 0) throw new Error("Invalid nutrition data");
         
         setFoodName(name);
-        setCalories(Math.round(calories).toString());
-        setProtein(Math.round(protein).toString());
-        setCarbs(Math.round(carbs).toString());
-        setFat(Math.round(fat).toString());
-        
+        setCalories(Math.round(cals).toString());
+        setProtein(Math.round(prot).toString());
+        setCarbs(Math.round(carb).toString());
+        setFat(Math.round(fatVal).toString());
         setShowAIInput(false);
         setShowCamera(false);
         setCapturedImage(null);
         setShowAddFood(true);
-        
-        Alert.alert(
-          "Food Analyzed", 
-          `Detected: ${name}\nCalories: ${Math.round(calories)}\nProtein: ${Math.round(protein)}g\nCarbs: ${Math.round(carbs)}g\nFat: ${Math.round(fat)}g\n\nYou can adjust the values if needed.`
-        );
+        Alert.alert("Food Analyzed", `Detected: ${name}\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g\n\nYou can adjust the values if needed.`);
       } catch (parseError: any) {
         console.error("Failed to parse AI response:", parseError.message);
-        console.error("Response that failed to parse:", cleanedResponse);
-        
         try {
           const nameMatch = cleanedResponse.match(/"name"\s*:\s*"([^"]+)"/);
           const caloriesMatch = cleanedResponse.match(/"calories"\s*:\s*(\d+)/);
-          
           if (nameMatch && caloriesMatch) {
-            const name = nameMatch[1];
-            const calories = parseInt(caloriesMatch[1]);
+            const n = nameMatch[1]; const c = parseInt(caloriesMatch[1]);
             const proteinMatch = cleanedResponse.match(/"protein"\s*:\s*(\d+)/);
             const carbsMatch = cleanedResponse.match(/"carbs"\s*:\s*(\d+)/);
             const fatMatch = cleanedResponse.match(/"fat"\s*:\s*(\d+)/);
-            
-            setFoodName(name);
-            setCalories(calories.toString());
-            setProtein(proteinMatch ? proteinMatch[1] : "0");
-            setCarbs(carbsMatch ? carbsMatch[1] : "0");
-            setFat(fatMatch ? fatMatch[1] : "0");
-            
-            setShowAIInput(false);
-            setShowCamera(false);
-            setCapturedImage(null);
-            setShowAddFood(true);
-            
-            Alert.alert(
-              "Food Analyzed", 
-              `Detected: ${name}\nCalories: ${calories}\n\nYou can adjust the values if needed.`
-            );
+            setFoodName(n); setCalories(c.toString()); setProtein(proteinMatch ? proteinMatch[1] : "0"); setCarbs(carbsMatch ? carbsMatch[1] : "0"); setFat(fatMatch ? fatMatch[1] : "0");
+            setShowAIInput(false); setShowCamera(false); setCapturedImage(null); setShowAddFood(true);
+            Alert.alert("Food Analyzed", `Detected: ${n}\nCalories: ${c}\n\nYou can adjust the values if needed.`);
             return;
           }
-        } catch (fallbackError) {
-          console.error("Fallback parsing also failed:", fallbackError);
-        }
-        
-        Alert.alert(
-          "Analysis Error", 
-          "Could not understand the nutritional data. Please try again or enter manually.",
-          [
-            { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
-            { text: "Enter Manually", onPress: () => { setShowCamera(false); setShowAIInput(false); setShowAddFood(true); } }
-          ]
-        );
+        } catch (fallbackError) { console.error("Fallback parsing also failed:", fallbackError); }
+        Alert.alert("Analysis Error", "Could not understand the nutritional data. Please try again or enter manually.", [
+          { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
+          { text: "Enter Manually", onPress: () => { setShowCamera(false); setShowAIInput(false); setShowAddFood(true); } }
+        ]);
       }
     } catch (error: any) {
       console.error("AI analysis error:", error.message);
-      Alert.alert(
-        "Analysis Failed", 
-        "Unable to analyze the food. Please try again or enter manually.",
-        [
-          { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
-          { text: "Enter Manually", onPress: () => { setShowCamera(false); setShowAIInput(false); setShowAddFood(true); } }
-        ]
-      );
-    } finally {
-      setIsAnalyzing(false);
-      setAiInput("");
-    }
+      Alert.alert("Analysis Failed", "Unable to analyze the food. Please try again or enter manually.", [
+        { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
+        { text: "Enter Manually", onPress: () => { setShowCamera(false); setShowAIInput(false); setShowAddFood(true); } }
+      ]);
+    } finally { setIsAnalyzing(false); setAiInput(""); }
   };
 
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
         setIsAnalyzing(true);
-        console.log("Taking picture...");
-        
-        const photo = await cameraRef.current.takePictureAsync({ 
-          base64: true,
-          quality: 0.5,
-          skipProcessing: Platform.OS === 'ios',
-          exif: false,
-        });
-        
-        console.log("Photo captured, base64 length:", photo.base64?.length);
-        
-        if (!photo.base64) {
-          throw new Error("Failed to capture image data");
-        }
-        
+        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5, skipProcessing: Platform.OS === 'ios', exif: false });
+        if (!photo.base64) throw new Error("Failed to capture image data");
         setCapturedImage(photo.base64);
         await analyzeWithAI(photo.base64, true);
       } catch (error: any) {
@@ -686,7 +557,6 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
         setIsAnalyzing(false);
       }
     } else {
-      console.error("Camera ref is not available");
       Alert.alert("Camera Error", "Camera is not ready. Please try again.");
       setIsAnalyzing(false);
     }
@@ -701,149 +571,56 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
     }, [showQuiz]);
     
     const questions = [
-      {
-        title: "What's your age?",
-        key: "age",
-        type: "number",
-        placeholder: "Enter your age",
-      },
-      {
-        title: "What's your weight?",
-        key: "weight",
-        type: "number",
-        placeholder: "Enter weight in pounds",
-      },
-      {
-        title: "What's your height?",
-        key: "height",
-        type: "height",
-        placeholder: "Enter height",
-      },
-      {
-        title: "What's your gender?",
-        key: "gender",
-        type: "choice",
-        choices: [
-          { label: "Male", value: "male" },
-          { label: "Female", value: "female" },
-        ],
-      },
-      {
-        title: "How active are you?",
-        key: "activityLevel",
-        type: "choice",
-        choices: [
-          { label: "Sedentary", value: "sedentary" },
-          { label: "Lightly Active", value: "light" },
-          { label: "Moderately Active", value: "moderate" },
-          { label: "Very Active", value: "active" },
-          { label: "Extremely Active", value: "veryActive" },
-        ],
-      },
-      {
-        title: "What's your goal?",
-        key: "goal",
-        type: "choice",
-        choices: [
-          { label: "Lose Weight", value: "lose" },
-          { label: "Maintain Weight", value: "maintain" },
-          { label: "Gain Weight", value: "gain" },
-        ],
-      },
-      {
-        title: "How much weight do you want to lose/gain?",
-        key: "weightGoal",
-        type: "number",
-        placeholder: "Enter weight in pounds (optional)",
-        skipCondition: (answers: any) => answers.goal === "maintain",
-      },
-      {
-        title: "How long do you plan to be on this diet?",
-        key: "dietDuration",
-        type: "choice",
-        choices: [
-          { label: "1-3 months (Faster results)", value: "short" },
-          { label: "3-6 months (Balanced approach)", value: "medium" },
-          { label: "6+ months (Sustainable long-term)", value: "long" },
-        ],
-        skipCondition: (answers: any) => answers.goal === "maintain",
-      },
+      { title: "What's your age?", key: "age", type: "number", placeholder: "Enter your age" },
+      { title: "What's your weight?", key: "weight", type: "number", placeholder: "Enter weight in pounds" },
+      { title: "What's your height?", key: "height", type: "height", placeholder: "Enter height" },
+      { title: "What's your gender?", key: "gender", type: "choice", choices: [{ label: "Male", value: "male" }, { label: "Female", value: "female" }] },
+      { title: "How active are you?", key: "activityLevel", type: "choice", choices: [
+        { label: "Sedentary", value: "sedentary" }, { label: "Lightly Active", value: "light" },
+        { label: "Moderately Active", value: "moderate" }, { label: "Very Active", value: "active" },
+        { label: "Extremely Active", value: "veryActive" },
+      ]},
+      { title: "What's your goal?", key: "goal", type: "choice", choices: [
+        { label: "Lose Weight", value: "lose" }, { label: "Maintain Weight", value: "maintain" }, { label: "Gain Weight", value: "gain" },
+      ]},
+      { title: "How much weight do you want to lose/gain?", key: "weightGoal", type: "number", placeholder: "Enter weight in pounds (optional)", skipCondition: (answers: any) => answers.goal === "maintain" },
+      { title: "How long do you plan to be on this diet?", key: "dietDuration", type: "choice", choices: [
+        { label: "1-3 months (Faster results)", value: "short" },
+        { label: "3-6 months (Balanced approach)", value: "medium" },
+        { label: "6+ months (Sustainable long-term)", value: "long" },
+      ], skipCondition: (answers: any) => answers.goal === "maintain" },
     ];
 
-    const filteredQuestions = questions.filter(q => 
-      !q.skipCondition || !q.skipCondition(localQuizAnswers)
-    );
+    const filteredQuestions = questions.filter(q => !q.skipCondition || !q.skipCondition(localQuizAnswers));
     const currentQuestion = filteredQuestions[quizStep];
 
     return (
       <Modal visible={showQuiz} animationType="slide" transparent>
-        <KeyboardAvoidingView 
-          style={styles.modalOverlay}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.quizModal}>
             <Text style={styles.quizTitle}>Nutrition Goals Setup</Text>
             <Text style={styles.quizProgress}>Step {quizStep + 1} of {filteredQuestions.length}</Text>
-            
             <Text style={styles.quizQuestion}>{currentQuestion?.title}</Text>
             
             {currentQuestion.type === "height" ? (
               <View style={styles.heightInputContainer}>
-                <TextInput
-                  style={[styles.quizInput, styles.heightInput]}
-                  placeholder="Feet"
-                  keyboardType="numeric"
-                  value={localQuizAnswers.heightFeet}
-                  onChangeText={(text) =>
-                    setLocalQuizAnswers({ ...localQuizAnswers, heightFeet: text })
-                  }
-                />
-                <TextInput
-                  style={[styles.quizInput, styles.heightInput]}
-                  placeholder="Inches"
-                  keyboardType="numeric"
-                  value={localQuizAnswers.heightInches}
-                  onChangeText={(text) =>
-                    setLocalQuizAnswers({ ...localQuizAnswers, heightInches: text })
-                  }
-                />
+                <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Feet" placeholderTextColor="#6B7280" keyboardType="numeric" value={localQuizAnswers.heightFeet} onChangeText={(text) => setLocalQuizAnswers({ ...localQuizAnswers, heightFeet: text })} />
+                <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Inches" placeholderTextColor="#6B7280" keyboardType="numeric" value={localQuizAnswers.heightInches} onChangeText={(text) => setLocalQuizAnswers({ ...localQuizAnswers, heightInches: text })} />
               </View>
             ) : currentQuestion.type === "number" ? (
-              <TextInput
-                style={styles.quizInput}
-                placeholder={currentQuestion.placeholder}
-                keyboardType="numeric"
-                value={localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]}
-                onChangeText={(text) =>
-                  setLocalQuizAnswers({ ...localQuizAnswers, [currentQuestion.key]: text })
-                }
-              />
+              <TextInput style={styles.quizInput} placeholder={currentQuestion.placeholder} placeholderTextColor="#6B7280" keyboardType="numeric" value={localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]} onChangeText={(text) => setLocalQuizAnswers({ ...localQuizAnswers, [currentQuestion.key]: text })} />
             ) : (
               <View style={styles.choicesContainer}>
                 {currentQuestion.choices?.map((choice) => (
                   <TouchableOpacity
                     key={choice.value}
-                    style={[
-                      styles.choiceButton,
-                      localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers] === choice.value &&
-                        styles.choiceButtonActive,
-                    ]}
+                    style={[styles.choiceButton, localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers] === choice.value && styles.choiceButtonActive]}
                     onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
+                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setLocalQuizAnswers({ ...localQuizAnswers, [currentQuestion.key]: choice.value });
                     }}
                   >
-                    <Text
-                      style={[
-                        styles.choiceText,
-                        localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers] === choice.value &&
-                          styles.choiceTextActive,
-                      ]}
-                    >
-                      {choice.label}
-                    </Text>
+                    <Text style={[styles.choiceText, localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers] === choice.value && styles.choiceTextActive]}>{choice.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -851,43 +628,20 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
             
             <View style={styles.quizButtons}>
               {quizStep > 0 && (
-                <TouchableOpacity
-                  style={[styles.quizButton, styles.quizButtonSecondary]}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setQuizStep(quizStep - 1);
-                  }}
-                >
+                <TouchableOpacity style={[styles.quizButton, styles.quizButtonSecondary]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setQuizStep(quizStep - 1); }}>
                   <Text style={styles.quizButtonTextSecondary}>Back</Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
                 style={[styles.quizButton, styles.quizButtonPrimary]}
                 onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  if (quizStep < filteredQuestions.length - 1) {
-                    setQuizAnswers(localQuizAnswers);
-                    setQuizStep(quizStep + 1);
-                  } else {
-                    setQuizAnswers(localQuizAnswers);
-                    calculateNutritionGoals();
-                  }
+                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (quizStep < filteredQuestions.length - 1) { setQuizAnswers(localQuizAnswers); setQuizStep(quizStep + 1); }
+                  else { setQuizAnswers(localQuizAnswers); calculateNutritionGoals(); }
                 }}
-                disabled={
-                  currentQuestion.type === "height" 
-                    ? !localQuizAnswers.heightFeet || !localQuizAnswers.heightInches
-                    : currentQuestion.key === "weightGoal"
-                    ? false
-                    : !localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]
-                }
+                disabled={currentQuestion.type === "height" ? !localQuizAnswers.heightFeet || !localQuizAnswers.heightInches : currentQuestion.key === "weightGoal" ? false : !localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]}
               >
-                <Text style={styles.quizButtonTextPrimary}>
-                  {quizStep < filteredQuestions.length - 1 ? "Next" : "Calculate Goals"}
-                </Text>
+                <Text style={styles.quizButtonTextPrimary}>{quizStep < filteredQuestions.length - 1 ? "Next" : "Calculate Goals"}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -896,9 +650,12 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
     );
   };
 
-  if (!permission) {
-    return <View />;
-  }
+  if (!permission) return <View />;
+
+  const totalMacrosCal = (nutrition.protein * 4) + (nutrition.carbs * 4) + (nutrition.fat * 9);
+  const proteinPct = totalMacrosCal > 0 ? Math.round((nutrition.protein * 4) / totalMacrosCal * 100) : 0;
+  const carbsPct = totalMacrosCal > 0 ? Math.round((nutrition.carbs * 4) / totalMacrosCal * 100) : 0;
+  const fatPct = totalMacrosCal > 0 ? Math.round((nutrition.fat * 9) / totalMacrosCal * 100) : 0;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -909,326 +666,153 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-
-
-        <View style={styles.heroBanner}>
-          <Text style={styles.heroBannerTitle}>Track Your Nutrition</Text>
-          <Text style={styles.heroBannerSubtitle}>Ready to fuel your body?</Text>
-        </View>
-
-        <LinearGradient
-          colors={["rgba(0,173,181,0.15)", "rgba(0,173,181,0.05)"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.weeklyReviewButtonTop}
-        >
-          <TouchableOpacity 
-            style={styles.weeklyReviewButtonInner}
-            onPress={async () => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setIsGeneratingReview(true);
-                setShowWeeklyReview(true);
-                try {
-                  const oneWeekAgo = new Date();
-                  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                  const weeklyFoods = foodHistory.filter(entry => 
-                    new Date(entry.date) >= oneWeekAgo
-                  );
-                  
-                  if (weeklyFoods.length === 0) {
-                    setWeeklyReviewData("You haven't logged any meals this week yet. Start tracking your nutrition to get personalized insights!");
-                    setIsGeneratingReview(false);
-                    return;
-                  }
-                  
-                  const totalCalories = weeklyFoods.reduce((sum, entry) => sum + entry.calories, 0);
-                  const totalProtein = weeklyFoods.reduce((sum, entry) => sum + entry.protein, 0);
-                  const totalCarbs = weeklyFoods.reduce((sum, entry) => sum + entry.carbs, 0);
-                  const totalFat = weeklyFoods.reduce((sum, entry) => sum + entry.fat, 0);
-                  const avgCaloriesPerDay = Math.round(totalCalories / 7);
-                  
-                  const foodList = weeklyFoods.map(f => `${f.name} (${f.calories} cal, ${f.protein}g P, ${f.carbs}g C, ${f.fat}g F)`).join(', ');
-                  
-                  const prompt = `You are a professional nutritionist analyzing a week of food intake. Here's the data:
-
-Total meals logged: ${weeklyFoods.length}
-Total calories: ${totalCalories}
-Average calories per day: ${avgCaloriesPerDay}
-Total protein: ${totalProtein}g
-Total carbs: ${totalCarbs}g
-Total fat: ${totalFat}g
-
-User's goals:
-Daily calorie goal: ${nutrition.calorieGoal}
-Daily protein goal: ${nutrition.proteinGoal}g
-Daily carbs goal: ${nutrition.carbsGoal}g
-Daily fat goal: ${nutrition.fatGoal}g
-
-Foods eaten this week: ${foodList}
-
-Provide a comprehensive weekly nutrition review with:
-1. Overall assessment of their eating habits
-2. How well they're meeting their goals
-3. Nutritional balance analysis (protein, carbs, fats)
-4. Specific recommendations for improvement
-5. Positive reinforcement for good choices
-6. Suggestions for foods to add or reduce
-
-Be encouraging, specific, and actionable. Keep it under 400 words.`;
-                  
-                  const response = await callOpenAI(prompt);
-                  setWeeklyReviewData(response);
-                } catch (error) {
-                  console.error('Error generating weekly review:', error);
-                  setWeeklyReviewData("Unable to generate your weekly review. Please try again later.");
-                } finally {
-                  setIsGeneratingReview(false);
-                }
-              }}
-          >
-            <FileText size={20} color="#00ADB5" />
-            <Text style={styles.weeklyReviewButtonTopText}>My Weekly Nutrition Review</Text>
-          </TouchableOpacity>
-        </LinearGradient>
-
-        <LinearGradient
-          colors={["#171B22", "#0D0F13"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.progressCard}
-        >
-          <View style={styles.progressHeader}>
+        <Animated.View style={[styles.headerSection, { opacity: headerFadeAnim, transform: [{ translateY: headerFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
+          <View style={styles.headerTop}>
             <View>
-              <Text style={styles.progressTitle}>Today's Progress</Text>
-              <Text style={styles.resetTimer}>Resets in {timeUntilReset}</Text>
+              <Text style={styles.headerTitle}>Fuel</Text>
+              <Text style={styles.headerSubtitle}>
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </Text>
             </View>
-            <View style={styles.progressIcons}>
-              <TouchableOpacity onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setEditGoals({
-                  calorieGoal: nutrition.calorieGoal.toString(),
-                  proteinGoal: nutrition.proteinGoal.toString(),
-                  carbsGoal: nutrition.carbsGoal.toString(),
-                  fatGoal: nutrition.fatGoal.toString(),
-                });
+            <View style={styles.headerActions}>
+              <TouchableOpacity style={styles.headerIconBtn} onPress={() => {
+                if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setEditGoals({ calorieGoal: nutrition.calorieGoal.toString(), proteinGoal: nutrition.proteinGoal.toString(), carbsGoal: nutrition.carbsGoal.toString(), fatGoal: nutrition.fatGoal.toString() });
                 setShowEditGoals(true);
               }}>
-                <Edit size={20} color="#6B7280" />
+                <Edit size={18} color="#9CA3AF" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowCalendar(true);
-              }}>
-                <Calendar size={20} color="#6B7280" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
+              <TouchableOpacity style={styles.headerIconBtn} onPress={() => {
+                if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setShowQuiz(true);
               }}>
-                <Settings size={20} color="#6B7280" />
+                <Settings size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
           </View>
-          <Text style={styles.progressSubtitle}>
-            {nutrition.calories} / {nutrition.calorieGoal} calories
-          </Text>
+        </Animated.View>
 
-          <View style={styles.macrosGrid}>
-            <LinearGradient
-              colors={["#0D0F13", "#171B22"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.macroItem}
-            >
-              <Zap size={20} color="#00E5FF" />
-              <Text style={styles.macroLabel}>Calories</Text>
-              <CircularProgress
-                value={nutrition.calories}
-                goal={nutrition.calorieGoal}
-                color="#00E5FF"
-                label="Calories"
-              />
-            </LinearGradient>
-            <LinearGradient
-              colors={["#0D0F13", "#171B22"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.macroItem}
-            >
-              <Drumstick size={20} color="#FF4FB6" />
-              <Text style={styles.macroLabel}>Protein</Text>
-              <CircularProgress
-                value={nutrition.protein}
-                goal={nutrition.proteinGoal}
-                color="#FF4FB6"
-                label="Protein"
-              />
-            </LinearGradient>
-            <LinearGradient
-              colors={["#0D0F13", "#171B22"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.macroItem}
-            >
-              <Droplet size={20} color="#FFB400" />
-              <Text style={styles.macroLabel}>Fat</Text>
-              <CircularProgress
-                value={nutrition.fat}
-                goal={nutrition.fatGoal}
-                color="#FFB400"
-                label="Fat"
-              />
-            </LinearGradient>
-            <LinearGradient
-              colors={["#0D0F13", "#171B22"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.macroItem}
-            >
-              <Wheat size={20} color="#00FFC6" />
-              <Text style={styles.macroLabel}>Carbs</Text>
-              <CircularProgress
-                value={nutrition.carbs}
-                goal={nutrition.carbsGoal}
-                color="#00FFC6"
-                label="Carbs"
-              />
-            </LinearGradient>
+        <TouchableOpacity
+          style={styles.weeklyReviewBtn}
+          activeOpacity={0.7}
+          onPress={async () => {
+            if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setIsGeneratingReview(true);
+            setShowWeeklyReview(true);
+            try {
+              const oneWeekAgo = new Date();
+              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+              const weeklyFoods = foodHistory.filter(entry => new Date(entry.date) >= oneWeekAgo);
+              if (weeklyFoods.length === 0) { setWeeklyReviewData("You haven't logged any meals this week yet. Start tracking your nutrition to get personalized insights!"); setIsGeneratingReview(false); return; }
+              const totalCalories = weeklyFoods.reduce((sum, entry) => sum + entry.calories, 0);
+              const totalProtein = weeklyFoods.reduce((sum, entry) => sum + entry.protein, 0);
+              const totalCarbs = weeklyFoods.reduce((sum, entry) => sum + entry.carbs, 0);
+              const totalFat = weeklyFoods.reduce((sum, entry) => sum + entry.fat, 0);
+              const avgCaloriesPerDay = Math.round(totalCalories / 7);
+              const foodList = weeklyFoods.map(f => `${f.name} (${f.calories} cal, ${f.protein}g P, ${f.carbs}g C, ${f.fat}g F)`).join(', ');
+              const prompt = `You are a professional nutritionist analyzing a week of food intake. Here's the data:\n\nTotal meals logged: ${weeklyFoods.length}\nTotal calories: ${totalCalories}\nAverage calories per day: ${avgCaloriesPerDay}\nTotal protein: ${totalProtein}g\nTotal carbs: ${totalCarbs}g\nTotal fat: ${totalFat}g\n\nUser's goals:\nDaily calorie goal: ${nutrition.calorieGoal}\nDaily protein goal: ${nutrition.proteinGoal}g\nDaily carbs goal: ${nutrition.carbsGoal}g\nDaily fat goal: ${nutrition.fatGoal}g\n\nFoods eaten this week: ${foodList}\n\nProvide a comprehensive weekly nutrition review with:\n1. Overall assessment\n2. How well they're meeting their goals\n3. Nutritional balance analysis\n4. Specific recommendations\n5. Positive reinforcement\n6. Suggestions for foods to add or reduce\n\nBe encouraging, specific, and actionable. Keep it under 400 words.`;
+              const response = await callOpenAI(prompt);
+              setWeeklyReviewData(response);
+            } catch (error) { console.error('Error generating weekly review:', error); setWeeklyReviewData("Unable to generate your weekly review. Please try again later."); } finally { setIsGeneratingReview(false); }
+          }}
+        >
+          <LinearGradient colors={["rgba(0,173,181,0.12)", "rgba(0,173,181,0.04)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.weeklyReviewGradient}>
+            <FileText size={18} color="#00ADB5" />
+            <Text style={styles.weeklyReviewText}>Weekly Nutrition Review</Text>
+            <ChevronRight size={16} color="#00ADB5" />
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <View style={styles.calorieCard}>
+          <View style={styles.calorieCardHeader}>
+            <View style={styles.calorieCardTitleRow}>
+              <Flame size={18} color="#FF6B35" />
+              <Text style={styles.calorieCardTitle}>Today's Calories</Text>
+            </View>
+            <View style={styles.resetBadge}>
+              <Clock size={12} color="#6B7280" />
+              <Text style={styles.resetText}>{timeUntilReset}</Text>
+            </View>
           </View>
-        </LinearGradient>
+          
+          <View style={styles.calorieRingWrapper}>
+            <CalorieRing calories={nutrition.calories} goal={nutrition.calorieGoal} />
+          </View>
+
+          {todaysFoodEntries.length > 0 && totalMacrosCal > 0 && (
+            <View style={styles.macroSplitRow}>
+              <View style={styles.macroSplitItem}>
+                <View style={[styles.macroSplitDot, { backgroundColor: "#FF4FB6" }]} />
+                <Text style={styles.macroSplitLabel}>Protein {proteinPct}%</Text>
+              </View>
+              <View style={styles.macroSplitItem}>
+                <View style={[styles.macroSplitDot, { backgroundColor: "#00FFC6" }]} />
+                <Text style={styles.macroSplitLabel}>Carbs {carbsPct}%</Text>
+              </View>
+              <View style={styles.macroSplitItem}>
+                <View style={[styles.macroSplitDot, { backgroundColor: "#FFB400" }]} />
+                <Text style={styles.macroSplitLabel}>Fat {fatPct}%</Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.macrosCard}>
+          <Text style={styles.macrosCardTitle}>Macros</Text>
+          <MacroBar label="Protein" value={nutrition.protein} goal={nutrition.proteinGoal} color="#FF4FB6" icon={<Drumstick size={16} color="#FF4FB6" />} />
+          <MacroBar label="Carbs" value={nutrition.carbs} goal={nutrition.carbsGoal} color="#00FFC6" icon={<Wheat size={16} color="#00FFC6" />} />
+          <MacroBar label="Fat" value={nutrition.fat} goal={nutrition.fatGoal} color="#FFB400" icon={<Droplet size={16} color="#FFB400" />} />
+        </View>
 
         {showAddFood ? (
           <View style={styles.addFoodCard}>
             <View style={styles.addFoodHeader}>
-              <Text style={styles.addFoodTitle}>
-                {isMealPrep ? "Meal Prep Food" : "Add Food"}
-              </Text>
+              <Text style={styles.addFoodTitle}>{isMealPrep ? "Meal Prep Food" : "Add Food"}</Text>
               {isMealPrep && (
-                <TouchableOpacity
-                  style={styles.datePickerButton}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    if (mealPrepDate.toDateString() === new Date().toDateString()) {
-                      setMealPrepDate(tomorrow);
-                    } else {
-                      const nextDay = new Date(mealPrepDate);
-                      nextDay.setDate(nextDay.getDate() + 1);
-                      setMealPrepDate(nextDay);
-                    }
-                  }}
-                >
-                  <Calendar size={16} color="#3B82F6" />
-                  <Text style={styles.datePickerText}>
-                    {mealPrepDate.toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric',
-                      year: mealPrepDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-                    })}
-                  </Text>
+                <TouchableOpacity style={styles.datePickerButton} onPress={() => {
+                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+                  if (mealPrepDate.toDateString() === new Date().toDateString()) setMealPrepDate(tomorrow);
+                  else { const nextDay = new Date(mealPrepDate); nextDay.setDate(nextDay.getDate() + 1); setMealPrepDate(nextDay); }
+                }}>
+                  <Calendar size={14} color="#00ADB5" />
+                  <Text style={styles.datePickerText}>{mealPrepDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: mealPrepDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</Text>
                 </TouchableOpacity>
               )}
             </View>
             {isMealPrep && (
-              <Text style={styles.mealPrepSubtitle}>
-                Planning meals for {mealPrepDate.toLocaleDateString('en-US', { 
-                  weekday: 'long',
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </Text>
+              <Text style={styles.mealPrepSubtitle}>Planning meals for {mealPrepDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
             )}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Food name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter food name"
-                placeholderTextColor="#9CA3AF"
-                value={foodName}
-                onChangeText={setFoodName}
-              />
+              <TextInput style={styles.input} placeholder="Enter food name" placeholderTextColor="#4B5563" value={foodName} onChangeText={setFoodName} />
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>Calories</Text>
-                <TextInput
-                  style={styles.nutritionInput}
-                  placeholder="0"
-                  placeholderTextColor="#9CA3AF"
-                  value={calories}
-                  onChangeText={setCalories}
-                  keyboardType="numeric"
-                />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={calories} onChangeText={setCalories} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>Protein (g)</Text>
-                <TextInput
-                  style={styles.nutritionInput}
-                  placeholder="0"
-                  placeholderTextColor="#9CA3AF"
-                  value={protein}
-                  onChangeText={setProtein}
-                  keyboardType="numeric"
-                />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={protein} onChangeText={setProtein} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>Carbs (g)</Text>
-                <TextInput
-                  style={styles.nutritionInput}
-                  placeholder="0"
-                  placeholderTextColor="#9CA3AF"
-                  value={carbs}
-                  onChangeText={setCarbs}
-                  keyboardType="numeric"
-                />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={carbs} onChangeText={setCarbs} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>Fat (g)</Text>
-                <TextInput
-                  style={styles.nutritionInput}
-                  placeholder="0"
-                  placeholderTextColor="#9CA3AF"
-                  value={fat}
-                  onChangeText={setFat}
-                  keyboardType="numeric"
-                />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={fat} onChangeText={setFat} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.addFoodButtons}>
-              <TouchableOpacity
-                style={[styles.addButton, styles.cancelButton]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setShowAddFood(false);
-                  setIsMealPrep(false);
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+              <TouchableOpacity style={[styles.addFoodBtn, styles.cancelBtn]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowAddFood(false); setIsMealPrep(false); }}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.addButton} onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                handleAddFood();
-              }}>
-                <Text style={styles.addButtonText}>
-                  {isMealPrep ? "Prep Meal" : "Add"}
-                </Text>
+              <TouchableOpacity style={[styles.addFoodBtn, styles.confirmBtn]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleAddFood(); }}>
+                <Text style={styles.confirmBtnText}>{isMealPrep ? "Prep Meal" : "Add"}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1236,218 +820,151 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
           <>
             {!nutrition.quizCompleted ? (
               <View style={styles.quizRequiredCard}>
-                <View style={styles.quizRequiredHeader}>
-                  <Brain size={48} color="#8B5CF6" />
-                  <Text style={styles.quizRequiredTitle}>Complete Your Nutrition Setup</Text>
+                <View style={styles.quizRequiredIconWrap}>
+                  <Brain size={40} color="#00ADB5" />
                 </View>
-                <Text style={styles.quizRequiredDescription}>
-                  Before you can start logging food, we need to set up your personalized nutrition goals. This quick quiz will help us calculate your daily calorie and macro targets based on your body stats and fitness goals.
-                </Text>
-                <View style={styles.quizRequiredFeatures}>
-                  <View style={styles.quizFeatureItem}>
-                    <Text style={styles.quizFeatureBullet}>•</Text>
-                    <Text style={styles.quizFeatureText}>Personalized calorie goals</Text>
-                  </View>
-                  <View style={styles.quizFeatureItem}>
-                    <Text style={styles.quizFeatureBullet}>•</Text>
-                    <Text style={styles.quizFeatureText}>Macro targets (protein, carbs, fat)</Text>
-                  </View>
-                  <View style={styles.quizFeatureItem}>
-                    <Text style={styles.quizFeatureBullet}>•</Text>
-                    <Text style={styles.quizFeatureText}>Based on your activity level & goals</Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.startQuizButton}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setShowQuiz(true);
-                  }}
-                >
-                  <Brain size={20} color="#FFFFFF" />
-                  <Text style={styles.startQuizButtonText}>Start Nutrition Setup</Text>
+                <Text style={styles.quizRequiredTitle}>Set Up Your Goals</Text>
+                <Text style={styles.quizRequiredDescription}>Take a quick quiz to calculate personalized calorie and macro targets based on your body and goals.</Text>
+                <TouchableOpacity style={styles.startQuizButton} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowQuiz(true); }}>
+                  <Brain size={18} color="#FFFFFF" />
+                  <Text style={styles.startQuizButtonText}>Start Setup</Text>
                 </TouchableOpacity>
               </View>
             ) : (
-              <>
-                <View style={styles.actionGrid}>
-                  <TouchableOpacity 
-                    style={styles.actionTile}
-                    onPress={async () => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      if (!isPremium) {
-                        router.push('/paywall');
-                        return;
-                      }
-                      if (!permission.granted) {
-                        const result = await requestPermission();
-                        if (result.granted) {
-                          setShowCamera(true);
-                        }
-                      } else {
-                        setShowCamera(true);
-                      }
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(0,229,255,0.1)' }]}>
-                      <ScanLine size={22} color="#00E5FF" />
+              <View style={styles.quickActions}>
+                <Text style={styles.quickActionsTitle}>Log Food</Text>
+                <View style={styles.actionRow}>
+                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={async () => {
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!isPremium) { router.push('/paywall'); return; }
+                    if (!permission.granted) { const result = await requestPermission(); if (result.granted) setShowCamera(true); } else setShowCamera(true);
+                  }}>
+                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(0,229,255,0.12)' }]}>
+                      <ScanLine size={20} color="#00E5FF" />
                     </View>
-                    <Text style={styles.actionTileLabel}>Scan</Text>
-                    <Text style={styles.actionTileSub}>Camera</Text>
+                    <View style={styles.actionChipText}>
+                      <Text style={styles.actionChipLabel}>Scan</Text>
+                      <Text style={styles.actionChipSub}>Camera</Text>
+                    </View>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={styles.actionTile}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      if (!isPremium) {
-                        router.push('/paywall');
-                        return;
-                      }
-                      setShowAIInput(true);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(191,255,0,0.1)' }]}>
-                      <Brain size={22} color="#BFFF00" />
+                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={() => {
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!isPremium) { router.push('/paywall'); return; }
+                    setShowAIInput(true);
+                  }}>
+                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(191,255,0,0.12)' }]}>
+                      <Brain size={20} color="#BFFF00" />
                     </View>
-                    <Text style={styles.actionTileLabel}>Describe</Text>
-                    <Text style={styles.actionTileSub}>AI Powered</Text>
+                    <View style={styles.actionChipText}>
+                      <Text style={styles.actionChipLabel}>Describe</Text>
+                      <Text style={styles.actionChipSub}>AI</Text>
+                    </View>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={styles.actionTile}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      if (!isPremium) {
-                        router.push('/paywall');
-                        return;
-                      }
-                      setShowFoodSearch(true);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(255,107,53,0.1)' }]}>
-                      <Search size={22} color="#FF6B35" />
+                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={() => {
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!isPremium) { router.push('/paywall'); return; }
+                    setShowFoodSearch(true);
+                  }}>
+                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(255,107,53,0.12)' }]}>
+                      <Search size={20} color="#FF6B35" />
                     </View>
-                    <Text style={styles.actionTileLabel}>Search</Text>
-                    <Text style={styles.actionTileSub}>USDA DB</Text>
+                    <View style={styles.actionChipText}>
+                      <Text style={styles.actionChipLabel}>Search</Text>
+                      <Text style={styles.actionChipSub}>USDA</Text>
+                    </View>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={styles.actionTile}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setShowAddFood(true);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.actionTileIcon, { backgroundColor: 'rgba(245,158,11,0.1)' }]}>
-                      <Plus size={22} color="#F59E0B" />
+                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={() => {
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setShowAddFood(true);
+                  }}>
+                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
+                      <Plus size={20} color="#F59E0B" />
                     </View>
-                    <Text style={styles.actionTileLabel}>Manual</Text>
-                    <Text style={styles.actionTileSub}>Add Entry</Text>
+                    <View style={styles.actionChipText}>
+                      <Text style={styles.actionChipLabel}>Manual</Text>
+                      <Text style={styles.actionChipSub}>Entry</Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
-              </>
+              </View>
             )}
           </>
         )}
 
         {nutrition.quizCompleted && (
-          <View style={styles.historySection}>
-            <Text style={styles.historyTitle}>Today's Meals</Text>
+          <View style={styles.mealsSection}>
+            <View style={styles.mealsSectionHeader}>
+              <Text style={styles.mealsSectionTitle}>Today's Meals</Text>
+              <Text style={styles.mealsSectionCount}>{todaysFoodEntries.length} logged</Text>
+            </View>
             {todaysFoodEntries.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No meals logged today</Text>
+              <View style={styles.emptyMeals}>
+                <UtensilsCrossed size={32} color="#2A2F3A" />
+                <Text style={styles.emptyMealsText}>No meals logged yet</Text>
+                <Text style={styles.emptyMealsHint}>Use the options above to add your first meal</Text>
               </View>
             ) : (
-              todaysFoodEntries.map((entry) => (
-                <TouchableOpacity 
-                  key={entry.id} 
-                  style={styles.mealCard}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setSelectedFoodEntry(entry);
-                    setShowRefineFood(true);
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.mealHeader}>
-                    <View style={styles.mealInfo}>
-                      <Text style={styles.mealName}>{entry.name}</Text>
-                      <Text style={styles.mealTime}>
-                        {new Date(entry.date).toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                        })}
-                      </Text>
-                      <Text style={styles.tapToRefineText}>Tap to refine with AI</Text>
+              todaysFoodEntries.map((entry, index) => {
+                const healthScore = calculateHealthScore(entry);
+                return (
+                  <TouchableOpacity
+                    key={entry.id}
+                    style={[styles.mealCard, index === todaysFoodEntries.length - 1 && { marginBottom: 0 }]}
+                    onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSelectedFoodEntry(entry); setShowRefineFood(true); }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.mealCardTop}>
+                      <View style={styles.mealCardInfo}>
+                        <Text style={styles.mealCardName} numberOfLines={1}>{entry.name}</Text>
+                        <Text style={styles.mealCardTime}>
+                          {new Date(entry.date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                        </Text>
+                      </View>
+                      <View style={styles.mealCardRight}>
+                        <Text style={styles.mealCardCal}>{entry.calories}</Text>
+                        <Text style={styles.mealCardCalUnit}>cal</Text>
+                      </View>
                     </View>
-                    <View style={styles.mealActions}>
-                      <Text style={styles.mealCalories}>{entry.calories} cal</Text>
+                    <View style={styles.mealCardBottom}>
+                      <View style={styles.mealCardMacros}>
+                        <View style={styles.mealMacroChip}>
+                          <View style={[styles.mealMacroDot, { backgroundColor: "#FF4FB6" }]} />
+                          <Text style={styles.mealMacroVal}>{entry.protein}g</Text>
+                        </View>
+                        <View style={styles.mealMacroChip}>
+                          <View style={[styles.mealMacroDot, { backgroundColor: "#00FFC6" }]} />
+                          <Text style={styles.mealMacroVal}>{entry.carbs}g</Text>
+                        </View>
+                        <View style={styles.mealMacroChip}>
+                          <View style={[styles.mealMacroDot, { backgroundColor: "#FFB400" }]} />
+                          <Text style={styles.mealMacroVal}>{entry.fat}g</Text>
+                        </View>
+                        <View style={[styles.healthBadge, { backgroundColor: `${healthScore.color}15` }]}>
+                          <View style={[styles.healthBadgeDot, { backgroundColor: healthScore.color }]} />
+                          <Text style={[styles.healthBadgeText, { color: healthScore.color }]}>{healthScore.score}/10</Text>
+                        </View>
+                      </View>
                       <TouchableOpacity
-                        style={styles.deleteButton}
+                        style={styles.mealDeleteBtn}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                         onPress={(e) => {
                           e.stopPropagation();
-                          if (Platform.OS !== 'web') {
-                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          }
-                          Alert.alert(
-                            "Delete Food Entry",
-                            `Are you sure you want to delete "${entry.name}"?`,
-                            [
-                              { text: "Cancel", style: "cancel" },
-                              { 
-                                text: "Delete", 
-                                style: "destructive",
-                                onPress: () => deleteFoodEntry(entry.id)
-                              }
-                            ]
-                          );
+                          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          Alert.alert("Delete Food Entry", `Are you sure you want to delete "${entry.name}"?`, [
+                            { text: "Cancel", style: "cancel" },
+                            { text: "Delete", style: "destructive", onPress: () => deleteFoodEntry(entry.id) }
+                          ]);
                         }}
                       >
-                        <Trash2 size={16} color="#EF4444" />
+                        <Trash2 size={14} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
-                  </View>
-                  <View style={styles.mealMacros}>
-                    <View style={styles.macroTag}>
-                      <Text style={styles.macroTagText}>P: {entry.protein}g</Text>
-                    </View>
-                    <View style={styles.macroTag}>
-                      <Text style={styles.macroTagText}>C: {entry.carbs}g</Text>
-                    </View>
-                    <View style={styles.macroTag}>
-                      <Text style={styles.macroTagText}>F: {entry.fat}g</Text>
-                    </View>
-                    {(() => {
-                      const healthScore = calculateHealthScore(entry);
-                      return (
-                        <View style={[styles.healthScoreTag, { backgroundColor: `${healthScore.color}15` }]}>
-                          <View style={[styles.healthScoreDot, { backgroundColor: healthScore.color }]} />
-                          <Text style={[styles.healthScoreText, { color: healthScore.color }]}>
-                            {healthScore.score}/10 • {healthScore.label}
-                          </Text>
-                        </View>
-                      );
-                    })()}
-                  </View>
-                </TouchableOpacity>
-              ))
+                  </TouchableOpacity>
+                );
+              })
             )}
           </View>
         )}
@@ -1457,52 +974,33 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
 
       <Modal visible={showFirstTimePrompt} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.firstTimePromptModal}>
-            <View style={styles.firstTimePromptHeader}>
-              <Brain size={48} color="#10B981" />
-              <Text style={styles.firstTimePromptTitle}>Welcome to Nutrition Tracking!</Text>
+          <View style={styles.firstTimeModal}>
+            <View style={styles.firstTimeIconWrap}>
+              <Brain size={40} color="#10B981" />
             </View>
-            <Text style={styles.firstTimePromptDescription}>
-              To get started with personalized nutrition tracking, let's set up your goals based on your body stats and fitness objectives.
-            </Text>
-            <View style={styles.firstTimePromptFeatures}>
-              <View style={styles.firstTimeFeatureItem}>
-                <Text style={styles.firstTimeFeatureBullet}>•</Text>
+            <Text style={styles.firstTimeTitle}>Welcome to Nutrition Tracking!</Text>
+            <Text style={styles.firstTimeDesc}>Set up personalized nutrition goals based on your body stats and fitness objectives.</Text>
+            <View style={styles.firstTimeFeatures}>
+              <View style={styles.firstTimeFeatureRow}>
+                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#00E5FF" }]} />
                 <Text style={styles.firstTimeFeatureText}>Personalized daily calorie targets</Text>
               </View>
-              <View style={styles.firstTimeFeatureItem}>
-                <Text style={styles.firstTimeFeatureBullet}>•</Text>
-                <Text style={styles.firstTimeFeatureText}>Optimized macro breakdown (protein, carbs, fat)</Text>
+              <View style={styles.firstTimeFeatureRow}>
+                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#FF4FB6" }]} />
+                <Text style={styles.firstTimeFeatureText}>Optimized macro breakdown</Text>
               </View>
-              <View style={styles.firstTimeFeatureItem}>
-                <Text style={styles.firstTimeFeatureBullet}>•</Text>
-                <Text style={styles.firstTimeFeatureText}>Track progress toward your fitness goals</Text>
+              <View style={styles.firstTimeFeatureRow}>
+                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#00FFC6" }]} />
+                <Text style={styles.firstTimeFeatureText}>Track progress toward your goals</Text>
               </View>
             </View>
-            <View style={styles.firstTimePromptButtons}>
-              <TouchableOpacity
-                style={[styles.firstTimePromptButton, styles.firstTimeSkipButton]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setShowFirstTimePrompt(false);
-                }}
-              >
-                <Text style={styles.firstTimeSkipButtonText}>Maybe Later</Text>
+            <View style={styles.firstTimeBtns}>
+              <TouchableOpacity style={styles.firstTimeSkipBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFirstTimePrompt(false); }}>
+                <Text style={styles.firstTimeSkipText}>Later</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.firstTimePromptButton, styles.firstTimeStartButton]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setShowFirstTimePrompt(false);
-                  setShowQuiz(true);
-                }}
-              >
-                <Brain size={20} color="#FFFFFF" />
-                <Text style={styles.firstTimeStartButtonText}>Take Quiz</Text>
+              <TouchableOpacity style={styles.firstTimeStartBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFirstTimePrompt(false); setShowQuiz(true); }}>
+                <TrendingUp size={18} color="#FFFFFF" />
+                <Text style={styles.firstTimeStartText}>Take Quiz</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1510,54 +1008,16 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
       </Modal>
 
       <Modal visible={showAIInput} animationType="slide" transparent>
-        <KeyboardAvoidingView 
-          style={styles.modalOverlay}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View style={styles.aiModal}>
-            <TouchableOpacity 
-              style={styles.modalClose}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowAIInput(false);
-                setAiInput("");
-              }}
-            >
-              <X size={24} color="#6B7280" />
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.sheetModal}>
+            <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowAIInput(false); setAiInput(""); }}>
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.aiModalTitle}>Describe Your Food</Text>
-            <Text style={styles.aiModalSubtitle}>
-              Tell me what you ate and I'll estimate the nutrition
-            </Text>
-            <TextInput
-              style={styles.aiTextInput}
-              placeholder="e.g., 'grilled chicken breast with rice and broccoli'"
-              placeholderTextColor="#9CA3AF"
-              value={aiInput}
-              onChangeText={setAiInput}
-              multiline
-              autoFocus
-            />
-            <TouchableOpacity
-              style={[
-                styles.aiAnalyzeButton,
-                (!aiInput || isAnalyzing) && styles.disabledButton,
-              ]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                void analyzeWithAI(aiInput);
-              }}
-              disabled={!aiInput || isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.aiAnalyzeButtonText}>Analyze Food</Text>
-              )}
+            <Text style={styles.sheetTitle}>Describe Your Food</Text>
+            <Text style={styles.sheetSubtitle}>Tell me what you ate and I'll estimate the nutrition</Text>
+            <TextInput style={styles.sheetTextInput} placeholder="e.g., 'grilled chicken breast with rice and broccoli'" placeholderTextColor="#4B5563" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
+            <TouchableOpacity style={[styles.sheetPrimaryBtn, (!aiInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeWithAI(aiInput); }} disabled={!aiInput || isAnalyzing}>
+              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>Analyze Food</Text>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1568,60 +1028,31 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
           {!permission?.granted ? (
             <View style={styles.permissionContainer}>
               <Text style={styles.permissionText}>We need camera permission</Text>
-              <TouchableOpacity
-                style={styles.permissionButton}
-                onPress={requestPermission}
-              >
+              <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
                 <Text style={styles.permissionButtonText}>Grant Permission</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <>
-              <CameraView
-                ref={cameraRef}
-                style={styles.camera}
-                facing="back"
-              >
+              <CameraView ref={cameraRef} style={styles.camera} facing="back">
                 <View style={styles.cameraOverlay}>
-                  <TouchableOpacity
-                    style={styles.cameraClose}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setShowCamera(false);
-                      setCapturedImage(null);
-                    }}
-                  >
+                  <TouchableOpacity style={styles.cameraClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowCamera(false); setCapturedImage(null); }}>
                     <X size={32} color="#FFFFFF" />
                   </TouchableOpacity>
-                  
                   <View style={styles.cameraGuide}>
                     <View style={[styles.cameraGuideCorner, { top: 0, left: 0 }]} />
                     <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerTR]} />
                     <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerBL]} />
                     <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerBR]} />
                   </View>
-                  
                   <Text style={styles.cameraText}>Position food in frame</Text>
-                  
                   <View style={styles.cameraBottomContainer}>
-                    <TouchableOpacity
-                      style={styles.captureButton}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        }
-                        void takePicture();
-                      }}
-                      disabled={isAnalyzing}
-                    >
+                    <TouchableOpacity style={styles.captureButton} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void takePicture(); }} disabled={isAnalyzing}>
                       <View style={styles.captureButtonInner} />
                     </TouchableOpacity>
                   </View>
                 </View>
               </CameraView>
-              
               {isAnalyzing && (
                 <View style={styles.analyzingOverlay}>
                   <ActivityIndicator size="large" color="#FFFFFF" />
@@ -1634,132 +1065,54 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
       </Modal>
 
       <Modal visible={showFoodSearch} animationType="slide" transparent>
-        <KeyboardAvoidingView 
-          style={styles.modalOverlay}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.foodSearchModal}>
-            <TouchableOpacity 
-              style={styles.modalClose}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowFoodSearch(false);
-                setFoodSearchQuery("");
-                setFoodSearchResults([]);
-              }}
-            >
-              <X size={24} color="#6B7280" />
+            <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]); }}>
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.aiModalTitle}>Search Foods</Text>
+            <Text style={styles.sheetTitle}>Search Foods</Text>
             <View style={styles.foodSearchInputRow}>
-              <TextInput
-                style={styles.foodSearchInput}
-                placeholder="e.g., apple, chicken breast, pizza"
-                placeholderTextColor="#9CA3AF"
-                value={foodSearchQuery}
-                onChangeText={setFoodSearchQuery}
-                autoFocus
-                returnKeyType="search"
+              <TextInput style={styles.foodSearchInput} placeholder="e.g., apple, chicken breast, pizza" placeholderTextColor="#4B5563" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
                 onSubmitEditing={async () => {
                   if (!foodSearchQuery || isSearching) return;
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  setIsSearching(true);
-                  setFoodSearchResults([]);
-                  try {
-                    const results = await searchUSDAFoods(foodSearchQuery);
-                    setFoodSearchResults(results);
-                  } catch (error: any) {
-                    console.error("Food search error:", error.message);
-                    Alert.alert("Search Failed", "Unable to find foods. Please try a different search.");
-                  } finally {
-                    setIsSearching(false);
-                  }
-                }}
-              />
-              <TouchableOpacity
-                style={[styles.foodSearchBtn, (!foodSearchQuery || isSearching) && styles.disabledButton]}
+                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setIsSearching(true); setFoodSearchResults([]);
+                  try { const results = await searchUSDAFoods(foodSearchQuery); setFoodSearchResults(results); }
+                  catch (error: any) { console.error("Food search error:", error.message); Alert.alert("Search Failed", "Unable to find foods. Please try a different search."); }
+                  finally { setIsSearching(false); }
+                }} />
+              <TouchableOpacity style={[styles.foodSearchBtn, (!foodSearchQuery || isSearching) && styles.disabledButton]}
                 onPress={async () => {
                   if (!foodSearchQuery || isSearching) return;
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  }
-                  setIsSearching(true);
-                  setFoodSearchResults([]);
-                  try {
-                    const results = await searchUSDAFoods(foodSearchQuery);
-                    setFoodSearchResults(results);
-                  } catch (error: any) {
-                    console.error("Food search error:", error.message);
-                    Alert.alert("Search Failed", "Unable to find foods. Please try a different search.");
-                  } finally {
-                    setIsSearching(false);
-                  }
-                }}
-                disabled={!foodSearchQuery || isSearching}
-              >
-                {isSearching ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Search size={20} color="#FFFFFF" />
-                )}
+                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setIsSearching(true); setFoodSearchResults([]);
+                  try { const results = await searchUSDAFoods(foodSearchQuery); setFoodSearchResults(results); }
+                  catch (error: any) { console.error("Food search error:", error.message); Alert.alert("Search Failed", "Unable to find foods."); }
+                  finally { setIsSearching(false); }
+                }} disabled={!foodSearchQuery || isSearching}>
+                {isSearching ? <ActivityIndicator color="#FFFFFF" size="small" /> : <Search size={18} color="#FFFFFF" />}
               </TouchableOpacity>
             </View>
-
             <ScrollView style={styles.foodSearchResultsList} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {isSearching && foodSearchResults.length === 0 && (
-                <View style={styles.foodSearchLoading}>
-                  <ActivityIndicator size="large" color="#00ADB5" />
-                  <Text style={styles.foodSearchLoadingText}>Searching USDA database...</Text>
-                </View>
+                <View style={styles.foodSearchLoading}><ActivityIndicator size="large" color="#00ADB5" /><Text style={styles.foodSearchLoadingText}>Searching USDA database...</Text></View>
               )}
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length > 0 && (
-                <View style={styles.foodSearchEmpty}>
-                  <UtensilsCrossed size={40} color="#D1D5DB" />
-                  <Text style={styles.foodSearchEmptyText}>Press search to find foods</Text>
-                </View>
+                <View style={styles.foodSearchEmpty}><UtensilsCrossed size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>Press search to find foods</Text></View>
               )}
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length === 0 && (
-                <View style={styles.foodSearchEmpty}>
-                  <Search size={40} color="#D1D5DB" />
-                  <Text style={styles.foodSearchEmptyText}>Search USDA food database</Text>
-                  <Text style={styles.foodSearchEmptyHint}>Try "banana", "chicken breast", or "rice"</Text>
-                </View>
+                <View style={styles.foodSearchEmpty}><Search size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>Search USDA food database</Text><Text style={styles.foodSearchEmptyHint}>Try "banana", "chicken breast", or "rice"</Text></View>
               )}
               {foodSearchResults.map((item, index) => (
-                <TouchableOpacity
-                  key={`${item.name}-${index}`}
-                  style={styles.foodSearchResultItem}
-                  activeOpacity={0.7}
+                <TouchableOpacity key={`${item.name}-${index}`} style={styles.foodSearchResultItem} activeOpacity={0.7}
                   onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                    }
-                    const newEntry = {
-                      id: Date.now().toString(),
-                      name: item.name,
-                      calories: item.calories,
-                      protein: item.protein,
-                      carbs: item.carbs,
-                      fat: item.fat,
-                      date: new Date().toISOString(),
-                    };
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    const newEntry = { id: Date.now().toString(), name: item.name, calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat, date: new Date().toISOString() };
                     addFoodEntry(newEntry);
-                    updateNutrition({
-                      calories: nutrition.calories + newEntry.calories,
-                      protein: nutrition.protein + newEntry.protein,
-                      carbs: nutrition.carbs + newEntry.carbs,
-                      fat: nutrition.fat + newEntry.fat,
-                    });
-                    setShowFoodSearch(false);
-                    setFoodSearchQuery("");
-                    setFoodSearchResults([]);
+                    updateNutrition({ calories: nutrition.calories + newEntry.calories, protein: nutrition.protein + newEntry.protein, carbs: nutrition.carbs + newEntry.carbs, fat: nutrition.fat + newEntry.fat });
+                    setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]);
                     Alert.alert("Food Added", `"${item.name}" has been added to today's log.`);
-                  }}
-                >
+                  }}>
                   <View style={styles.foodSearchResultLeft}>
                     <Text style={styles.foodSearchResultName} numberOfLines={2}>{item.name}</Text>
                     <Text style={styles.foodSearchResultServing}>{item.serving}</Text>
@@ -1772,178 +1125,53 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                   <View style={styles.foodSearchResultRight}>
                     <Text style={styles.foodSearchResultCal}>{item.calories}</Text>
                     <Text style={styles.foodSearchResultCalLabel}>cal</Text>
-                    <ChevronRight size={16} color="#9CA3AF" style={{ marginTop: 4 }} />
                   </View>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-
-            <TouchableOpacity
-              style={styles.foodSearchManualBtn}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowFoodSearch(false);
-                setFoodSearchQuery("");
-                setFoodSearchResults([]);
-                setShowAddFood(true);
-              }}
-            >
-              <Plus size={16} color="#6B7280" />
-              <Text style={styles.foodSearchManualText}>Enter manually instead</Text>
+            <TouchableOpacity style={styles.foodSearchManualBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]); setShowAddFood(true); }}>
+              <Plus size={14} color="#6B7280" /><Text style={styles.foodSearchManualText}>Enter manually instead</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={showEditGoals} animationType="slide" transparent>
-        <KeyboardAvoidingView 
-          style={styles.modalOverlay}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View style={styles.aiModal}>
-            <TouchableOpacity 
-              style={styles.modalClose}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowEditGoals(false);
-              }}
-            >
-              <X size={24} color="#6B7280" />
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.sheetModal}>
+            <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowEditGoals(false); }}>
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.aiModalTitle}>Edit Nutrition Goals</Text>
-            <Text style={styles.aiModalSubtitle}>
-              Adjust your daily targets
-            </Text>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Daily Calorie Goal</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Calories"
-                placeholderTextColor="#9CA3AF"
-                value={editGoals.calorieGoal}
-                onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })}
-                keyboardType="numeric"
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Daily Protein Goal (g)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Protein"
-                placeholderTextColor="#9CA3AF"
-                value={editGoals.proteinGoal}
-                onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })}
-                keyboardType="numeric"
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Daily Carbs Goal (g)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Carbs"
-                placeholderTextColor="#9CA3AF"
-                value={editGoals.carbsGoal}
-                onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })}
-                keyboardType="numeric"
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Daily Fat Goal (g)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Fat"
-                placeholderTextColor="#9CA3AF"
-                value={editGoals.fatGoal}
-                onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })}
-                keyboardType="numeric"
-              />
-            </View>
-            
-            <TouchableOpacity
-              style={styles.aiAnalyzeButton}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                handleEditGoals();
-              }}
-            >
-              <Text style={styles.aiAnalyzeButtonText}>Save Goals</Text>
+            <Text style={styles.sheetTitle}>Edit Nutrition Goals</Text>
+            <Text style={styles.sheetSubtitle}>Adjust your daily targets</Text>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Calorie Goal</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#4B5563" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Protein Goal (g)</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#4B5563" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Carbs Goal (g)</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#4B5563" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Fat Goal (g)</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#4B5563" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
+            <TouchableOpacity style={styles.sheetPrimaryBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleEditGoals(); }}>
+              <Text style={styles.sheetPrimaryBtnText}>Save Goals</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={showRefineFood} animationType="slide" transparent>
-        <KeyboardAvoidingView 
-          style={styles.modalOverlay}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View style={styles.aiModal}>
-            <TouchableOpacity 
-              style={styles.modalClose}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowRefineFood(false);
-                setSelectedFoodEntry(null);
-                setRefinementInput("");
-              }}
-            >
-              <X size={24} color="#6B7280" />
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.sheetModal}>
+            <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowRefineFood(false); setSelectedFoodEntry(null); setRefinementInput(""); }}>
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.aiModalTitle}>Refine Food Entry</Text>
-            <Text style={styles.aiModalSubtitle}>
-              Add details to improve accuracy: portion size, cooking method, ingredients, etc.
-            </Text>
+            <Text style={styles.sheetTitle}>Refine Food Entry</Text>
+            <Text style={styles.sheetSubtitle}>Add details to improve accuracy</Text>
             {selectedFoodEntry && (
-              <View style={{ marginBottom: 15 }}>
-                <Text style={{ fontSize: 16, color: "#F3F4F6", fontWeight: "600" as const }}>
-                  {selectedFoodEntry.name}
-                </Text>
-                <Text style={{ fontSize: 14, color: "#6B7280", marginTop: 4 }}>
-                  {selectedFoodEntry.calories} cal • P: {selectedFoodEntry.protein}g • C: {selectedFoodEntry.carbs}g • F: {selectedFoodEntry.fat}g
-                </Text>
+              <View style={styles.refineEntryPreview}>
+                <Text style={styles.refineEntryName}>{selectedFoodEntry.name}</Text>
+                <Text style={styles.refineEntryMacros}>{selectedFoodEntry.calories} cal · P: {selectedFoodEntry.protein}g · C: {selectedFoodEntry.carbs}g · F: {selectedFoodEntry.fat}g</Text>
               </View>
             )}
-            <TextInput
-              style={styles.aiTextInput}
-              placeholder="e.g., 'it was a large portion, deep fried' or 'with olive oil and garlic'"
-              placeholderTextColor="#9CA3AF"
-              value={refinementInput}
-              onChangeText={setRefinementInput}
-              multiline
-              autoFocus
-            />
-            <TouchableOpacity
-              style={[
-                styles.aiAnalyzeButton,
-                (!refinementInput || isAnalyzing) && styles.disabledButton,
-              ]}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                if (selectedFoodEntry) {
-                  void refineWithAI(selectedFoodEntry, refinementInput);
-                }
-              }}
-              disabled={!refinementInput || isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.aiAnalyzeButtonText}>Refine Entry</Text>
-              )}
+            <TextInput style={styles.sheetTextInput} placeholder="e.g., 'it was a large portion, deep fried'" placeholderTextColor="#4B5563" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
+            <TouchableOpacity style={[styles.sheetPrimaryBtn, (!refinementInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); if (selectedFoodEntry) void refineWithAI(selectedFoodEntry, refinementInput); }} disabled={!refinementInput || isAnalyzing}>
+              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>Refine Entry</Text>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1951,32 +1179,19 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
 
       <Modal visible={showWeeklyReview} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.aiModal}>
-            <TouchableOpacity 
-              style={styles.modalClose}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setShowWeeklyReview(false);
-                setWeeklyReviewData("");
-              }}
-            >
-              <X size={24} color="#6B7280" />
+          <View style={styles.sheetModal}>
+            <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowWeeklyReview(false); setWeeklyReviewData(""); }}>
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.aiModalTitle}>Weekly Nutrition Review</Text>
-            <ScrollView style={{ maxHeight: 400, marginTop: 20 }}>
+            <Text style={styles.sheetTitle}>Weekly Nutrition Review</Text>
+            <ScrollView style={{ maxHeight: 400, marginTop: 16 }}>
               {isGeneratingReview ? (
                 <View style={{ alignItems: "center" as const, paddingVertical: 40 }}>
                   <ActivityIndicator size="large" color="#00ADB5" />
-                  <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 16 }}>
-                    Analyzing your week...
-                  </Text>
+                  <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 15 }}>Analyzing your week...</Text>
                 </View>
               ) : (
-                <Text style={{ fontSize: 16, color: "#D1D5DB", lineHeight: 24 }}>
-                  {weeklyReviewData}
-                </Text>
+                <Text style={{ fontSize: 15, color: "#D1D5DB", lineHeight: 24 }}>{weeklyReviewData}</Text>
               )}
             </ScrollView>
           </View>
@@ -1993,348 +1208,687 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
   },
   contentContainer: {
+    paddingHorizontal: 20,
     paddingBottom: 120,
   },
-  progressCard: {
+
+  headerSection: {
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  headerTitle: {
+    fontSize: 34,
+    fontWeight: "800" as const,
+    color: "#F9FAFB",
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    color: "#6B7280",
+    marginTop: 4,
+    fontWeight: "500" as const,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 4,
+  },
+  headerIconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  weeklyReviewBtn: {
+    marginTop: 16,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  weeklyReviewGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(0,173,181,0.15)",
+  },
+  weeklyReviewText: {
+    flex: 1,
+    color: "#00ADB5",
+    fontSize: 14,
+    fontWeight: "600" as const,
+  },
+
+  calorieCard: {
+    backgroundColor: "#141720",
     borderRadius: 24,
     padding: 24,
-    marginTop: 30,
-    shadowColor: "#00ADB5",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
   },
-  progressHeader: {
+  calorieCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 20,
   },
-  progressTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+  calorieCardTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  calorieCardTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
     color: "#F9FAFB",
   },
-  resetTimer: {
+  resetBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+  },
+  resetText: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "500" as const,
+  },
+  calorieRingWrapper: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  macroSplitRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    marginTop: 20,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.05)",
+  },
+  macroSplitItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  macroSplitDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  macroSplitLabel: {
     fontSize: 12,
     color: "#9CA3AF",
-    marginTop: 2,
+    fontWeight: "500" as const,
   },
-  progressIcons: {
-    flexDirection: "row",
-    gap: 15,
-  },
-  progressSubtitle: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    marginTop: 5,
-  },
-  macrosGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 15,
-    marginTop: 20,
-  },
-  macroItem: {
-    width: "47%",
+
+  macrosCard: {
+    backgroundColor: "#141720",
     borderRadius: 20,
     padding: 20,
-    alignItems: "center",
-    backgroundColor: "#10141B",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
   },
-  macroIcon: {
-    fontSize: 20,
-  },
-  macroLabel: {
-    fontSize: 16,
-    fontWeight: "600",
+  macrosCardTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
     color: "#F9FAFB",
-    marginTop: 5,
+    marginBottom: 20,
   },
-  progressContainer: {
-    alignItems: "center",
-    marginTop: 15,
-    position: "relative",
-  },
-  progressRingCenter: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  progressPercentage: {
-    fontSize: 22,
-    fontWeight: "bold" as const,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  progressValue: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 10,
-  },
-  actionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
+
+  quickActions: {
     marginTop: 20,
   },
-  actionTile: {
-    width: "48%",
-    backgroundColor: "#0E1015",
-    borderRadius: 18,
-    padding: 18,
+  quickActionsTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#F9FAFB",
+    marginBottom: 14,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  actionChip: {
+    flex: 1,
+    backgroundColor: "#141720",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
     gap: 8,
   },
-  actionTileIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+  actionChipIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
-  actionTileLabel: {
-    fontSize: 15,
+  actionChipText: {
+    alignItems: "center",
+  },
+  actionChipLabel: {
+    fontSize: 13,
     fontWeight: "700" as const,
     color: "#F3F4F6",
-    letterSpacing: -0.3,
   },
-  actionTileSub: {
-    fontSize: 11,
+  actionChipSub: {
+    fontSize: 10,
     fontWeight: "500" as const,
     color: "#4B5563",
+    marginTop: 2,
   },
-  scanButton: {
-    backgroundColor: "#00ADB5",
+
+  mealsSection: {
+    marginTop: 28,
+    marginBottom: 20,
+  },
+  mealsSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  mealsSectionTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#F9FAFB",
+  },
+  mealsSectionCount: {
+    fontSize: 13,
+    color: "#6B7280",
+    fontWeight: "500" as const,
+  },
+  emptyMeals: {
+    backgroundColor: "#141720",
+    borderRadius: 20,
+    padding: 40,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  emptyMealsText: {
+    fontSize: 15,
+    color: "#6B7280",
+    marginTop: 12,
+    fontWeight: "600" as const,
+  },
+  emptyMealsHint: {
+    fontSize: 13,
+    color: "#4B5563",
+    marginTop: 4,
+  },
+  mealCard: {
+    backgroundColor: "#141720",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  mealCardTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  mealCardInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  mealCardName: {
+    fontSize: 16,
+    fontWeight: "600" as const,
+    color: "#F9FAFB",
+  },
+  mealCardTime: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 3,
+  },
+  mealCardRight: {
+    alignItems: "flex-end",
+  },
+  mealCardCal: {
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#00E5FF",
+    letterSpacing: -0.5,
+  },
+  mealCardCalUnit: {
+    fontSize: 11,
+    color: "#6B7280",
+    fontWeight: "500" as const,
+    marginTop: -2,
+  },
+  mealCardBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  mealCardMacros: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+    flex: 1,
+  },
+  mealMacroChip: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-    borderRadius: 15,
-    marginTop: 20,
-    gap: 10,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 5,
   },
-  scanButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
+  mealMacroDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
-  aiButton: {
-    backgroundColor: "#00ADB5",
+  mealMacroVal: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "600" as const,
+  },
+  healthBadge: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-    borderRadius: 15,
-    marginTop: 15,
-    gap: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 5,
   },
-  aiButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
+  healthBadgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
-  manualButton: {
-    backgroundColor: "#00ADB5",
-    padding: 18,
-    borderRadius: 15,
-    marginTop: 15,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 10,
+  healthBadgeText: {
+    fontSize: 12,
+    fontWeight: "700" as const,
   },
-  manualButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
+  mealDeleteBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    marginLeft: 8,
   },
+
   addFoodCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#141720",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  addFoodHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
   addFoodTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "700" as const,
     color: "#F9FAFB",
-    marginBottom: 15,
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 14,
   },
   inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#F9FAFB",
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
     marginBottom: 6,
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
   },
   input: {
     backgroundColor: "#0D0F13",
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 12,
+    padding: 14,
     fontSize: 16,
-    borderWidth: 2,
-    borderColor: "#1E293B",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
     color: "#F9FAFB",
   },
   nutritionInputRow: {
     flexDirection: "row",
     gap: 10,
-    marginBottom: 15,
+    marginBottom: 14,
   },
   nutritionInputItem: {
     flex: 1,
   },
   nutritionInput: {
     backgroundColor: "#0D0F13",
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 12,
+    padding: 14,
     fontSize: 16,
-    borderWidth: 2,
-    borderColor: "#1E293B",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
     color: "#F9FAFB",
   },
   addFoodButtons: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 10,
+    marginTop: 6,
   },
-  addButton: {
+  addFoodBtn: {
     flex: 1,
-    backgroundColor: "#00ADB5",
-    padding: 15,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: "center",
   },
-  cancelButton: {
-    backgroundColor: "#1E293B",
+  cancelBtn: {
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
-  addButtonText: {
+  confirmBtn: {
+    backgroundColor: "#00ADB5",
+  },
+  cancelBtnText: {
+    color: "#9CA3AF",
+    fontSize: 15,
+    fontWeight: "600" as const,
+  },
+  confirmBtnText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600" as const,
+  },
+  datePickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,173,181,0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    gap: 6,
+  },
+  datePickerText: {
+    color: "#00ADB5",
+    fontSize: 13,
+    fontWeight: "600" as const,
+  },
+  mealPrepSubtitle: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginBottom: 14,
+    fontStyle: "italic" as const,
+  },
+
+  quizRequiredCard: {
+    backgroundColor: "#141720",
+    borderRadius: 24,
+    padding: 32,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+    alignItems: "center",
+  },
+  quizRequiredIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: "rgba(0,173,181,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  quizRequiredTitle: {
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  quizRequiredDescription: {
+    fontSize: 15,
+    color: "#9CA3AF",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  startQuizButton: {
+    backgroundColor: "#00ADB5",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 14,
+    gap: 8,
+    alignSelf: "stretch",
+  },
+  startQuizButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700" as const,
   },
-  cancelButtonText: {
-    color: "#9CA3AF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  historySection: {
-    marginTop: 30,
-    marginBottom: 30,
-  },
-  historyTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 15,
-  },
-  emptyState: {
-    backgroundColor: "#171B22",
-    borderRadius: 20,
-    padding: 30,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#9CA3AF",
-  },
-  mealCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  mealName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#F9FAFB",
-  },
-  mealTime: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
-  mealStats: {
-    alignItems: "flex-end",
-  },
-  mealCalories: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#00ADB5",
-  },
-  mealMacro: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginTop: 2,
-  },
+
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     justifyContent: "center",
     alignItems: "center",
   },
+  sheetModal: {
+    backgroundColor: "#141720",
+    borderRadius: 24,
+    padding: 24,
+    width: "90%",
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  sheetClose: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 10,
+    padding: 4,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  sheetTitle: {
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    marginBottom: 6,
+  },
+  sheetSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 20,
+  },
+  sheetTextInput: {
+    backgroundColor: "#0D0F13",
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    minHeight: 100,
+    textAlignVertical: "top",
+    color: "#F3F4F6",
+  },
+  sheetPrimaryBtn: {
+    backgroundColor: "#00ADB5",
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  sheetPrimaryBtnText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700" as const,
+  },
+  disabledButton: {
+    opacity: 0.4,
+  },
+  refineEntryPreview: {
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  refineEntryName: {
+    fontSize: 15,
+    color: "#F3F4F6",
+    fontWeight: "600" as const,
+  },
+  refineEntryMacros: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+
+  firstTimeModal: {
+    backgroundColor: "#141720",
+    borderRadius: 24,
+    padding: 28,
+    width: "90%",
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    alignItems: "center",
+  },
+  firstTimeIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: "rgba(16,185,129,0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  firstTimeTitle: {
+    fontSize: 22,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  firstTimeDesc: {
+    fontSize: 15,
+    color: "#9CA3AF",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  firstTimeFeatures: {
+    alignSelf: "stretch",
+    marginBottom: 24,
+    gap: 14,
+  },
+  firstTimeFeatureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  firstTimeFeatureDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  firstTimeFeatureText: {
+    fontSize: 15,
+    color: "#9CA3AF",
+    flex: 1,
+  },
+  firstTimeBtns: {
+    flexDirection: "row",
+    gap: 12,
+    alignSelf: "stretch",
+  },
+  firstTimeSkipBtn: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  firstTimeSkipText: {
+    color: "#9CA3AF",
+    fontSize: 15,
+    fontWeight: "600" as const,
+  },
+  firstTimeStartBtn: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#10B981",
+    flexDirection: "row",
+    gap: 8,
+  },
+  firstTimeStartText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600" as const,
+  },
+
   quizModal: {
     backgroundColor: "#141720",
     borderRadius: 24,
-    padding: 30,
+    padding: 28,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
   },
   quizTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "800" as const,
     color: "#F3F4F6",
-    marginBottom: 5,
+    marginBottom: 4,
   },
   quizProgress: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#6B7280",
-    marginBottom: 20,
+    marginBottom: 24,
+    fontWeight: "500" as const,
   },
   quizQuestion: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#E5E7EB",
     marginBottom: 20,
   },
   quizInput: {
     backgroundColor: "#0D0F13",
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(255,255,255,0.06)",
     color: "#F3F4F6",
   },
   choicesContainer: {
@@ -2342,33 +1896,34 @@ const styles = StyleSheet.create({
   },
   choiceButton: {
     backgroundColor: "#0D0F13",
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 15,
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.06)",
   },
   choiceButtonActive: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "rgba(0,173,181,0.15)",
     borderColor: "#00ADB5",
   },
   choiceText: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#D1D5DB",
     textAlign: "center",
+    fontWeight: "500" as const,
   },
   choiceTextActive: {
-    color: "#FFFFFF",
-    fontWeight: "600",
+    color: "#00E5FF",
+    fontWeight: "600" as const,
   },
   quizButtons: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 30,
+    marginTop: 28,
   },
   quizButton: {
     flex: 1,
-    padding: 15,
-    borderRadius: 10,
+    paddingVertical: 15,
+    borderRadius: 12,
     alignItems: "center",
   },
   quizButtonPrimary: {
@@ -2381,68 +1936,13 @@ const styles = StyleSheet.create({
   },
   quizButtonTextPrimary: {
     color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "600" as const,
   },
   quizButtonTextSecondary: {
     color: "#9CA3AF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  aiModal: {
-    backgroundColor: "#141720",
-    borderRadius: 24,
-    padding: 30,
-    width: "90%",
-    maxWidth: 400,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  modalClose: {
-    position: "absolute",
-    top: 15,
-    right: 15,
-    zIndex: 10,
-    padding: 5,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-  },
-  aiModalTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F3F4F6",
-    marginBottom: 10,
-  },
-  aiModalSubtitle: {
-    fontSize: 16,
-    color: "#6B7280",
-    marginBottom: 20,
-  },
-  aiTextInput: {
-    backgroundColor: "#0D0F13",
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    minHeight: 100,
-    textAlignVertical: "top",
-    color: "#F3F4F6",
-  },
-  aiAnalyzeButton: {
-    backgroundColor: "#00ADB5",
-    padding: 15,
-    borderRadius: 14,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  aiAnalyzeButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  disabledButton: {
-    opacity: 0.5,
+    fontSize: 15,
+    fontWeight: "600" as const,
   },
   heightInputContainer: {
     flexDirection: "row",
@@ -2451,249 +1951,27 @@ const styles = StyleSheet.create({
   heightInput: {
     flex: 1,
   },
-  cameraContainer: {
-    flex: 1,
-    backgroundColor: "#000000",
-  },
-  camera: {
-    flex: 1,
-  },
-  cameraOverlay: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  cameraClose: {
-    position: "absolute",
-    top: 50,
-    right: 20,
-    zIndex: 1,
-  },
-  cameraBottomContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    paddingBottom: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    paddingTop: 20,
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  captureButtonInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FFFFFF",
-  },
-  cameraText: {
-    position: "absolute",
-    top: "50%",
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  permissionText: {
-    fontSize: 18,
-    color: "#FFFFFF",
-    marginBottom: 20,
-  },
-  permissionButton: {
-    backgroundColor: "#3B82F6",
-    padding: 15,
-    borderRadius: 10,
-  },
-  permissionButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  cameraGuide: {
-    position: "absolute",
-    top: "30%",
-    left: "10%",
-    right: "10%",
-    height: "30%",
-  },
-  cameraGuideCorner: {
-    position: "absolute",
-    width: 40,
-    height: 40,
-    borderColor: "#FFFFFF",
-    borderWidth: 3,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderBottomWidth: 0,
-    borderRightWidth: 0,
-  },
-  cameraGuideCornerTR: {
-    top: 0,
-    right: 0,
-    borderLeftWidth: 0,
-    borderRightWidth: 3,
-  },
-  cameraGuideCornerBL: {
-    bottom: 0,
-    left: 0,
-    borderTopWidth: 0,
-    borderBottomWidth: 3,
-  },
-  cameraGuideCornerBR: {
-    bottom: 0,
-    right: 0,
-    borderTopWidth: 0,
-    borderLeftWidth: 0,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-  },
-  analyzingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  analyzingText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 20,
-  },
 
-  heroBanner: {
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  heroBannerTitle: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#F9FAFB",
-    marginBottom: 4,
-  },
-  heroBannerSubtitle: {
-    fontSize: 16,
-    color: "#9CA3AF",
-  },
-  weeklyReviewButtonTop: {
-    borderRadius: 16,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: "rgba(0,173,181,0.2)",
-    overflow: "hidden",
-  },
-  weeklyReviewButtonInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 10,
-  },
-  weeklyReviewButtonTopText: {
-    color: "#00ADB5",
-    fontSize: 15,
-    fontWeight: "600",
-    letterSpacing: 0.3,
-  },
-  quizRequiredCard: {
-    backgroundColor: "#0E1015",
-    borderRadius: 20,
-    padding: 30,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
-    alignItems: "center",
-  },
-  quizRequiredHeader: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  quizRequiredTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F3F4F6",
-    textAlign: "center",
-    marginTop: 15,
-  },
-  quizRequiredDescription: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 25,
-  },
-  quizRequiredFeatures: {
-    alignSelf: "stretch",
-    marginBottom: 30,
-  },
-  quizFeatureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  quizFeatureBullet: {
-    fontSize: 18,
-    color: "#00ADB5",
-    marginRight: 12,
-    fontWeight: "bold",
-  },
-  quizFeatureText: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    flex: 1,
-  },
-  startQuizButton: {
-    backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 18,
-    paddingHorizontal: 32,
-    borderRadius: 15,
-    gap: 10,
-    alignSelf: "stretch",
-  },
-  startQuizButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  foodSearchButton: {
-    backgroundColor: "#00ADB5",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 18,
-    borderRadius: 15,
-    marginTop: 15,
-    gap: 10,
-  },
-  foodSearchButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "600",
-  },
+  cameraContainer: { flex: 1, backgroundColor: "#000000" },
+  camera: { flex: 1 },
+  cameraOverlay: { flex: 1, justifyContent: "space-between" },
+  cameraClose: { position: "absolute", top: 50, right: 20, zIndex: 1 },
+  cameraBottomContainer: { position: "absolute", bottom: 0, left: 0, right: 0, alignItems: "center", paddingBottom: 50, backgroundColor: "rgba(0, 0, 0, 0.3)", paddingTop: 20 },
+  captureButton: { width: 80, height: 80, borderRadius: 40, backgroundColor: "rgba(255, 255, 255, 0.3)", justifyContent: "center", alignItems: "center" },
+  captureButtonInner: { width: 60, height: 60, borderRadius: 30, backgroundColor: "#FFFFFF" },
+  cameraText: { position: "absolute", top: "50%", left: 0, right: 0, textAlign: "center", color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, textShadowColor: "rgba(0, 0, 0, 0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
+  permissionContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
+  permissionText: { fontSize: 18, color: "#FFFFFF", marginBottom: 20 },
+  permissionButton: { backgroundColor: "#00ADB5", padding: 15, borderRadius: 12 },
+  permissionButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" as const },
+  cameraGuide: { position: "absolute", top: "30%", left: "10%", right: "10%", height: "30%" },
+  cameraGuideCorner: { position: "absolute", width: 40, height: 40, borderColor: "#FFFFFF", borderWidth: 3, borderTopWidth: 3, borderLeftWidth: 3, borderBottomWidth: 0, borderRightWidth: 0 },
+  cameraGuideCornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderRightWidth: 3 },
+  cameraGuideCornerBL: { bottom: 0, left: 0, borderTopWidth: 0, borderBottomWidth: 3 },
+  cameraGuideCornerBR: { bottom: 0, right: 0, borderTopWidth: 0, borderLeftWidth: 0, borderBottomWidth: 3, borderRightWidth: 3 },
+  analyzingOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0, 0, 0, 0.8)", justifyContent: "center", alignItems: "center" },
+  analyzingText: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, marginTop: 20 },
+
   foodSearchModal: {
     backgroundColor: "#141720",
     borderRadius: 24,
@@ -2708,7 +1986,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginTop: 10,
+    marginTop: 8,
   },
   foodSearchInput: {
     flex: 1,
@@ -2719,13 +1997,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#F3F4F6",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   foodSearchBtn: {
     backgroundColor: "#00ADB5",
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2739,7 +2017,7 @@ const styles = StyleSheet.create({
   },
   foodSearchLoadingText: {
     marginTop: 12,
-    fontSize: 15,
+    fontSize: 14,
     color: "#6B7280",
   },
   foodSearchEmpty: {
@@ -2748,22 +2026,22 @@ const styles = StyleSheet.create({
   },
   foodSearchEmptyText: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 15,
     color: "#6B7280",
     fontWeight: "500" as const,
   },
   foodSearchEmptyHint: {
     marginTop: 4,
-    fontSize: 13,
+    fontSize: 12,
     color: "#4B5563",
   },
   foodSearchResultItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0E1015",
+    backgroundColor: "rgba(255,255,255,0.03)",
     borderRadius: 14,
     padding: 14,
-    marginBottom: 10,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
   },
@@ -2772,14 +2050,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   foodSearchResultName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600" as const,
     color: "#F3F4F6",
     lineHeight: 20,
   },
   foodSearchResultServing: {
-    fontSize: 13,
-    color: "#9CA3AF",
+    fontSize: 12,
+    color: "#6B7280",
     marginTop: 2,
   },
   foodSearchResultMacros: {
@@ -2788,17 +2066,17 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   foodSearchMacroP: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#FF4FB6",
     fontWeight: "600" as const,
   },
   foodSearchMacroC: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#00FFC6",
     fontWeight: "600" as const,
   },
   foodSearchMacroF: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#FFB400",
     fontWeight: "600" as const,
   },
@@ -2809,11 +2087,11 @@ const styles = StyleSheet.create({
   foodSearchResultCal: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#00ADB5",
+    color: "#00E5FF",
   },
   foodSearchResultCalLabel: {
     fontSize: 11,
-    color: "#9CA3AF",
+    color: "#6B7280",
     fontWeight: "500" as const,
   },
   foodSearchManualBtn: {
@@ -2825,172 +2103,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   foodSearchManualText: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#6B7280",
     fontWeight: "500" as const,
-  },
-  addFoodHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  datePickerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EBF4FF",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  datePickerText: {
-    color: "#3B82F6",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  mealPrepSubtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 15,
-    fontStyle: "italic",
-  },
-  tapToRefineText: {
-    fontSize: 12,
-    color: "#8B5CF6",
-    marginTop: 2,
-    fontStyle: "italic",
-  },
-  mealHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 10,
-  },
-  mealInfo: {
-    flex: 1,
-  },
-  mealActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  deleteButton: {
-    padding: 4,
-    borderRadius: 6,
-    backgroundColor: "#FEF2F2",
-  },
-  mealMacros: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  macroTag: {
-    backgroundColor: "#0D0F13",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  macroTagText: {
-    fontSize: 13,
-    color: "#9CA3AF",
-    fontWeight: "500",
-  },
-  healthScoreTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    gap: 6,
-  },
-  healthScoreDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  healthScoreText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  firstTimePromptModal: {
-    backgroundColor: "#141720",
-    borderRadius: 24,
-    padding: 30,
-    width: "90%",
-    maxWidth: 400,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  firstTimePromptHeader: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  firstTimePromptTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F3F4F6",
-    textAlign: "center",
-    marginTop: 15,
-  },
-  firstTimePromptDescription: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 25,
-  },
-  firstTimePromptFeatures: {
-    marginBottom: 30,
-  },
-  firstTimeFeatureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  firstTimeFeatureBullet: {
-    fontSize: 20,
-    marginRight: 15,
-    width: 30,
-    color: "#00ADB5",
-    fontWeight: "bold" as const,
-  },
-  firstTimeFeatureText: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    flex: 1,
-    lineHeight: 22,
-  },
-  firstTimePromptButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  firstTimePromptButton: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  firstTimeSkipButton: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  firstTimeStartButton: {
-    backgroundColor: "#10B981",
-    flexDirection: "row",
-    gap: 8,
-  },
-  firstTimeSkipButtonText: {
-    color: "#9CA3AF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  firstTimeStartButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });
