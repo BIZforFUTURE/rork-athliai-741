@@ -11,15 +11,18 @@ import {
   AppState,
   Animated,
   Pressable,
+  Image,
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Pause, TrendingUp, Flame, X, Zap, Route } from "lucide-react-native";
+import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera } from "lucide-react-native";
 import Svg, { Circle } from "react-native-svg";
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 
 import { useApp } from "@/providers/AppProvider";
+import { XP_REWARDS } from "@/constants/xp";
 import { useNotifications } from "@/providers/NotificationProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { router } from "expo-router";
@@ -66,6 +69,8 @@ export default function RunScreen() {
   const [lastRunCalories, setLastRunCalories] = useState(0);
   const [runNotificationId, setRunNotificationId] = useState<string | null>(null);
   const [isStopping, setIsStopping] = useState(false);
+  const [treadmillPhoto, setTreadmillPhoto] = useState<string | null>(null);
+  const [_showPhotoPreview, setShowPhotoPreview] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
@@ -329,6 +334,8 @@ export default function RunScreen() {
         id: Date.now().toString(), date: new Date().toISOString(),
         distance: runState.distance, time: finalElapsedTime,
         pace, calories, routeCoordinates: runState.routeCoordinates,
+        photos: treadmillPhoto ? [treadmillPhoto] : undefined,
+        treadmillVerified: !!treadmillPhoto,
       });
       setLastRunCalories(calories);
       setShowCalorieModal(true);
@@ -342,6 +349,7 @@ export default function RunScreen() {
       isRunning: false, isPaused: false, startTime: null, pausedTime: 0,
       elapsedTime: 0, distance: 0, routeCoordinates: [], currentLocation: null,
     });
+    setTreadmillPhoto(null);
     setIsStopping(false);
   };
 
@@ -403,6 +411,75 @@ export default function RunScreen() {
     : 0;
 
   const currentCalories = Math.round(runState.distance * 112.5);
+
+  const handleTreadmillPhoto = useCallback(async () => {
+    if (Platform.OS !== 'web') {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
+    const showOptions = () => {
+      Alert.alert(
+        "Snap Treadmill",
+        "Take a photo of your treadmill display to verify your run and earn bonus XP!",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Take Photo", onPress: handleCameraCapture },
+          { text: "Choose from Library", onPress: handleLibraryPick },
+        ]
+      );
+    };
+
+    const handleCameraCapture = async () => {
+      try {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Required", "Camera access is needed to snap your treadmill.");
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.7,
+        });
+        if (!result.canceled && result.assets[0]) {
+          setTreadmillPhoto(result.assets[0].uri);
+          if (Platform.OS !== 'web') {
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        }
+      } catch (error) {
+        console.error("Error taking treadmill photo:", error);
+        Alert.alert("Error", "Failed to take photo. Please try again.");
+      }
+    };
+
+    const handleLibraryPick = async () => {
+      try {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Required", "Photo library access is needed.");
+          return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.7,
+        });
+        if (!result.canceled && result.assets[0]) {
+          setTreadmillPhoto(result.assets[0].uri);
+          if (Platform.OS !== 'web') {
+            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }
+        }
+      } catch (error) {
+        console.error("Error picking treadmill photo:", error);
+        Alert.alert("Error", "Failed to pick photo. Please try again.");
+      }
+    };
+
+    showOptions();
+  }, []);
 
   useEffect(() => {
     void loadRunState();
@@ -529,6 +606,54 @@ export default function RunScreen() {
             <Text style={styles.statUnit}>cal</Text>
           </View>
         </Animated.View>
+
+        {runState.isRunning && (
+          <View style={styles.treadmillSection}>
+            {treadmillPhoto ? (
+              <TouchableOpacity
+                style={styles.treadmillPhotoPreview}
+                onPress={() => setShowPhotoPreview(true)}
+                activeOpacity={0.8}
+              >
+                <Image source={{ uri: treadmillPhoto }} style={styles.treadmillThumb} />
+                <View style={styles.treadmillPhotoInfo}>
+                  <View style={styles.treadmillVerifiedBadge}>
+                    <Camera size={12} color="#00E5FF" />
+                    <Text style={styles.treadmillVerifiedText}>Treadmill Verified</Text>
+                  </View>
+                  <Text style={styles.treadmillXpText}>+{XP_REWARDS.TREADMILL_PHOTO} XP earned</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.treadmillPhotoRemove}
+                  onPress={() => {
+                    setTreadmillPhoto(null);
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }}
+                >
+                  <X size={14} color="#9CA3AF" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.treadmillBtn}
+                onPress={handleTreadmillPhoto}
+                activeOpacity={0.7}
+              >
+                <View style={styles.treadmillBtnIcon}>
+                  <Camera size={18} color="#00E5FF" />
+                </View>
+                <View style={styles.treadmillBtnTextWrap}>
+                  <Text style={styles.treadmillBtnTitle}>Snap Treadmill</Text>
+                  <Text style={styles.treadmillBtnSub}>Photo your machine for +{XP_REWARDS.TREADMILL_PHOTO} XP</Text>
+                </View>
+                <View style={styles.treadmillBtnXp}>
+                  <Zap size={10} color="#00E5FF" fill="#00E5FF" />
+                  <Text style={styles.treadmillBtnXpText}>+{XP_REWARDS.TREADMILL_PHOTO}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         {runState.isRunning ? (
           <View style={styles.runningControls}>
@@ -945,5 +1070,97 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700" as const,
+  },
+  treadmillSection: {
+    marginTop: 2,
+  },
+  treadmillBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "#0E1015",
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.12)",
+    gap: 12,
+  },
+  treadmillBtnIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  treadmillBtnTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  treadmillBtnTitle: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.2,
+  },
+  treadmillBtnSub: {
+    fontSize: 11,
+    fontWeight: "500" as const,
+    color: "#6B7280",
+  },
+  treadmillBtnXp: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 3,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  treadmillBtnXpText: {
+    fontSize: 11,
+    fontWeight: "800" as const,
+    color: "#00E5FF",
+  },
+  treadmillPhotoPreview: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "#0E1015",
+    borderRadius: 16,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.2)",
+    gap: 12,
+  },
+  treadmillThumb: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+  },
+  treadmillPhotoInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  treadmillVerifiedBadge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+  },
+  treadmillVerifiedText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#00E5FF",
+  },
+  treadmillXpText: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: "#4B5563",
+  },
+  treadmillPhotoRemove: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
 });

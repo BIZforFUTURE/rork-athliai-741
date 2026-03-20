@@ -469,10 +469,10 @@ export default function PersonalStatsScreen() {
             <View style={xpStatStyles.breakdownSection}>
               <Text style={xpStatStyles.breakdownTitle}>XP Breakdown</Text>
               {(() => {
-                const grouped: Record<XPSource, number> = { run: 0, workout: 0, food: 0, nutrition_goal: 0, streak: 0 };
+                const grouped: Record<XPSource, number> = { run: 0, workout: 0, food: 0, nutrition_goal: 0, streak: 0, treadmill_photo: 0 };
                 xpInfo.xpEvents.forEach(e => { grouped[e.source] = (grouped[e.source] || 0) + e.amount; });
-                const labels: Record<XPSource, string> = { run: 'Runs', workout: 'Workouts', food: 'Food Logging', nutrition_goal: 'Nutrition Goals', streak: 'Streaks' };
-                const colors: Record<XPSource, string> = { run: '#00E5FF', workout: '#00ADB5', food: '#BFFF00', nutrition_goal: '#F59E0B', streak: '#E879F9' };
+                const labels: Record<XPSource, string> = { run: 'Runs', workout: 'Workouts', food: 'Food Logging', nutrition_goal: 'Nutrition Goals', streak: 'Streaks', treadmill_photo: 'Treadmill Photos' };
+                const colors: Record<XPSource, string> = { run: '#00E5FF', workout: '#00ADB5', food: '#BFFF00', nutrition_goal: '#F59E0B', streak: '#E879F9', treadmill_photo: '#38BDF8' };
                 const totalXPFromEvents = Object.values(grouped).reduce((a, b) => a + b, 0);
                 return Object.entries(grouped)
                   .filter(([, v]) => v > 0)

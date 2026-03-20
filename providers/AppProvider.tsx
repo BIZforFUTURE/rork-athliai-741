@@ -60,11 +60,12 @@ interface Run {
   time: number;
   pace: number;
   calories: number;
-  photos?: string[]; // Array of photo URIs
+  photos?: string[];
   notes?: string;
   weather?: string;
   route?: string;
-  routeCoordinates?: RouteCoordinate[]; // GPS coordinates of the route
+  routeCoordinates?: RouteCoordinate[];
+  treadmillVerified?: boolean;
 }
 
 interface FoodEntry {
@@ -606,6 +607,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       const quarterMiles = Math.floor(run.distance * 4);
       const runXP = XP_REWARDS.RUN_BASE + (quarterMiles * XP_REWARDS.RUN_PER_QUARTER_MILE);
       state = awardXP(state, runXP, 'run', `Completed a ${run.distance.toFixed(1)} mi run`);
+
+      if (run.treadmillVerified) {
+        state = awardXP(state, XP_REWARDS.TREADMILL_PHOTO, 'treadmill_photo', 'Treadmill photo verified');
+      }
 
       if (newRunStreak >= XP_REWARDS.STREAK_MIN_DAYS) {
         const streakBonus = newRunStreak * XP_REWARDS.STREAK_RUN_BONUS;

@@ -27,9 +27,10 @@ export const XP_REWARDS = {
   STREAK_WORKOUT_BONUS: 10,
   STREAK_FOOD_BONUS: 5,
   STREAK_MIN_DAYS: 3,
+  TREADMILL_PHOTO: 20,
 } as const;
 
-export type XPSource = 'run' | 'workout' | 'food' | 'nutrition_goal' | 'streak';
+export type XPSource = 'run' | 'workout' | 'food' | 'nutrition_goal' | 'streak' | 'treadmill_photo';
 
 export interface XPEvent {
   id: string;

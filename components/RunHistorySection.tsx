@@ -16,7 +16,8 @@ import {
   Clock,
   MapPin,
   TrendingUp,
-  Flame
+  Flame,
+  Camera,
 } from 'lucide-react-native';
 
 interface RouteCoordinate {
@@ -36,6 +37,7 @@ interface Run {
   weather?: string;
   route?: string;
   routeCoordinates?: RouteCoordinate[];
+  treadmillVerified?: boolean;
 }
 
 interface RunHistorySectionProps {
@@ -320,6 +322,12 @@ export default function RunHistorySection({
                     minute: "2-digit" 
                   })}
                 </Text>
+                {run.treadmillVerified && (
+                  <View style={styles.treadmillBadge}>
+                    <Camera size={10} color="#00E5FF" />
+                    <Text style={styles.treadmillBadgeText}>Treadmill</Text>
+                  </View>
+                )}
                 {run.weather && (
                   <Text style={styles.runWeatherText}>{run.weather}</Text>
                 )}
@@ -568,5 +576,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#00ADB5',
+  },
+  treadmillBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 3,
+    backgroundColor: 'rgba(0,229,255,0.08)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start' as const,
+  },
+  treadmillBadgeText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+    color: '#00E5FF',
   },
 });
