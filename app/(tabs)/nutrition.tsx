@@ -917,9 +917,9 @@ Analyze this food: "${input}". Estimate nutritional content based on typical ser
         </View>
 
         <LinearGradient
-          colors={["#00ADB5", "#00C6FF"]}
+          colors={["rgba(0,173,181,0.15)", "rgba(0,173,181,0.05)"]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={styles.weeklyReviewButtonTop}
         >
           <TouchableOpacity 
@@ -988,7 +988,7 @@ Be encouraging, specific, and actionable. Keep it under 400 words.`;
                 }
               }}
           >
-            <FileText size={20} color="#FFFFFF" />
+            <FileText size={20} color="#00ADB5" />
             <Text style={styles.weeklyReviewButtonTopText}>My Weekly Nutrition Review</Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -2596,13 +2596,10 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
   },
   weeklyReviewButtonTop: {
-    borderRadius: 20,
+    borderRadius: 16,
     marginTop: 16,
-    shadowColor: "#00ADB5",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
+    borderWidth: 1,
+    borderColor: "rgba(0,173,181,0.2)",
     overflow: "hidden",
   },
   weeklyReviewButtonInner: {
@@ -2614,10 +2611,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   weeklyReviewButtonTopText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
-    letterSpacing: 0.5,
+    color: "#00ADB5",
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: 0.3,
   },
   quizRequiredCard: {
     backgroundColor: "#0E1015",
