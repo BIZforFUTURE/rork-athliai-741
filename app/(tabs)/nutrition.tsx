@@ -17,7 +17,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Clock } from "lucide-react-native";
+import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Clock, Dumbbell } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -170,6 +170,8 @@ export default function NutritionScreen() {
     fat: string;
   }[]>([]);
   const [_bulkMealPrepDate, _setBulkMealPrepDate] = useState(new Date());
+  const [showExerciseInput, setShowExerciseInput] = useState(false);
+  const [exerciseInput, setExerciseInput] = useState("");
   const [showRefineFood, setShowRefineFood] = useState(false);
   const [selectedFoodEntry, setSelectedFoodEntry] = useState<any>(null);
   const [refinementInput, setRefinementInput] = useState("");
@@ -413,6 +415,59 @@ Analyze this protein shake recipe: "${ingredients}". Estimate the total nutritio
         { text: "Enter Manually", onPress: () => { setShowProteinShake(false); setShowAddFood(true); } }
       ]);
     } finally { setIsAnalyzing(false); setProteinIngredients(""); }
+  };
+
+  const analyzeExercise = async (description: string) => {
+    setIsAnalyzing(true);
+    try {
+      const prompt = `You are a fitness and nutrition expert. The user will describe an exercise or physical activity they performed. Estimate the calories burned based on the description, assuming an average adult body weight unless specified otherwise.
+
+Exercise described: "${description}"
+
+Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "exercise description", "caloriesBurned": number, "duration": "estimated duration string"}. All numeric values must be numbers, not strings.`;
+
+      console.log("Analyzing exercise...");
+      const response = await callOpenAI(prompt);
+      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
+      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
+      if (jsonMatch) cleanedResponse = jsonMatch[0];
+
+      const exerciseData = JSON.parse(cleanedResponse);
+      const name = exerciseData.name || description;
+      const burned = Number(exerciseData.caloriesBurned) || 0;
+      const duration = exerciseData.duration || "";
+      if (burned === 0) throw new Error("Invalid exercise data");
+
+      const newEntry = {
+        id: Date.now().toString(),
+        name: `🏋️ ${name}`,
+        calories: -Math.round(burned),
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        date: new Date().toISOString(),
+      };
+
+      addFoodEntry(newEntry);
+      updateNutrition({
+        calories: Math.max(0, nutrition.calories - Math.round(burned)),
+      });
+
+      setShowExerciseInput(false);
+      setExerciseInput("");
+      Alert.alert(
+        "Exercise Logged!",
+        `${name}${duration ? ` (~${duration})` : ""}\n\nCalories burned: ${Math.round(burned)} cal\n\nThis has been subtracted from your daily intake.`
+      );
+    } catch (error: any) {
+      console.error("Exercise analysis error:", error.message);
+      Alert.alert("Analysis Failed", "Unable to estimate calories burned. Please try again.", [
+        { text: "Try Again", onPress: () => setShowExerciseInput(true) },
+        { text: "Cancel", style: "cancel" },
+      ]);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const refineWithAI = async (entry: any, refinementText: string) => {
@@ -889,6 +944,25 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     </View>
                   </TouchableOpacity>
                 </View>
+
+                <TouchableOpacity
+                  style={styles.exerciseChip}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!isPremium) { router.push('/paywall'); return; }
+                    setShowExerciseInput(true);
+                  }}
+                >
+                  <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
+                    <Dumbbell size={20} color="#8B5CF6" />
+                  </View>
+                  <View style={styles.exerciseChipTextWrap}>
+                    <Text style={styles.actionChipLabel}>Log Exercise</Text>
+                    <Text style={styles.exerciseChipSub}>Describe your workout to subtract burned calories</Text>
+                  </View>
+                  <ChevronRight size={16} color="#4B5563" />
+                </TouchableOpacity>
               </View>
             )}
           </>
@@ -1155,6 +1229,22 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         </KeyboardAvoidingView>
       </Modal>
 
+      <Modal visible={showExerciseInput} animationType="slide" transparent>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.sheetModal}>
+            <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowExerciseInput(false); setExerciseInput(""); }}>
+              <X size={22} color="#6B7280" />
+            </TouchableOpacity>
+            <Text style={styles.sheetTitle}>Log Exercise</Text>
+            <Text style={styles.sheetSubtitle}>Describe your exercise and I'll estimate calories burned</Text>
+            <TextInput style={styles.sheetTextInput} placeholder="e.g., '30 min jog', 'chest and triceps for 45 min', '100 pushups'" placeholderTextColor="#4B5563" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
+            <TouchableOpacity style={[styles.sheetPrimaryBtn, styles.exercisePrimaryBtn, (!exerciseInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeExercise(exerciseInput); }} disabled={!exerciseInput || isAnalyzing}>
+              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>Estimate Calories</Text>}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       <Modal visible={showRefineFood} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.sheetModal}>
@@ -1398,6 +1488,29 @@ const styles = StyleSheet.create({
     fontWeight: "500" as const,
     color: "#4B5563",
     marginTop: 2,
+  },
+  exerciseChip: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "#141720",
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "rgba(139,92,246,0.12)",
+    gap: 12,
+  },
+  exerciseChipTextWrap: {
+    flex: 1,
+  },
+  exerciseChipSub: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  exercisePrimaryBtn: {
+    backgroundColor: "#8B5CF6",
   },
 
   mealsSection: {
