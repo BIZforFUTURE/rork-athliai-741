@@ -607,8 +607,7 @@ export default function RunScreen() {
           </View>
         </Animated.View>
 
-        {runState.isRunning && (
-          <View style={styles.treadmillSection}>
+        <View style={styles.treadmillSection}>
             {treadmillPhoto ? (
               <TouchableOpacity
                 style={styles.treadmillPhotoPreview}
@@ -652,8 +651,7 @@ export default function RunScreen() {
                 </View>
               </TouchableOpacity>
             )}
-          </View>
-        )}
+        </View>
 
         {runState.isRunning ? (
           <View style={styles.runningControls}>
