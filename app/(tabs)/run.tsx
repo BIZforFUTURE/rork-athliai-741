@@ -533,6 +533,7 @@ export default function RunScreen() {
         {runState.isRunning ? (
           <View style={styles.runningControls}>
             <Pressable
+              style={styles.controlBtnWrap}
               onPress={runState.isPaused ? resumeRun : pauseRun}
               onPressIn={handleButtonPressIn}
               onPressOut={handleButtonPressOut}
@@ -542,20 +543,18 @@ export default function RunScreen() {
                 runState.isPaused ? styles.controlBtnResume : styles.controlBtnPause,
                 { transform: [{ scale: buttonScale }] }
               ]}>
-                {runState.isPaused ? (
-                  <>
-                    <Play size={20} color="#FFFFFF" />
-                    <Text style={styles.controlBtnText}>RESUME</Text>
-                  </>
-                ) : (
-                  <>
-                    <Pause size={20} color="#FFFFFF" />
-                    <Text style={styles.controlBtnText}>PAUSE</Text>
-                  </>
-                )}
+                <View style={[styles.controlIconCircle, runState.isPaused ? styles.controlIconResume : styles.controlIconPauseCircle]}>
+                  {runState.isPaused ? (
+                    <Play size={22} color="#FFFFFF" fill="#FFFFFF" />
+                  ) : (
+                    <Pause size={22} color="#FFFFFF" fill="#FFFFFF" />
+                  )}
+                </View>
+                <Text style={styles.controlBtnText}>{runState.isPaused ? 'RESUME' : 'PAUSE'}</Text>
               </Animated.View>
             </Pressable>
             <Pressable
+              style={styles.controlBtnWrap}
               onPress={stopRun}
               disabled={isStopping}
               onPressIn={handleButtonPressIn}
@@ -566,7 +565,9 @@ export default function RunScreen() {
                 isStopping && styles.controlBtnDisabled,
                 { transform: [{ scale: buttonScale }] }
               ]}>
-                <View style={styles.stopIcon} />
+                <View style={[styles.controlIconCircle, styles.controlIconStopCircle]}>
+                  <View style={styles.stopIcon} />
+                </View>
                 <Text style={styles.controlBtnText}>{isStopping ? 'STOPPING...' : 'STOP'}</Text>
               </Animated.View>
             </Pressable>
@@ -768,42 +769,68 @@ const styles = StyleSheet.create({
   },
   runningControls: {
     flexDirection: "row" as const,
-    gap: 10,
-    marginTop: 6,
+    gap: 12,
+    marginTop: 10,
+  },
+  controlBtnWrap: {
+    flex: 1,
   },
   controlBtn: {
     flex: 1,
-    flexDirection: "row" as const,
+    flexDirection: "column" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    paddingVertical: 16,
-    borderRadius: 16,
-    gap: 8,
+    paddingVertical: 18,
+    borderRadius: 20,
+    gap: 10,
+  },
+  controlIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  controlIconPauseCircle: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  controlIconResume: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  controlIconStopCircle: {
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
   controlBtnPause: {
-    backgroundColor: "#F59E0B",
+    backgroundColor: "#0E1015",
+    borderWidth: 1,
+    borderColor: "rgba(245,158,11,0.3)",
   },
   controlBtnResume: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#0E1015",
+    borderWidth: 1,
+    borderColor: "rgba(0,173,181,0.3)",
   },
   controlBtnStop: {
-    backgroundColor: "#EF4444",
+    backgroundColor: "#0E1015",
+    borderWidth: 1,
+    borderColor: "rgba(239,68,68,0.3)",
   },
   controlBtnDisabled: {
-    backgroundColor: "#374151",
-    opacity: 0.7,
+    backgroundColor: "#0E1015",
+    borderColor: "rgba(55,65,81,0.3)",
+    opacity: 0.5,
   },
   controlBtnText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "800" as const,
-    letterSpacing: 0.5,
+    color: "#9CA3AF",
+    fontSize: 11,
+    fontWeight: "700" as const,
+    letterSpacing: 1.5,
   },
   stopIcon: {
-    width: 14,
-    height: 14,
+    width: 16,
+    height: 16,
     borderRadius: 3,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#EF4444",
   },
   startBtn: {
     backgroundColor: "#0E1015",
