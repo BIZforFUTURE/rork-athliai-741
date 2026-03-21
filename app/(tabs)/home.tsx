@@ -286,9 +286,11 @@ function TodayNutrition() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const calPct = nutrition.calorieGoal > 0 ? Math.min(nutrition.calories / nutrition.calorieGoal, 1) : 0;
+  const calRemaining = Math.max(nutrition.calorieGoal - nutrition.calories, 0);
+  const isGoalHit = calPct >= 0.95;
 
-  const dialSize = 72;
-  const stroke = 5;
+  const dialSize = 110;
+  const stroke = 8;
   const r = (dialSize - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - calPct);
@@ -315,42 +317,65 @@ function TodayNutrition() {
     >
       <Animated.View style={[nutStyles.card, { transform: [{ scale: scaleAnim }] }]}>
         <View style={nutStyles.cardHeader}>
-          <UtensilsCrossed size={13} color="#6B7280" />
-          <Text style={nutStyles.heading}>Today's Fuel</Text>
-          <ChevronRight size={14} color="#374151" />
+          <View style={nutStyles.headerIconWrap}>
+            <UtensilsCrossed size={15} color="#FF6B35" />
+          </View>
+          <View style={nutStyles.headerTitleArea}>
+            <Text style={nutStyles.heading}>Today's Fuel</Text>
+            <Text style={nutStyles.headerSub}>
+              {isGoalHit ? "Goal reached!" : `${calRemaining} kcal remaining`}
+            </Text>
+          </View>
+          <View style={nutStyles.headerArrow}>
+            <ChevronRight size={16} color="#4B5563" />
+          </View>
         </View>
+
         <View style={nutStyles.body}>
-          <View style={nutStyles.left}>
+          <View style={nutStyles.dialArea}>
             <Svg width={dialSize} height={dialSize}>
-              <Circle cx={dialSize / 2} cy={dialSize / 2} r={r} stroke="rgba(255,107,53,0.08)" strokeWidth={stroke} fill="none" />
+              <Defs>
+                <SvgGradient id="fuelRingGrad" x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0" stopColor={isGoalHit ? "#10B981" : "#FF6B35"} stopOpacity="1" />
+                  <Stop offset="1" stopColor={isGoalHit ? "#34D399" : "#FF8F65"} stopOpacity="0.6" />
+                </SvgGradient>
+              </Defs>
+              <Circle cx={dialSize / 2} cy={dialSize / 2} r={r} stroke="rgba(255,107,53,0.06)" strokeWidth={stroke} fill="none" />
               <Circle
                 cx={dialSize / 2} cy={dialSize / 2} r={r}
-                stroke={calPct >= 0.95 ? "#10B981" : "#FF6B35"} strokeWidth={stroke} fill="none"
+                stroke="url(#fuelRingGrad)" strokeWidth={stroke} fill="none"
                 strokeDasharray={`${circ}`} strokeDashoffset={offset}
                 strokeLinecap="round" transform={`rotate(-90 ${dialSize / 2} ${dialSize / 2})`}
               />
             </Svg>
             <View style={nutStyles.dialInner}>
               <Text style={nutStyles.calNum}>{nutrition.calories}</Text>
+              <Text style={nutStyles.calDivider}>of {nutrition.calorieGoal}</Text>
               <Text style={nutStyles.calUnit}>kcal</Text>
             </View>
           </View>
+        </View>
 
-          <View style={nutStyles.right}>
-            {macros.map((m) => {
-              const pct = m.goal > 0 ? Math.min(m.value / m.goal, 1) : 0;
-              return (
-                <View key={m.short} style={nutStyles.macroRow}>
+        <View style={nutStyles.macroSection}>
+          {macros.map((m) => {
+            const pct = m.goal > 0 ? Math.min(m.value / m.goal, 1) : 0;
+            const macroHit = pct >= 0.95;
+            return (
+              <View key={m.short} style={nutStyles.macroCard}>
+                <View style={nutStyles.macroTop}>
                   <View style={[nutStyles.macroDot, { backgroundColor: m.color }]} />
-                  <Text style={nutStyles.macroLabel}>{m.short}</Text>
-                  <View style={nutStyles.macroTrack}>
-                    <View style={[nutStyles.macroFill, { width: `${pct * 100}%`, backgroundColor: m.color }]} />
-                  </View>
-                  <Text style={nutStyles.macroVal}>{m.value}<Text style={nutStyles.macroGoal}>g</Text></Text>
+                  <Text style={nutStyles.macroLabel}>{m.label}</Text>
                 </View>
-              );
-            })}
-          </View>
+                <View style={nutStyles.macroValues}>
+                  <Text style={[nutStyles.macroVal, macroHit && { color: m.color }]}>{m.value}</Text>
+                  <Text style={nutStyles.macroGoalText}>/ {m.goal}g</Text>
+                </View>
+                <View style={nutStyles.macroTrack}>
+                  <View style={[nutStyles.macroFill, { width: `${pct * 100}%`, backgroundColor: macroHit ? m.color : m.color + "80" }]} />
+                </View>
+              </View>
+            );
+          })}
         </View>
       </Animated.View>
     </Pressable>
@@ -882,31 +907,55 @@ const streakStyles = StyleSheet.create({
 const nutStyles = StyleSheet.create({
   card: {
     backgroundColor: "#0E1015",
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 24,
+    padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,107,53,0.1)",
   },
   cardHeader: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 6,
-    marginBottom: 14,
+    gap: 10,
+    marginBottom: 20,
+  },
+  headerIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,107,53,0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  headerTitleArea: {
+    flex: 1,
+    gap: 1,
   },
   heading: {
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: "#9CA3AF",
-    flex: 1,
+    fontSize: 17,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.3,
+  },
+  headerSub: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#6B7280",
+  },
+  headerArrow: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
   body: {
-    flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 18,
+    marginBottom: 20,
   },
-  left: {
-    width: 72,
-    height: 72,
+  dialArea: {
+    width: 110,
+    height: 110,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -915,59 +964,75 @@ const nutStyles = StyleSheet.create({
     alignItems: "center" as const,
   },
   calNum: {
-    fontSize: 17,
-    fontWeight: "800" as const,
+    fontSize: 26,
+    fontWeight: "900" as const,
     color: "#FFFFFF",
-    letterSpacing: -0.5,
+    letterSpacing: -1,
+    lineHeight: 30,
+  },
+  calDivider: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: "#4B5563",
+    marginTop: 1,
   },
   calUnit: {
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: "600" as const,
     color: "#6B7280",
     marginTop: -1,
   },
-  right: {
-    flex: 1,
-    gap: 10,
+  macroSection: {
+    flexDirection: "row" as const,
+    gap: 8,
   },
-  macroRow: {
+  macroCard: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 14,
+    padding: 12,
+    gap: 8,
+  },
+  macroTop: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 6,
+    gap: 5,
   },
   macroDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   macroLabel: {
     fontSize: 11,
     fontWeight: "700" as const,
     color: "#6B7280",
-    width: 14,
+  },
+  macroValues: {
+    flexDirection: "row" as const,
+    alignItems: "baseline" as const,
+    gap: 3,
+  },
+  macroVal: {
+    fontSize: 18,
+    fontWeight: "800" as const,
+    color: "#E5E7EB",
+    letterSpacing: -0.5,
+  },
+  macroGoalText: {
+    fontSize: 11,
+    fontWeight: "500" as const,
+    color: "#4B5563",
   },
   macroTrack: {
-    flex: 1,
     height: 4,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 2,
     overflow: "hidden" as const,
   },
   macroFill: {
     height: "100%" as const,
     borderRadius: 2,
-  },
-  macroVal: {
-    fontSize: 12,
-    fontWeight: "700" as const,
-    color: "#D1D5DB",
-    width: 40,
-    textAlign: "right" as const,
-  },
-  macroGoal: {
-    fontSize: 10,
-    fontWeight: "500" as const,
-    color: "#4B5563",
   },
 });
 
