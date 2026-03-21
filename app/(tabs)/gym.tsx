@@ -68,6 +68,19 @@ const GYM_TIPS = [
   "Drinking water before meals can reduce calorie intake by up to 13%.",
 ];
 
+const RECOVERY_QUOTES = [
+  "Muscles grow during rest, not during the workout.",
+  "Recovery is where the magic happens.",
+  "Rest today, conquer tomorrow.",
+  "Your body repairs and strengthens between sessions.",
+  "Quality rest = quality gains.",
+  "Sleep is the most powerful recovery tool you have.",
+  "Active recovery: stretch, walk, hydrate.",
+  "Overtraining kills progress. Rest is strategic.",
+  "Let your nervous system recharge fully.",
+  "Foam rolling and mobility work on rest days pay dividends.",
+];
+
 const WEEK_DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const WEEK_DAYS_FULL = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -313,6 +326,100 @@ function WeekDayIndicator({ workoutDays }: { workoutDays: string[] }) {
           </View>
         );
       })}
+    </View>
+  );
+}
+
+function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan }: {
+  hasCompletedToday: boolean;
+  nextWorkoutDay: string;
+  onViewPlan: () => void;
+}) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const quoteIndex = useMemo(() => {
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    return dayOfYear % RECOVERY_QUOTES.length;
+  }, []);
+
+  useEffect(() => {
+    if (hasCompletedToday) return;
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.15, duration: 1800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1800, useNativeDriver: true }),
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [pulseAnim, hasCompletedToday]);
+
+  return (
+    <View style={styles.restDayCard}>
+      <LinearGradient
+        colors={['rgba(15, 23, 42, 0.95)', 'rgba(15, 30, 50, 0.98)']}
+        style={styles.restDayGradient}
+      >
+        <View style={styles.restDayStars}>
+          {[12, 45, 78, 120, 160, 200, 240, 30, 90, 150, 210, 260].map((left, i) => (
+            <View
+              key={i}
+              style={[
+                styles.restDayStar,
+                {
+                  left: left,
+                  top: 8 + (i * 7) % 40,
+                  opacity: 0.15 + (i % 3) * 0.12,
+                  width: i % 3 === 0 ? 3 : 2,
+                  height: i % 3 === 0 ? 3 : 2,
+                },
+              ]}
+            />
+          ))}
+        </View>
+
+        <View style={styles.restDayInner}>
+          <View style={styles.restDayIconWrap}>
+            {hasCompletedToday ? (
+              <View style={[styles.restDayIconCircle, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
+                <Check size={28} color="#10B981" strokeWidth={2.5} />
+              </View>
+            ) : (
+              <Animated.View
+                style={[
+                  styles.restDayIconCircle,
+                  { transform: [{ scale: pulseAnim }] },
+                ]}
+              >
+                <Moon size={28} color="#7DD3FC" />
+              </Animated.View>
+            )}
+          </View>
+          <View style={styles.restDayTextBlock}>
+            <Text style={styles.restDayTitle}>
+              {hasCompletedToday ? "Workout Complete" : "Rest Day"}
+            </Text>
+            <Text style={styles.restDayQuote}>
+              {hasCompletedToday
+                ? "Great job today! Recovery starts now."
+                : `"${RECOVERY_QUOTES[quoteIndex]}"`}
+            </Text>
+            <View style={styles.restDayNextRow}>
+              <Calendar size={13} color="#38BDF8" />
+              <Text style={styles.nextWorkoutText}>
+                Next workout: {nextWorkoutDay}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </LinearGradient>
+      <TouchableOpacity
+        style={styles.viewPlanButton}
+        activeOpacity={0.7}
+        onPress={onViewPlan}
+      >
+        <Text style={styles.viewPlanButtonText}>View Full Plan</Text>
+        <ChevronRight size={16} color="#38BDF8" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -1090,47 +1197,16 @@ Format as JSON:
                 </LinearGradient>
               </TouchableOpacity>
             ) : (
-              <View style={styles.restDayCard}>
-                <View style={styles.restDayInner}>
-                  <View style={styles.restDayIconWrap}>
-                    {hasCompletedToday ? (
-                      <View style={[styles.restDayIconCircle, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}>
-                        <Check size={28} color="#10B981" strokeWidth={2.5} />
-                      </View>
-                    ) : (
-                      <View style={styles.restDayIconCircle}>
-                        <Moon size={28} color="#64748B" />
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.restDayTextBlock}>
-                    <Text style={styles.restDayTitle}>
-                      {hasCompletedToday ? "Workout Complete" : "Rest Day"}
-                    </Text>
-                    <Text style={styles.restDaySubtitle}>
-                      {hasCompletedToday 
-                        ? "Great job today! Recovery starts now."
-                        : "Rest, recharge, and be ready."}
-                    </Text>
-                    <Text style={styles.nextWorkoutText}>
-                      Next workout: {getNextWorkoutDay(generatedPlan)}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity 
-                  style={styles.viewPlanButton}
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    setShowCustomPlan(true);
-                  }}
-                >
-                  <Text style={styles.viewPlanButtonText}>View Full Plan</Text>
-                  <ChevronRight size={16} color="#00ADB5" />
-                </TouchableOpacity>
-              </View>
+              <RestDayCard
+                hasCompletedToday={hasCompletedToday}
+                nextWorkoutDay={getNextWorkoutDay(generatedPlan)}
+                onViewPlan={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setShowCustomPlan(true);
+                }}
+              />
             )}
           </View>
         )}
@@ -2019,11 +2095,25 @@ const styles = StyleSheet.create({
   },
 
   restDayCard: {
-    backgroundColor: "#171B22",
     borderRadius: 20,
-    overflow: "hidden",
+    overflow: "hidden" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(56, 189, 248, 0.15)",
+  },
+  restDayGradient: {
+    position: "relative" as const,
+  },
+  restDayStars: {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  restDayStar: {
+    position: "absolute" as const,
+    borderRadius: 2,
+    backgroundColor: "#7DD3FC",
   },
   restDayInner: {
     flexDirection: "row" as const,
@@ -2036,9 +2126,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgba(100, 116, 139, 0.1)",
+    backgroundColor: "rgba(56, 189, 248, 0.1)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
+    borderWidth: 1,
+    borderColor: "rgba(56, 189, 248, 0.15)",
   },
   restDayTextBlock: {
     flex: 1,
@@ -2047,17 +2139,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700" as const,
     color: "#F1F5F9",
-    marginBottom: 3,
-  },
-  restDaySubtitle: {
-    fontSize: 13,
-    color: "#64748B",
-    lineHeight: 18,
     marginBottom: 4,
+  },
+  restDayQuote: {
+    fontSize: 13,
+    color: "#94A3B8",
+    lineHeight: 18,
+    marginBottom: 8,
+    fontStyle: "italic" as const,
+  },
+  restDayNextRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
   },
   nextWorkoutText: {
     fontSize: 12,
-    color: "#00ADB5",
+    color: "#38BDF8",
     fontWeight: "600" as const,
   },
   viewPlanButton: {
@@ -2067,11 +2165,12 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.04)",
+    borderTopColor: "rgba(56, 189, 248, 0.08)",
+    backgroundColor: "rgba(56, 189, 248, 0.04)",
   },
   viewPlanButtonText: {
     fontSize: 14,
-    color: "#00ADB5",
+    color: "#38BDF8",
     fontWeight: "600" as const,
   },
 

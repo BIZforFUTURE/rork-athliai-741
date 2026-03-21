@@ -56,7 +56,7 @@ interface RunState {
 const STORAGE_KEY = 'activeRunState';
 
 export default function RunScreen() {
-  const { addRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo, personalStats } = useApp();
+  const { addRun, deleteRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo, personalStats } = useApp();
   const { sendRunStartNotification, cancelRunNotification, sendRunCompletionNotification } = useNotifications();
   const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
@@ -873,6 +873,7 @@ export default function RunScreen() {
         <RunHistorySection
           runs={recentRuns}
           onRunPress={(runId) => router.push(`/run-details/${runId}`)}
+          onDeleteRun={deleteRun}
           formatTime={formatTime}
           formatPace={formatPace}
         />

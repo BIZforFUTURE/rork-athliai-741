@@ -785,6 +785,21 @@ export const [AppProvider, useApp] = createContextHook(() => {
     });
   }, [mutate]);
 
+  const deleteRun = useCallback((runId: string) => {
+    setAppState(prev => {
+      const runToDelete = prev.runs.find(r => r.id === runId);
+      if (!runToDelete) return prev;
+
+      const updatedRuns = prev.runs.filter(r => r.id !== runId);
+      const updated = {
+        ...prev,
+        runs: updatedRuns,
+      };
+      mutate(updated);
+      return updated;
+    });
+  }, [mutate]);
+
   const updateRun = useCallback((runId: string, updates: Partial<Run>) => {
     setAppState(prev => {
       const updatedRuns = prev.runs.map(run => 
@@ -1051,6 +1066,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     updateStats,
     updateNutrition,
     addRun,
+    deleteRun,
     updateRun,
     addFoodEntry,
     deleteFoodEntry,
@@ -1068,5 +1084,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     dismissLevelUp,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState, updateUser, updateStats, updateNutrition, addRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getWeeklyRuns, getWeeklyWorkouts]);
 });

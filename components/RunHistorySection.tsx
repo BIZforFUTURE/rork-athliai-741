@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  Alert,
+  Platform,
 } from 'react-native';
 import { 
   ChevronRight, 
@@ -18,7 +20,9 @@ import {
   TrendingUp,
   Flame,
   Camera,
+  Trash2,
 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
 interface RouteCoordinate {
   latitude: number;
@@ -43,6 +47,7 @@ interface Run {
 interface RunHistorySectionProps {
   runs: Run[];
   onRunPress: (runId: string) => void;
+  onDeleteRun?: (runId: string) => void;
   formatTime: (seconds: number) => string;
   formatPace: (pace: number) => string;
 }
@@ -52,7 +57,8 @@ type FilterPeriod = 'all' | 'week' | 'month' | '3months' | 'year';
 
 export default function RunHistorySection({ 
   runs, 
-  onRunPress, 
+  onRunPress,
+  onDeleteRun,
   formatTime, 
   formatPace 
 }: RunHistorySectionProps) {
@@ -62,7 +68,37 @@ export default function RunHistorySection({
   const [showFilters, setShowFilters] = useState(false);
   const [showAllRuns, setShowAllRuns] = useState(false);
 
-  // Filter runs by period
+  const handleDeleteRun = useCallback((run: Run) => {
+    if (!onDeleteRun) return;
+
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    const dateStr = new Date(run.date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    Alert.alert(
+      "Delete Run",
+      `Delete your ${run.distance.toFixed(2)} mi run from ${dateStr}? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            if (Platform.OS !== 'web') {
+              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            }
+            onDeleteRun(run.id);
+          },
+        },
+      ]
+    );
+  }, [onDeleteRun]);
+
   const filteredByPeriod = useMemo(() => {
     if (filterPeriod === 'all') return runs;
     
@@ -87,7 +123,6 @@ export default function RunHistorySection({
     return runs.filter(run => new Date(run.date) >= cutoffDate);
   }, [runs, filterPeriod]);
 
-  // Filter runs by search query
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return filteredByPeriod;
     
@@ -105,7 +140,6 @@ export default function RunHistorySection({
     });
   }, [filteredByPeriod, searchQuery]);
 
-  // Sort runs
   const sortedRuns = useMemo(() => {
     const sorted = [...searchFiltered];
     
@@ -117,16 +151,14 @@ export default function RunHistorySection({
       case 'time':
         return sorted.sort((a, b) => b.time - a.time);
       case 'pace':
-        return sorted.sort((a, b) => a.pace - b.pace); // Faster pace first
+        return sorted.sort((a, b) => a.pace - b.pace);
       default:
         return sorted;
     }
   }, [searchFiltered, sortBy]);
 
-  // Display runs (show limited or all based on state)
   const displayRuns = showAllRuns ? sortedRuns : sortedRuns.slice(0, 10);
 
-  // Calculate summary stats
   const summaryStats = useMemo(() => {
     const totalDistance = sortedRuns.reduce((sum, run) => sum + run.distance, 0);
     const totalTime = sortedRuns.reduce((sum, run) => sum + run.time, 0);
@@ -194,7 +226,6 @@ export default function RunHistorySection({
 
       {showFilters && (
         <View style={styles.filtersContainer}>
-          {/* Search */}
           <View style={styles.searchContainer}>
             <Search size={20} color="#6B7280" />
             <TextInput
@@ -206,7 +237,6 @@ export default function RunHistorySection({
             />
           </View>
 
-          {/* Filter and Sort Options */}
           <View style={styles.filterRow}>
             <View style={styles.filterGroup}>
               <Text style={styles.filterLabel}>Period:</Text>
@@ -261,7 +291,6 @@ export default function RunHistorySection({
         </View>
       )}
 
-      {/* Summary Stats */}
       {sortedRuns.length > 0 && (
         <View style={styles.summaryContainer}>
           <Text style={styles.summaryTitle}>
@@ -292,7 +321,6 @@ export default function RunHistorySection({
         </View>
       )}
 
-      {/* Run List */}
       {displayRuns.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
@@ -301,11 +329,16 @@ export default function RunHistorySection({
         </View>
       ) : (
         <>
+          {onDeleteRun && (
+            <Text style={styles.deleteHint}>Long-press a run to delete it</Text>
+          )}
           {displayRuns.map((run) => (
             <TouchableOpacity
               key={run.id}
               style={styles.runCard}
               onPress={() => onRunPress(run.id)}
+              onLongPress={() => handleDeleteRun(run)}
+              delayLongPress={500}
               testID={`run-card-${run.id}`}
             >
               <View style={styles.runDate}>
@@ -350,11 +383,22 @@ export default function RunHistorySection({
                   <Text style={styles.runStatLabel}>cal</Text>
                 </View>
               </View>
-              <ChevronRight size={20} color="#9CA3AF" />
+              <View style={styles.runCardActions}>
+                {onDeleteRun && (
+                  <TouchableOpacity
+                    style={styles.deleteIconBtn}
+                    onPress={() => handleDeleteRun(run)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    testID={`delete-run-${run.id}`}
+                  >
+                    <Trash2 size={16} color="#6B7280" />
+                  </TouchableOpacity>
+                )}
+                <ChevronRight size={20} color="#9CA3AF" />
+              </View>
             </TouchableOpacity>
           ))}
 
-          {/* Show More/Less Button */}
           {sortedRuns.length > 10 && (
             <TouchableOpacity
               style={styles.showMoreButton}
@@ -512,6 +556,12 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     textAlign: 'center',
   },
+  deleteHint: {
+    fontSize: 12,
+    color: '#4B5563',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
   runCard: {
     backgroundColor: '#171B22',
     borderRadius: 15,
@@ -560,6 +610,15 @@ const styles = StyleSheet.create({
   runStatLabel: {
     fontSize: 12,
     color: '#6B7280',
+  },
+  runCardActions: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteIconBtn: {
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(107, 114, 128, 0.1)',
   },
   showMoreButton: {
     flexDirection: 'row',
