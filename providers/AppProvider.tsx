@@ -881,6 +881,16 @@ export const [AppProvider, useApp] = createContextHook(() => {
       new Date(entry.date).toDateString() === today
     );
   }, [appState.foodHistory]);
+
+  const getTodaysRuns = useCallback(() => {
+    const today = new Date().toDateString();
+    return appState.runs.filter(run => new Date(run.date).toDateString() === today);
+  }, [appState.runs]);
+
+  const getTodaysWorkouts = useCallback(() => {
+    const today = new Date().toDateString();
+    return appState.workoutLogs.filter(log => new Date(log.date).toDateString() === today);
+  }, [appState.workoutLogs]);
   
   const getWeeklyWorkouts = useCallback(() => {
     const oneWeekAgo = new Date();
@@ -1091,6 +1101,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     weightHistory: appState.weightHistory,
     hasSeenWelcome: appState.hasSeenWelcome,
     todaysFoodEntries: getTodaysFoodEntries(),
+    todaysRuns: getTodaysRuns(),
+    todaysWorkouts: getTodaysWorkouts(),
     weeklyRuns: getWeeklyRuns(),
     weeklyWorkouts: getWeeklyWorkouts(),
     xpInfo,
@@ -1117,5 +1129,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     dismissLevelUp,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
 });

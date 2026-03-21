@@ -155,7 +155,7 @@ function HeroSection() {
 }
 
 function DailyQuests() {
-  const { stats, nutrition } = useApp();
+  const { nutrition, todaysRuns, todaysWorkouts } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -172,8 +172,8 @@ function DailyQuests() {
       xp: "+25 XP",
       icon: <Footprints size={16} color="#00E5FF" />,
       color: "#00E5FF",
-      done: stats.weeklyRuns > 0,
-      progress: stats.weeklyRuns > 0 ? 1 : 0,
+      done: todaysRuns.length > 0,
+      progress: todaysRuns.length > 0 ? 1 : 0,
     },
     {
       id: "lift",
@@ -181,8 +181,8 @@ function DailyQuests() {
       xp: "+75 XP",
       icon: <Dumbbell size={16} color="#FF6B35" />,
       color: "#FF6B35",
-      done: stats.weeklyWorkouts > 0,
-      progress: stats.weeklyWorkouts > 0 ? 1 : 0,
+      done: todaysWorkouts.length > 0,
+      progress: todaysWorkouts.length > 0 ? 1 : 0,
     },
     {
       id: "cal",
@@ -202,7 +202,7 @@ function DailyQuests() {
       done: proteinProgress >= 0.95,
       progress: proteinProgress,
     },
-  ], [stats.weeklyRuns, stats.weeklyWorkouts, calProgress, proteinProgress]);
+  ], [todaysRuns.length, todaysWorkouts.length, calProgress, proteinProgress]);
 
   const completedCount = quests.filter(q => q.done).length;
 
