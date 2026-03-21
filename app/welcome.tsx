@@ -14,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check } from 'lucide-react-native';
+import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check, X, Crown, Zap, TrendingUp, Shield } from 'lucide-react-native';
 import { useApp } from '@/providers/AppProvider';
 import { getStartingLevelFromQuiz } from '@/constants/xp';
 import { useNotifications } from '@/providers/NotificationProvider';
@@ -861,88 +861,126 @@ Format as JSON:
   const isLastSlide = currentSlide === slides.length - 1;
 
   if (showPaywall) {
+    const PAYWALL_FEATURES = [
+      { icon: Dumbbell, title: 'AI Workout Plans', desc: 'Personalized routines built for your goals' },
+      { icon: TrendingUp, title: 'Advanced Analytics', desc: 'Deep insights into your progress over time' },
+      { icon: Zap, title: 'Smart Nutrition', desc: 'AI-powered meal tracking and suggestions' },
+      { icon: Shield, title: 'Unlimited Everything', desc: 'No limits on workouts, runs, or logs' },
+    ];
+
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.paywallContainer}>
         <LinearGradient
-          colors={['#8B5CF6', '#EC4899']}
-          style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          colors={['#0D0F13', '#111827', '#0D0F13']}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+        />
+
+        <TouchableOpacity
+          style={[styles.paywallCloseBtn, { top: insets.top + 12 }]}
+          onPress={() => {
+            if (Platform.OS !== 'web') {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            handleGetStarted();
+          }}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <ScrollView
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(60, insets.bottom + 40) }]}
-            showsVerticalScrollIndicator={false}
+          <X size={22} color="#9CA3AF" />
+        </TouchableOpacity>
+
+        <ScrollView
+          contentContainerStyle={[styles.paywallScrollContent, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 24 }]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.paywallCrownWrap}>
+            <LinearGradient
+              colors={['#00ADB5', '#0891B2']}
+              style={styles.paywallCrownBadge}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Crown size={32} color="#FFF" />
+            </LinearGradient>
+          </View>
+
+          <Text style={styles.paywallTitle}>Unlock AthliAI Premium</Text>
+          <Text style={styles.paywallSubtitle}>Train smarter with AI-powered insights</Text>
+
+          <View style={styles.paywallFeatures}>
+            {PAYWALL_FEATURES.map((feature, index) => (
+              <View key={index} style={styles.paywallFeatureRow}>
+                <View style={styles.paywallFeatureIcon}>
+                  <feature.icon size={20} color="#00ADB5" />
+                </View>
+                <View style={styles.paywallFeatureText}>
+                  <Text style={styles.paywallFeatureTitle}>{feature.title}</Text>
+                  <Text style={styles.paywallFeatureDesc}>{feature.desc}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.paywallPriceCard}>
+            <LinearGradient
+              colors={['#1F2937', '#111827']}
+              style={styles.paywallPriceGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+            >
+              <View style={styles.paywallPriceRow}>
+                <View>
+                  <Text style={styles.paywallPlanName}>Annual Plan</Text>
+                  <Text style={styles.paywallTrialLabel}>3-day free trial</Text>
+                </View>
+                <View style={styles.paywallPriceRight}>
+                  <Text style={styles.paywallPriceAmount}>$9.99</Text>
+                  <Text style={styles.paywallPricePeriod}>/year</Text>
+                </View>
+              </View>
+            </LinearGradient>
+          </View>
+
+          <TouchableOpacity
+            style={styles.paywallCTA}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              }
+              router.push('/paywall');
+            }}
+            activeOpacity={0.85}
           >
-            <View style={styles.iconContainer}>
-              <View style={styles.paywallIconContainer}>
-                <Sparkles size={60} color="#FFFFFF" />
-              </View>
-            </View>
-
-            <View style={styles.contentContainer}>
-              <Text style={styles.title}>Your Personal Plan is Ready!</Text>
-              <Text style={styles.subtitle}>Start your 3-day free trial</Text>
-              <Text style={styles.description}>
-                Begin your fitness journey with AI-powered workouts, nutrition tracking, and personalized insights.
-              </Text>
-            </View>
-
-            <View style={styles.featuresContainer}>
-              <View style={styles.featureRow}>
-                <Check size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Personalized workout plans</Text>
-              </View>
-              <View style={styles.featureRow}>
-                <Check size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Custom nutrition goals</Text>
-              </View>
-
-              <View style={styles.featureRow}>
-                <Check size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Progress tracking & analytics</Text>
-              </View>
-              <View style={styles.featureRow}>
-                <Check size={20} color="#FFFFFF" />
-                <Text style={styles.featureText}>Unlimited workouts & runs</Text>
-              </View>
-            </View>
-
-            <View style={styles.pricingContainer}>
-              <Text style={styles.pricingText}>Then $9.99/year</Text>
-              <Text style={styles.pricingSubtext}>Only $0.83/month • Cancel anytime</Text>
-            </View>
-
-            <TouchableOpacity
-              style={styles.startTrialButton}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                }
-                router.push('/paywall');
-              }}
+            <LinearGradient
+              colors={['#00ADB5', '#0891B2']}
+              style={styles.paywallCTAGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.startTrialButtonText}>Start Free Trial</Text>
-              <ChevronRight size={20} color="#8B5CF6" style={styles.chevron} />
-            </TouchableOpacity>
+              <Text style={styles.paywallCTAText}>Start Free Trial</Text>
+              <ChevronRight size={20} color="#FFF" />
+            </LinearGradient>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                handleGetStarted();
-              }}
-            >
-              <Text style={styles.continueButtonText}>Continue to App</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.paywallSkipBtn}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              }
+              handleGetStarted();
+            }}
+          >
+            <Text style={styles.paywallSkipText}>Continue to App</Text>
+          </TouchableOpacity>
 
-            <Text style={styles.termsText}>
-              By continuing, you agree to our Terms of Service and Privacy Policy.
-              Your subscription will automatically renew unless cancelled.
-            </Text>
-          </ScrollView>
-        </LinearGradient>
+          <Text style={styles.paywallLegal}>
+            Payment will be charged to your account after the 3-day free trial.
+            Subscription automatically renews unless canceled at least 24 hours
+            before the end of the current period.
+          </Text>
+        </ScrollView>
       </View>
     );
   }
@@ -2115,5 +2153,155 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#00ADB5',
     borderRadius: 2,
+  },
+  paywallContainer: {
+    flex: 1,
+    backgroundColor: '#0D0F13',
+  },
+  paywallCloseBtn: {
+    position: 'absolute' as const,
+    right: 20,
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+  },
+  paywallScrollContent: {
+    paddingHorizontal: 24,
+    alignItems: 'center' as const,
+  },
+  paywallCrownWrap: {
+    marginBottom: 24,
+  },
+  paywallCrownBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+  },
+  paywallTitle: {
+    fontSize: 28,
+    fontWeight: '800' as const,
+    color: '#F9FAFB',
+    textAlign: 'center' as const,
+    marginBottom: 8,
+    letterSpacing: -0.5,
+  },
+  paywallSubtitle: {
+    fontSize: 16,
+    color: '#9CA3AF',
+    textAlign: 'center' as const,
+    marginBottom: 32,
+  },
+  paywallFeatures: {
+    width: '100%',
+    marginBottom: 28,
+    gap: 16,
+  },
+  paywallFeatureRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 14,
+  },
+  paywallFeatureIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 173, 181, 0.1)',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+  },
+  paywallFeatureText: {
+    flex: 1,
+  },
+  paywallFeatureTitle: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#F9FAFB',
+    marginBottom: 2,
+  },
+  paywallFeatureDesc: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  paywallPriceCard: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden' as const,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 173, 181, 0.25)',
+    marginBottom: 20,
+  },
+  paywallPriceGradient: {
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+  },
+  paywallPriceRow: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+  },
+  paywallPlanName: {
+    fontSize: 17,
+    fontWeight: '700' as const,
+    color: '#F9FAFB',
+  },
+  paywallTrialLabel: {
+    fontSize: 13,
+    color: '#00ADB5',
+    marginTop: 2,
+    fontWeight: '500' as const,
+  },
+  paywallPriceRight: {
+    flexDirection: 'row' as const,
+    alignItems: 'baseline' as const,
+  },
+  paywallPriceAmount: {
+    fontSize: 24,
+    fontWeight: '800' as const,
+    color: '#F9FAFB',
+  },
+  paywallPricePeriod: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginLeft: 2,
+  },
+  paywallCTA: {
+    width: '100%',
+    borderRadius: 14,
+    overflow: 'hidden' as const,
+    marginBottom: 16,
+  },
+  paywallCTAGradient: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    paddingVertical: 16,
+    gap: 6,
+  },
+  paywallCTAText: {
+    fontSize: 17,
+    fontWeight: '700' as const,
+    color: '#FFF',
+  },
+  paywallSkipBtn: {
+    paddingVertical: 12,
+    marginBottom: 16,
+  },
+  paywallSkipText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    textDecorationLine: 'underline' as const,
+  },
+  paywallLegal: {
+    fontSize: 11,
+    color: '#6B7280',
+    textAlign: 'center' as const,
+    lineHeight: 16,
+    paddingHorizontal: 12,
   },
 });
