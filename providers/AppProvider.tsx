@@ -1020,7 +1020,56 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const dismissLevelUp = useCallback(() => {
     setPendingLevelUp(null);
   }, []);
-  
+
+  const exportAllData = useCallback((): string => {
+    const exportPayload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      core: extractCoreState(appState),
+      runs: appState.runs,
+      foodHistory: appState.foodHistory,
+      workoutLogs: appState.workoutLogs,
+    };
+    console.log('Exporting data, payload size:', JSON.stringify(exportPayload).length);
+    return JSON.stringify(exportPayload);
+  }, [appState]);
+
+  const importAllData = useCallback((jsonString: string): { success: boolean; error?: string } => {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (!parsed || typeof parsed !== 'object') {
+        return { success: false, error: 'Invalid backup file format.' };
+      }
+      if (!parsed.version || !parsed.exportedAt) {
+        return { success: false, error: 'This does not look like a valid backup.' };
+      }
+
+      const core = parsed.core && typeof parsed.core === 'object' ? parsed.core : {};
+      const runs = Array.isArray(parsed.runs) ? parsed.runs : [];
+      const food = Array.isArray(parsed.foodHistory) ? parsed.foodHistory : [];
+      const workouts = Array.isArray(parsed.workoutLogs) ? parsed.workoutLogs : [];
+
+      const restoredState = validateState({
+        ...core,
+        runs,
+        foodHistory: food,
+        workoutLogs: workouts,
+      });
+
+      console.log(`Import: runs=${runs.length}, food=${food.length}, workouts=${workouts.length}`);
+      setAppState(restoredState);
+      prevStateRef.current = restoredState;
+      saveMutation.mutate({
+        state: restoredState,
+        changed: { core: true, runs: true, food: true, workouts: true },
+      });
+      return { success: true };
+    } catch (e) {
+      console.error('Import error:', e);
+      return { success: false, error: 'Failed to parse backup data. Make sure you copied the full text.' };
+    }
+  }, [saveMutation]);
+
   const addWeightEntry = useCallback((entry: WeightEntry) => {
     console.log('Adding weight entry:', entry);
     setAppState(prev => {
@@ -1167,7 +1216,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
     markWelcomeAsSeen,
     setStartingXP,
     dismissLevelUp,
+    exportAllData,
+    importAllData,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
 });

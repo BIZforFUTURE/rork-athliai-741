@@ -41,7 +41,13 @@ import {
   ChevronRight,
   Camera,
   Trash2,
+  Download,
+  Upload,
+  ClipboardPaste,
+  Shield,
+  Check,
 } from "lucide-react-native";
+import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
 import { RANKS, XPSource } from "@/constants/xp";
 
@@ -716,8 +722,86 @@ function FitnessStatsCard() {
   );
 }
 
+interface DataBackupCardProps {
+  onExport: () => void;
+  onImport: () => void;
+  exportCopied: boolean;
+  runCount: number;
+  foodCount: number;
+  workoutCount: number;
+}
+
+function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount, workoutCount }: DataBackupCardProps) {
+  const fadeIn = useRef(new Animated.Value(0)).current;
+  const exportScale = useRef(new Animated.Value(1)).current;
+  const importScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeIn, { toValue: 1, duration: 500, delay: 300, useNativeDriver: true }).start();
+  }, [fadeIn]);
+
+  const totalEntries = runCount + foodCount + workoutCount;
+
+  return (
+    <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
+      <View style={cardStyles.cardHeader}>
+        <Shield size={13} color="#6B7280" />
+        <Text style={cardStyles.cardHeading}>Data Backup</Text>
+      </View>
+
+      <View style={bkStyles.statsRow}>
+        <View style={bkStyles.statPill}>
+          <Footprints size={10} color="#00E5FF" />
+          <Text style={[bkStyles.statText, { color: '#00E5FF' }]}>{runCount} runs</Text>
+        </View>
+        <View style={bkStyles.statPill}>
+          <UtensilsCrossed size={10} color="#BFFF00" />
+          <Text style={[bkStyles.statText, { color: '#BFFF00' }]}>{foodCount} meals</Text>
+        </View>
+        <View style={bkStyles.statPill}>
+          <Dumbbell size={10} color="#FF6B35" />
+          <Text style={[bkStyles.statText, { color: '#FF6B35' }]}>{workoutCount} workouts</Text>
+        </View>
+      </View>
+
+      <Text style={bkStyles.desc}>
+        {totalEntries > 0
+          ? `You have ${totalEntries} entries. Export a backup to keep your data safe.`
+          : 'No data yet. Start tracking to build your backup.'}
+      </Text>
+
+      <View style={bkStyles.btnRow}>
+        <Pressable
+          onPress={onExport}
+          onPressIn={() => Animated.spring(exportScale, { toValue: 0.95, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+          onPressOut={() => Animated.spring(exportScale, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+          style={{ flex: 1 }}
+        >
+          <Animated.View style={[bkStyles.exportBtn, { transform: [{ scale: exportScale }] }]}>
+            {exportCopied ? <Check size={16} color="#10B981" /> : <Download size={16} color="#00E5FF" />}
+            <Text style={[bkStyles.exportText, exportCopied && { color: '#10B981' }]}>
+              {exportCopied ? 'Copied!' : 'Export'}
+            </Text>
+          </Animated.View>
+        </Pressable>
+        <Pressable
+          onPress={onImport}
+          onPressIn={() => Animated.spring(importScale, { toValue: 0.95, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+          onPressOut={() => Animated.spring(importScale, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+          style={{ flex: 1 }}
+        >
+          <Animated.View style={bkStyles.importBtn}>
+            <Upload size={16} color="#F59E0B" />
+            <Text style={bkStyles.importText}>Restore</Text>
+          </Animated.View>
+        </Pressable>
+      </View>
+    </Animated.View>
+  );
+}
+
 export default function PersonalStatsScreen() {
-  const { personalStats, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, isLoading: appLoading } = useApp();
+  const { personalStats, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, exportAllData, importAllData, recentRuns, foodHistory, workoutLogs, isLoading: appLoading } = useApp();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
   const [activeTab, setActiveTab] = useState<StatsTab>('progress');
@@ -735,6 +819,11 @@ export default function PersonalStatsScreen() {
   const [showEditWeightModal, setShowEditWeightModal] = useState(false);
   const [editWeight, setEditWeight] = useState('');
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [importError, setImportError] = useState('');
+  const [exportCopied, setExportCopied] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -815,6 +904,63 @@ export default function PersonalStatsScreen() {
     setEditWeight('');
   };
 
+  const handleExport = useCallback(async () => {
+    try {
+      const json = exportAllData();
+      await Clipboard.setStringAsync(json);
+      if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setExportCopied(true);
+      setTimeout(() => setExportCopied(false), 3000);
+      Alert.alert('Backup Copied', 'Your full backup has been copied to clipboard. Paste it somewhere safe (Notes, email, cloud doc) to keep it.');
+    } catch (e) {
+      console.error('Export error:', e);
+      Alert.alert('Export Failed', 'Could not copy backup to clipboard.');
+    }
+  }, [exportAllData]);
+
+  const handleImport = useCallback(() => {
+    if (!importText.trim()) return;
+    Alert.alert(
+      'Restore Backup',
+      'This will replace ALL your current data with the backup. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Restore',
+          style: 'destructive',
+          onPress: () => {
+            const result = importAllData(importText);
+            if (result.success) {
+              if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              setImportStatus('success');
+              setTimeout(() => {
+                setShowImportModal(false);
+                setImportText('');
+                setImportStatus('idle');
+              }, 1500);
+            } else {
+              if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              setImportStatus('error');
+              setImportError(result.error || 'Unknown error');
+            }
+          },
+        },
+      ]
+    );
+  }, [importText, importAllData]);
+
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const text = await Clipboard.getStringAsync();
+      if (text) {
+        setImportText(text);
+        if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (e) {
+      console.error('Paste error:', e);
+    }
+  }, []);
+
   const handleDeleteWeight = (entry: WeightEntry) => {
     Alert.alert(
       'Delete Weight Entry',
@@ -843,6 +989,56 @@ export default function PersonalStatsScreen() {
 
   return (
     <View style={styles.container}>
+      <Modal visible={showImportModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { setShowImportModal(false); setImportText(''); setImportStatus('idle'); }}>
+        <View style={[modalStyles.container, { paddingTop: insets.top }]}>
+          <View style={modalStyles.header}>
+            <Text style={modalStyles.headerTitle}>Restore Backup</Text>
+            <TouchableOpacity onPress={() => { setShowImportModal(false); setImportText(''); setImportStatus('idle'); }} style={modalStyles.closeBtn}>
+              <Text style={modalStyles.closeText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <View style={backupModalStyles.infoBox}>
+              <Shield size={16} color="#F59E0B" />
+              <Text style={backupModalStyles.infoText}>Paste the backup text you previously exported. This will replace all current data.</Text>
+            </View>
+            <TouchableOpacity style={backupModalStyles.pasteBtn} onPress={handlePasteFromClipboard} activeOpacity={0.7}>
+              <ClipboardPaste size={16} color="#00E5FF" />
+              <Text style={backupModalStyles.pasteBtnText}>Paste from Clipboard</Text>
+            </TouchableOpacity>
+            <TextInput
+              style={backupModalStyles.textArea}
+              placeholder='Paste backup JSON here...'
+              placeholderTextColor="#374151"
+              value={importText}
+              onChangeText={(t) => { setImportText(t); setImportStatus('idle'); setImportError(''); }}
+              multiline
+              textAlignVertical="top"
+            />
+            {importStatus === 'error' && (
+              <View style={backupModalStyles.errorBox}>
+                <AlertCircle size={14} color="#EF4444" />
+                <Text style={backupModalStyles.errorText}>{importError}</Text>
+              </View>
+            )}
+            {importStatus === 'success' && (
+              <View style={backupModalStyles.successBox}>
+                <Check size={14} color="#10B981" />
+                <Text style={backupModalStyles.successText}>Data restored successfully!</Text>
+              </View>
+            )}
+            <TouchableOpacity
+              style={[modalStyles.saveBtn, { backgroundColor: '#F59E0B', opacity: importText.trim() ? 1 : 0.4 }]}
+              onPress={handleImport}
+              disabled={!importText.trim() || importStatus === 'success'}
+            >
+              <Text style={modalStyles.saveBtnText}>Restore Data</Text>
+            </TouchableOpacity>
+            <View style={{ height: 60 }} />
+          </ScrollView>
+        </View>
+      </Modal>
+
       <Modal visible={showStatsModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowStatsModal(false)}>
         <View style={[modalStyles.container, { paddingTop: insets.top }]}>
           <View style={modalStyles.header}>
@@ -1014,6 +1210,14 @@ export default function PersonalStatsScreen() {
             <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} />
             <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} />
             <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
+            <DataBackupCard
+              onExport={handleExport}
+              onImport={() => { setShowImportModal(true); setImportText(''); setImportStatus('idle'); setImportError(''); }}
+              exportCopied={exportCopied}
+              runCount={recentRuns.length}
+              foodCount={foodHistory.length}
+              workoutCount={workoutLogs.length}
+            />
           </>
         )}
         <View style={{ height: 40 }} />
@@ -1749,5 +1953,151 @@ const modalStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: "#FFFFFF",
+  },
+});
+
+const bkStyles = StyleSheet.create({
+  statsRow: {
+    flexDirection: "row" as const,
+    gap: 6,
+    marginBottom: 10,
+    flexWrap: "wrap" as const,
+  },
+  statPill: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statText: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+  },
+  desc: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#4B5563",
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  btnRow: {
+    flexDirection: "row" as const,
+    gap: 8,
+  },
+  exportBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 6,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.15)",
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  exportText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#00E5FF",
+  },
+  importBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 6,
+    backgroundColor: "rgba(245,158,11,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(245,158,11,0.15)",
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  importText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#F59E0B",
+  },
+});
+
+const backupModalStyles = StyleSheet.create({
+  infoBox: {
+    flexDirection: "row" as const,
+    alignItems: "flex-start" as const,
+    gap: 10,
+    backgroundColor: "rgba(245,158,11,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(245,158,11,0.12)",
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#9CA3AF",
+    lineHeight: 19,
+  },
+  pasteBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 8,
+    backgroundColor: "rgba(0,229,255,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.12)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginBottom: 12,
+  },
+  pasteBtnText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#00E5FF",
+  },
+  textArea: {
+    backgroundColor: "#0E1015",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 13,
+    color: "#F3F4F6",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+    minHeight: 160,
+    maxHeight: 300,
+  },
+  errorBox: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    backgroundColor: "rgba(239,68,68,0.08)",
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 12,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#EF4444",
+  },
+  successBox: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    backgroundColor: "rgba(16,185,129,0.08)",
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 12,
+  },
+  successText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#10B981",
   },
 });
