@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   Animated,
+  RefreshControl,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -378,6 +379,12 @@ export default function GymScreen() {
   const [showSettings, setShowSettings] = useState(false);
   const [showDayAdjustment, setShowDayAdjustment] = useState(false);
   const [adjustedWorkoutDays, setAdjustedWorkoutDays] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 800);
+  }, []);
 
   const heroFade = useRef(new Animated.Value(0)).current;
   const heroSlide = useRef(new Animated.Value(20)).current;
@@ -951,6 +958,15 @@ Format as JSON:
         style={styles.content} 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00ADB5"
+            colors={["#00ADB5"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
       >
         {!generatedPlan ? (
           <>

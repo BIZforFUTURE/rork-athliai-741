@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useMemo, useEffect, useRef, useCallback, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   Animated,
   Pressable,
   Platform,
+  RefreshControl,
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -514,6 +515,12 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const greeting = useGreeting();
   const { xpInfo } = useApp();
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 800);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -531,6 +538,15 @@ export default function DashboardScreen() {
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00E5FF"
+            colors={["#00E5FF"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
       >
         <HeroSection />
         <StreakStrip />

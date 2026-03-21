@@ -11,6 +11,7 @@ import {
   Platform,
   Animated,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -702,6 +703,12 @@ export default function PersonalStatsScreen() {
   const [tempAge, setTempAge] = useState('');
   const [tempGender, setTempGender] = useState<'male' | 'female' | 'other'>('male');
   const [newWeight, setNewWeight] = useState('');
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 800);
+  }, []);
 
   const inchesToFeetAndInches = (totalInches: number) => {
     const feet = Math.floor(totalInches / 12);
@@ -858,7 +865,17 @@ export default function PersonalStatsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#A855F7"
+            colors={["#A855F7"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
+      >
         <XPRankCard />
         <XPBreakdownCard />
         <RecentXPCard />

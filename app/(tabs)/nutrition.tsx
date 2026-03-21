@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Animated,
   Dimensions,
+  RefreshControl,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -142,8 +143,14 @@ export default function NutritionScreen() {
   const { isPremium } = useRevenueCat();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
 
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [timeUntilReset, setTimeUntilReset] = useState<string>("");
   const insets = useSafeAreaInsets();
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 800);
+  }, []);
   const [showAddFood, setShowAddFood] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
@@ -708,6 +715,15 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         showsVerticalScrollIndicator={false} 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#FF6B35"
+            colors={["#FF6B35"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
       >
         <Animated.View style={[styles.headerSection, { opacity: headerFadeAnim, transform: [{ translateY: headerFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
           <View style={styles.headerTop}>

@@ -14,6 +14,7 @@ import {
   Image,
   ActivityIndicator,
   TextInput,
+  RefreshControl,
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -81,6 +82,12 @@ export default function RunScreen() {
   const [treadmillEditDistance, setTreadmillEditDistance] = useState('');
   const [treadmillEditTime, setTreadmillEditTime] = useState('');
   const [treadmillEditing, setTreadmillEditing] = useState(false);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 800);
+  }, []);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
@@ -695,7 +702,17 @@ export default function RunScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00E5FF"
+            colors={["#00E5FF"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
+      >
         <Animated.View style={[styles.timerCard, { opacity: fadeIn, transform: [{ translateY: slideUp }, { scale: pulseAnim }] }]}>
           <View style={styles.timerDialWrap}>
             <Svg width={timeDialSize} height={timeDialSize}>
