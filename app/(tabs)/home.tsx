@@ -399,29 +399,34 @@ function WeeklyStats() {
   };
 
   const items = [
-    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: "Distance", color: "#00E5FF", icon: <Route size={14} color="#00E5FF" /> },
-    { value: `${stats.weeklyRuns}`, unit: "", label: "Runs", color: "#BFFF00", icon: <Footprints size={14} color="#BFFF00" /> },
-    { value: formatTime(stats.weeklyTime), unit: "", label: "Active", color: "#FF6B35", icon: <Timer size={14} color="#FF6B35" /> },
-    { value: `${stats.weeklyWorkouts}`, unit: "", label: "Lifts", color: "#00ADB5", icon: <Dumbbell size={14} color="#00ADB5" /> },
+    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: "Distance", color: "#00E5FF", icon: <Route size={20} color="#00E5FF" /> },
+    { value: `${stats.weeklyRuns}`, unit: "", label: "Runs", color: "#BFFF00", icon: <Footprints size={20} color="#BFFF00" /> },
+    { value: formatTime(stats.weeklyTime), unit: "", label: "Active Time", color: "#FF6B35", icon: <Timer size={20} color="#FF6B35" /> },
+    { value: `${stats.weeklyWorkouts}`, unit: "", label: "Workouts", color: "#00ADB5", icon: <Dumbbell size={20} color="#00ADB5" /> },
   ];
 
   return (
     <Animated.View style={[weekStyles.container, { opacity: fadeIn }]}>
       <View style={weekStyles.headerRow}>
-        <TrendingUp size={13} color="#6B7280" />
+        <TrendingUp size={15} color="#9CA3AF" />
         <Text style={weekStyles.heading}>This Week</Text>
       </View>
       <View style={weekStyles.grid}>
         {items.map((item, idx) => (
-          <View key={item.label} style={[weekStyles.cell, idx < 3 && weekStyles.cellBorder]}>
-            <View style={[weekStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
-              {item.icon}
+          <View key={item.label} style={[weekStyles.cell, { borderColor: item.color + "12" }]}>
+            <View style={weekStyles.cellTop}>
+              <View style={[weekStyles.cellIcon, { backgroundColor: item.color + "14" }]}>
+                {item.icon}
+              </View>
+              <Text style={[weekStyles.cellLabel, { color: item.color + "AA" }]}>{item.label}</Text>
             </View>
             <Text style={weekStyles.cellValue}>
               {item.value}
               {item.unit ? <Text style={[weekStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
             </Text>
-            <Text style={weekStyles.cellLabel}>{item.label}</Text>
+            {idx < 2 && (
+              <View style={[weekStyles.cellAccent, { backgroundColor: item.color + "18" }]} />
+            )}
           </View>
         ))}
       </View>
@@ -1055,58 +1060,75 @@ const nutStyles = StyleSheet.create({
 const weekStyles = StyleSheet.create({
   container: {
     backgroundColor: "#0E1015",
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 22,
+    padding: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
   },
   headerRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 6,
+    gap: 7,
     marginBottom: 16,
   },
   heading: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700" as const,
-    color: "#9CA3AF",
+    color: "#D1D5DB",
   },
   grid: {
     flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 10,
   },
   cell: {
-    flex: 1,
-    alignItems: "center" as const,
-    gap: 6,
-    paddingVertical: 6,
+    width: "48%" as unknown as number,
+    flexGrow: 1,
+    flexBasis: "46%" as unknown as number,
+    backgroundColor: "rgba(255,255,255,0.025)",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    overflow: "hidden" as const,
+    position: "relative" as const,
   },
-  cellBorder: {
-    borderRightWidth: 1,
-    borderRightColor: "rgba(255,255,255,0.06)",
+  cellTop: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    marginBottom: 12,
   },
   cellIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
   cellValue: {
-    fontSize: 18,
+    fontSize: 28,
     fontWeight: "800" as const,
     color: "#F3F4F6",
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
   cellUnit: {
-    fontSize: 12,
-    fontWeight: "600" as const,
+    fontSize: 16,
+    fontWeight: "700" as const,
   },
   cellLabel: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "600" as const,
-    color: "#4B5563",
     textTransform: "uppercase" as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+  },
+  cellAccent: {
+    position: "absolute" as const,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
 });
 

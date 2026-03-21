@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -295,17 +295,24 @@ export default function NutritionScreen() {
     }
   };
 
-  const calculateNutritionGoals = (answers?: typeof quizAnswers) => {
-    const a = answers || quizAnswers;
-    const weightPounds = Math.round(parseFloat(a.weight));
-    const weightKg = Math.round(weightPounds * 0.453592 * 10) / 10;
-    const heightFeet = Math.round(parseFloat(a.heightFeet));
-    const heightInches = Math.round(parseFloat(a.heightInches));
-    const heightCm = Math.round((heightFeet * 30.48) + (heightInches * 2.54));
-    const age = Math.round(parseFloat(a.age));
+  const calculateNutritionGoals = useCallback((answers: typeof quizAnswers) => {
+    console.log('Quiz answers received:', JSON.stringify(answers));
+    const a = answers;
+    const weightPounds = parseFloat(a.weight);
+    const weightKg = weightPounds * 0.453592;
+    const heightFeet = parseFloat(a.heightFeet);
+    const heightInches = parseFloat(a.heightInches);
+    const heightCm = (heightFeet * 30.48) + (heightInches * 2.54);
+    const age = parseFloat(a.age);
     const gender = a.gender;
     const activity = a.activityLevel;
     const goal = a.goal;
+
+    if (isNaN(weightKg) || isNaN(heightCm) || isNaN(age) || !gender || !activity || !goal) {
+      console.error('Quiz validation failed:', { weightKg, heightCm, age, gender, activity, goal });
+      Alert.alert("Error", "Some quiz answers are missing or invalid. Please try again.");
+      return;
+    }
 
     let bmr = 0;
     if (gender === "male") {
@@ -333,13 +340,22 @@ export default function NutritionScreen() {
 
     const proteinGoal = Math.round(weightKg * 1.6);
     const fatGoal = Math.round((tdee * 0.25) / 9);
-    const carbsGoal = Math.round((tdee - (proteinGoal * 4 + fatGoal * 9)) / 4);
+    const carbsGoal = Math.max(0, Math.round((tdee - (proteinGoal * 4 + fatGoal * 9)) / 4));
+
+    console.log('Calculated goals:', { calorieGoal: tdee, proteinGoal, carbsGoal, fatGoal });
 
     updateNutrition({ calorieGoal: tdee, proteinGoal, carbsGoal, fatGoal, quizCompleted: true });
     setShowQuiz(false);
     setQuizStep(0);
     setQuizAnswers({ age: "", weight: "", heightFeet: "", heightInches: "", gender: "", activityLevel: "", goal: "", weightGoal: "", dietDuration: "" });
-  };
+
+    setTimeout(() => {
+      Alert.alert(
+        "Goals Set!",
+        `Your personalized nutrition goals:\n\nCalories: ${tdee} kcal\nProtein: ${proteinGoal}g\nCarbs: ${carbsGoal}g\nFat: ${fatGoal}g\n\nYou can adjust these anytime from the settings icon.`
+      );
+    }, 300);
+  }, [updateNutrition]);
 
   const _analyzeQuickMeal = async (mealName: string, targetDate: Date) => {
     setIsAnalyzing(true);
@@ -599,93 +615,32 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
     }
   };
 
-  const QuizModal = () => {
-    const [localQuizAnswers, setLocalQuizAnswers] = useState(quizAnswers);
-    
-    React.useEffect(() => {
-      setLocalQuizAnswers(quizAnswers);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showQuiz]);
-    
-    const questions = [
-      { title: "What's your age?", key: "age", type: "number", placeholder: "Enter your age" },
-      { title: "What's your weight?", key: "weight", type: "number", placeholder: "Enter weight in pounds" },
-      { title: "What's your height?", key: "height", type: "height", placeholder: "Enter height" },
-      { title: "What's your gender?", key: "gender", type: "choice", choices: [{ label: "Male", value: "male" }, { label: "Female", value: "female" }] },
-      { title: "How active are you?", key: "activityLevel", type: "choice", choices: [
-        { label: "Sedentary", value: "sedentary" }, { label: "Lightly Active", value: "light" },
-        { label: "Moderately Active", value: "moderate" }, { label: "Very Active", value: "active" },
-        { label: "Extremely Active", value: "veryActive" },
-      ]},
-      { title: "What's your goal?", key: "goal", type: "choice", choices: [
-        { label: "Lose Weight", value: "lose" }, { label: "Maintain Weight", value: "maintain" }, { label: "Gain Weight", value: "gain" },
-      ]},
-      { title: "How much weight do you want to lose/gain?", key: "weightGoal", type: "number", placeholder: "Enter weight in pounds (optional)", skipCondition: (answers: any) => answers.goal === "maintain" },
-      { title: "How long do you plan to be on this diet?", key: "dietDuration", type: "choice", choices: [
-        { label: "1-3 months (Faster results)", value: "short" },
-        { label: "3-6 months (Balanced approach)", value: "medium" },
-        { label: "6+ months (Sustainable long-term)", value: "long" },
-      ], skipCondition: (answers: any) => answers.goal === "maintain" },
-    ];
+  const quizQuestions = useMemo(() => [
+    { title: "What's your age?", key: "age", type: "number" as const, placeholder: "Enter your age" },
+    { title: "What's your weight?", key: "weight", type: "number" as const, placeholder: "Enter weight in pounds" },
+    { title: "What's your height?", key: "height", type: "height" as const, placeholder: "Enter height" },
+    { title: "What's your gender?", key: "gender", type: "choice" as const, choices: [{ label: "Male", value: "male" }, { label: "Female", value: "female" }] },
+    { title: "How active are you?", key: "activityLevel", type: "choice" as const, choices: [
+      { label: "Sedentary", value: "sedentary" }, { label: "Lightly Active", value: "light" },
+      { label: "Moderately Active", value: "moderate" }, { label: "Very Active", value: "active" },
+      { label: "Extremely Active", value: "veryActive" },
+    ]},
+    { title: "What's your goal?", key: "goal", type: "choice" as const, choices: [
+      { label: "Lose Weight", value: "lose" }, { label: "Maintain Weight", value: "maintain" }, { label: "Gain Weight", value: "gain" },
+    ]},
+    { title: "How much weight do you want to lose/gain?", key: "weightGoal", type: "number" as const, placeholder: "Enter weight in pounds (optional)", skipCondition: (answers: { goal: string }) => answers.goal === "maintain" },
+    { title: "How long do you plan to be on this diet?", key: "dietDuration", type: "choice" as const, choices: [
+      { label: "1-3 months (Faster results)", value: "short" },
+      { label: "3-6 months (Balanced approach)", value: "medium" },
+      { label: "6+ months (Sustainable long-term)", value: "long" },
+    ], skipCondition: (answers: { goal: string }) => answers.goal === "maintain" },
+  ], []);
 
-    const filteredQuestions = questions.filter(q => !q.skipCondition || !q.skipCondition(localQuizAnswers));
-    const currentQuestion = filteredQuestions[quizStep];
+  const filteredQuizQuestions = useMemo(() => 
+    quizQuestions.filter((q: { skipCondition?: (a: { goal: string }) => boolean }) => !q.skipCondition || !q.skipCondition(quizAnswers)),
+  [quizQuestions, quizAnswers]);
 
-    return (
-      <Modal visible={showQuiz} animationType="slide" transparent>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-          <View style={styles.quizModal}>
-            <Text style={styles.quizTitle}>Nutrition Goals Setup</Text>
-            <Text style={styles.quizProgress}>Step {quizStep + 1} of {filteredQuestions.length}</Text>
-            <Text style={styles.quizQuestion}>{currentQuestion?.title}</Text>
-            
-            {currentQuestion.type === "height" ? (
-              <View style={styles.heightInputContainer}>
-                <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Feet" placeholderTextColor="#6B7280" keyboardType="numeric" value={localQuizAnswers.heightFeet} onChangeText={(text) => setLocalQuizAnswers({ ...localQuizAnswers, heightFeet: text })} />
-                <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Inches" placeholderTextColor="#6B7280" keyboardType="numeric" value={localQuizAnswers.heightInches} onChangeText={(text) => setLocalQuizAnswers({ ...localQuizAnswers, heightInches: text })} />
-              </View>
-            ) : currentQuestion.type === "number" ? (
-              <TextInput style={styles.quizInput} placeholder={currentQuestion.placeholder} placeholderTextColor="#6B7280" keyboardType="numeric" value={localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]} onChangeText={(text) => setLocalQuizAnswers({ ...localQuizAnswers, [currentQuestion.key]: text })} />
-            ) : (
-              <View style={styles.choicesContainer}>
-                {currentQuestion.choices?.map((choice) => (
-                  <TouchableOpacity
-                    key={choice.value}
-                    style={[styles.choiceButton, localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers] === choice.value && styles.choiceButtonActive]}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setLocalQuizAnswers({ ...localQuizAnswers, [currentQuestion.key]: choice.value });
-                    }}
-                  >
-                    <Text style={[styles.choiceText, localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers] === choice.value && styles.choiceTextActive]}>{choice.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-            
-            <View style={styles.quizButtons}>
-              {quizStep > 0 && (
-                <TouchableOpacity style={[styles.quizButton, styles.quizButtonSecondary]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setQuizStep(quizStep - 1); }}>
-                  <Text style={styles.quizButtonTextSecondary}>Back</Text>
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={[styles.quizButton, styles.quizButtonPrimary]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  if (quizStep < filteredQuestions.length - 1) { setQuizAnswers(localQuizAnswers); setQuizStep(quizStep + 1); }
-                  else { setQuizAnswers(localQuizAnswers); calculateNutritionGoals(localQuizAnswers); }
-                }}
-                disabled={currentQuestion.type === "height" ? !localQuizAnswers.heightFeet || !localQuizAnswers.heightInches : currentQuestion.key === "weightGoal" ? false : !localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]}
-              >
-                <Text style={styles.quizButtonTextPrimary}>{quizStep < filteredQuestions.length - 1 ? "Next" : "Calculate Goals"}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-    );
-  };
+  const currentQuizQuestion = filteredQuizQuestions[quizStep];
 
   if (!permission) return <View />;
 
@@ -1035,7 +990,65 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         )}
       </ScrollView>
 
-      <QuizModal />
+      <Modal visible={showQuiz} animationType="slide" transparent>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.quizModal}>
+            <Text style={styles.quizTitle}>Nutrition Goals Setup</Text>
+            <Text style={styles.quizProgress}>Step {quizStep + 1} of {filteredQuizQuestions.length}</Text>
+            {currentQuizQuestion && (
+              <>
+                <Text style={styles.quizQuestion}>{currentQuizQuestion.title}</Text>
+                
+                {currentQuizQuestion.type === "height" ? (
+                  <View style={styles.heightInputContainer}>
+                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Feet" placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
+                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Inches" placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
+                  </View>
+                ) : currentQuizQuestion.type === "number" ? (
+                  <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />
+                ) : (
+                  <View style={styles.choicesContainer}>
+                    {currentQuizQuestion.choices?.map((choice: { label: string; value: string }) => (
+                      <TouchableOpacity
+                        key={choice.value}
+                        style={[styles.choiceButton, quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers] === choice.value && styles.choiceButtonActive]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: choice.value }));
+                        }}
+                      >
+                        <Text style={[styles.choiceText, quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers] === choice.value && styles.choiceTextActive]}>{choice.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                
+                <View style={styles.quizButtons}>
+                  {quizStep > 0 && (
+                    <TouchableOpacity style={[styles.quizButton, styles.quizButtonSecondary]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setQuizStep(quizStep - 1); }}>
+                      <Text style={styles.quizButtonTextSecondary}>Back</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity
+                    style={[styles.quizButton, styles.quizButtonPrimary]}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      if (quizStep < filteredQuizQuestions.length - 1) {
+                        setQuizStep(quizStep + 1);
+                      } else {
+                        calculateNutritionGoals(quizAnswers);
+                      }
+                    }}
+                    disabled={currentQuizQuestion.type === "height" ? !quizAnswers.heightFeet || !quizAnswers.heightInches : currentQuizQuestion.key === "weightGoal" ? false : !quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]}
+                  >
+                    <Text style={styles.quizButtonTextPrimary}>{quizStep < filteredQuizQuestions.length - 1 ? "Next" : "Calculate Goals"}</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
       <Modal visible={showFirstTimePrompt} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
