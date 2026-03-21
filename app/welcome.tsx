@@ -459,13 +459,11 @@ export default function WelcomeScreen() {
 
   const generateFitnessPlan = async (answers: {question: string; answer: string}[], goals: string) => {
     console.log('Generating fitness plan with AI...');
-    setGenerationProgress(0.2);
     
     const openaiApiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
     
     if (openaiApiKey) {
       try {
-        setGenerationProgress(0.4);
         const prompt = `You are a certified personal trainer creating a personalized 5-day workout plan. Based on the user's quiz responses and specific goals, create a comprehensive training program.
 
 User's Quiz Responses:
@@ -509,12 +507,16 @@ Format as JSON:
   ]
 }`;
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${openaiApiKey}`
           },
+          signal: controller.signal,
           body: JSON.stringify({
             model: 'gpt-4o-mini',
             messages: [
@@ -532,18 +534,18 @@ Format as JSON:
           })
         });
 
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
           const errorText = await response.text();
           console.error('OpenAI API error:', errorText);
           throw new Error(`OpenAI API error: ${response.status}`);
         }
 
-        setGenerationProgress(0.7);
         const data = await response.json();
         const planData = JSON.parse(data.choices[0].message.content);
         
         console.log('AI-generated plan:', planData);
-        setGenerationProgress(0.85);
         
         const enhancedPlan = {
           ...planData,
@@ -815,6 +817,35 @@ Format as JSON:
 
 
   const [generationProgress, setGenerationProgress] = useState(0);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startProgressSimulation = (from: number, to: number, durationMs: number) => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    const steps = 20;
+    const increment = (to - from) / steps;
+    const intervalTime = durationMs / steps;
+    let current = from;
+    progressIntervalRef.current = setInterval(() => {
+      current += increment;
+      if (current >= to) {
+        current = to;
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+          progressIntervalRef.current = null;
+        }
+      }
+      setGenerationProgress(current);
+    }, intervalTime);
+  };
+
+  const stopProgressSimulation = () => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+  };
 
   const generateGymPlan = async () => {
     if (!customGoals.trim()) {
@@ -822,12 +853,13 @@ Format as JSON:
     }
 
     setIsGeneratingPlan(true);
-    setGenerationProgress(0.1);
+    setGenerationProgress(0.05);
+    startProgressSimulation(0.05, 0.85, 15000);
     
     try {
-      setGenerationProgress(0.3);
       const planData = await generateFitnessPlan(gymAnswers, customGoals);
       
+      stopProgressSimulation();
       setGenerationProgress(0.9);
       const workoutDays = selectedWorkoutDays.length > 0 
         ? selectedWorkoutDays 
@@ -852,7 +884,14 @@ Format as JSON:
       }, 300);
     } catch (error) {
       console.error('Error generating plan:', error);
+      stopProgressSimulation();
+      setGenerationProgress(1);
+      setTimeout(() => {
+        setShowGymQuiz(false);
+        setShowNutritionQuiz(true);
+      }, 300);
     } finally {
+      stopProgressSimulation();
       setIsGeneratingPlan(false);
     }
   };
