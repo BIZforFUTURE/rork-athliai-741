@@ -1,7 +1,7 @@
 import createContextHook from "@nkzw/create-context-hook";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 import { WorkoutLog, calculateWorkoutVolume } from "@/constants/workouts";
 import { useNotifications } from "@/providers/NotificationProvider";
@@ -81,17 +81,17 @@ interface FoodEntry {
 
 
 interface PersonalStats {
-  height?: number; // in inches
-  weight?: number; // in pounds
-  targetWeight?: number; // in pounds
-  goalEndDate?: string; // ISO date string
+  height?: number;
+  weight?: number;
+  targetWeight?: number;
+  goalEndDate?: string;
   age?: number;
   gender?: 'male' | 'female' | 'other';
 }
 
 interface WeightEntry {
   date: string;
-  weight: number; // in pounds
+  weight: number;
 }
 
 interface CustomWorkoutPlan {
@@ -129,19 +129,15 @@ interface SavedWorkout {
   createdAt: string;
 }
 
-interface AppState {
+interface CoreState {
   user: User;
   stats: Stats;
   nutrition: Nutrition;
-  runs: Run[];
-  foodHistory: FoodEntry[];
-  workoutLogs: WorkoutLog[];
   customWorkoutPlan: CustomWorkoutPlan | null;
   savedWorkouts: SavedWorkout[];
   personalStats: PersonalStats;
   weightHistory: WeightEntry[];
   xp: XPState;
-
   lastResetDate: string;
   lastRunDate: string | null;
   lastFoodDate: string | null;
@@ -149,7 +145,20 @@ interface AppState {
   hasSeenWelcome: boolean;
 }
 
-// Generate a user ID (will be persisted with app state)
+interface AppState extends CoreState {
+  runs: Run[];
+  foodHistory: FoodEntry[];
+  workoutLogs: WorkoutLog[];
+}
+
+const STORAGE_KEYS = {
+  CORE: '@app_core',
+  RUNS: '@app_runs',
+  FOOD: '@app_food',
+  WORKOUTS: '@app_workouts',
+  LEGACY: 'appState',
+} as const;
+
 const generateUserId = () => {
   return `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
@@ -225,16 +234,200 @@ const runStorage = {
   },
 };
 
+function safeJsonParse<T>(raw: string | null, fallback: T): T {
+  if (!raw || raw.trim() === '' || raw === 'undefined' || raw === 'null') {
+    return fallback;
+  }
+  try {
+    const trimmed = raw.trim();
+    if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return fallback;
+    if (!trimmed.endsWith('}') && !trimmed.endsWith(']')) return fallback;
+    return JSON.parse(trimmed) as T;
+  } catch {
+    console.warn('safeJsonParse failed, using fallback');
+    return fallback;
+  }
+}
+
+function validateState(parsed: Record<string, unknown>): AppState {
+  return {
+    ...defaultState,
+    ...parsed,
+    user: {
+      ...defaultState.user,
+      ...((parsed.user as Record<string, unknown>) || {}),
+      id: (parsed.user as Record<string, unknown>)?.id as string || generateUserId(),
+    },
+    stats: { ...defaultState.stats, ...((parsed.stats as Record<string, unknown>) || {}) },
+    nutrition: { ...defaultState.nutrition, ...((parsed.nutrition as Record<string, unknown>) || {}) },
+    runs: Array.isArray(parsed.runs) ? parsed.runs : [],
+    foodHistory: Array.isArray(parsed.foodHistory) ? parsed.foodHistory : [],
+    workoutLogs: Array.isArray(parsed.workoutLogs) ? parsed.workoutLogs : [],
+    customWorkoutPlan: (parsed.customWorkoutPlan as CustomWorkoutPlan) || null,
+    savedWorkouts: Array.isArray(parsed.savedWorkouts) ? parsed.savedWorkouts : [],
+    personalStats: (parsed.personalStats as PersonalStats) || {},
+    weightHistory: Array.isArray(parsed.weightHistory) ? parsed.weightHistory : [],
+    xp: parsed.xp ? {
+      ...defaultXPState,
+      ...(parsed.xp as Record<string, unknown>),
+      xpEvents: Array.isArray((parsed.xp as Record<string, unknown>)?.xpEvents) 
+        ? (parsed.xp as Record<string, unknown>).xpEvents as XPEvent[] 
+        : [],
+    } : defaultXPState,
+    lastResetDate: (parsed.lastResetDate as string) || new Date().toDateString(),
+    lastRunDate: (parsed.lastRunDate as string) || null,
+    lastFoodDate: (parsed.lastFoodDate as string) || null,
+    lastWorkoutDate: (parsed.lastWorkoutDate as string) || null,
+    hasSeenWelcome: Boolean(parsed.hasSeenWelcome),
+  };
+}
+
+function extractCoreState(state: AppState): CoreState {
+  const { runs, foodHistory, workoutLogs, ...core } = state;
+  void runs;
+  void foodHistory;
+  void workoutLogs;
+  return core;
+}
+
+async function migrateFromLegacy(): Promise<AppState | null> {
+  try {
+    const legacy = await AsyncStorage.getItem(STORAGE_KEYS.LEGACY);
+    if (!legacy) return null;
+
+    console.log('Found legacy appState, migrating to split storage...');
+    const parsed = safeJsonParse<Record<string, unknown>>(legacy, {});
+    if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
+      await AsyncStorage.removeItem(STORAGE_KEYS.LEGACY);
+      return null;
+    }
+
+    const state = validateState(parsed);
+
+    const coreData = extractCoreState(state);
+    await AsyncStorage.multiSet([
+      [STORAGE_KEYS.CORE, JSON.stringify(coreData)],
+      [STORAGE_KEYS.RUNS, JSON.stringify(state.runs)],
+      [STORAGE_KEYS.FOOD, JSON.stringify(state.foodHistory)],
+      [STORAGE_KEYS.WORKOUTS, JSON.stringify(state.workoutLogs)],
+    ]);
+
+    await AsyncStorage.removeItem(STORAGE_KEYS.LEGACY);
+    console.log('Migration complete. Legacy key removed.');
+    console.log(`Split sizes - core: ${JSON.stringify(coreData).length}, runs: ${JSON.stringify(state.runs).length}, food: ${JSON.stringify(state.foodHistory).length}, workouts: ${JSON.stringify(state.workoutLogs).length}`);
+    return state;
+  } catch (error) {
+    console.error('Migration error:', error);
+    try { await AsyncStorage.removeItem(STORAGE_KEYS.LEGACY); } catch {}
+    return null;
+  }
+}
+
+async function loadSplitState(): Promise<AppState> {
+  const migrated = await migrateFromLegacy();
+  if (migrated) return migrated;
+
+  const results = await AsyncStorage.multiGet([
+    STORAGE_KEYS.CORE,
+    STORAGE_KEYS.RUNS,
+    STORAGE_KEYS.FOOD,
+    STORAGE_KEYS.WORKOUTS,
+  ]);
+
+  const coreRaw = results[0][1];
+  const runsRaw = results[1][1];
+  const foodRaw = results[2][1];
+  const workoutsRaw = results[3][1];
+
+  if (!coreRaw) {
+    console.log('No stored state found, using default');
+    return defaultState;
+  }
+
+  const core = safeJsonParse<Record<string, unknown>>(coreRaw, {});
+  const runs = safeJsonParse<Run[]>(runsRaw, []);
+  const food = safeJsonParse<FoodEntry[]>(foodRaw, []);
+  const workouts = safeJsonParse<WorkoutLog[]>(workoutsRaw, []);
+
+  const state = validateState({
+    ...core,
+    runs: Array.isArray(runs) ? runs : [],
+    foodHistory: Array.isArray(food) ? food : [],
+    workoutLogs: Array.isArray(workouts) ? workouts : [],
+  });
+
+  console.log(`State loaded - runs: ${state.runs.length}, food: ${state.foodHistory.length}, workouts: ${state.workoutLogs.length}`);
+  return state;
+}
+
+type ChangedDomains = {
+  core: boolean;
+  runs: boolean;
+  food: boolean;
+  workouts: boolean;
+};
+
+async function saveSplitState(state: AppState, changed: ChangedDomains): Promise<AppState> {
+  if (!state) {
+    console.error('Attempted to save null/undefined state');
+    return state;
+  }
+
+  try {
+    const pairs: [string, string][] = [];
+
+    if (changed.core) {
+      const coreData = extractCoreState(state);
+      const coreSerialized = JSON.stringify(coreData);
+      pairs.push([STORAGE_KEYS.CORE, coreSerialized]);
+    }
+    if (changed.runs) {
+      const runsSerialized = JSON.stringify(Array.isArray(state.runs) ? state.runs : []);
+      pairs.push([STORAGE_KEYS.RUNS, runsSerialized]);
+    }
+    if (changed.food) {
+      const foodSerialized = JSON.stringify(Array.isArray(state.foodHistory) ? state.foodHistory : []);
+      pairs.push([STORAGE_KEYS.FOOD, foodSerialized]);
+    }
+    if (changed.workouts) {
+      const workoutsSerialized = JSON.stringify(Array.isArray(state.workoutLogs) ? state.workoutLogs : []);
+      pairs.push([STORAGE_KEYS.WORKOUTS, workoutsSerialized]);
+    }
+
+    if (pairs.length > 0) {
+      await AsyncStorage.multiSet(pairs);
+      const totalSize = pairs.reduce((sum, [, v]) => sum + v.length, 0);
+      console.log(`Saved ${pairs.length} storage keys, total size: ${totalSize}`);
+    }
+
+    return state;
+  } catch (error) {
+    console.error('Error saving app state:', error);
+    return state;
+  }
+}
+
 export const [AppProvider, useApp] = createContextHook(() => {
   const [appState, setAppState] = useState<AppState>(defaultState);
   const [isInitialized, setIsInitialized] = useState(false);
   const [pendingLevelUp, setPendingLevelUp] = useState<{ level: number; previousLevel: number } | null>(null);
   const { sendWeeklyReport, sendLevelUpNotification, sendRankUpNotification, sendStreakMilestoneNotification } = useNotifications();
-  
+  const prevStateRef = useRef<AppState>(defaultState);
 
+  const getChangedDomains = useCallback((prev: AppState, next: AppState): ChangedDomains => {
+    return {
+      core: prev.user !== next.user || prev.stats !== next.stats || prev.nutrition !== next.nutrition ||
+        prev.customWorkoutPlan !== next.customWorkoutPlan || prev.savedWorkouts !== next.savedWorkouts ||
+        prev.personalStats !== next.personalStats || prev.weightHistory !== next.weightHistory ||
+        prev.xp !== next.xp || prev.lastResetDate !== next.lastResetDate ||
+        prev.lastRunDate !== next.lastRunDate || prev.lastFoodDate !== next.lastFoodDate ||
+        prev.lastWorkoutDate !== next.lastWorkoutDate || prev.hasSeenWelcome !== next.hasSeenWelcome,
+      runs: prev.runs !== next.runs,
+      food: prev.foodHistory !== next.foodHistory,
+      workouts: prev.workoutLogs !== next.workoutLogs,
+    };
+  }, []);
 
-
-  // Check for daily reset and update streaks
   const getWeeklyRunsFromState = useCallback((state: AppState) => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -323,224 +516,81 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
   const { data: storedState, isLoading: isLoadingState } = useQuery({
     queryKey: ["appState"],
-    queryFn: async () => {
-      try {
-        const stored = await AsyncStorage.getItem("appState");
-        console.log('Loading stored state, length:', stored?.length || 0);
-        
-        if (!stored || stored.trim() === '' || stored === 'undefined' || stored === 'null') {
-          console.log('No valid stored state found, using default');
-          return defaultState;
-        }
-        
-        // Additional validation for JSON format
-        const trimmed = stored.trim();
-        if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
-          console.warn('Stored data does not appear to be valid JSON format, clearing and using default');
-          await AsyncStorage.removeItem("appState");
-          return defaultState;
-        }
-        
-        // Check for common corruption patterns
-        if (trimmed.includes('undefined') || trimmed.includes('NaN') || trimmed.includes('[object Object]') || trimmed.includes('"o"')) {
-          console.warn('Stored data contains invalid values, clearing and using default');
-          await AsyncStorage.removeItem("appState");
-          return defaultState;
-        }
-        
-        // Check for incomplete JSON (common corruption pattern)
-        const openBraces = (trimmed.match(/{/g) || []).length;
-        const closeBraces = (trimmed.match(/}/g) || []).length;
-        if (openBraces !== closeBraces) {
-          console.warn('Stored data has mismatched braces, clearing and using default');
-          await AsyncStorage.removeItem("appState");
-          return defaultState;
-        }
-        
-        let parsed;
-        try {
-          // Additional safety check - ensure the string is properly terminated
-          if (!trimmed.endsWith('}') && !trimmed.endsWith(']')) {
-            console.warn('Stored data does not end properly, clearing and using default');
-            await AsyncStorage.removeItem("appState");
-            return defaultState;
-          }
-          
-          parsed = JSON.parse(trimmed);
-          console.log('Successfully parsed stored state');
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.log('Error message:', parseError instanceof Error ? parseError.message : 'Unknown error');
-          console.log('Problematic stored data (first 200 chars):', trimmed.substring(0, 200));
-          console.log('Data type:', typeof stored);
-          console.log('Data ends with:', trimmed.slice(-50));
-          console.log('Data length:', trimmed.length);
-          
-          // Clear corrupted data and start fresh
-          await AsyncStorage.removeItem("appState");
-          return defaultState;
-        }
-        
-        // Validate that parsed data is an object
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-          console.warn('Parsed data is not a valid app state object, using default');
-          await AsyncStorage.removeItem("appState");
-          return defaultState;
-        }
-        
-        // Ensure all required fields exist, including user ID
-        const validatedState = {
-          ...defaultState,
-          ...parsed,
-          user: { 
-            ...defaultState.user, 
-            ...(parsed.user || {}),
-            // Ensure user has an ID (for existing users without one)
-            id: parsed.user?.id || generateUserId()
-          },
-          stats: { ...defaultState.stats, ...(parsed.stats || {}) },
-          nutrition: { ...defaultState.nutrition, ...(parsed.nutrition || {}) },
-          runs: Array.isArray(parsed.runs) ? parsed.runs : [],
-          foodHistory: Array.isArray(parsed.foodHistory) ? parsed.foodHistory : [],
-          workoutLogs: Array.isArray(parsed.workoutLogs) ? parsed.workoutLogs : [],
-          customWorkoutPlan: parsed.customWorkoutPlan || null,
-          savedWorkouts: Array.isArray(parsed.savedWorkouts) ? parsed.savedWorkouts : [],
-          personalStats: parsed.personalStats || {},
-          weightHistory: Array.isArray(parsed.weightHistory) ? parsed.weightHistory : [],
-          xp: parsed.xp ? {
-            ...defaultXPState,
-            ...parsed.xp,
-            xpEvents: Array.isArray(parsed.xp.xpEvents) ? parsed.xp.xpEvents : [],
-          } : defaultXPState,
-        };
-        
-        console.log('State loaded successfully');
-        return validatedState;
-      } catch (error) {
-        console.error("Error loading app state:", error);
-        // Clear any corrupted data
-        try {
-          await AsyncStorage.removeItem("appState");
-          console.log('Cleared corrupted app state');
-        } catch (clearError) {
-          console.error("Error clearing corrupted app state:", clearError);
-        }
-        return defaultState;
-      }
-    },
+    queryFn: loadSplitState,
     retry: false,
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (state: AppState) => {
-      if (!state) {
-        console.error('Attempted to save null/undefined state');
-        return state;
-      }
-      
-      try {
-        // Clean the state before serialization
-        const cleanState = {
-          ...state,
-          // Ensure all arrays are valid
-          runs: Array.isArray(state.runs) ? state.runs : [],
-          foodHistory: Array.isArray(state.foodHistory) ? state.foodHistory : [],
-          workoutLogs: Array.isArray(state.workoutLogs) ? state.workoutLogs : [],
-          savedWorkouts: Array.isArray(state.savedWorkouts) ? state.savedWorkouts : [],
-          weightHistory: Array.isArray(state.weightHistory) ? state.weightHistory : [],
-          // Ensure objects are valid
-          user: state.user || defaultState.user,
-          stats: state.stats || defaultState.stats,
-          nutrition: state.nutrition || defaultState.nutrition,
-          personalStats: state.personalStats || {},
-        };
-        
-        const serialized = JSON.stringify(cleanState);
-        
-        // Validate that serialization worked
-        if (!serialized || serialized === 'undefined' || serialized === 'null' || serialized.length < 10) {
-          console.error('Failed to serialize app state properly');
-          return state;
-        }
-        
-        // Test that we can parse it back
-        try {
-          JSON.parse(serialized);
-        } catch (testError) {
-          console.error('Serialized state is not valid JSON:', testError);
-          return state;
-        }
-        
-        await AsyncStorage.setItem("appState", serialized);
-        console.log('App state saved successfully, size:', serialized.length);
-        return state;
-      } catch (error) {
-        console.error('Error saving app state:', error);
-        return state;
-      }
+    mutationFn: async ({ state, changed }: { state: AppState; changed: ChangedDomains }) => {
+      return saveSplitState(state, changed);
     },
   });
 
-  const { mutate } = saveMutation;
+  const persistState = useCallback((updated: AppState) => {
+    const changed = getChangedDomains(prevStateRef.current, updated);
+    prevStateRef.current = updated;
+    saveMutation.mutate({ state: updated, changed });
+  }, [getChangedDomains, saveMutation]);
 
   useEffect(() => {
     if (storedState && !isLoadingState) {
       const resetState = checkDailyReset(storedState);
       setAppState(resetState);
+      prevStateRef.current = resetState;
       setIsInitialized(true);
       if (resetState !== storedState) {
-        mutate(resetState);
+        const changed = getChangedDomains(storedState, resetState);
+        saveMutation.mutate({ state: resetState, changed });
       }
     } else if (!isLoadingState && !storedState) {
       setAppState(defaultState);
+      prevStateRef.current = defaultState;
       setIsInitialized(true);
     }
-  }, [storedState, isLoadingState, checkDailyReset, mutate]);
+  }, [storedState, isLoadingState, checkDailyReset, saveMutation, getChangedDomains]);
 
-  // Check for daily reset periodically (every minute)
   useEffect(() => {
     const interval = setInterval(() => {
       setAppState(prev => {
         const resetState = checkDailyReset(prev);
         if (resetState !== prev) {
           console.log('Periodic daily reset check - resetting nutrition');
-          mutate(resetState);
+          persistState(resetState);
         }
         return resetState;
       });
-    }, 60000); // Check every minute
+    }, 60000);
 
     return () => clearInterval(interval);
-  }, [checkDailyReset, mutate]);
+  }, [checkDailyReset, persistState]);
 
   const updateUser = useCallback((user: Partial<User>) => {
     setAppState(prev => {
       const updated = { ...prev, user: { ...prev.user, ...user } };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const updateStats = useCallback((stats: Partial<Stats>) => {
     setAppState(prev => {
       const updated = { ...prev, stats: { ...prev.stats, ...stats } };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const updateNutrition = useCallback((nutrition: Partial<Nutrition>) => {
     setAppState(prev => {
-      // First check if we need a daily reset
       const resetState = checkDailyReset(prev);
       const updated = {
         ...resetState,
         nutrition: { ...resetState.nutrition, ...nutrition },
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate, checkDailyReset]);
+  }, [persistState, checkDailyReset]);
 
   const awardXP = useCallback((state: AppState, amount: number, source: XPSource, description: string): AppState => {
     const event: XPEvent = {
@@ -620,10 +670,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
 
-      mutate(state);
+      persistState(state);
       return state;
     });
-  }, [mutate, awardXP, sendStreakMilestoneNotification]);
+  }, [persistState, awardXP, sendStreakMilestoneNotification]);
 
   const addFoodEntry = useCallback((entry: FoodEntry) => {
     setAppState(prev => {
@@ -686,10 +736,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
 
-      mutate(state);
+      persistState(state);
       return state;
     });
-  }, [mutate, checkDailyReset, awardXP, sendStreakMilestoneNotification]);
+  }, [persistState, checkDailyReset, awardXP, sendStreakMilestoneNotification]);
 
   const deleteFoodEntry = useCallback((entryId: string) => {
     setAppState(prev => {
@@ -699,12 +749,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
       const entryDate = new Date(entryToDelete.date).toDateString();
       const today = new Date().toDateString();
       
-      // Remove the entry from history
       const updatedFoodHistory = prev.foodHistory.filter(entry => entry.id !== entryId);
       
       let updatedNutrition = prev.nutrition;
       
-      // If deleting today's entry, subtract from today's nutrition totals
       if (entryDate === today) {
         updatedNutrition = {
           ...prev.nutrition,
@@ -720,10 +768,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
         foodHistory: updatedFoodHistory,
         nutrition: updatedNutrition,
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const updateFoodEntry = useCallback((entryId: string, updates: Partial<FoodEntry>) => {
     setAppState(prev => {
@@ -733,14 +781,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
       const entryDate = new Date(entryToUpdate.date).toDateString();
       const today = new Date().toDateString();
       
-      // Update the entry in history
       const updatedFoodHistory = prev.foodHistory.map(entry => 
         entry.id === entryId ? { ...entry, ...updates } : entry
       );
       
       let updatedNutrition = prev.nutrition;
       
-      // If updating today's entry, adjust today's nutrition totals
       if (entryDate === today) {
         const oldCalories = entryToUpdate.calories;
         const oldProtein = entryToUpdate.protein;
@@ -766,10 +812,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
         foodHistory: updatedFoodHistory,
         nutrition: updatedNutrition,
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const subtractCaloriesFromRun = useCallback((calories: number) => {
     setAppState(prev => {
@@ -780,10 +826,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
           calories: Math.max(0, prev.nutrition.calories - calories),
         },
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const deleteRun = useCallback((runId: string) => {
     setAppState(prev => {
@@ -795,10 +841,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
         ...prev,
         runs: updatedRuns,
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const updateRun = useCallback((runId: string, updates: Partial<Run>) => {
     setAppState(prev => {
@@ -809,19 +855,17 @@ export const [AppProvider, useApp] = createContextHook(() => {
         ...prev,
         runs: updatedRuns,
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
-  // Get runs from this week
   const getWeeklyRuns = useCallback(() => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     return appState.runs.filter(run => new Date(run.date) >= oneWeekAgo);
   }, [appState.runs]);
   
-  // Calculate weekly stats from actual runs
   const getWeeklyStats = useCallback(() => {
     const weeklyRuns = getWeeklyRuns();
     return {
@@ -831,7 +875,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     };
   }, [getWeeklyRuns]);
 
-  // Get food entries from today
   const getTodaysFoodEntries = useCallback(() => {
     const today = new Date().toDateString();
     return appState.foodHistory.filter(entry => 
@@ -839,14 +882,12 @@ export const [AppProvider, useApp] = createContextHook(() => {
     );
   }, [appState.foodHistory]);
   
-  // Get workouts from this week
   const getWeeklyWorkouts = useCallback(() => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     return appState.workoutLogs.filter(log => new Date(log.date) >= oneWeekAgo);
   }, [appState.workoutLogs]);
   
-  // Calculate gym stats from actual workout logs
   const getGymStats = useCallback(() => {
     const weeklyWorkouts = getWeeklyWorkouts();
     const totalVolume = appState.workoutLogs.reduce((sum, log) => sum + calculateWorkoutVolume(log), 0);
@@ -898,21 +939,19 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
 
-      mutate(state);
+      persistState(state);
       return state;
     });
-  }, [mutate, awardXP, sendStreakMilestoneNotification]);
+  }, [persistState, awardXP, sendStreakMilestoneNotification]);
   
-  // Update custom workout plan
   const updateCustomWorkoutPlan = useCallback((plan: CustomWorkoutPlan | null) => {
     setAppState(prev => {
       const updated = { ...prev, customWorkoutPlan: plan };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
   
-  // Save a custom workout
   const saveCustomWorkout = useCallback((workout: Omit<SavedWorkout, 'id' | 'createdAt'>) => {
     setAppState(prev => {
       const newWorkout: SavedWorkout = {
@@ -921,39 +960,37 @@ export const [AppProvider, useApp] = createContextHook(() => {
         createdAt: new Date().toISOString(),
       };
       const updated = { ...prev, savedWorkouts: [newWorkout, ...prev.savedWorkouts] };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
   
-  // Delete a saved workout
   const deleteSavedWorkout = useCallback((workoutId: string) => {
     setAppState(prev => {
       const updated = { 
         ...prev, 
         savedWorkouts: prev.savedWorkouts.filter(w => w.id !== workoutId) 
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
   
-  // Update personal stats
   const updatePersonalStats = useCallback((stats: PersonalStats) => {
     setAppState(prev => {
       const updated = { ...prev, personalStats: { ...prev.personalStats, ...stats } };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
   
   const markWelcomeAsSeen = useCallback(() => {
     setAppState(prev => {
       const updated = { ...prev, hasSeenWelcome: true };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const setStartingXP = useCallback((totalXP: number, level: number) => {
     setAppState(prev => {
@@ -965,16 +1002,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
           level,
         },
       };
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
 
   const dismissLevelUp = useCallback(() => {
     setPendingLevelUp(null);
   }, []);
   
-  // Add weight entry
   const addWeightEntry = useCallback((entry: WeightEntry) => {
     console.log('Adding weight entry:', entry);
     setAppState(prev => {
@@ -984,16 +1020,15 @@ export const [AppProvider, useApp] = createContextHook(() => {
         weightHistory: [entry, ...prev.weightHistory],
         personalStats: {
           ...prev.personalStats,
-          weight: entry.weight, // Update current weight
+          weight: entry.weight,
         },
       };
       console.log('Updated personal stats:', updated.personalStats);
-      mutate(updated);
+      persistState(updated);
       return updated;
     });
-  }, [mutate]);
+  }, [persistState]);
   
-  // Get weight history for a specific period
   const getWeightHistory = useCallback((period: '7d' | '30d' | '90d' | '1y') => {
     let daysBack = 7;
     
@@ -1018,8 +1053,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, [appState.weightHistory]);
   
 
-
-  // Merge calculated weekly stats with stored stats
   const mergedStats = useMemo(() => {
     const weeklyStats = getWeeklyStats();
     const gymStats = getGymStats();
