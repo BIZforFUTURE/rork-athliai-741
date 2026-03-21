@@ -297,13 +297,7 @@ export default function RunScreen() {
         ]);
         return;
       }
-      const backgroundStatus = await Location.getBackgroundPermissionsAsync();
-      if (backgroundStatus.status !== 'granted') {
-        const { status: newStatus } = await Location.requestBackgroundPermissionsAsync();
-        if (newStatus !== 'granted') {
-          Alert.alert('Background Location Required', 'Background location access is needed to continue tracking when the app is closed.', [{ text: 'OK' }]);
-        }
-      }
+
     }
 
     const startTime = Date.now();
