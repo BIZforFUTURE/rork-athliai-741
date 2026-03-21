@@ -29,6 +29,7 @@ import { z } from "zod";
 
 import { useApp } from "@/providers/AppProvider";
 import { XP_REWARDS } from "@/constants/xp";
+import { estimateRunCalories } from "@/utils/healthScore";
 import { useNotifications } from "@/providers/NotificationProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { router } from "expo-router";
@@ -55,7 +56,7 @@ interface RunState {
 const STORAGE_KEY = 'activeRunState';
 
 export default function RunScreen() {
-  const { addRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo } = useApp();
+  const { addRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo, personalStats } = useApp();
   const { sendRunStartNotification, cancelRunNotification, sendRunCompletionNotification } = useNotifications();
   const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
@@ -357,7 +358,7 @@ export default function RunScreen() {
 
     if (finalElapsedTime > 0) {
       const pace = runState.distance > 0 ? finalElapsedTime / 60 / runState.distance : 0;
-      const calories = Math.round(runState.distance * 112.5);
+      const calories = estimateRunCalories(runState.distance, personalStats?.weight, finalElapsedTime);
       addRun({
         id: Date.now().toString(), date: new Date().toISOString(),
         distance: runState.distance, time: finalElapsedTime,
@@ -436,7 +437,7 @@ export default function RunScreen() {
     ? runState.elapsedTime / 60 / runState.distance
     : 0;
 
-  const currentCalories = Math.round(runState.distance * 112.5);
+  const currentCalories = estimateRunCalories(runState.distance, personalStats?.weight, runState.elapsedTime);
 
   const getBase64FromUri = useCallback(async (uri: string): Promise<string> => {
     if (Platform.OS === 'web') {
@@ -614,7 +615,7 @@ export default function RunScreen() {
     }
 
     const pace = distance > 0 ? timeInSeconds / 60 / distance : 0;
-    const calories = Math.round(distance * 112.5);
+    const calories = estimateRunCalories(distance, personalStats?.weight, timeInSeconds);
 
     addRun({
       id: Date.now().toString(),

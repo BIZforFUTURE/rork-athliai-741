@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import createContextHook from '@nkzw/create-context-hook';
 import { getRankForLevel, getXPProgress, type RankInfo } from '@/constants/xp';
+import { estimateRunCalories } from '@/utils/healthScore';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -264,7 +265,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         return `${mins}:${secs.toString().padStart(2, '0')}`;
       };
 
-      const estimatedCalories = calories || Math.round(distance * 112.5);
+      const estimatedCalories = calories || estimateRunCalories(distance);
 
       await Notifications.scheduleNotificationAsync({
         identifier,

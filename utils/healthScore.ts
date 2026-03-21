@@ -6,6 +6,33 @@ interface FoodEntry {
   fat: number;
 }
 
+export const estimateRunCalories = (
+  distanceMiles: number,
+  weightLbs?: number,
+  timeSeconds?: number,
+): number => {
+  const weight = weightLbs && weightLbs > 0 ? weightLbs : 155;
+  const weightKg = weight * 0.453592;
+
+  if (timeSeconds && timeSeconds > 0 && distanceMiles > 0) {
+    const speedMph = distanceMiles / (timeSeconds / 3600);
+    let met: number;
+    if (speedMph < 4) met = 6.0;
+    else if (speedMph < 5) met = 8.3;
+    else if (speedMph < 6) met = 9.8;
+    else if (speedMph < 7) met = 11.0;
+    else if (speedMph < 8) met = 11.8;
+    else if (speedMph < 9) met = 12.8;
+    else met = 14.5;
+
+    const hours = timeSeconds / 3600;
+    return Math.round(met * weightKg * hours);
+  }
+
+  const caloriesPerMile = weightKg * 1.036;
+  return Math.round(caloriesPerMile * distanceMiles);
+};
+
 interface HealthScoreResult {
   score: number;
   color: string;

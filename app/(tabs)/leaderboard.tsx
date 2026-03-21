@@ -521,6 +521,11 @@ function WeightProgressCard({ onAddWeight, selectedPeriod, setSelectedPeriod }: 
   const weightProgress = personalStats?.targetWeight && personalStats?.weight
     ? personalStats.weight - personalStats.targetWeight : null;
 
+  const isGaining = (personalStats?.targetWeight ?? 0) > (personalStats?.weight ?? 0);
+  const isOnTrack = weightProgress !== null
+    ? (isGaining ? weightProgress >= 0 : weightProgress <= 0)
+    : false;
+
   const filteredHistory = getWeightHistory(selectedPeriod);
 
   return (
@@ -542,16 +547,16 @@ function WeightProgressCard({ onAddWeight, selectedPeriod, setSelectedPeriod }: 
 
       {weightProgress !== null && (
         <View style={wpStyles.progressStrip}>
-          {weightProgress > 0 ? (
+          {isOnTrack ? (
             <TrendingUp size={16} color="#10B981" />
           ) : (
             <TrendingDown size={16} color="#EF4444" />
           )}
-          <Text style={[wpStyles.progressVal, { color: weightProgress > 0 ? '#10B981' : '#EF4444' }]}>
+          <Text style={[wpStyles.progressVal, { color: isOnTrack ? '#10B981' : '#EF4444' }]}>
             {Math.abs(weightProgress).toFixed(1)} lbs
           </Text>
           <Text style={wpStyles.progressLabel}>
-            {weightProgress > 0 ? 'above target' : 'below target'}
+            {isOnTrack ? 'on track' : `${Math.abs(weightProgress).toFixed(1)} lbs to go`}
           </Text>
         </View>
       )}
