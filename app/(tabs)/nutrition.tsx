@@ -274,15 +274,6 @@ export default function NutritionScreen() {
     };
 
     addFoodEntry(newEntry);
-    
-    if (!isMealPrep || targetDate.toDateString() === new Date().toDateString()) {
-      updateNutrition({
-        calories: nutrition.calories + newEntry.calories,
-        protein: nutrition.protein + newEntry.protein,
-        carbs: nutrition.carbs + newEntry.carbs,
-        fat: nutrition.fat + newEntry.fat,
-      });
-    }
 
     setFoodName("");
     setCalories("");
@@ -449,9 +440,6 @@ Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"nam
       };
 
       addFoodEntry(newEntry);
-      updateNutrition({
-        calories: Math.max(0, nutrition.calories - Math.round(burned)),
-      });
 
       setShowExerciseInput(false);
       setExerciseInput("");
@@ -1183,7 +1171,6 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     const newEntry = { id: Date.now().toString(), name: item.name, calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat, date: new Date().toISOString() };
                     addFoodEntry(newEntry);
-                    updateNutrition({ calories: nutrition.calories + newEntry.calories, protein: nutrition.protein + newEntry.protein, carbs: nutrition.carbs + newEntry.carbs, fat: nutrition.fat + newEntry.fat });
                     setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]);
                     Alert.alert("Food Added", `"${item.name}" has been added to today's log.`);
                   }}>

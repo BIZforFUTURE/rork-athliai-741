@@ -644,9 +644,20 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
       
+      const isToday = new Date(entry.date).toDateString() === today;
+
       let state: AppState = {
         ...resetState,
         foodHistory: [entry, ...resetState.foodHistory],
+        nutrition: {
+          ...resetState.nutrition,
+          ...(isToday ? {
+            calories: resetState.nutrition.calories + entry.calories,
+            protein: resetState.nutrition.protein + entry.protein,
+            carbs: resetState.nutrition.carbs + entry.carbs,
+            fat: resetState.nutrition.fat + entry.fat,
+          } : {}),
+        },
         stats: {
           ...resetState.stats,
           foodStreak: newFoodStreak,
@@ -656,8 +667,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
 
       state = awardXP(state, XP_REWARDS.FOOD_LOG, 'food', `Logged ${entry.name}`);
 
-      const newCalories = state.nutrition.calories + entry.calories;
-      const newProtein = state.nutrition.protein + entry.protein;
+      const newCalories = state.nutrition.calories;
+      const newProtein = state.nutrition.protein;
       if (newCalories >= state.nutrition.calorieGoal && state.nutrition.calorieGoal > 0 && state.xp.lastCalorieGoalDate !== today) {
         state = awardXP(state, XP_REWARDS.CALORIE_GOAL_HIT, 'nutrition_goal', 'Hit daily calorie goal');
         state = { ...state, xp: { ...state.xp, lastCalorieGoalDate: today } };
