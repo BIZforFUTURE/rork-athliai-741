@@ -295,16 +295,17 @@ export default function NutritionScreen() {
     }
   };
 
-  const calculateNutritionGoals = () => {
-    const weightPounds = Math.round(parseFloat(quizAnswers.weight));
+  const calculateNutritionGoals = (answers?: typeof quizAnswers) => {
+    const a = answers || quizAnswers;
+    const weightPounds = Math.round(parseFloat(a.weight));
     const weightKg = Math.round(weightPounds * 0.453592 * 10) / 10;
-    const heightFeet = Math.round(parseFloat(quizAnswers.heightFeet));
-    const heightInches = Math.round(parseFloat(quizAnswers.heightInches));
+    const heightFeet = Math.round(parseFloat(a.heightFeet));
+    const heightInches = Math.round(parseFloat(a.heightInches));
     const heightCm = Math.round((heightFeet * 30.48) + (heightInches * 2.54));
-    const age = Math.round(parseFloat(quizAnswers.age));
-    const gender = quizAnswers.gender;
-    const activity = quizAnswers.activityLevel;
-    const goal = quizAnswers.goal;
+    const age = Math.round(parseFloat(a.age));
+    const gender = a.gender;
+    const activity = a.activityLevel;
+    const goal = a.goal;
 
     let bmr = 0;
     if (gender === "male") {
@@ -319,7 +320,7 @@ export default function NutritionScreen() {
 
     let tdee = Math.round(bmr * (activityMultipliers[activity] || 1.55));
 
-    const dietDuration = quizAnswers.dietDuration;
+    const dietDuration = a.dietDuration;
     let deficitMultiplier = 0.8;
     let surplusMultiplier = 1.2;
     
@@ -673,7 +674,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 onPress={() => {
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   if (quizStep < filteredQuestions.length - 1) { setQuizAnswers(localQuizAnswers); setQuizStep(quizStep + 1); }
-                  else { setQuizAnswers(localQuizAnswers); calculateNutritionGoals(); }
+                  else { setQuizAnswers(localQuizAnswers); calculateNutritionGoals(localQuizAnswers); }
                 }}
                 disabled={currentQuestion.type === "height" ? !localQuizAnswers.heightFeet || !localQuizAnswers.heightInches : currentQuestion.key === "weightGoal" ? false : !localQuizAnswers[currentQuestion.key as keyof typeof localQuizAnswers]}
               >
