@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,7 +8,7 @@ import {
   TextInput,
   Alert,
   Platform,
-  Image,
+  Modal,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,13 +19,18 @@ import {
   Trash2,
   GripVertical,
   Play,
-  Search,
+  Dumbbell,
+  PersonStanding,
+  Footprints,
+  Bike,
+  Flame,
+  Target,
+  Zap,
 } from "lucide-react-native";
 import { 
   ExerciseTemplate, 
   BodyPart, 
   bodyPartLabels, 
-  bodyPartColors,
   exercisesByBodyPart 
 } from "@/constants/exercises";
 import { WorkoutPlan } from "@/constants/workouts";
@@ -37,21 +42,42 @@ interface SelectedExercise extends ExerciseTemplate {
   restTime: number;
 }
 
+const BODY_PART_ICONS: Record<BodyPart, React.ReactNode> = {
+  chest: <PersonStanding size={20} color="#9CA3AF" />,
+  back: <PersonStanding size={20} color="#9CA3AF" />,
+  legs: <PersonStanding size={20} color="#9CA3AF" />,
+  shoulders: <PersonStanding size={20} color="#9CA3AF" />,
+  arms: <Zap size={20} color="#9CA3AF" />,
+  core: <Target size={20} color="#9CA3AF" />,
+  cardio: <Footprints size={20} color="#9CA3AF" />,
+};
+
+const CARDIO_EXERCISES = ['treadmill', 'elliptical', 'rowing-machine', 'jump-rope', 'stair-climber'];
+
+function getExerciseIcon(exercise: ExerciseTemplate) {
+  if (CARDIO_EXERCISES.includes(exercise.id)) {
+    if (exercise.id === 'treadmill') return <Footprints size={18} color="#00ADB5" />;
+    if (exercise.id === 'elliptical') return <Bike size={18} color="#00ADB5" />;
+    if (exercise.id === 'jump-rope') return <Flame size={18} color="#00ADB5" />;
+    if (exercise.id === 'stair-climber') return <Footprints size={18} color="#00ADB5" />;
+    return <Dumbbell size={18} color="#00ADB5" />;
+  }
+  return <Dumbbell size={18} color="#00ADB5" />;
+}
+
 export default function WorkoutBuilderScreen() {
   const insets = useSafeAreaInsets();
   const { savedWorkouts, saveCustomWorkout, deleteSavedWorkout } = useApp();
   const [workoutName, setWorkoutName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
-  const [selectedBodyPart, setSelectedBodyPart] = useState<BodyPart | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
 
-  const bodyParts: BodyPart[] = ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio'];
+  const bodyParts: BodyPart[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'cardio'];
 
-  const addExercise = (exercise: ExerciseTemplate) => {
+  const addExercise = useCallback((exercise: ExerciseTemplate) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     
     const newExercise: SelectedExercise = {
@@ -61,37 +87,37 @@ export default function WorkoutBuilderScreen() {
       restTime: 90
     };
     
-    setSelectedExercises([...selectedExercises, newExercise]);
-    setShowExercisePicker(false);
-    setSelectedBodyPart(null);
-    setSearchQuery("");
-  };
+    setSelectedExercises(prev => [...prev, newExercise]);
+  }, []);
 
-  const removeExercise = (index: number) => {
+  const removeExercise = useCallback((index: number) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    setSelectedExercises(selectedExercises.filter((_, i) => i !== index));
-  };
+    setSelectedExercises(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const updateExercise = (index: number, field: keyof SelectedExercise, value: any) => {
-    const updated = [...selectedExercises];
-    updated[index] = { ...updated[index], [field]: value };
-    setSelectedExercises(updated);
-  };
+  const updateExercise = useCallback((index: number, field: keyof SelectedExercise, value: string | number) => {
+    setSelectedExercises(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  }, []);
 
-  const moveExercise = (fromIndex: number, direction: 'up' | 'down') => {
+  const moveExercise = useCallback((fromIndex: number, direction: 'up' | 'down') => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     
     const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1;
-    if (toIndex < 0 || toIndex >= selectedExercises.length) return;
-
-    const updated = [...selectedExercises];
-    [updated[fromIndex], updated[toIndex]] = [updated[toIndex], updated[fromIndex]];
-    setSelectedExercises(updated);
-  };
+    setSelectedExercises(prev => {
+      if (toIndex < 0 || toIndex >= prev.length) return prev;
+      const updated = [...prev];
+      [updated[fromIndex], updated[toIndex]] = [updated[toIndex], updated[fromIndex]];
+      return updated;
+    });
+  }, []);
 
   const saveWorkout = () => {
     if (!workoutName.trim()) {
@@ -105,7 +131,7 @@ export default function WorkoutBuilderScreen() {
     }
 
     if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 
     const customWorkout: WorkoutPlan = {
@@ -148,32 +174,32 @@ export default function WorkoutBuilderScreen() {
   
   const loadSavedWorkout = (workout: any) => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     
     setWorkoutName(workout.name);
     setSelectedExercises(workout.exercises.map((ex: any) => ({
       ...ex,
       id: `exercise-${Date.now()}-${Math.random()}`,
-      targetMuscle: 'general' as any,
-      difficulty: 'intermediate' as any,
+      targetMuscle: ex.targetMuscle ?? 'general',
+      difficulty: 'intermediate' as const,
     })));
     setShowSavedWorkouts(false);
   };
 
-  const getFilteredExercises = () => {
-    if (!selectedBodyPart) return [];
-    
-    let exercises = exercisesByBodyPart[selectedBodyPart];
-    
-    if (searchQuery.trim()) {
-      exercises = exercises.filter(ex => 
-        ex.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const closePicker = useCallback(() => {
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    
-    return exercises;
-  };
+    setShowExercisePicker(false);
+  }, []);
+
+  const openPicker = useCallback(() => {
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    setShowExercisePicker(true);
+  }, []);
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -182,7 +208,7 @@ export default function WorkoutBuilderScreen() {
           style={styles.closeButton} 
           onPress={() => {
             if (Platform.OS !== 'web') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
             router.back();
           }}
@@ -207,7 +233,7 @@ export default function WorkoutBuilderScreen() {
               style={styles.savedWorkoutsHeader}
               onPress={() => {
                 if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 setShowSavedWorkouts(!showSavedWorkouts);
               }}
@@ -237,7 +263,7 @@ export default function WorkoutBuilderScreen() {
                         onPress={(e) => {
                           e.stopPropagation();
                           if (Platform.OS !== 'web') {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           }
                           Alert.alert(
                             'Delete Workout',
@@ -268,7 +294,7 @@ export default function WorkoutBuilderScreen() {
           <TextInput
             style={styles.nameInput}
             placeholder="e.g., Upper Body Blast"
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor="#6B7280"
             value={workoutName}
             onChangeText={setWorkoutName}
           />
@@ -279,12 +305,7 @@ export default function WorkoutBuilderScreen() {
             <Text style={styles.sectionTitle}>Exercises ({selectedExercises.length})</Text>
             <TouchableOpacity 
               style={styles.addButton}
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                }
-                setShowExercisePicker(true);
-              }}
+              onPress={openPicker}
             >
               <Plus size={20} color="#FFFFFF" />
               <Text style={styles.addButtonText}>Add Exercise</Text>
@@ -293,8 +314,9 @@ export default function WorkoutBuilderScreen() {
 
           {selectedExercises.length === 0 ? (
             <View style={styles.emptyState}>
+              <Dumbbell size={40} color="#374151" />
               <Text style={styles.emptyStateText}>No exercises added yet</Text>
-              <Text style={styles.emptyStateSubtext}>Tap &quot;Add Exercise&quot; to get started</Text>
+              <Text style={styles.emptyStateSubtext}>Tap "Add Exercise" to get started</Text>
             </View>
           ) : (
             <View style={styles.exercisesList}>
@@ -340,7 +362,7 @@ export default function WorkoutBuilderScreen() {
                           style={styles.paramButton}
                           onPress={() => {
                             if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }
                             updateExercise(index, 'sets', Math.max(1, exercise.sets - 1));
                           }}
@@ -352,7 +374,7 @@ export default function WorkoutBuilderScreen() {
                           style={styles.paramButton}
                           onPress={() => {
                             if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }
                             updateExercise(index, 'sets', exercise.sets + 1);
                           }}
@@ -369,7 +391,7 @@ export default function WorkoutBuilderScreen() {
                         value={exercise.reps}
                         onChangeText={(value) => updateExercise(index, 'reps', value)}
                         placeholder="8-12"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor="#6B7280"
                       />
                     </View>
 
@@ -380,7 +402,7 @@ export default function WorkoutBuilderScreen() {
                           style={styles.paramButton}
                           onPress={() => {
                             if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }
                             updateExercise(index, 'restTime', Math.max(30, exercise.restTime - 15));
                           }}
@@ -392,7 +414,7 @@ export default function WorkoutBuilderScreen() {
                           style={styles.paramButton}
                           onPress={() => {
                             if (Platform.OS !== 'web') {
-                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                             }
                             updateExercise(index, 'restTime', exercise.restTime + 15);
                           }}
@@ -409,120 +431,85 @@ export default function WorkoutBuilderScreen() {
         </View>
       </ScrollView>
 
-      {showExercisePicker && (
-        <View style={styles.pickerOverlay}>
-          <View style={[styles.pickerContainer, { paddingBottom: insets.bottom }]}>
-            <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>
-                {selectedBodyPart ? bodyPartLabels[selectedBodyPart] : 'Select Body Part'}
-              </Text>
-              <TouchableOpacity 
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setShowExercisePicker(false);
-                  setSelectedBodyPart(null);
-                  setSearchQuery("");
-                }}
-              >
-                <X size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-
-            {!selectedBodyPart ? (
-              <ScrollView style={styles.pickerContent} showsVerticalScrollIndicator={false}>
-                <View style={styles.bodyPartsGrid}>
-                  {bodyParts.map((bodyPart) => (
-                    <TouchableOpacity
-                      key={bodyPart}
-                      style={[
-                        styles.bodyPartCard,
-                        { backgroundColor: bodyPartColors[bodyPart] }
-                      ]}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        }
-                        setSelectedBodyPart(bodyPart);
-                      }}
-                    >
-                      <Text style={styles.bodyPartLabel}>{bodyPartLabels[bodyPart]}</Text>
-                      <Text style={styles.bodyPartCount}>
-                        {exercisesByBodyPart[bodyPart].length} exercises
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            ) : (
-              <>
-                <View style={styles.searchContainer}>
-                  <Search size={20} color="#9CA3AF" />
-                  <TextInput
-                    style={styles.searchInput}
-                    placeholder="Search exercises..."
-                    placeholderTextColor="#9CA3AF"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                  />
-                  <TouchableOpacity 
-                    onPress={() => {
-                      if (Platform.OS !== 'web') {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      }
-                      setSelectedBodyPart(null);
-                      setSearchQuery("");
-                    }}
-                  >
-                    <Text style={styles.backText}>Back</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView style={styles.pickerContent} showsVerticalScrollIndicator={false}>
-                  {getFilteredExercises().length === 0 ? (
-                    <View style={styles.emptyExerciseState}>
-                      <Text style={styles.emptyStateText}>No exercises found</Text>
-                      <Text style={styles.emptyStateSubtext}>Try a different search term</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.exercisesGrid}>
-                      {getFilteredExercises().map((exercise) => (
-                      <TouchableOpacity
-                        key={exercise.id}
-                        style={styles.exercisePickerCard}
-                        onPress={() => addExercise(exercise)}
-                      >
-                        <Image 
-                          source={{ uri: exercise.imageUrl }} 
-                          style={styles.exerciseImage}
-                        />
-                        <View style={styles.exercisePickerInfo}>
-                          <Text style={styles.exercisePickerName}>{exercise.name}</Text>
-                          <Text style={styles.exercisePickerEquipment}>{exercise.equipment}</Text>
-                          <View style={[
-                            styles.difficultyBadge,
-                            { backgroundColor: 
-                              exercise.difficulty === 'beginner' ? '#10B981' :
-                              exercise.difficulty === 'intermediate' ? '#F59E0B' :
-                              '#EF4444'
-                            }
-                          ]}>
-                            <Text style={styles.difficultyText}>
-                              {exercise.difficulty.charAt(0).toUpperCase() + exercise.difficulty.slice(1)}
-                            </Text>
-                          </View>
-                        </View>
-                      </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </ScrollView>
-              </>
-            )}
+      <Modal
+        visible={showExercisePicker}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closePicker}
+      >
+        <View style={[styles.pickerContainer, { paddingTop: insets.top }]}>
+          <View style={styles.pickerHeader}>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={closePicker}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.pickerTitle}>Choose Exercises</Text>
+            <View style={styles.cancelButton} />
           </View>
+
+          <ScrollView 
+            style={styles.pickerContent} 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.pickerScrollContent}
+          >
+            {bodyParts.map((bodyPart) => {
+              const exercises = exercisesByBodyPart[bodyPart];
+              return (
+                <View key={bodyPart} style={styles.bodyPartSection}>
+                  <View style={styles.bodyPartHeader}>
+                    {BODY_PART_ICONS[bodyPart]}
+                    <Text style={styles.bodyPartTitle}>{bodyPartLabels[bodyPart]}</Text>
+                  </View>
+
+                  <View style={styles.exerciseGroupCard}>
+                    {exercises.map((exercise, idx) => {
+                      const isSelected = selectedExercises.some(se => se.id === exercise.id);
+                      return (
+                        <React.Fragment key={exercise.id}>
+                          <TouchableOpacity
+                            style={[
+                              styles.exercisePickerRow,
+                              isSelected && styles.exercisePickerRowSelected,
+                            ]}
+                            onPress={() => addExercise(exercise)}
+                            activeOpacity={0.6}
+                          >
+                            <View style={styles.exercisePickerIcon}>
+                              {getExerciseIcon(exercise)}
+                            </View>
+                            <View style={styles.exercisePickerInfo}>
+                              <Text style={[
+                                styles.exercisePickerName,
+                                isSelected && styles.exercisePickerNameSelected,
+                              ]}>
+                                {exercise.name}
+                              </Text>
+                              <Text style={styles.exercisePickerTarget}>
+                                {exercise.targetMuscle}
+                              </Text>
+                            </View>
+                            {isSelected && (
+                              <View style={styles.selectedBadge}>
+                                <Text style={styles.selectedBadgeText}>Added</Text>
+                              </View>
+                            )}
+                          </TouchableOpacity>
+                          {idx < exercises.length - 1 && (
+                            <View style={styles.exerciseDivider} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
+                </View>
+              );
+            })}
+            <View style={{ height: 40 }} />
+          </ScrollView>
         </View>
-      )}
+      </Modal>
     </View>
   );
 }
@@ -547,7 +534,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "bold" as const,
     color: "#FFFFFF",
   },
   saveButton: {
@@ -565,7 +552,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "600" as const,
   },
   content: {
     flex: 1,
@@ -575,7 +562,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#F9FAFB",
     marginBottom: 10,
   },
@@ -586,7 +573,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#F9FAFB",
     borderWidth: 1,
-    borderColor: "#0D0F13",
+    borderColor: "#1F2329",
   },
   exercisesSection: {
     paddingHorizontal: 20,
@@ -600,7 +587,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "bold" as const,
     color: "#F9FAFB",
   },
   addButton: {
@@ -615,23 +602,23 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "600" as const,
   },
   emptyState: {
     backgroundColor: "#171B22",
-    borderRadius: 12,
-    padding: 40,
+    borderRadius: 16,
+    padding: 50,
     alignItems: "center",
+    gap: 10,
   },
   emptyStateText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#F9FAFB",
-    marginBottom: 5,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: "#6B7280",
   },
   exercisesList: {
     gap: 15,
@@ -640,11 +627,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#171B22",
     borderRadius: 12,
     padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
   },
   exerciseHeader: {
     flexDirection: "row",
@@ -664,7 +646,7 @@ const styles = StyleSheet.create({
   },
   exerciseNumber: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "bold" as const,
     color: "#00ADB5",
   },
   exerciseInfo: {
@@ -672,13 +654,13 @@ const styles = StyleSheet.create({
   },
   exerciseName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#F9FAFB",
     marginBottom: 4,
   },
   exerciseEquipment: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#6B7280",
   },
   deleteButton: {
     padding: 5,
@@ -692,9 +674,9 @@ const styles = StyleSheet.create({
   },
   paramLabel: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#6B7280",
     marginBottom: 8,
-    textAlign: "center",
+    textAlign: "center" as const,
   },
   paramControls: {
     flexDirection: "row",
@@ -708,22 +690,22 @@ const styles = StyleSheet.create({
   paramButton: {
     width: 30,
     height: 30,
-    backgroundColor: "#171B22",
+    backgroundColor: "#1F2329",
     borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
   },
   paramButtonText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#F9FAFB",
   },
   paramValue: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#F9FAFB",
     minWidth: 30,
-    textAlign: "center",
+    textAlign: "center" as const,
   },
   repsInput: {
     backgroundColor: "#0D0F13",
@@ -731,125 +713,119 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     color: "#F9FAFB",
-    textAlign: "center",
-  },
-  pickerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
+    textAlign: "center" as const,
   },
   pickerContainer: {
-    backgroundColor: "#171B22",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
+    flex: 1,
+    backgroundColor: "#0D0F13",
   },
   pickerHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: "#141820",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#1F2329",
+  },
+  cancelButton: {
+    minWidth: 70,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    color: "#9CA3AF",
+    fontWeight: "500" as const,
+    backgroundColor: "#1F2329",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   pickerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "bold" as const,
     color: "#FFFFFF",
   },
   pickerContent: {
-    maxHeight: 500,
+    flex: 1,
   },
-  bodyPartsGrid: {
-    padding: 20,
-    gap: 15,
+  pickerScrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
-  bodyPartCard: {
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+  bodyPartSection: {
+    marginBottom: 20,
   },
-  bodyPartLabel: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-    marginBottom: 5,
-  },
-  bodyPartCount: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    opacity: 0.9,
-  },
-  searchContainer: {
+  bodyPartHeader: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0D0F13",
-    borderRadius: 12,
-    padding: 12,
-    margin: 20,
-    gap: 10,
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
   },
-  searchInput: {
-    flex: 1,
+  bodyPartTitle: {
     fontSize: 16,
-    color: "#F9FAFB",
+    fontWeight: "600" as const,
+    color: "#E5E7EB",
   },
-  backText: {
-    fontSize: 14,
-    color: "#00ADB5",
-    fontWeight: "600",
-  },
-  exercisesGrid: {
-    padding: 20,
-    gap: 15,
-  },
-  exercisePickerCard: {
-    backgroundColor: "#0D0F13",
-    borderRadius: 12,
+  exerciseGroupCard: {
+    backgroundColor: "#171B22",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#1F2329",
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
   },
-  exerciseImage: {
-    width: "100%",
-    height: 150,
-    backgroundColor: "#1F2937",
+  exercisePickerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  exercisePickerRowSelected: {
+    backgroundColor: "rgba(0, 173, 181, 0.08)",
+  },
+  exercisePickerIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: "rgba(0, 173, 181, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
   },
   exercisePickerInfo: {
-    padding: 15,
+    flex: 1,
   },
   exercisePickerName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#F9FAFB",
-    marginBottom: 5,
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#00ADB5",
+    marginBottom: 2,
   },
-  exercisePickerEquipment: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 10,
+  exercisePickerNameSelected: {
+    color: "#00D4DE",
   },
-  difficultyBadge: {
-    alignSelf: "flex-start",
+  exercisePickerTarget: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  selectedBadge: {
+    backgroundColor: "rgba(0, 173, 181, 0.15)",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
   },
-  difficultyText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#FFFFFF",
+  selectedBadgeText: {
+    fontSize: 11,
+    color: "#00ADB5",
+    fontWeight: "600" as const,
+  },
+  exerciseDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#1F2329",
+    marginLeft: 60,
+    marginRight: 16,
   },
   savedWorkoutsSection: {
     padding: 20,
@@ -863,13 +839,13 @@ const styles = StyleSheet.create({
   },
   savedWorkoutsTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "bold" as const,
     color: "#F9FAFB",
   },
   savedWorkoutsToggle: {
     fontSize: 14,
     color: "#00ADB5",
-    fontWeight: "600",
+    fontWeight: "600" as const,
   },
   savedWorkoutsList: {
     gap: 10,
@@ -881,33 +857,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#00ADB5",
+    borderWidth: 1,
+    borderColor: "#1F2329",
   },
   savedWorkoutInfo: {
     flex: 1,
   },
   savedWorkoutName: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "600" as const,
     color: "#F9FAFB",
     marginBottom: 4,
   },
   savedWorkoutMeta: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#6B7280",
   },
   savedWorkoutActions: {
     flexDirection: "row",
     gap: 10,
     alignItems: "center",
   },
-
   deleteWorkoutButton: {
     padding: 5,
-  },
-  emptyExerciseState: {
-    padding: 40,
-    alignItems: "center",
   },
 });
