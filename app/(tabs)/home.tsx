@@ -248,9 +248,9 @@ function StreakStrip() {
   }, [enterAnim]);
 
   const streaks = [
-    { label: "Run", value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#2A2E35"} /> },
-    { label: "Food", value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#2A2E35"} /> },
-    { label: "Gym", value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#2A2E35"} /> },
+    { label: "Run", value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#4B5563"} /> },
+    { label: "Food", value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#4B5563"} /> },
+    { label: "Gym", value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#4B5563"} /> },
   ];
 
   const totalStreak = streaks.reduce((a, s) => a + s.value, 0);
@@ -387,7 +387,7 @@ function WeeklyStats() {
       </View>
       <View style={weekStyles.grid}>
         {items.map((item, idx) => (
-          <View key={item.label} style={[weekStyles.cell, idx < 2 && weekStyles.cellBorder]}>
+          <View key={item.label} style={[weekStyles.cell, idx < 3 && weekStyles.cellBorder]}>
             <View style={[weekStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
               {item.icon}
             </View>
@@ -492,12 +492,12 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
         <View>
           <Text style={styles.greetingText}>{greeting}</Text>
           <Text style={styles.subGreeting}>Keep leveling up</Text>
         </View>
-        <View style={[styles.levelChip, { backgroundColor: xpInfo.rank.color + "15", borderColor: xpInfo.rank.color + "30" }]}>
+        <View style={[styles.levelChip, { backgroundColor: xpInfo.rank.color + "18", borderColor: xpInfo.rank.color + "35" }]}>
           <Text style={styles.levelChipEmoji}>{xpInfo.rank.emoji}</Text>
           <Text style={[styles.levelChipText, { color: xpInfo.rank.color }]}>Lv {xpInfo.level}</Text>
         </View>
@@ -526,14 +526,14 @@ const styles = StyleSheet.create({
   },
   topBar: {
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 16,
     backgroundColor: "#08090C",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
   },
   greetingText: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "800" as const,
     color: "#F3F4F6",
     letterSpacing: -0.8,
@@ -541,8 +541,8 @@ const styles = StyleSheet.create({
   subGreeting: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#4B5563",
-    marginTop: 1,
+    color: "#6B7280",
+    marginTop: 2,
   },
   levelChip: {
     flexDirection: "row" as const,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 110,
-    gap: 10,
+    gap: 12,
   },
 });
 
@@ -578,7 +578,7 @@ const heroStyles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
     alignItems: "center" as const,
   },
   centerBlock: {
@@ -734,7 +734,7 @@ const questStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   header: {
     flexDirection: "row" as const,
@@ -819,11 +819,11 @@ const streakStyles = StyleSheet.create({
     alignItems: "center" as const,
     backgroundColor: "#0E1015",
     borderRadius: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 14,
     gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   flameWrap: {
     position: "relative" as const,
@@ -855,13 +855,13 @@ const streakStyles = StyleSheet.create({
   val: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#2A2E35",
+    color: "#6B7280",
     letterSpacing: -0.5,
   },
   lbl: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#374151",
+    color: "#4B5563",
   },
   bonusTag: {
     flexDirection: "row" as const,
@@ -885,7 +885,7 @@ const nutStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -977,7 +977,7 @@ const weekStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   headerRow: {
     flexDirection: "row" as const,
@@ -1001,7 +1001,7 @@ const weekStyles = StyleSheet.create({
   },
   cellBorder: {
     borderRightWidth: 1,
-    borderRightColor: "rgba(255,255,255,0.04)",
+    borderRightColor: "rgba(255,255,255,0.06)",
   },
   cellIcon: {
     width: 32,
@@ -1036,7 +1036,7 @@ const feedStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   header: {
     flexDirection: "row" as const,
@@ -1053,7 +1053,7 @@ const feedStyles = StyleSheet.create({
   total: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#2A2E35",
+    color: "#6B7280",
   },
   timeline: {
     gap: 0,

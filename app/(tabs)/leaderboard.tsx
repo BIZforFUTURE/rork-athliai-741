@@ -673,7 +673,7 @@ function FitnessStatsCard() {
       </View>
       <View style={fitStyles.grid}>
         {items.map((item, idx) => (
-          <View key={item.label} style={[fitStyles.cell, idx < 2 && fitStyles.cellBorder]}>
+          <View key={item.label} style={[fitStyles.cell, idx < 3 && fitStyles.cellBorder]}>
             <View style={[fitStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
               {item.icon}
             </View>
@@ -851,7 +851,7 @@ export default function PersonalStatsScreen() {
         </View>
       </Modal>
 
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
+      <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
         <View>
           <Text style={styles.pageTitle}>Stats</Text>
           <Text style={styles.pageSubtitle}>Your fitness journey</Text>
@@ -879,11 +879,11 @@ const styles = StyleSheet.create({
   },
   topBar: {
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 16,
     backgroundColor: "#08090C",
   },
   pageTitle: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "800" as const,
     color: "#F3F4F6",
     letterSpacing: -0.8,
@@ -891,8 +891,8 @@ const styles = StyleSheet.create({
   pageSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#4B5563",
-    marginTop: 1,
+    color: "#6B7280",
+    marginTop: 2,
   },
   scroll: {
     flex: 1,
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 110,
-    gap: 10,
+    gap: 12,
   },
 });
 
@@ -910,7 +910,7 @@ const cardStyles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -971,7 +971,7 @@ const xpStyles = StyleSheet.create({
   },
   xpBarOuter: {
     height: 6,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: 3,
     overflow: "hidden" as const,
   },
@@ -1011,7 +1011,7 @@ const xpStyles = StyleSheet.create({
     justifyContent: "space-between" as const,
     paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.04)",
+    borderTopColor: "rgba(255,255,255,0.06)",
   },
   timelineItem: {
     alignItems: "center" as const,
@@ -1028,7 +1028,7 @@ const xpStyles = StyleSheet.create({
   timelineName: {
     fontSize: 7,
     fontWeight: "600" as const,
-    color: "#2A2E35",
+    color: "#4B5563",
     textTransform: "uppercase" as const,
     letterSpacing: 0.3,
   },
@@ -1038,7 +1038,7 @@ const breakdownStyles = StyleSheet.create({
   totalLabel: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#2A2E35",
+    color: "#6B7280",
   },
   row: {
     flexDirection: "row" as const,
@@ -1062,7 +1062,7 @@ const breakdownStyles = StyleSheet.create({
   barTrack: {
     flex: 1,
     height: 4,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: 2,
     overflow: "hidden" as const,
   },
@@ -1145,11 +1145,11 @@ const goalStyles = StyleSheet.create({
   divider: {
     width: 1,
     height: 28,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.06)",
   },
   barOuter: {
     height: 6,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: 3,
     overflow: "hidden" as const,
     marginBottom: 6,
@@ -1411,7 +1411,7 @@ const fitStyles = StyleSheet.create({
   },
   cellBorder: {
     borderRightWidth: 1,
-    borderRightColor: "rgba(255,255,255,0.04)",
+    borderRightColor: "rgba(255,255,255,0.06)",
   },
   cellIcon: {
     width: 32,
