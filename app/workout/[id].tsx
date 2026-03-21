@@ -256,7 +256,7 @@ export default function WorkoutScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <X size={24} color="#1F2937" />
+            <X size={24} color="#9CA3AF" />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.workoutTitle}>{workout.name}</Text>
@@ -419,7 +419,7 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#0D0F13",
   },
   header: {
     flexDirection: "row",
@@ -427,9 +427,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#171B22",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#1F2329",
     marginHorizontal: 0,
   },
   closeButton: {
@@ -441,12 +441,12 @@ const styles = StyleSheet.create({
   },
   workoutTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "bold" as const,
+    color: "#F9FAFB",
   },
   exerciseCounter: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#9CA3AF",
     marginTop: 2,
   },
   finishButton: {
@@ -464,14 +464,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FEF3C7",
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
     paddingVertical: 15,
     gap: 10,
   },
   restText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#92400E",
+    fontWeight: "600" as const,
+    color: "#F59E0B",
   },
   skipButton: {
     paddingHorizontal: 15,
@@ -488,16 +488,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   exerciseHeader: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#171B22",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
     marginHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   exerciseTitle: {
     flexDirection: "row",
@@ -507,14 +502,14 @@ const styles = StyleSheet.create({
   },
   exerciseName: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "bold" as const,
+    color: "#F9FAFB",
     flex: 1,
   },
 
   exerciseDetails: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#9CA3AF",
     marginBottom: 8,
   },
   exerciseEquipment: {
@@ -531,7 +526,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#171B22",
     borderRadius: 15,
     padding: 20,
     marginTop: 15,
@@ -539,18 +534,18 @@ const styles = StyleSheet.create({
   },
   autoFillLabel: {
     fontSize: 16,
-    color: "#1F2937",
+    color: "#F9FAFB",
   },
   toggle: {
     width: 50,
     height: 30,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#1F2329",
     borderRadius: 15,
     justifyContent: "center",
     paddingHorizontal: 2,
   },
   toggleActive: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#00ADB5",
   },
   toggleThumb: {
     width: 26,
@@ -572,20 +567,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   setRow: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#171B22",
     borderRadius: 15,
     padding: 20,
     marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
   },
   setLabel: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "bold" as const,
+    color: "#F9FAFB",
     marginBottom: 15,
   },
   setInputs: {
@@ -602,16 +592,18 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
+    borderColor: "#1F2329",
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
-    textAlign: "center",
+    textAlign: "center" as const,
+    backgroundColor: "#0D0F13",
+    color: "#F9FAFB",
   },
   inputLabel: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#9CA3AF",
     minWidth: 30,
   },
   setActions: {
@@ -622,13 +614,13 @@ const styles = StyleSheet.create({
   autoFillButton: {
     paddingHorizontal: 15,
     paddingVertical: 8,
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#1F2329",
     borderRadius: 20,
   },
   autoFillButtonText: {
-    color: "#6B7280",
+    color: "#9CA3AF",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "600" as const,
   },
   restButton: {
     flex: 1,
@@ -652,26 +644,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "transparent",
     borderWidth: 2,
-    borderColor: "#6366F1",
+    borderColor: "#00ADB5",
     borderStyle: "dashed",
     borderRadius: 15,
     paddingVertical: 20,
     gap: 10,
   },
   addSetText: {
-    color: "#6366F1",
+    color: "#00ADB5",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "600" as const,
   },
   navigation: {
     flexDirection: "row",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#171B22",
     borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
+    borderTopColor: "#1F2329",
     gap: 15,
   },
   navButton: {
@@ -679,21 +671,21 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 25,
     alignItems: "center",
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#1F2329",
   },
   navButtonDisabled: {
     opacity: 0.5,
   },
   navButtonText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#6B7280",
-  },
-  navButtonTextDisabled: {
+    fontWeight: "600" as const,
     color: "#9CA3AF",
   },
+  navButtonTextDisabled: {
+    color: "#6B7280",
+  },
   nextButton: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#00ADB5",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
