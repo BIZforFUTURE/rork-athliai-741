@@ -14,8 +14,9 @@ interface RunMapProps {
   routeCoordinates: RouteCoordinate[];
   showMap: boolean;
   isRunning: boolean;
-  isHistorical?: boolean; // For showing past runs
-  title?: string; // Custom title for the map
+  isHistorical?: boolean;
+  title?: string;
+  fullscreen?: boolean;
 }
 
 export default function RunMap({ 
@@ -24,9 +25,10 @@ export default function RunMap({
   showMap, 
   isRunning, 
   isHistorical = false, 
-  title 
+  title,
+  fullscreen = false,
 }: RunMapProps) {
-  const { width: screenWidth } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const mapTitle = title || (isHistorical ? "Route Map" : "Live Route");
   const shouldShow = showMap || isHistorical;
   const mapRef = useRef<any>(null);
@@ -111,6 +113,17 @@ export default function RunMap({
   }
 
   if (Platform.OS === 'web') {
+    if (fullscreen) {
+      return (
+        <View style={[styles.fullscreenMapContainer, { width: screenWidth, height: screenHeight * 0.55 }]}>
+          <View style={[styles.webMapFallback, { flex: 1 }]}>
+            <Map size={32} color="#4B5563" />
+            <Text style={styles.webMapText}>Map view available on mobile devices</Text>
+            <Text style={styles.webMapSubtext}>Your route is being tracked</Text>
+          </View>
+        </View>
+      );
+    }
     return (
       <View style={styles.mapContainer}>
         <View style={styles.mapHeader}>
@@ -135,8 +148,17 @@ export default function RunMap({
     return null;
   }
 
-  // If MapView is not available (web platform), show fallback
   if (!MapView) {
+    if (fullscreen) {
+      return (
+        <View style={[styles.fullscreenMapContainer, { width: screenWidth, height: screenHeight * 0.55 }]}>
+          <View style={[styles.webMapFallback, { flex: 1 }]}>
+            <Map size={32} color="#4B5563" />
+            <Text style={styles.webMapText}>Map view available on mobile devices</Text>
+          </View>
+        </View>
+      );
+    }
     return (
       <View style={styles.mapContainer}>
         <View style={styles.mapHeader}>
@@ -158,6 +180,53 @@ export default function RunMap({
 
   if (!mapRegion) {
     return null;
+  }
+
+  if (fullscreen) {
+    return (
+      <View style={[styles.fullscreenMapContainer, { width: screenWidth, height: screenHeight * 0.55 }]}>
+        {React.createElement(MapView, {
+          ref: mapRef,
+          style: { flex: 1 },
+          provider: Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined,
+          initialRegion: mapRegion,
+          showsUserLocation: true,
+          followsUserLocation: isRunning && routeDistance < 0.5,
+          showsMyLocationButton: false,
+          showsCompass: false,
+          toolbarEnabled: false,
+          mapType: "standard",
+          pitchEnabled: false,
+          rotateEnabled: false,
+          scrollEnabled: true,
+          zoomEnabled: true,
+        }, [
+          routeCoordinates.length > 1 && Polyline && React.createElement(Polyline, {
+            key: "route-polyline",
+            coordinates: routeCoordinates,
+            strokeColor: "#3B82F6",
+            strokeWidth: 4,
+            lineCap: "round",
+            lineJoin: "round",
+            geodesic: true,
+          }),
+          routeCoordinates.length > 0 && Marker && React.createElement(Marker, {
+            key: "start-marker",
+            coordinate: routeCoordinates[0],
+            title: "Start",
+            pinColor: "#10B981",
+            identifier: "start-marker",
+          }),
+          routeCoordinates.length > 1 && Marker && React.createElement(Marker, {
+            key: "end-marker",
+            coordinate: routeCoordinates[routeCoordinates.length - 1],
+            title: "Current",
+            pinColor: "#EF4444",
+            identifier: "end-marker",
+          }),
+        ].filter(Boolean))}
+      </View>
+    );
   }
 
   return (
@@ -218,6 +287,9 @@ export default function RunMap({
 }
 
 const styles = StyleSheet.create({
+  fullscreenMapContainer: {
+    overflow: "hidden" as const,
+  },
   mapContainer: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,

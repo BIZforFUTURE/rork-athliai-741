@@ -685,22 +685,119 @@ export default function RunScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runState.isRunning, runState.startTime, runState.isPaused]);
 
-  const timeDialSize = 140;
-  const timeStroke = 6;
-  const timeR = (timeDialSize - timeStroke) / 2;
-  const timeCirc = 2 * Math.PI * timeR;
-  const maxRunTime = 3600;
-  const timeProgress = Math.min(runState.elapsedTime / maxRunTime, 1);
-  const timeOffset = timeCirc * (1 - timeProgress);
+  if (runState.isRunning) {
+    return (
+      <View style={styles.activeRunContainer}>
+        <RunMap
+          currentLocation={runState.currentLocation}
+          routeCoordinates={optimizeRouteCoordinates(runState.routeCoordinates)}
+          showMap={true}
+          isRunning={!runState.isPaused}
+          fullscreen={true}
+        />
+
+        <View style={styles.activeRunPanel}>
+          <TouchableOpacity
+            style={styles.activeRunClose}
+            onPress={confirmStopRun}
+            activeOpacity={0.7}
+          >
+            <X size={18} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <View style={styles.activeRunTimeWrap}>
+            <Text style={styles.activeRunTime}>{formatTime(runState.elapsedTime)}</Text>
+            <Text style={styles.activeRunTimeLabel}>TIME</Text>
+            {runState.isPaused && (
+              <View style={styles.activeRunPausedChip}>
+                <Pause size={10} color="#F59E0B" />
+                <Text style={styles.activeRunPausedText}>PAUSED</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.activeRunStats}>
+            <View style={styles.activeRunStat}>
+              <Text style={styles.activeRunStatValue}>{runState.distance.toFixed(2)}</Text>
+              <Text style={styles.activeRunStatLabel}>MILES</Text>
+            </View>
+            <View style={styles.activeRunStatDivider} />
+            <View style={styles.activeRunStat}>
+              <Text style={styles.activeRunStatValue}>{formatPace(currentPace)}</Text>
+              <Text style={styles.activeRunStatLabel}>MIN/MI</Text>
+            </View>
+            <View style={styles.activeRunStatDivider} />
+            <View style={styles.activeRunStat}>
+              <Text style={styles.activeRunStatValue}>{currentCalories}</Text>
+              <Text style={styles.activeRunStatLabel}>CAL</Text>
+            </View>
+          </View>
+
+          <View style={styles.activeRunControls}>
+            <Pressable
+              onPress={runState.isPaused ? resumeRun : pauseRun}
+              onPressIn={handleButtonPressIn}
+              onPressOut={handleButtonPressOut}
+            >
+              <Animated.View style={[styles.activeRunPauseBtn, { transform: [{ scale: buttonScale }] }]}>
+                {runState.isPaused ? (
+                  <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
+                ) : (
+                  <Pause size={24} color="#FFFFFF" fill="#FFFFFF" />
+                )}
+              </Animated.View>
+            </Pressable>
+            <Pressable
+              onPress={confirmStopRun}
+              disabled={isStopping}
+              onPressIn={handleButtonPressIn}
+              onPressOut={handleButtonPressOut}
+            >
+              <Animated.View style={[styles.activeRunStopBtn, isStopping && { opacity: 0.5 }, { transform: [{ scale: buttonScale }] }]}>
+                <View style={styles.activeRunStopIcon} />
+              </Animated.View>
+            </Pressable>
+          </View>
+        </View>
+
+        <Modal
+          visible={showCalorieModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowCalorieModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
+                <X size={20} color="#4B5563" />
+              </TouchableOpacity>
+              <View style={styles.modalIconWrap}>
+                <Flame size={40} color="#FF6B35" />
+              </View>
+              <Text style={styles.modalTitle}>Great Run!</Text>
+              <Text style={styles.modalCalText}>{lastRunCalories} calories burned</Text>
+              <Text style={styles.modalSubtext}>Subtract these from your daily intake?</Text>
+              <View style={styles.modalBtns}>
+                <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowCalorieModal(false)}>
+                  <Text style={styles.modalBtnSecondaryText}>No Thanks</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleSubtractCalories}>
+                  <Text style={styles.modalBtnPrimaryText}>Subtract</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <View>
           <Text style={styles.screenTitle}>Run</Text>
-          <Text style={styles.screenSubtitle}>
-            {runState.isRunning ? (runState.isPaused ? "Paused" : "Running...") : "Ready to go?"}
-          </Text>
+          <Text style={styles.screenSubtitle}>Ready to go?</Text>
         </View>
         <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "15", borderColor: xpInfo.rank.color + "30" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
@@ -719,150 +816,82 @@ export default function RunScreen() {
           />
         }
       >
-        <Animated.View style={[styles.timerCard, { opacity: fadeIn, transform: [{ translateY: slideUp }, { scale: pulseAnim }] }]}>
+        <Animated.View style={[styles.timerCard, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
           <View style={styles.timerDialWrap}>
-            <Svg width={timeDialSize} height={timeDialSize}>
+            <Svg width={140} height={140}>
               <Circle
-                cx={timeDialSize / 2} cy={timeDialSize / 2} r={timeR}
-                stroke="rgba(0,229,255,0.06)" strokeWidth={timeStroke} fill="none"
+                cx={70} cy={70} r={67}
+                stroke="rgba(0,229,255,0.06)" strokeWidth={6} fill="none"
               />
-              {runState.isRunning && (
-                <Circle
-                  cx={timeDialSize / 2} cy={timeDialSize / 2} r={timeR}
-                  stroke="#00E5FF" strokeWidth={timeStroke} fill="none"
-                  strokeDasharray={`${timeCirc}`} strokeDashoffset={timeOffset}
-                  strokeLinecap="round" transform={`rotate(-90 ${timeDialSize / 2} ${timeDialSize / 2})`}
-                />
-              )}
             </Svg>
             <View style={styles.timerInner}>
-              <Text style={styles.timerValue}>{formatTime(runState.elapsedTime)}</Text>
+              <Text style={styles.timerValue}>0:00</Text>
               <Text style={styles.timerLabel}>TIME</Text>
             </View>
           </View>
-
-          {runState.isPaused && (
-            <View style={styles.pausedChip}>
-              <Pause size={12} color="#F59E0B" />
-              <Text style={styles.pausedChipText}>PAUSED</Text>
-            </View>
-          )}
         </Animated.View>
-
-        <RunMap
-          currentLocation={runState.currentLocation}
-          routeCoordinates={optimizeRouteCoordinates(runState.routeCoordinates)}
-          showMap={runState.isRunning}
-          isRunning={runState.isRunning && !runState.isPaused}
-        />
 
         <Animated.View style={[styles.statsRow, { opacity: fadeIn }]}>
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: "rgba(0,229,255,0.08)" }]}>
               <Route size={14} color="#00E5FF" />
             </View>
-            <Text style={styles.statValue}>{runState.distance.toFixed(2)}</Text>
+            <Text style={styles.statValue}>0.00</Text>
             <Text style={styles.statUnit}>miles</Text>
           </View>
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: "rgba(191,255,0,0.08)" }]}>
               <TrendingUp size={14} color="#BFFF00" />
             </View>
-            <Text style={styles.statValue}>{formatPace(currentPace)}</Text>
+            <Text style={styles.statValue}>0:00</Text>
             <Text style={styles.statUnit}>min/mi</Text>
           </View>
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,107,53,0.08)" }]}>
               <Flame size={14} color="#FF6B35" />
             </View>
-            <Text style={styles.statValue}>{currentCalories}</Text>
+            <Text style={styles.statValue}>0</Text>
             <Text style={styles.statUnit}>cal</Text>
           </View>
         </Animated.View>
 
-        {runState.isRunning ? (
-          <View style={styles.runningControls}>
-            <Pressable
-              style={styles.controlBtnWrap}
-              onPress={runState.isPaused ? resumeRun : pauseRun}
-              onPressIn={handleButtonPressIn}
-              onPressOut={handleButtonPressOut}
-            >
-              <Animated.View style={[
-                styles.controlBtn,
-                runState.isPaused ? styles.controlBtnResume : styles.controlBtnPause,
-                { transform: [{ scale: buttonScale }] }
-              ]}>
-                <View style={[styles.controlIconCircle, runState.isPaused ? styles.controlIconResume : styles.controlIconPauseCircle]}>
-                  {runState.isPaused ? (
-                    <Play size={22} color="#FFFFFF" fill="#FFFFFF" />
-                  ) : (
-                    <Pause size={22} color="#FFFFFF" fill="#FFFFFF" />
-                  )}
-                </View>
-                <Text style={styles.controlBtnText}>{runState.isPaused ? 'RESUME' : 'PAUSE'}</Text>
-              </Animated.View>
-            </Pressable>
-            <Pressable
-              style={styles.controlBtnWrap}
-              onPress={confirmStopRun}
-              disabled={isStopping}
-              onPressIn={handleButtonPressIn}
-              onPressOut={handleButtonPressOut}
-            >
-              <Animated.View style={[
-                styles.controlBtn, styles.controlBtnStop,
-                isStopping && styles.controlBtnDisabled,
-                { transform: [{ scale: buttonScale }] }
-              ]}>
-                <View style={[styles.controlIconCircle, styles.controlIconStopCircle]}>
-                  <View style={styles.stopIcon} />
-                </View>
-                <Text style={styles.controlBtnText}>{isStopping ? 'STOPPING...' : 'STOP'}</Text>
-              </Animated.View>
-            </Pressable>
-          </View>
-        ) : (
-          <Pressable
-            onPress={startRun}
-            onPressIn={handleButtonPressIn}
-            onPressOut={handleButtonPressOut}
-          >
-            <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
-              <View style={styles.startBtnInner}>
-                <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
-                <Text style={styles.startBtnText}>START RUN</Text>
-              </View>
-              <View style={styles.startBtnXp}>
-                <Zap size={10} color="#00E5FF" fill="#00E5FF" />
-                <Text style={styles.startBtnXpText}>+25 XP</Text>
-              </View>
-            </Animated.View>
-          </Pressable>
-        )}
+        <Pressable
+          onPress={startRun}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+        >
+          <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
+            <View style={styles.startBtnInner}>
+              <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
+              <Text style={styles.startBtnText}>START RUN</Text>
+            </View>
+            <View style={styles.startBtnXp}>
+              <Zap size={10} color="#00E5FF" fill="#00E5FF" />
+              <Text style={styles.startBtnXpText}>+25 XP</Text>
+            </View>
+          </Animated.View>
+        </Pressable>
 
-        {!runState.isRunning && (
-          <TouchableOpacity
-            style={styles.treadmillLogBtn}
-            onPress={handleTreadmillCapture}
-            activeOpacity={0.7}
-            testID="treadmill-log-btn"
-          >
-            <View style={styles.treadmillLogBtnLeft}>
-              <View style={styles.treadmillLogBtnIcon}>
-                <Camera size={20} color="#00E5FF" />
-              </View>
-              <View style={styles.treadmillLogBtnTextWrap}>
-                <Text style={styles.treadmillLogBtnTitle}>Log Treadmill Run</Text>
-                <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
-              </View>
+        <TouchableOpacity
+          style={styles.treadmillLogBtn}
+          onPress={handleTreadmillCapture}
+          activeOpacity={0.7}
+          testID="treadmill-log-btn"
+        >
+          <View style={styles.treadmillLogBtnLeft}>
+            <View style={styles.treadmillLogBtnIcon}>
+              <Camera size={20} color="#00E5FF" />
             </View>
-            <View style={styles.treadmillLogBtnXp}>
-              <Zap size={10} color="#BFFF00" fill="#BFFF00" />
-              <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
+            <View style={styles.treadmillLogBtnTextWrap}>
+              <Text style={styles.treadmillLogBtnTitle}>Log Treadmill Run</Text>
+              <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
             </View>
-          </TouchableOpacity>
-        )}
+          </View>
+          <View style={styles.treadmillLogBtnXp}>
+            <Zap size={10} color="#BFFF00" fill="#BFFF00" />
+            <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
+          </View>
+        </TouchableOpacity>
 
         <RunHistorySection
           runs={recentRuns}
@@ -992,19 +1021,12 @@ export default function RunScreen() {
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
               <X size={20} color="#4B5563" />
             </TouchableOpacity>
-
             <View style={styles.modalIconWrap}>
               <Flame size={40} color="#FF6B35" />
             </View>
-
             <Text style={styles.modalTitle}>Great Run!</Text>
-            <Text style={styles.modalCalText}>
-              {lastRunCalories} calories burned
-            </Text>
-            <Text style={styles.modalSubtext}>
-              Subtract these from your daily intake?
-            </Text>
-
+            <Text style={styles.modalCalText}>{lastRunCalories} calories burned</Text>
+            <Text style={styles.modalSubtext}>Subtract these from your daily intake?</Text>
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowCalorieModal(false)}>
                 <Text style={styles.modalBtnSecondaryText}>No Thanks</Text>
@@ -1021,6 +1043,121 @@ export default function RunScreen() {
 }
 
 const styles = StyleSheet.create({
+  activeRunContainer: {
+    flex: 1,
+    backgroundColor: "#0A0C10",
+  },
+  activeRunPanel: {
+    flex: 1,
+    backgroundColor: "#0A0C10",
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
+    justifyContent: "center" as const,
+  },
+  activeRunClose: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    position: "absolute" as const,
+    top: 16,
+    left: 24,
+    zIndex: 10,
+  },
+  activeRunTimeWrap: {
+    alignItems: "center" as const,
+    marginBottom: 24,
+  },
+  activeRunTime: {
+    fontSize: 64,
+    fontWeight: "200" as const,
+    color: "#FFFFFF",
+    letterSpacing: -2,
+  },
+  activeRunTimeLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+    letterSpacing: 3,
+    textTransform: "uppercase" as const,
+    marginTop: -4,
+  },
+  activeRunPausedChip: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    backgroundColor: "rgba(245,158,11,0.12)",
+    borderRadius: 20,
+  },
+  activeRunPausedText: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#F59E0B",
+    letterSpacing: 1,
+  },
+  activeRunStats: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    marginBottom: 32,
+    gap: 0,
+  },
+  activeRunStat: {
+    flex: 1,
+    alignItems: "center" as const,
+  },
+  activeRunStatValue: {
+    fontSize: 26,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
+  },
+  activeRunStatLabel: {
+    fontSize: 11,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  activeRunStatDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+  activeRunControls: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 24,
+  },
+  activeRunPauseBtn: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  activeRunStopBtn: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(239,68,68,0.25)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  activeRunStopIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    backgroundColor: "#EF4444",
+  },
   container: {
     flex: 1,
     backgroundColor: "#08090C",
