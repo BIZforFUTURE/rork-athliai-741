@@ -139,8 +139,7 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
   const percentText = Math.round(progress * 100);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.loadingBackground}>
+    <View style={[styles.container, styles.loadingBackground, { paddingTop: insets.top }]}>
         <ScrollView
           contentContainerStyle={styles.loadingScrollContent}
           showsVerticalScrollIndicator={false}
@@ -229,7 +228,6 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
 
           <View style={{ height: 40 }} />
         </ScrollView>
-      </View>
     </View>
   );
 }
