@@ -21,6 +21,7 @@ import { useNotifications } from '@/providers/NotificationProvider';
 import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getVideoUrlForExercise } from '@/utils/videoUrls';
+import { callOpenAI } from '@/utils/openai';
 
 
 interface WelcomeSlide {
@@ -460,11 +461,8 @@ export default function WelcomeScreen() {
   const generateFitnessPlan = async (answers: {question: string; answer: string}[], goals: string) => {
     console.log('Generating fitness plan with AI...');
     
-    const openaiApiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
-    
-    if (openaiApiKey) {
-      try {
-        const prompt = `You are a certified personal trainer creating a personalized 5-day workout plan. Based on the user's quiz responses and specific goals, create a comprehensive training program.
+    try {
+      const prompt = `You are a certified personal trainer creating a personalized 5-day workout plan. Based on the user's quiz responses and specific goals, create a comprehensive training program.
 
 User's Quiz Responses:
 ${answers.map(qa => `${qa.question}: ${qa.answer}`).join('\n')}
@@ -505,45 +503,20 @@ Format as JSON:
       ]
     }
   ]
-}`;
+}
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
+Return ONLY valid JSON, no markdown or code blocks.`;
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openaiApiKey}`
-          },
-          signal: controller.signal,
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content: 'You are a certified personal trainer and fitness expert. Generate workout plans in valid JSON format only.'
-              },
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.7
-          })
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('OpenAI API error:', errorText);
-          throw new Error(`OpenAI API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const planData = JSON.parse(data.choices[0].message.content);
+      console.log('Generating fitness plan via Rork toolkit...');
+      const aiResponse = await callOpenAI(prompt);
+      
+      let cleaned = aiResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+      }
+      const planData = JSON.parse(cleaned);
         
         console.log('AI-generated plan:', planData);
         
@@ -559,11 +532,8 @@ Format as JSON:
         };
         
         return enhancedPlan;
-      } catch (error) {
-        console.error('Error generating AI plan, falling back to preset:', error);
-      }
-    } else {
-      console.log('OpenAI API key not found, using preset templates');
+    } catch (error) {
+      console.error('Error generating AI plan, falling back to preset:', error);
     }
     
     const fitnessLevel = answers.find(a => a.question.includes('fitness level'))?.answer || '';

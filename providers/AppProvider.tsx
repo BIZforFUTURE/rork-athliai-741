@@ -1024,7 +1024,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const addWeightEntry = useCallback((entry: WeightEntry) => {
     console.log('Adding weight entry:', entry);
     setAppState(prev => {
-      console.log('Previous personal stats:', prev.personalStats);
       const updated = {
         ...prev,
         weightHistory: [entry, ...prev.weightHistory],
@@ -1033,7 +1032,46 @@ export const [AppProvider, useApp] = createContextHook(() => {
           weight: entry.weight,
         },
       };
-      console.log('Updated personal stats:', updated.personalStats);
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const deleteWeightEntry = useCallback((date: string) => {
+    console.log('Deleting weight entry for date:', date);
+    setAppState(prev => {
+      const updatedHistory = prev.weightHistory.filter(e => e.date !== date);
+      const latestEntry = updatedHistory.length > 0
+        ? [...updatedHistory].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+        : null;
+      const updated = {
+        ...prev,
+        weightHistory: updatedHistory,
+        personalStats: {
+          ...prev.personalStats,
+          weight: latestEntry?.weight ?? prev.personalStats.weight,
+        },
+      };
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const updateWeightEntry = useCallback((date: string, newWeight: number) => {
+    console.log('Updating weight entry:', date, newWeight);
+    setAppState(prev => {
+      const updatedHistory = prev.weightHistory.map(e =>
+        e.date === date ? { ...e, weight: newWeight } : e
+      );
+      const latestEntry = [...updatedHistory].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+      const updated = {
+        ...prev,
+        weightHistory: updatedHistory,
+        personalStats: {
+          ...prev.personalStats,
+          weight: latestEntry?.weight ?? prev.personalStats.weight,
+        },
+      };
       persistState(updated);
       return updated;
     });
@@ -1122,6 +1160,8 @@ export const [AppProvider, useApp] = createContextHook(() => {
     deleteSavedWorkout,
     updatePersonalStats,
     addWeightEntry,
+    deleteWeightEntry,
+    updateWeightEntry,
     getWeightHistory,
     subtractCaloriesFromRun,
     markWelcomeAsSeen,
@@ -1129,5 +1169,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     dismissLevelUp,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
 });

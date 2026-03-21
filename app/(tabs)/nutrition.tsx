@@ -23,7 +23,7 @@ import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { callOpenAI } from "@/utils/openai";
+import { callOpenAI, callOpenAIWithVision } from "@/utils/openai";
 import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
 import { calculateHealthScore } from "@/utils/healthScore";
 import Svg, { Circle } from "react-native-svg";
@@ -510,22 +510,8 @@ Please provide a refined nutritional estimate. Return ONLY a valid JSON object (
       
       if (isImage) {
         try {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}` },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [{ role: 'user', content: [
-                { type: 'text', text: 'You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Return ONLY a valid JSON object with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}.' },
-                { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${input}` } }
-              ]}],
-              max_tokens: 500, temperature: 0.1,
-            }),
-          });
-          
-          if (!response.ok) { const errorData = await response.text(); console.error('OpenAI Vision API Error:', response.status, errorData); throw new Error('Image analysis failed'); }
-          const data = await response.json();
-          prompt = data.choices[0].message.content;
+          const visionPrompt = 'You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Return ONLY a valid JSON object with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}.';
+          prompt = await callOpenAIWithVision(visionPrompt, input);
         } catch (imageError) {
           console.error('Image analysis failed:', imageError);
           Alert.alert("Image Analysis Failed", "Unable to analyze the image. Please try describing your food instead.", [{ text: "OK", onPress: () => { setShowCamera(false); setShowAIInput(true); } }]);

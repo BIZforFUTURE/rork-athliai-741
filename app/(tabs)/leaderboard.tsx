@@ -12,6 +12,7 @@ import {
   Animated,
   Pressable,
   RefreshControl,
+  Alert,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,6 +40,7 @@ import {
   Flame,
   ChevronRight,
   Camera,
+  Trash2,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { RANKS, XPSource } from "@/constants/xp";
@@ -505,8 +507,10 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
   );
 }
 
-function WeightProgressCard({ onAddWeight, selectedPeriod, setSelectedPeriod }: {
+function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selectedPeriod, setSelectedPeriod }: {
   onAddWeight: () => void;
+  onEditWeight: (entry: WeightEntry) => void;
+  onDeleteWeight: (entry: WeightEntry) => void;
   selectedPeriod: StatPeriod;
   setSelectedPeriod: (p: StatPeriod) => void;
 }) {
@@ -641,10 +645,26 @@ function WeightProgressCard({ onAddWeight, selectedPeriod, setSelectedPeriod }: 
             <View style={wpStyles.recentHeader}>
               <Text style={wpStyles.recentTitle}>Recent</Text>
             </View>
-            {filteredHistory.slice(0, 3).map((entry: WeightEntry, index: number) => (
+            {filteredHistory.slice(0, 5).map((entry: WeightEntry, index: number) => (
               <View key={index} style={wpStyles.historyRow}>
                 <Text style={wpStyles.historyDate}>{new Date(entry.date + 'T00:00:00').toLocaleDateString()}</Text>
-                <Text style={wpStyles.historyWeight}>{entry.weight} lbs</Text>
+                <View style={wpStyles.historyActions}>
+                  <Text style={wpStyles.historyWeight}>{entry.weight} lbs</Text>
+                  <TouchableOpacity
+                    onPress={() => onEditWeight(entry)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={wpStyles.historyActionBtn}
+                  >
+                    <Edit3 size={13} color="#6B7280" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onDeleteWeight(entry)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={wpStyles.historyActionBtn}
+                  >
+                    <Trash2 size={13} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
               </View>
             ))}
           </View>
@@ -697,7 +717,7 @@ function FitnessStatsCard() {
 }
 
 export default function PersonalStatsScreen() {
-  const { personalStats, updatePersonalStats, addWeightEntry, isLoading: appLoading } = useApp();
+  const { personalStats, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, isLoading: appLoading } = useApp();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
   const [activeTab, setActiveTab] = useState<StatsTab>('progress');
@@ -711,6 +731,9 @@ export default function PersonalStatsScreen() {
   const [tempAge, setTempAge] = useState('');
   const [tempGender, setTempGender] = useState<'male' | 'female' | 'other'>('male');
   const [newWeight, setNewWeight] = useState('');
+  const [editingWeightEntry, setEditingWeightEntry] = useState<WeightEntry | null>(null);
+  const [showEditWeightModal, setShowEditWeightModal] = useState(false);
+  const [editWeight, setEditWeight] = useState('');
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = useCallback(() => {
@@ -773,6 +796,41 @@ export default function PersonalStatsScreen() {
     addWeightEntry({ weight, date: getLocalDateString() });
     setShowWeightModal(false);
     setNewWeight('');
+  };
+
+  const handleEditWeight = (entry: WeightEntry) => {
+    setEditingWeightEntry(entry);
+    setEditWeight(entry.weight.toString());
+    setShowEditWeightModal(true);
+  };
+
+  const handleSaveEditWeight = () => {
+    if (!editingWeightEntry) return;
+    const weight = parseFloat(editWeight);
+    if (!weight || weight < 50 || weight > 500) return;
+    if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    updateWeightEntry(editingWeightEntry.date, weight);
+    setShowEditWeightModal(false);
+    setEditingWeightEntry(null);
+    setEditWeight('');
+  };
+
+  const handleDeleteWeight = (entry: WeightEntry) => {
+    Alert.alert(
+      'Delete Weight Entry',
+      `Delete the entry for ${new Date(entry.date + 'T00:00:00').toLocaleDateString()} (${entry.weight} lbs)?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            deleteWeightEntry(entry.date);
+          },
+        },
+      ]
+    );
   };
 
   if (appLoading) {
@@ -843,6 +901,26 @@ export default function PersonalStatsScreen() {
             </TouchableOpacity>
             <View style={{ height: 60 }} />
           </ScrollView>
+        </View>
+      </Modal>
+
+      <Modal visible={showEditWeightModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { setShowEditWeightModal(false); setEditingWeightEntry(null); }}>
+        <View style={[modalStyles.container, { paddingTop: insets.top }]}>
+          <View style={modalStyles.header}>
+            <Text style={modalStyles.headerTitle}>Edit Weight</Text>
+            <TouchableOpacity onPress={() => { setShowEditWeightModal(false); setEditingWeightEntry(null); setEditWeight(''); }} style={modalStyles.closeBtn}>
+              <Text style={modalStyles.closeText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={modalStyles.body}>
+            <View style={modalStyles.section}>
+              <Text style={modalStyles.sectionLabel}>{editingWeightEntry ? new Date(editingWeightEntry.date + 'T00:00:00').toLocaleDateString() : ''}</Text>
+              <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={editWeight} onChangeText={setEditWeight} keyboardType="numeric" autoFocus />
+            </View>
+            <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSaveEditWeight}>
+              <Text style={modalStyles.saveBtnText}>Save</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
 
@@ -935,7 +1013,7 @@ export default function PersonalStatsScreen() {
           <>
             <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} />
             <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} />
-            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
+            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
           </>
         )}
         <View style={{ height: 40 }} />
@@ -1513,6 +1591,14 @@ const wpStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700" as const,
     color: "#D1D5DB",
+  },
+  historyActions: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+  },
+  historyActionBtn: {
+    padding: 4,
   },
 });
 

@@ -41,6 +41,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
 import { getVideoUrlForExercise } from "@/utils/videoUrls";
+import { callOpenAI } from "@/utils/openai";
 
 interface QuizAnswer {
   question: string;
@@ -731,37 +732,9 @@ Format as JSON:
   ]
 }`;
 
-      console.log("Generating personalized fitness plan with OpenAI...");
+      console.log("Generating personalized fitness plan via Rork toolkit...");
       
-      const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
-      
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 2000,
-          temperature: 0.1,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('OpenAI API Error:', response.status, errorData);
-        throw new Error(`OpenAI API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      const aiResponse = await callOpenAI(prompt);
       
       console.log('AI Response:', aiResponse);
       

@@ -1,36 +1,40 @@
+import { generateText } from "@rork-ai/toolkit-sdk";
+
 const callOpenAI = async (prompt: string): Promise<string> => {
-  const API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY || '';
-  
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.1,
-      }),
+    console.log('Calling AI via Rork toolkit...');
+    const response = await generateText({
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
     });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API Error:', response.status, errorData);
-      throw new Error(`OpenAI API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
+    return response;
   } catch (error: any) {
-    console.error('OpenAI API call failed:', error);
+    console.error('AI call failed:', error);
+    throw error;
+  }
+};
+
+const callOpenAIWithVision = async (prompt: string, base64Image: string): Promise<string> => {
+  try {
+    console.log('Calling AI vision via Rork toolkit...');
+    const response = await generateText({
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image', image: `data:image/jpeg;base64,${base64Image}` },
+          ],
+        },
+      ],
+    });
+    return response;
+  } catch (error: any) {
+    console.error('AI vision call failed:', error);
     throw error;
   }
 };
@@ -93,4 +97,4 @@ const parseNutritionResponse = (response: string): { name: string; calories: num
   }
 };
 
-export { callOpenAI, cleanJsonResponse, parseNutritionResponse };
+export { callOpenAI, callOpenAIWithVision, cleanJsonResponse, parseNutritionResponse };
