@@ -518,6 +518,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
     queryKey: ["appState"],
     queryFn: loadSplitState,
     retry: false,
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const saveMutation = useMutation({
@@ -533,6 +537,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   }, [getChangedDomains, saveMutation]);
 
   useEffect(() => {
+    if (isInitialized) return;
     if (storedState && !isLoadingState) {
       const resetState = checkDailyReset(storedState);
       setAppState(resetState);
@@ -547,7 +552,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
       prevStateRef.current = defaultState;
       setIsInitialized(true);
     }
-  }, [storedState, isLoadingState, checkDailyReset, saveMutation, getChangedDomains]);
+  }, [storedState, isLoadingState, isInitialized, checkDailyReset, saveMutation, getChangedDomains]);
 
   useEffect(() => {
     const interval = setInterval(() => {
