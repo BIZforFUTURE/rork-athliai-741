@@ -4,11 +4,10 @@ import React from "react";
 import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet } from "react-native";
 
-function TabIcon({ children, focused, color }: { children: React.ReactNode; focused: boolean; color: string }) {
+function TabIcon({ children }: { children: React.ReactNode }) {
   return (
     <View style={styles.iconWrap}>
       {children}
-      {focused && <View style={[styles.activeIndicator, { backgroundColor: color }]} />}
     </View>
   );
 }
@@ -40,8 +39,8 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Base",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon focused={focused} color={color}>
+          tabBarIcon: ({ color }) => (
+            <TabIcon>
               <Home size={22} color={color} />
             </TabIcon>
           ),
@@ -58,8 +57,8 @@ export default function TabLayout() {
         name="run"
         options={{
           title: "Run",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon focused={focused} color={color}>
+          tabBarIcon: ({ color }) => (
+            <TabIcon>
               <Route size={22} color={color} />
             </TabIcon>
           ),
@@ -76,8 +75,8 @@ export default function TabLayout() {
         name="nutrition"
         options={{
           title: "Fuel",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon focused={focused} color={color}>
+          tabBarIcon: ({ color }) => (
+            <TabIcon>
               <Utensils size={22} color={color} />
             </TabIcon>
           ),
@@ -94,8 +93,8 @@ export default function TabLayout() {
         name="gym"
         options={{
           title: "Gym",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon focused={focused} color={color}>
+          tabBarIcon: ({ color }) => (
+            <TabIcon>
               <Dumbbell size={22} color={color} />
             </TabIcon>
           ),
@@ -112,8 +111,8 @@ export default function TabLayout() {
         name="leaderboard"
         options={{
           title: "Stats",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon focused={focused} color={color}>
+          tabBarIcon: ({ color }) => (
+            <TabIcon>
               <Trophy size={22} color={color} />
             </TabIcon>
           ),
@@ -137,11 +136,5 @@ const styles = StyleSheet.create({
     width: 36,
     height: 28,
   },
-  activeIndicator: {
-    position: "absolute" as const,
-    bottom: -4,
-    width: 16,
-    height: 3,
-    borderRadius: 2,
-  },
+
 });
