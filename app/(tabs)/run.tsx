@@ -328,6 +328,17 @@ export default function RunScreen() {
     setRunNotificationId(notificationId);
   };
 
+  const confirmStopRun = () => {
+    Alert.alert(
+      'End Run?',
+      'Are you sure you want to stop this run? This action cannot be undone.',
+      [
+        { text: 'Keep Running', style: 'cancel' },
+        { text: 'End Run', style: 'destructive', onPress: stopRun },
+      ]
+    );
+  };
+
   const stopRun = async () => {
     if (isStopping) return;
     setIsStopping(true);
@@ -799,7 +810,7 @@ export default function RunScreen() {
             </Pressable>
             <Pressable
               style={styles.controlBtnWrap}
-              onPress={stopRun}
+              onPress={confirmStopRun}
               disabled={isStopping}
               onPressIn={handleButtonPressIn}
               onPressOut={handleButtonPressOut}

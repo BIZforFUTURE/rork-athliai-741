@@ -880,9 +880,22 @@ Format as JSON:
   };
 
   const retakeQuiz = () => {
-    setShowSettings(false);
-    resetQuiz();
-    setShowQuiz(true);
+    Alert.alert(
+      'Retake Quiz?',
+      'This will replace your current workout plan with a new one. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Retake',
+          style: 'destructive',
+          onPress: () => {
+            setShowSettings(false);
+            resetQuiz();
+            setShowQuiz(true);
+          },
+        },
+      ]
+    );
   };
 
   const hasCompletedToday = workoutLogs.some(log => {
