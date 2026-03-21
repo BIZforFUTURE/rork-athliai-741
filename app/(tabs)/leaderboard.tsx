@@ -49,6 +49,7 @@ interface WeightEntry {
 }
 
 type StatPeriod = '7d' | '30d' | '90d' | '1y';
+type StatsTab = 'progress' | 'profile';
 
 function XPRankCard() {
   const { xpInfo } = useApp();
@@ -699,8 +700,10 @@ export default function PersonalStatsScreen() {
   const { personalStats, updatePersonalStats, addWeightEntry, isLoading: appLoading } = useApp();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
+  const [activeTab, setActiveTab] = useState<StatsTab>('progress');
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
+  const segmentAnim = useRef(new Animated.Value(0)).current;
   const [tempHeightFeet, setTempHeightFeet] = useState('');
   const [tempHeightInches, setTempHeightInches] = useState('');
   const [tempWeight, setTempWeight] = useState('');
@@ -870,24 +873,71 @@ export default function PersonalStatsScreen() {
         </View>
       </View>
 
+      <View style={segStyles.container}>
+        <View style={segStyles.track}>
+          <Animated.View
+            style={[
+              segStyles.slider,
+              {
+                transform: [{
+                  translateX: segmentAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [2, (Dimensions.get('window').width - 40) / 2 - 2],
+                  }),
+                }],
+              },
+            ]}
+          />
+          <Pressable
+            style={segStyles.btn}
+            onPress={() => {
+              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setActiveTab('progress');
+              Animated.spring(segmentAnim, { toValue: 0, useNativeDriver: true, tension: 300, friction: 25 }).start();
+            }}
+          >
+            <Zap size={13} color={activeTab === 'progress' ? '#00E5FF' : '#4B5563'} />
+            <Text style={[segStyles.btnText, activeTab === 'progress' && segStyles.btnTextActive]}>Progress</Text>
+          </Pressable>
+          <Pressable
+            style={segStyles.btn}
+            onPress={() => {
+              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setActiveTab('profile');
+              Animated.spring(segmentAnim, { toValue: 1, useNativeDriver: true, tension: 300, friction: 25 }).start();
+            }}
+          >
+            <User size={13} color={activeTab === 'profile' ? '#00E5FF' : '#4B5563'} />
+            <Text style={[segStyles.btnText, activeTab === 'profile' && segStyles.btnTextActive]}>Profile</Text>
+          </Pressable>
+        </View>
+      </View>
+
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#A855F7"
-            colors={["#A855F7"]}
+            tintColor="#00E5FF"
+            colors={["#00E5FF"]}
             progressBackgroundColor="#1A1D24"
           />
         }
       >
-        <XPRankCard />
-        <XPBreakdownCard />
-        <RecentXPCard />
-        <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} />
-        <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} />
-        <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
-        <FitnessStatsCard />
+        {activeTab === 'progress' ? (
+          <>
+            <XPRankCard />
+            <XPBreakdownCard />
+            <RecentXPCard />
+            <FitnessStatsCard />
+          </>
+        ) : (
+          <>
+            <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} />
+            <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} />
+            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
+          </>
+        )}
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
@@ -923,6 +973,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 110,
     gap: 12,
+  },
+});
+
+const segStyles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    marginBottom: 4,
+  },
+  track: {
+    flexDirection: "row" as const,
+    backgroundColor: "#0E1015",
+    borderRadius: 14,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    position: "relative" as const,
+  },
+  slider: {
+    position: "absolute" as const,
+    top: 2,
+    left: 0,
+    width: "50%" as const,
+    height: "100%" as const,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.15)",
+  },
+  btn: {
+    flex: 1,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 6,
+    paddingVertical: 11,
+    borderRadius: 12,
+  },
+  btnText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#4B5563",
+    letterSpacing: -0.2,
+  },
+  btnTextActive: {
+    color: "#E5E7EB",
   },
 });
 
