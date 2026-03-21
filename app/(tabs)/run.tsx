@@ -618,12 +618,8 @@ export default function RunScreen() {
     setTreadmillParsed(null);
     setTreadmillEditing(false);
 
-    const xpEarned = XP_REWARDS.RUN_BASE + Math.floor(distance * 4) * XP_REWARDS.RUN_PER_QUARTER_MILE + XP_REWARDS.TREADMILL_PHOTO;
-    Alert.alert(
-      'Treadmill Run Logged! 🏃',
-      `${distance.toFixed(2)} mi in ${formatTime(timeInSeconds)}\n+${xpEarned} XP earned!`,
-      [{ text: 'Nice!' }]
-    );
+    setLastRunCalories(calories);
+    setShowCalorieModal(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [treadmillEditDistance, treadmillEditTime, treadmillPhoto, addRun]);
 
@@ -761,29 +757,6 @@ export default function RunScreen() {
           </View>
         </Animated.View>
 
-        {!runState.isRunning && (
-          <TouchableOpacity
-            style={styles.treadmillLogBtn}
-            onPress={handleTreadmillCapture}
-            activeOpacity={0.7}
-            testID="treadmill-log-btn"
-          >
-            <View style={styles.treadmillLogBtnLeft}>
-              <View style={styles.treadmillLogBtnIcon}>
-                <Camera size={20} color="#00E5FF" />
-              </View>
-              <View style={styles.treadmillLogBtnTextWrap}>
-                <Text style={styles.treadmillLogBtnTitle}>Log Treadmill Run</Text>
-                <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
-              </View>
-            </View>
-            <View style={styles.treadmillLogBtnXp}>
-              <Zap size={10} color="#BFFF00" fill="#BFFF00" />
-              <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-
         {runState.isRunning ? (
           <View style={styles.runningControls}>
             <Pressable
@@ -843,6 +816,29 @@ export default function RunScreen() {
               </View>
             </Animated.View>
           </Pressable>
+        )}
+
+        {!runState.isRunning && (
+          <TouchableOpacity
+            style={styles.treadmillLogBtn}
+            onPress={handleTreadmillCapture}
+            activeOpacity={0.7}
+            testID="treadmill-log-btn"
+          >
+            <View style={styles.treadmillLogBtnLeft}>
+              <View style={styles.treadmillLogBtnIcon}>
+                <Camera size={20} color="#00E5FF" />
+              </View>
+              <View style={styles.treadmillLogBtnTextWrap}>
+                <Text style={styles.treadmillLogBtnTitle}>Log Treadmill Run</Text>
+                <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
+              </View>
+            </View>
+            <View style={styles.treadmillLogBtnXp}>
+              <Zap size={10} color="#BFFF00" fill="#BFFF00" />
+              <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
+            </View>
+          </TouchableOpacity>
         )}
 
         <RunHistorySection
