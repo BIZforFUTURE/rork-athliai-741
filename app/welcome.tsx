@@ -239,31 +239,31 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Your AI Fitness Companion',
     description: 'Track runs, workouts, and nutrition with intelligent insights that adapt to your goals.',
     icon: null,
-    gradient: ['#FFFFFF', '#FFFFFF'],
+    gradient: ['#0D0F13', '#111827'],
   },
   {
     id: 2,
     title: 'Track Everything',
     subtitle: 'Runs • Workouts • Nutrition',
     description: 'Monitor your complete fitness journey in one place. Every rep, every mile, every meal counts.',
-    icon: <Activity size={80} color="#000000" />,
-    gradient: ['#FFFFFF', '#FFFFFF'],
+    icon: <Activity size={80} color="#00ADB5" />,
+    gradient: ['#0D0F13', '#111827'],
   },
   {
     id: 3,
     title: 'Personalized Plans',
     subtitle: 'Built for You',
     description: 'AI-generated workout and nutrition plans that match your fitness level, goals, and lifestyle.',
-    icon: <Dumbbell size={80} color="#000000" />,
-    gradient: ['#FFFFFF', '#FFFFFF'],
+    icon: <Dumbbell size={80} color="#00ADB5" />,
+    gradient: ['#0D0F13', '#111827'],
   },
   {
     id: 4,
     title: 'Stay Consistent',
     subtitle: 'Build Lasting Habits',
     description: 'Smart reminders and streak tracking keep you motivated and on track every single day.',
-    icon: <Bell size={80} color="#000000" />,
-    gradient: ['#FFFFFF', '#FFFFFF'],
+    icon: <Bell size={80} color="#00ADB5" />,
+    gradient: ['#0D0F13', '#111827'],
   },
 ];
 
@@ -1036,15 +1036,15 @@ Format as JSON:
         : ((currentGymStep + 1) / (gymQuestions.length + 2)) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0F13' }]}>
         <LinearGradient
-          colors={['#FFFFFF', '#FFFFFF']}
+          colors={['#0D0F13', '#111827', '#0D0F13']}
           style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
         >
           <TouchableOpacity style={styles.skipButton} onPress={handleSkipGym}>
-            <Text style={[styles.skipText, { color: '#000000' }]}>Skip</Text>
+            <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
 
           <KeyboardAvoidingView
@@ -1062,16 +1062,16 @@ Format as JSON:
             </View>
 
             <View style={styles.iconContainer}>
-              <Dumbbell size={80} color="#000000" />
+              <Dumbbell size={80} color="#00ADB5" />
             </View>
 
             <View style={styles.contentContainer}>
-              <Text style={[styles.title, { color: '#000000' }]}>Create Your Gym Plan</Text>
-              <Text style={[styles.subtitle, { color: '#000000' }]}>Let&apos;s build your personalized workout routine</Text>
-              <Text style={[styles.description, { color: '#000000' }]}>
+              <Text style={styles.title}>Create Your Gym Plan</Text>
+              <Text style={styles.subtitle}>Let&apos;s build your personalized workout routine</Text>
+              <Text style={styles.description}>
                 Answer a few questions to get a custom 5-day training plan.
               </Text>
-              <Text style={[styles.quizStepIndicator, { color: '#000000' }]}>
+              <Text style={styles.quizStepIndicator}>
                 {showDaySelector ? 'Final Step' : currentGymStep >= gymQuestions.length ? 'Almost Done' : `Question ${currentGymStep + 1} of ${gymQuestions.length}`}
               </Text>
             </View>
@@ -1079,8 +1079,8 @@ Format as JSON:
             <View style={styles.quizContainer}>
               {showDaySelector ? (
                 <>
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>Select your workout days</Text>
-                  <Text style={[styles.daySelectionSubtext, { color: '#000000' }]}>
+                  <Text style={styles.quizQuestion}>Select your workout days</Text>
+                  <Text style={styles.daySelectionSubtext}>
                     Choose which days of the week you want to workout
                   </Text>
                   <View style={styles.daySelectionContainer}>
@@ -1133,13 +1133,13 @@ Format as JSON:
                     }}
                     disabled={selectedWorkoutDays.length === 0}
                   >
-                    <Text style={[styles.actionButtonText, { color: '#FFFFFF' }]}>Continue</Text>
+                    <Text style={styles.actionButtonText}>Continue</Text>
                     <ChevronRight size={20} color="#FFFFFF" style={styles.chevron} />
                   </TouchableOpacity>
                 </>
               ) : currentGymStep < gymQuestions.length && gymQuestions[currentGymStep] ? (
                 <>
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>
+                  <Text style={styles.quizQuestion}>
                     {gymQuestions[currentGymStep].question}
                   </Text>
                   <View style={styles.optionsContainer}>
@@ -1157,18 +1157,18 @@ Format as JSON:
                 </>
               ) : (
                 <>
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>
+                  <Text style={styles.quizQuestion}>
                     Any specific goals or limitations?
                   </Text>
-                  <Text style={[styles.goalsSubtext, { color: '#000000' }]}>
+                  <Text style={styles.goalsSubtext}>
                     Tell us about any specific areas you want to focus on or limitations we should know about.
                   </Text>
                   <TextInput
-                    style={[styles.goalsInput, { color: '#000000', borderColor: 'rgba(0,0,0,0.3)', backgroundColor: 'rgba(0,0,0,0.05)' }]}
+                    style={styles.goalsInput}
                     multiline
                     numberOfLines={4}
                     placeholder="e.g., I want to build bigger arms and chest, improve my posture..."
-                    placeholderTextColor="rgba(0,0,0,0.5)"
+                    placeholderTextColor="#6B7280"
                     value={customGoals}
                     onChangeText={setCustomGoals}
                     textAlignVertical="top"
@@ -1186,7 +1186,7 @@ Format as JSON:
                     }}
                     disabled={!customGoals.trim()}
                   >
-                    <Text style={[styles.actionButtonText, { color: '#FFFFFF' }]}>Create My Plan</Text>
+                    <Text style={styles.actionButtonText}>Create My Plan</Text>
                     <Target size={20} color="#FFFFFF" style={styles.chevron} />
                   </TouchableOpacity>
                 </>
@@ -1210,15 +1210,15 @@ Format as JSON:
     const nutritionProgressPercent = (currentNutritionStep / totalNutritionSteps) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0F13' }]}>
         <LinearGradient
-          colors={['#FFFFFF', '#FFFFFF']}
+          colors={['#0D0F13', '#111827', '#0D0F13']}
           style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
         >
           <TouchableOpacity style={styles.skipButton} onPress={handleSkipNutrition}>
-            <Text style={[styles.skipText, { color: '#000000' }]}>Skip</Text>
+            <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
 
           <KeyboardAvoidingView
@@ -1236,22 +1236,22 @@ Format as JSON:
             </View>
 
             <View style={styles.iconContainer}>
-              <Utensils size={80} color="#000000" />
+              <Utensils size={80} color="#00ADB5" />
             </View>
 
             <View style={styles.contentContainer}>
-              <Text style={[styles.title, { color: '#000000' }]}>Nutrition Goals</Text>
-              <Text style={[styles.subtitle, { color: '#000000' }]}>Let&apos;s personalize your nutrition plan</Text>
-              <Text style={[styles.description, { color: '#000000' }]}>
+              <Text style={styles.title}>Nutrition Goals</Text>
+              <Text style={styles.subtitle}>Let&apos;s personalize your nutrition plan</Text>
+              <Text style={styles.description}>
                 Tell us your goals so we can calculate your daily calorie and macro targets.
               </Text>
-              <Text style={[styles.quizStepIndicator, { color: '#000000' }]}>
+              <Text style={styles.quizStepIndicator}>
                 Step {currentNutritionStep + 1} of {totalNutritionSteps}
               </Text>
             </View>
 
             <View style={styles.quizContainer}>
-              <Text style={[styles.quizQuestion, { color: '#000000' }]}>What&apos;s your primary goal?</Text>
+              <Text style={styles.quizQuestion}>What&apos;s your primary goal?</Text>
               <View style={styles.optionsContainer}>
                 <TouchableOpacity
                   style={[
@@ -1323,11 +1323,11 @@ Format as JSON:
 
               {nutritionGoal && (
                 <>
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>Current weight (lbs)?</Text>
+                  <Text style={styles.quizQuestion}>Current weight (lbs)?</Text>
                   <TextInput
-                    style={[styles.weightInput, { color: '#000000', borderColor: 'rgba(0,0,0,0.3)', backgroundColor: 'rgba(0,0,0,0.05)' }]}
+                    style={styles.weightInput}
                     placeholder="e.g., 180"
-                    placeholderTextColor="rgba(0,0,0,0.5)"
+                    placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={currentWeight}
                     onChangeText={setCurrentWeight}
@@ -1337,29 +1337,29 @@ Format as JSON:
 
               {nutritionGoal && currentWeight && (
                 <>
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>Height</Text>
+                  <Text style={styles.quizQuestion}>Height</Text>
                   <View style={styles.heightInputContainer}>
                     <View style={styles.heightInputWrapper}>
                       <TextInput
-                        style={[styles.heightInput, { color: '#000000', borderColor: 'rgba(0,0,0,0.3)', backgroundColor: 'rgba(0,0,0,0.05)' }]}
+                        style={styles.heightInput}
                         placeholder="Feet"
-                        placeholderTextColor="rgba(0,0,0,0.5)"
+                        placeholderTextColor="#6B7280"
                         keyboardType="numeric"
                         value={heightFeet}
                         onChangeText={setHeightFeet}
                       />
-                      <Text style={[styles.heightLabel, { color: '#000000' }]}>ft</Text>
+                      <Text style={styles.heightLabel}>ft</Text>
                     </View>
                     <View style={styles.heightInputWrapper}>
                       <TextInput
-                        style={[styles.heightInput, { color: '#000000', borderColor: 'rgba(0,0,0,0.3)', backgroundColor: 'rgba(0,0,0,0.05)' }]}
+                        style={styles.heightInput}
                         placeholder="Inches"
-                        placeholderTextColor="rgba(0,0,0,0.5)"
+                        placeholderTextColor="#6B7280"
                         keyboardType="numeric"
                         value={heightInches}
                         onChangeText={setHeightInches}
                       />
-                      <Text style={[styles.heightLabel, { color: '#000000' }]}>in</Text>
+                      <Text style={styles.heightLabel}>in</Text>
                     </View>
                   </View>
                 </>
@@ -1367,17 +1367,17 @@ Format as JSON:
 
               {nutritionGoal && nutritionGoal !== 'maintain' && currentWeight && heightFeet && heightInches && (
                 <>
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>Target weight (lbs)?</Text>
+                  <Text style={styles.quizQuestion}>Target weight (lbs)?</Text>
                   <TextInput
-                    style={[styles.weightInput, { color: '#000000', borderColor: 'rgba(0,0,0,0.3)', backgroundColor: 'rgba(0,0,0,0.05)' }]}
+                    style={styles.weightInput}
                     placeholder="e.g., 165"
-                    placeholderTextColor="rgba(0,0,0,0.5)"
+                    placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={targetWeight}
                     onChangeText={setTargetWeight}
                   />
 
-                  <Text style={[styles.quizQuestion, { color: '#000000' }]}>When do you want to achieve this by?</Text>
+                  <Text style={styles.quizQuestion}>When do you want to achieve this by?</Text>
                   <TouchableOpacity
                     style={styles.datePickerButton}
                     onPress={() => {
@@ -1405,8 +1405,8 @@ Format as JSON:
                           setGoalEndDate(selectedDate);
                         }
                       }}
-                      textColor="#000000"
-                      themeVariant="light"
+                      textColor="#F9FAFB"
+                      themeVariant="dark"
                     />
                   )}
                 </>
@@ -1431,7 +1431,7 @@ Format as JSON:
                 (nutritionGoal !== 'maintain' && (!targetWeight || !goalEndDate))
               }
             >
-              <Text style={[styles.actionButtonText, { color: '#FFFFFF' }]}>Complete Setup</Text>
+              <Text style={styles.actionButtonText}>Complete Setup</Text>
               <Target size={20} color="#FFFFFF" style={styles.chevron} />
             </TouchableOpacity>
             </ScrollView>
@@ -1444,8 +1444,13 @@ Format as JSON:
   const _isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#FFFFFF' }]}>
-      <View style={styles.whiteBackground}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0F13' }]}>
+      <LinearGradient
+        colors={['#0D0F13', '#111827', '#0D0F13']}
+        style={styles.darkBackground}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      >
         <TouchableOpacity style={styles.skipButtonMain} onPress={handleSkip}>
           <Text style={styles.skipTextMain}>Skip</Text>
         </TouchableOpacity>
@@ -1454,12 +1459,11 @@ Format as JSON:
           contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(60, insets.bottom + 40) }]}
           showsVerticalScrollIndicator={false}
         >
-          {/* Icon */}
           <View style={styles.iconContainer}>
             {currentSlideData.id === 1 ? (
               <View style={styles.appNameContainer}>
-                <Text style={styles.appNameLargeBlack}>AthliAI</Text>
-                <View style={styles.underlineBlack} />
+                <Text style={styles.appNameLarge}>AthliAI</Text>
+                <View style={styles.underlineTeal} />
               </View>
             ) : currentSlideData.icon ? (
               <View style={styles.iconWrapper}>
@@ -1468,36 +1472,33 @@ Format as JSON:
             ) : null}
           </View>
 
-          {/* Content */}
           <View style={styles.contentContainer}>
-            <Text style={styles.titleBlack}>{currentSlideData.title}</Text>
-            <Text style={styles.subtitleBlack}>{currentSlideData.subtitle}</Text>
-            <Text style={styles.descriptionBlack}>{currentSlideData.description}</Text>
+            <Text style={styles.titleDark}>{currentSlideData.title}</Text>
+            <Text style={styles.subtitleDark}>{currentSlideData.subtitle}</Text>
+            <Text style={styles.descriptionDark}>{currentSlideData.description}</Text>
           </View>
 
-          {/* Pagination Dots */}
           <View style={styles.pagination}>
             {slides.map((slide, index) => (
               <View
                 key={slide.id}
                 style={[
-                  styles.dotBlack,
-                  index === currentSlide && styles.activeDotBlack,
+                  styles.dotDark,
+                  index === currentSlide && styles.activeDotDark,
                 ]}
               />
             ))}
           </View>
 
-          {/* Action Button */}
           <TouchableOpacity 
             style={[
-              styles.actionButtonBlack,
+              styles.actionButton,
               isRequestingPermissions && styles.actionButtonDisabled
             ]} 
             onPress={handleNext}
             disabled={isRequestingPermissions}
           >
-            <Text style={styles.actionButtonTextBlack}>
+            <Text style={styles.actionButtonText}>
               {isRequestingPermissions ? 'Requesting...' : 
                currentSlide === 3 ? 'Allow Notifications' :
                isLastSlide ? 'Get Started' : 'Next'}
@@ -1507,7 +1508,6 @@ Format as JSON:
             )}
           </TouchableOpacity>
           
-          {/* Skip notifications option */}
           {currentSlide === 3 && (
             <TouchableOpacity 
               style={styles.skipNotificationsButton} 
@@ -1518,11 +1518,11 @@ Format as JSON:
                 setCurrentSlide(currentSlide + 1);
               }}
             >
-              <Text style={styles.skipNotificationsTextBlack}>Skip for now</Text>
+              <Text style={styles.skipNotificationsText}>Skip for now</Text>
             </TouchableOpacity>
           )}
         </ScrollView>
-      </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -1546,7 +1546,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    color: '#FFFFFF',
+    color: '#9CA3AF',
     fontSize: 16,
     fontWeight: '500',
     opacity: 0.8,
@@ -1569,22 +1569,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: 'bold' as const,
+    textAlign: 'center' as const,
     marginBottom: 12,
-    color: '#FFFFFF',
+    color: '#F9FAFB',
   },
   subtitle: {
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     marginBottom: 20,
-    opacity: 0.9,
-    fontWeight: '500',
-    color: '#00E5FF',
+    fontWeight: '500' as const,
+    color: '#00ADB5',
   },
   description: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
@@ -1650,27 +1649,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: -2,
   },
-  appNameLargeBlack: {
-    fontSize: 72,
-    fontWeight: '900',
-    color: '#000000',
-    letterSpacing: -2,
-  },
-  underline: {
+  underlineTeal: {
     width: 120,
     height: 4,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#00ADB5',
     marginTop: 12,
+    borderRadius: 2,
   },
-  underlineBlack: {
-    width: 120,
-    height: 4,
-    backgroundColor: '#000000',
-    marginTop: 12,
-  },
-  whiteBackground: {
+  darkBackground: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   skipButtonMain: {
     position: 'absolute' as const,
@@ -1681,74 +1668,49 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipTextMain: {
-    color: '#000000',
+    color: '#9CA3AF',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500' as const,
     opacity: 0.8,
   },
   iconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  titleBlack: {
+  titleDark: {
     fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: 'bold' as const,
+    textAlign: 'center' as const,
     marginBottom: 12,
-    color: '#000000',
+    color: '#F9FAFB',
   },
-  subtitleBlack: {
+  subtitleDark: {
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     marginBottom: 20,
-    opacity: 0.9,
-    fontWeight: '500',
-    color: '#000000',
+    fontWeight: '500' as const,
+    color: '#00ADB5',
   },
-  descriptionBlack: {
+  descriptionDark: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
-    color: '#000000',
+    color: '#9CA3AF',
   },
-  dotBlack: {
+  dotDark: {
     width: 8,
     height: 8,
     borderRadius: 4,
     opacity: 0.3,
     marginHorizontal: 4,
-    backgroundColor: '#000000',
+    backgroundColor: '#9CA3AF',
   },
-  activeDotBlack: {
+  activeDotDark: {
     opacity: 1,
     width: 24,
-  },
-  actionButtonBlack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 30,
-    borderWidth: 1,
-    minWidth: 160,
-    justifyContent: 'center',
-    backgroundColor: '#000000',
-    borderColor: '#000000',
-  },
-  actionButtonTextBlack: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginRight: 8,
-    color: '#FFFFFF',
-  },
-  skipNotificationsTextBlack: {
-    fontSize: 16,
-    fontWeight: '500',
-    opacity: 0.7,
-    textAlign: 'center',
-    color: '#000000',
+    backgroundColor: '#00ADB5',
   },
   actionButtonDisabled: {
     opacity: 0.6,
@@ -1771,10 +1733,10 @@ const styles = StyleSheet.create({
   },
   quizQuestion: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: '#F9FAFB',
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: 'center' as const,
   },
   optionsContainer: {
     width: '100%',
@@ -2174,9 +2136,9 @@ const styles = StyleSheet.create({
   },
   quizStepIndicator: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     marginTop: 8,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     opacity: 0.7,
     color: '#6B7280',
   },
