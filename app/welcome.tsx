@@ -1348,8 +1348,8 @@ Format as JSON:
                       setShowDatePicker(true);
                     }}
                   >
-                    <Calendar size={20} color="#000000" />
-                    <Text style={[styles.datePickerButtonText, { color: '#000000' }]}>
+                    <Calendar size={20} color="#F9FAFB" />
+                    <Text style={styles.datePickerButtonText}>
                       {goalEndDate ? goalEndDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Select End Date'}
                     </Text>
                   </TouchableOpacity>
