@@ -14,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check, X, Crown, Zap, TrendingUp, Shield } from 'lucide-react-native';
+import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check } from 'lucide-react-native';
 import { useApp } from '@/providers/AppProvider';
 import { getStartingLevelFromQuiz } from '@/constants/xp';
 import { useNotifications } from '@/providers/NotificationProvider';
@@ -274,7 +274,7 @@ export default function WelcomeScreen() {
   const [showNutritionQuiz, setShowNutritionQuiz] = useState(false);
   const [showGymQuiz, setShowGymQuiz] = useState(false);
 
-  const [showPaywall, setShowPaywall] = useState(false);
+
   const [nutritionGoal, setNutritionGoal] = useState<'lose' | 'maintain' | 'gain' | null>(null);
   const [currentWeight, setCurrentWeight] = useState('');
   const [heightFeet, setHeightFeet] = useState('');
@@ -371,7 +371,8 @@ export default function WelcomeScreen() {
     });
 
     setShowNutritionQuiz(false);
-    setShowPaywall(true);
+    router.push('/paywall');
+    handleGetStarted();
   };
 
   const handleSkipNutrition = () => {
@@ -380,7 +381,8 @@ export default function WelcomeScreen() {
     }
     updateNutrition({ quizCompleted: true });
     setShowNutritionQuiz(false);
-    setShowPaywall(true);
+    router.push('/paywall');
+    handleGetStarted();
   };
 
   const handleSkipGym = () => {
@@ -869,130 +871,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   const currentSlideData = slides[currentSlide] || slides[0];
   const isLastSlide = currentSlide === slides.length - 1;
 
-  if (showPaywall) {
-    const PAYWALL_FEATURES = [
-      { icon: Dumbbell, title: 'AI Workout Plans', desc: 'Personalized routines built for your goals' },
-      { icon: TrendingUp, title: 'Advanced Analytics', desc: 'Deep insights into your progress over time' },
-      { icon: Zap, title: 'Smart Nutrition', desc: 'AI-powered meal tracking and suggestions' },
-      { icon: Shield, title: 'Unlimited Everything', desc: 'No limits on workouts, runs, or logs' },
-    ];
 
-    return (
-      <View style={styles.paywallContainer}>
-        <LinearGradient
-          colors={['#0D0F13', '#111827', '#0D0F13']}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        />
-
-        <TouchableOpacity
-          style={[styles.paywallCloseBtn, { top: insets.top + 12 }]}
-          onPress={() => {
-            if (Platform.OS !== 'web') {
-              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }
-            handleGetStarted();
-          }}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        >
-          <X size={22} color="#9CA3AF" />
-        </TouchableOpacity>
-
-        <ScrollView
-          contentContainerStyle={[styles.paywallScrollContent, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 24 }]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.paywallCrownWrap}>
-            <LinearGradient
-              colors={['#00ADB5', '#0891B2']}
-              style={styles.paywallCrownBadge}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Crown size={32} color="#FFF" />
-            </LinearGradient>
-          </View>
-
-          <Text style={styles.paywallTitle}>Unlock AthliAI Premium</Text>
-          <Text style={styles.paywallSubtitle}>Train smarter with AI-powered insights</Text>
-
-          <View style={styles.paywallFeatures}>
-            {PAYWALL_FEATURES.map((feature, index) => (
-              <View key={index} style={styles.paywallFeatureRow}>
-                <View style={styles.paywallFeatureIcon}>
-                  <feature.icon size={20} color="#00ADB5" />
-                </View>
-                <View style={styles.paywallFeatureText}>
-                  <Text style={styles.paywallFeatureTitle}>{feature.title}</Text>
-                  <Text style={styles.paywallFeatureDesc}>{feature.desc}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.paywallPriceCard}>
-            <LinearGradient
-              colors={['#1F2937', '#111827']}
-              style={styles.paywallPriceGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-            >
-              <View style={styles.paywallPriceRow}>
-                <View>
-                  <Text style={styles.paywallPlanName}>Annual Plan</Text>
-                  <Text style={styles.paywallTrialLabel}>3-day free trial</Text>
-                </View>
-                <View style={styles.paywallPriceRight}>
-                  <Text style={styles.paywallPriceAmount}>$9.99</Text>
-                  <Text style={styles.paywallPricePeriod}>/year</Text>
-                </View>
-              </View>
-            </LinearGradient>
-          </View>
-
-          <TouchableOpacity
-            style={styles.paywallCTA}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              }
-              router.push('/paywall');
-            }}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={['#00ADB5', '#0891B2']}
-              style={styles.paywallCTAGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text style={styles.paywallCTAText}>Start Free Trial</Text>
-              <ChevronRight size={20} color="#FFF" />
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.paywallSkipBtn}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              handleGetStarted();
-            }}
-          >
-            <Text style={styles.paywallSkipText}>Continue to App</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.paywallLegal}>
-            Payment will be charged to your account after the 3-day free trial.
-            Subscription automatically renews unless canceled at least 24 hours
-            before the end of the current period.
-          </Text>
-        </ScrollView>
-      </View>
-    );
-  }
 
   if (isGeneratingPlan) {
     return <LoadingScreen insets={insets} progress={generationProgress} />;
