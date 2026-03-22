@@ -48,7 +48,7 @@ function LevelUpOverlay() {
 function RootLayoutNav() {
   return (
     <>
-      <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#0D0F13" } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
