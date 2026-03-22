@@ -8,6 +8,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 import Purchases from "react-native-purchases";
 import { router } from "expo-router";
@@ -142,12 +143,18 @@ export default function PaywallScreen() {
         <X size={22} color={colors.text.secondary} />
       </TouchableOpacity>
 
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 24 },
+          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
         ]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.crownContainer}>
           <LinearGradient
@@ -260,6 +267,7 @@ export default function PaywallScreen() {
           device settings.
         </Text>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -285,6 +293,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.08)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  flex: {
+    flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 24,
