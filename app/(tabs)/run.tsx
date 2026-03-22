@@ -1202,7 +1202,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 110,
+    paddingBottom: 160,
     gap: 10,
   },
   timerCard: {
