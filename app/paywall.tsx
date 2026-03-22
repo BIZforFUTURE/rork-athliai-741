@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Platform,
   ScrollView,
-  TextInput,
   Alert,
 } from "react-native";
 import Purchases from "react-native-purchases";
@@ -22,7 +21,6 @@ import {
   TrendingUp,
   Shield,
   ChevronRight,
-  Tag,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -57,9 +55,7 @@ export default function PaywallScreen() {
     useRevenueCat();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const [showPromoInput, setShowPromoInput] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
-  const [isRedeeming, setIsRedeeming] = useState(false);
+
 
   const annualPackage = currentOffering?.availablePackages?.[0];
   const priceString = annualPackage?.product?.priceString ?? "$9.99";
@@ -100,41 +96,14 @@ export default function PaywallScreen() {
   };
 
   const handleRedeemPromo = async () => {
-    const code = promoCode.trim();
-    if (!code) {
-      Alert.alert("Invalid Code", "Please enter a promo code.");
-      return;
-    }
-    if (isRedeeming) return;
-    setIsRedeeming(true);
-    if (Platform.OS !== "web") {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    try {
-      if (Platform.OS === "web") {
-        Alert.alert("Not Supported", "Promo codes can only be redeemed on a mobile device.");
-        return;
-      }
-      const _info = await Purchases.getCustomerInfo();
-      // Try applying the promo code as a promotional offer
-      // RevenueCat handles promo codes via the store's native redemption
-      if (Platform.OS === "ios") {
-        // On iOS, present the code redemption sheet
+    if (Platform.OS === "ios") {
+      try {
         await (Purchases as any).presentCodeRedemptionSheet?.();
-      } else {
-        // On Android, promo codes are redeemed through Google Play
-        Alert.alert(
-          "Redeem Code",
-          "Please redeem your promo code through the Google Play Store."
-        );
+      } catch (error: any) {
+        console.error("[Paywall] Promo code error:", error);
       }
-      setPromoCode("");
-      setShowPromoInput(false);
-    } catch (error: any) {
-      console.error("[Paywall] Promo code error:", error);
-      Alert.alert("Error", "Failed to redeem promo code. Please try again.");
-    } finally {
-      setIsRedeeming(false);
+    } else if (Platform.OS === "android") {
+      Alert.alert("Redeem Code", "Please redeem your promo code through the Google Play Store.");
     }
   };
 
@@ -270,54 +239,19 @@ export default function PaywallScreen() {
             )}
           </TouchableOpacity>
 
-          <View style={styles.linkDivider} />
-
-          <TouchableOpacity
-            style={styles.promoButton}
-            onPress={() => {
-              if (Platform.OS !== "web") {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              setShowPromoInput(!showPromoInput);
-            }}
-            testID="paywall-promo-toggle"
-          >
-            <Tag size={14} color={colors.text.secondary} />
-            <Text style={styles.promoToggleText}>Promo Code</Text>
-          </TouchableOpacity>
-        </View>
-
-        {showPromoInput && (
-          <View style={styles.promoContainer}>
-            <View style={styles.promoInputRow}>
-              <TextInput
-                style={styles.promoInput}
-                value={promoCode}
-                onChangeText={setPromoCode}
-                placeholder="Enter promo code"
-                placeholderTextColor={colors.text.tertiary}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                testID="paywall-promo-input"
-              />
+          {Platform.OS !== "web" && (
+            <>
+              <View style={styles.linkDivider} />
               <TouchableOpacity
-                style={[
-                  styles.promoRedeemButton,
-                  !promoCode.trim() && styles.promoRedeemButtonDisabled,
-                ]}
+                style={styles.restoreButton}
                 onPress={handleRedeemPromo}
-                disabled={isRedeeming || !promoCode.trim()}
-                testID="paywall-promo-redeem"
+                testID="paywall-promo"
               >
-                {isRedeeming ? (
-                  <ActivityIndicator size="small" color="#FFF" />
-                ) : (
-                  <Text style={styles.promoRedeemText}>Redeem</Text>
-                )}
+                <Text style={styles.restoreText}>Redeem Code</Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        )}
+            </>
+          )}
+        </View>
 
         <Text style={styles.legalText}>
           Payment will be charged to your account after the 3-day free trial.
@@ -490,54 +424,6 @@ const styles = StyleSheet.create({
     width: 1,
     height: 14,
     backgroundColor: "rgba(255,255,255,0.15)",
-  },
-  promoButton: {
-    flexDirection: "row" as const,
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    gap: 5,
-  },
-  promoToggleText: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
-  promoContainer: {
-    width: "100%",
-    marginBottom: 16,
-  },
-  promoInputRow: {
-    flexDirection: "row" as const,
-    gap: 10,
-    alignItems: "center",
-  },
-  promoInput: {
-    flex: 1,
-    height: 46,
-    backgroundColor: "rgba(255,255,255,0.07)",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 15,
-    color: colors.text.primary,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    letterSpacing: 1,
-  },
-  promoRedeemButton: {
-    height: 46,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: colors.accent.teal,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  promoRedeemButtonDisabled: {
-    opacity: 0.4,
-  },
-  promoRedeemText: {
-    fontSize: 15,
-    fontWeight: "600" as const,
-    color: "#FFF",
   },
   legalText: {
     fontSize: 11,
