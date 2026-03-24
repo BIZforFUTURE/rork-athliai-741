@@ -23,6 +23,7 @@ import {
   Timer,
   Route,
   Crown,
+  Globe,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
@@ -517,7 +518,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const greeting = useGreeting();
   const { xpInfo } = useApp();
-  const { t } = useLanguage();
+  const { t, setLanguage, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = useCallback(() => {
@@ -557,7 +558,14 @@ export default function DashboardScreen() {
         <TodayNutrition />
         <WeeklyStats />
         <XPFeed />
-        <View style={{ height: 40 }} />
+        <Pressable
+          onPress={() => setLanguage(isSpanish ? 'en' : 'es')}
+          style={styles.langToggle}
+        >
+          <Globe size={13} color="#374151" />
+          <Text style={styles.langToggleText}>{isSpanish ? 'English' : 'Español'}</Text>
+        </Pressable>
+        <View style={{ height: 20 }} />
       </ScrollView>
     </View>
   );
@@ -613,6 +621,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 110,
     gap: 12,
+  },
+  langToggle: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    alignSelf: "center" as const,
+    marginTop: 4,
+  },
+  langToggleText: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#374151",
+    letterSpacing: 0.2,
   },
 });
 
