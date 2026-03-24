@@ -300,11 +300,18 @@ export default function NutritionScreen() {
   const calculateNutritionGoals = useCallback((answers: typeof quizAnswers) => {
     console.log('Quiz answers received:', JSON.stringify(answers));
     const a = answers;
-    const weightPounds = parseFloat(a.weight);
-    const weightKg = weightPounds * 0.453592;
-    const heightFeet = parseFloat(a.heightFeet);
-    const heightInches = parseFloat(a.heightInches);
-    const heightCm = (heightFeet * 30.48) + (heightInches * 2.54);
+    let weightKg: number;
+    let heightCm: number;
+    if (isSpanish) {
+      weightKg = parseFloat(a.weight);
+      heightCm = parseFloat(a.heightFeet) * 100 + parseFloat(a.heightInches || '0');
+    } else {
+      const weightPounds = parseFloat(a.weight);
+      weightKg = weightPounds * 0.453592;
+      const heightFeet = parseFloat(a.heightFeet);
+      const heightInches = parseFloat(a.heightInches);
+      heightCm = (heightFeet * 30.48) + (heightInches * 2.54);
+    }
     const age = parseFloat(a.age);
     const gender = a.gender;
     const activity = a.activityLevel;
@@ -357,7 +364,7 @@ export default function NutritionScreen() {
         `Your personalized nutrition goals:\n\nCalories: ${tdee} kcal\nProtein: ${proteinGoal}g\nCarbs: ${carbsGoal}g\nFat: ${fatGoal}g\n\nYou can adjust these anytime from the settings icon.`
       );
     }, 300);
-  }, [updateNutrition]);
+  }, [updateNutrition, isSpanish]);
 
   const _analyzeQuickMeal = async (mealName: string, targetDate: Date) => {
     setIsAnalyzing(true);
@@ -713,7 +720,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               const totalFat = weeklyFoods.reduce((sum, entry) => sum + entry.fat, 0);
               const avgCaloriesPerDay = Math.round(totalCalories / 7);
               const foodList = weeklyFoods.map(f => `${f.name} (${f.calories} cal, ${f.protein}g P, ${f.carbs}g C, ${f.fat}g F)`).join(', ');
-              const langInstruction = isSpanish ? 'IMPORTANT: Respond entirely in Spanish.' : '';
+              const langInstruction = isSpanish ? 'IMPORTANT: Respond entirely in Spanish. Use metric units (kg, cm, km) instead of imperial units (lbs, feet, miles).' : '';
               const prompt = `You are a professional nutritionist analyzing a week of food intake. ${langInstruction} Here's the data:\n\nTotal meals logged: ${weeklyFoods.length}\nTotal calories: ${totalCalories}\nAverage calories per day: ${avgCaloriesPerDay}\nTotal protein: ${totalProtein}g\nTotal carbs: ${totalCarbs}g\nTotal fat: ${totalFat}g\n\nUser's goals:\nDaily calorie goal: ${nutrition.calorieGoal}\nDaily protein goal: ${nutrition.proteinGoal}g\nDaily carbs goal: ${nutrition.carbsGoal}g\nDaily fat goal: ${nutrition.fatGoal}g\n\nFoods eaten this week: ${foodList}\n\nProvide a comprehensive weekly nutrition review with:\n1. Overall assessment\n2. How well they're meeting their goals\n3. Nutritional balance analysis\n4. Specific recommendations\n5. Positive reinforcement\n6. Suggestions for foods to add or reduce\n\nBe encouraging, specific, and actionable. Keep it under 400 words.`;
               const response = await callOpenAI(prompt);
               setWeeklyReviewData(response);
@@ -1004,8 +1011,14 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 
                 {currentQuizQuestion.type === "height" ? (
                   <View style={styles.heightInputContainer}>
-                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
-                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
+                    {isSpanish ? (
+                      <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="170 cm" placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text, heightInches: '0' }))} />
+                    ) : (
+                      <>
+                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
+                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
+                      </>
+                    )}
                   </View>
                 ) : currentQuizQuestion.type === "number" ? (
                   <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />

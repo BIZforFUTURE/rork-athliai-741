@@ -51,6 +51,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
 import { RANKS, XPSource, RANK_TRANSLATION_KEYS } from "@/constants/xp";
 import { useLanguage } from "@/providers/LanguageProvider";
+import { lbsToKg, formatHeightMetric } from "@/utils/metricConversions";
 
 interface WeightEntry {
   date: string;
@@ -257,7 +258,7 @@ function RecentXPCard({ t }: { t: (key: any, params?: Record<string, string | nu
   );
 }
 
-function WeightGoalCard({ onAddWeight, t }: { onAddWeight: () => void; t: (key: any, params?: Record<string, string | number>) => string }) {
+function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void; t: (key: any, params?: Record<string, string | number>) => string; isSpanish: boolean }) {
   const { personalStats, getWeightHistory } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -321,12 +322,12 @@ function WeightGoalCard({ onAddWeight, t }: { onAddWeight: () => void; t: (key: 
         <View style={goalStyles.statsRow}>
           <View style={goalStyles.statItem}>
             <Text style={goalStyles.statLabel}>{t('stats_current')}</Text>
-            <Text style={goalStyles.statValue}>{currentWeight}<Text style={goalStyles.statUnit}> lbs</Text></Text>
+            <Text style={goalStyles.statValue}>{isSpanish ? lbsToKg(currentWeight) : currentWeight}<Text style={goalStyles.statUnit}> {isSpanish ? 'kg' : 'lbs'}</Text></Text>
           </View>
           <View style={goalStyles.divider} />
           <View style={goalStyles.statItem}>
             <Text style={goalStyles.statLabel}>{t('stats_target')}</Text>
-            <Text style={goalStyles.statValue}>{targetWeight}<Text style={goalStyles.statUnit}> lbs</Text></Text>
+            <Text style={goalStyles.statValue}>{isSpanish ? lbsToKg(targetWeight) : targetWeight}<Text style={goalStyles.statUnit}> {isSpanish ? 'kg' : 'lbs'}</Text></Text>
           </View>
           <View style={goalStyles.divider} />
           <View style={goalStyles.statItem}>
@@ -338,7 +339,7 @@ function WeightGoalCard({ onAddWeight, t }: { onAddWeight: () => void; t: (key: 
                 <TrendingDown size={12} color={remaining < 0 ? "#10B981" : "#EF4444"} />
               )}
               <Text style={[goalStyles.statValue, { color: Math.abs(remaining) < 5 ? "#10B981" : "#D1D5DB" }]}>
-                {Math.abs(remaining).toFixed(1)}<Text style={goalStyles.statUnit}> lbs</Text>
+                {isSpanish ? lbsToKg(Math.abs(remaining)).toFixed(1) : Math.abs(remaining).toFixed(1)}<Text style={goalStyles.statUnit}> {isSpanish ? 'kg' : 'lbs'}</Text>
               </Text>
             </View>
           </View>
@@ -396,7 +397,7 @@ function WeightGoalCard({ onAddWeight, t }: { onAddWeight: () => void; t: (key: 
   );
 }
 
-function PhysicalStatsCard({ onEdit, t }: { onEdit: () => void; t: (key: any, params?: Record<string, string | number>) => string }) {
+function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (key: any, params?: Record<string, string | number>) => string; isSpanish: boolean }) {
   const { personalStats } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -431,13 +432,13 @@ function PhysicalStatsCard({ onEdit, t }: { onEdit: () => void; t: (key: any, pa
     const result = [
       {
         icon: <Ruler size={16} color="#00ADB5" />,
-        value: (() => { const { feet, inches } = inchesToFeetAndInches(personalStats.height!); return `${feet}'${inches}"`; })(),
+        value: isSpanish ? formatHeightMetric(personalStats.height!) : (() => { const { feet, inches } = inchesToFeetAndInches(personalStats.height!); return `${feet}'${inches}"`; })(),
         label: t('stats_height'),
         color: "#00ADB5",
       },
       {
         icon: <Scale size={16} color="#10B981" />,
-        value: `${personalStats.weight} lbs`,
+        value: isSpanish ? `${lbsToKg(personalStats.weight!)} kg` : `${personalStats.weight} lbs`,
         label: t('stats_weight'),
         color: "#10B981",
       },
@@ -454,13 +455,13 @@ function PhysicalStatsCard({ onEdit, t }: { onEdit: () => void; t: (key: any, pa
     if (personalStats.targetWeight) {
       result.push({
         icon: <Target size={16} color="#F59E0B" />,
-        value: `${personalStats.targetWeight} lbs`,
+        value: isSpanish ? `${lbsToKg(personalStats.targetWeight!)} kg` : `${personalStats.targetWeight} lbs`,
         label: t('stats_target'),
         color: "#F59E0B",
       });
     }
     return result;
-  }, [personalStats, bmi, hasStats, t]);
+  }, [personalStats, bmi, hasStats, t, isSpanish]);
 
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
@@ -514,13 +515,14 @@ function PhysicalStatsCard({ onEdit, t }: { onEdit: () => void; t: (key: any, pa
   );
 }
 
-function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selectedPeriod, setSelectedPeriod, t }: {
+function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selectedPeriod, setSelectedPeriod, t, isSpanish }: {
   onAddWeight: () => void;
   onEditWeight: (entry: WeightEntry) => void;
   onDeleteWeight: (entry: WeightEntry) => void;
   selectedPeriod: StatPeriod;
   setSelectedPeriod: (p: StatPeriod) => void;
   t: (key: any, params?: Record<string, string | number>) => string;
+  isSpanish: boolean;
 }) {
   const { personalStats, getWeightHistory } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
@@ -604,7 +606,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
           <Text style={wpStyles.emptyTextSub}>{t('stats_add_more')}</Text>
           <View style={wpStyles.singleEntry}>
             <Text style={wpStyles.singleDate}>{new Date(filteredHistory[0].date + 'T00:00:00').toLocaleDateString()}</Text>
-            <Text style={wpStyles.singleWeight}>{filteredHistory[0].weight} lbs</Text>
+            <Text style={wpStyles.singleWeight}>{isSpanish ? lbsToKg(filteredHistory[0].weight) : filteredHistory[0].weight} {isSpanish ? 'kg' : 'lbs'}</Text>
           </View>
         </View>
       )}
@@ -657,7 +659,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
               <View key={index} style={wpStyles.historyRow}>
                 <Text style={wpStyles.historyDate}>{new Date(entry.date + 'T00:00:00').toLocaleDateString()}</Text>
                 <View style={wpStyles.historyActions}>
-                  <Text style={wpStyles.historyWeight}>{entry.weight} lbs</Text>
+                  <Text style={wpStyles.historyWeight}>{isSpanish ? lbsToKg(entry.weight) : entry.weight} {isSpanish ? 'kg' : 'lbs'}</Text>
                   <TouchableOpacity
                     onPress={() => onEditWeight(entry)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -682,7 +684,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
   );
 }
 
-function FitnessStatsCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
+function FitnessStatsCard({ t, isSpanish }: { t: (key: any, params?: Record<string, string | number>) => string; isSpanish: boolean }) {
   const { recentRuns, weeklyRuns } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -694,8 +696,8 @@ function FitnessStatsCard({ t }: { t: (key: any, params?: Record<string, string 
   const currentLifetimeMiles = recentRuns.reduce((sum, run) => sum + run.distance, 0);
 
   const items = [
-    { value: currentWeeklyMiles.toFixed(1), unit: "mi", label: t('stats_this_week'), color: "#00E5FF", icon: <Footprints size={14} color="#00E5FF" /> },
-    { value: currentLifetimeMiles.toFixed(1), unit: "mi", label: t('stats_all_time'), color: "#FF6B35", icon: <TrendingUp size={14} color="#FF6B35" /> },
+    { value: isSpanish ? (currentWeeklyMiles * 1.60934).toFixed(1) : currentWeeklyMiles.toFixed(1), unit: isSpanish ? "km" : "mi", label: t('stats_this_week'), color: "#00E5FF", icon: <Footprints size={14} color="#00E5FF" /> },
+    { value: isSpanish ? (currentLifetimeMiles * 1.60934).toFixed(1) : currentLifetimeMiles.toFixed(1), unit: isSpanish ? "km" : "mi", label: t('stats_all_time'), color: "#FF6B35", icon: <TrendingUp size={14} color="#FF6B35" /> },
     { value: `${weeklyRuns.length}`, unit: "", label: t('stats_runs_wk'), color: "#BFFF00", icon: <Activity size={14} color="#BFFF00" /> },
     { value: `${recentRuns.length}`, unit: "", label: t('stats_total_runs'), color: "#F59E0B", icon: <Target size={14} color="#F59E0B" /> },
   ];
@@ -804,7 +806,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
 
 export default function PersonalStatsScreen() {
   const { personalStats, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, exportAllData, importAllData, recentRuns, foodHistory, workoutLogs, isLoading: appLoading } = useApp();
-  const { t } = useLanguage();
+  const { t, isSpanish } = useLanguage();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
   const [activeTab, setActiveTab] = useState<StatsTab>('progress');
@@ -846,31 +848,54 @@ export default function PersonalStatsScreen() {
   useEffect(() => {
     if (personalStats) {
       if (personalStats.height) {
-        const { feet, inches } = inchesToFeetAndInches(personalStats.height);
-        setTempHeightFeet(feet.toString());
-        setTempHeightInches(inches.toString());
+        if (isSpanish) {
+          const cm = Math.round(personalStats.height * 2.54);
+          setTempHeightFeet(cm.toString());
+          setTempHeightInches('0');
+        } else {
+          const { feet, inches } = inchesToFeetAndInches(personalStats.height);
+          setTempHeightFeet(feet.toString());
+          setTempHeightInches(inches.toString());
+        }
       }
-      setTempWeight(personalStats.weight?.toString() || '');
-      setTempTargetWeight(personalStats.targetWeight?.toString() || '');
+      if (isSpanish) {
+        setTempWeight(personalStats.weight ? lbsToKg(personalStats.weight).toString() : '');
+        setTempTargetWeight(personalStats.targetWeight ? lbsToKg(personalStats.targetWeight).toString() : '');
+      } else {
+        setTempWeight(personalStats.weight?.toString() || '');
+        setTempTargetWeight(personalStats.targetWeight?.toString() || '');
+      }
       setTempAge(personalStats.age?.toString() || '');
       setTempGender(personalStats.gender || 'male');
     }
-  }, [personalStats]);
+  }, [personalStats, isSpanish]);
 
   const handleSaveStats = () => {
     if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const feet = parseInt(tempHeightFeet);
-    const inches = parseInt(tempHeightInches);
-    const weight = parseFloat(tempWeight);
-    const targetWeight = tempTargetWeight ? parseFloat(tempTargetWeight) : undefined;
     const age = tempAge ? parseInt(tempAge) : undefined;
 
-    if (!feet || !weight || inches < 0) return;
-    if (feet < 3 || feet > 8 || inches < 0 || inches >= 12) return;
-    if (weight < 50 || weight > 500) return;
-
-    const totalInches = feetAndInchesToInches(feet, inches);
-    updatePersonalStats({ height: totalInches, weight, targetWeight, age, gender: tempGender });
+    if (isSpanish) {
+      const cm = parseFloat(tempHeightFeet);
+      const weightKg = parseFloat(tempWeight);
+      const targetWeightKg = tempTargetWeight ? parseFloat(tempTargetWeight) : undefined;
+      if (!cm || !weightKg) return;
+      if (cm < 100 || cm > 250) return;
+      if (weightKg < 25 || weightKg > 250) return;
+      const totalInches = Math.round(cm / 2.54);
+      const weightLbs = Math.round(weightKg / 0.453592 * 10) / 10;
+      const targetWeightLbs = targetWeightKg ? Math.round(targetWeightKg / 0.453592 * 10) / 10 : undefined;
+      updatePersonalStats({ height: totalInches, weight: weightLbs, targetWeight: targetWeightLbs, age, gender: tempGender });
+    } else {
+      const feet = parseInt(tempHeightFeet);
+      const inches = parseInt(tempHeightInches);
+      const weight = parseFloat(tempWeight);
+      const targetWeight = tempTargetWeight ? parseFloat(tempTargetWeight) : undefined;
+      if (!feet || !weight || inches < 0) return;
+      if (feet < 3 || feet > 8 || inches < 0 || inches >= 12) return;
+      if (weight < 50 || weight > 500) return;
+      const totalInches = feetAndInchesToInches(feet, inches);
+      updatePersonalStats({ height: totalInches, weight, targetWeight, age, gender: tempGender });
+    }
     setShowStatsModal(false);
   };
 
@@ -883,23 +908,33 @@ export default function PersonalStatsScreen() {
 
   const handleAddWeight = () => {
     if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const weight = parseFloat(newWeight);
-    if (!weight || weight < 50 || weight > 500) return;
-    addWeightEntry({ weight, date: getLocalDateString() });
+    const inputWeight = parseFloat(newWeight);
+    if (!inputWeight) return;
+    if (isSpanish) {
+      if (inputWeight < 25 || inputWeight > 250) return;
+      const weightLbs = Math.round(inputWeight / 0.453592 * 10) / 10;
+      addWeightEntry({ weight: weightLbs, date: getLocalDateString() });
+    } else {
+      if (inputWeight < 50 || inputWeight > 500) return;
+      addWeightEntry({ weight: inputWeight, date: getLocalDateString() });
+    }
     setShowWeightModal(false);
     setNewWeight('');
   };
 
   const handleEditWeight = (entry: WeightEntry) => {
     setEditingWeightEntry(entry);
-    setEditWeight(entry.weight.toString());
+    setEditWeight(isSpanish ? lbsToKg(entry.weight).toString() : entry.weight.toString());
     setShowEditWeightModal(true);
   };
 
   const handleSaveEditWeight = () => {
     if (!editingWeightEntry) return;
-    const weight = parseFloat(editWeight);
-    if (!weight || weight < 50 || weight > 500) return;
+    const inputWeight = parseFloat(editWeight);
+    if (!inputWeight) return;
+    const weight = isSpanish ? Math.round(inputWeight / 0.453592 * 10) / 10 : inputWeight;
+    if (!isSpanish && (weight < 50 || weight > 500)) return;
+    if (isSpanish && (inputWeight < 25 || inputWeight > 250)) return;
     if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     updateWeightEntry(editingWeightEntry.date, weight);
     setShowEditWeightModal(false);
@@ -966,8 +1001,8 @@ export default function PersonalStatsScreen() {
 
   const handleDeleteWeight = (entry: WeightEntry) => {
     Alert.alert(
-      'Delete Weight Entry',
-      `Delete the entry for ${new Date(entry.date + 'T00:00:00').toLocaleDateString()} (${entry.weight} lbs)?`,
+      t('stats_delete_weight'),
+      `${t('stats_delete_weight_confirm', { date: new Date(entry.date + 'T00:00:00').toLocaleDateString(), weight: isSpanish ? String(lbsToKg(entry.weight)) : String(entry.weight) })}`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -1055,22 +1090,24 @@ export default function PersonalStatsScreen() {
               <Text style={modalStyles.sectionLabel}>{t('stats_height')}</Text>
               <View style={modalStyles.heightRow}>
                 <View style={modalStyles.heightField}>
-                  <TextInput style={modalStyles.input} placeholder="5" placeholderTextColor="#374151" value={tempHeightFeet} onChangeText={setTempHeightFeet} keyboardType="numeric" />
-                  <Text style={modalStyles.heightUnit}>ft</Text>
+                  <TextInput style={modalStyles.input} placeholder={isSpanish ? "170" : "5"} placeholderTextColor="#374151" value={tempHeightFeet} onChangeText={setTempHeightFeet} keyboardType="numeric" />
+                  <Text style={modalStyles.heightUnit}>{isSpanish ? 'cm' : 'ft'}</Text>
                 </View>
-                <View style={modalStyles.heightField}>
-                  <TextInput style={modalStyles.input} placeholder="10" placeholderTextColor="#374151" value={tempHeightInches} onChangeText={setTempHeightInches} keyboardType="numeric" />
-                  <Text style={modalStyles.heightUnit}>in</Text>
-                </View>
+                {!isSpanish && (
+                  <View style={modalStyles.heightField}>
+                    <TextInput style={modalStyles.input} placeholder="10" placeholderTextColor="#374151" value={tempHeightInches} onChangeText={setTempHeightInches} keyboardType="numeric" />
+                    <Text style={modalStyles.heightUnit}>in</Text>
+                  </View>
+                )}
               </View>
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_current_weight_lbs')}</Text>
-              <TextInput style={modalStyles.input} placeholder="150" placeholderTextColor="#374151" value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" />
+              <TextInput style={modalStyles.input} placeholder={isSpanish ? "70" : "150"} placeholderTextColor="#374151" value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_target_weight_lbs')}</Text>
-              <TextInput style={modalStyles.input} placeholder="140" placeholderTextColor="#374151" value={tempTargetWeight} onChangeText={setTempTargetWeight} keyboardType="numeric" />
+              <TextInput style={modalStyles.input} placeholder={isSpanish ? "65" : "140"} placeholderTextColor="#374151" value={tempTargetWeight} onChangeText={setTempTargetWeight} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_age')}</Text>
@@ -1206,13 +1243,13 @@ export default function PersonalStatsScreen() {
             <XPRankCard t={t} />
             <XPBreakdownCard t={t} />
             <RecentXPCard t={t} />
-            <FitnessStatsCard t={t} />
+            <FitnessStatsCard t={t} isSpanish={isSpanish} />
           </>
         ) : (
           <>
-            <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} />
-            <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} />
-            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} />
+            <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
+            <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
+            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} isSpanish={isSpanish} />
             <DataBackupCard
               onExport={handleExport}
               onImport={() => { setShowImportModal(true); setImportText(''); setImportStatus('idle'); setImportError(''); }}

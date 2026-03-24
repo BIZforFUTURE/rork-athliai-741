@@ -359,11 +359,22 @@ export default function WelcomeScreen() {
   };
 
   const calculateNutritionGoals = () => {
-    if (!nutritionGoal || !currentWeight || !heightFeet || !heightInches || (nutritionGoal !== 'maintain' && (!targetWeight || !goalEndDate))) return;
+    if (!nutritionGoal || !currentWeight || !heightFeet || (!isSpanish && !heightInches) || (nutritionGoal !== 'maintain' && (!targetWeight || !goalEndDate))) return;
 
-    const currentWeightNum = parseFloat(currentWeight);
-    const heightNum = (parseFloat(heightFeet) * 12) + parseFloat(heightInches);
-    const targetWeightNum = targetWeight ? parseFloat(targetWeight) : currentWeightNum;
+    let currentWeightNum: number;
+    let heightNum: number;
+    let targetWeightNum: number;
+    if (isSpanish) {
+      const weightKg = parseFloat(currentWeight);
+      currentWeightNum = Math.round(weightKg / 0.453592 * 10) / 10;
+      heightNum = Math.round(parseFloat(heightFeet) / 2.54);
+      const targetKg = targetWeight ? parseFloat(targetWeight) : weightKg;
+      targetWeightNum = Math.round(targetKg / 0.453592 * 10) / 10;
+    } else {
+      currentWeightNum = parseFloat(currentWeight);
+      heightNum = (parseFloat(heightFeet) * 12) + parseFloat(heightInches);
+      targetWeightNum = targetWeight ? parseFloat(targetWeight) : currentWeightNum;
+    }
     let calorieGoal = 2000;
     let proteinGoal = 150;
     let carbsGoal = 200;
@@ -1081,7 +1092,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
     let currentNutritionStep = 0;
     if (nutritionGoal) currentNutritionStep = 1;
     if (currentWeight) currentNutritionStep = 2;
-    if (heightFeet && heightInches) currentNutritionStep = 3;
+    if (isSpanish ? heightFeet : (heightFeet && heightInches)) currentNutritionStep = 3;
     if (nutritionGoal === 'maintain' || (targetWeight && goalEndDate)) currentNutritionStep = 4;
     
     const nutritionProgressPercent = (currentNutritionStep / totalNutritionSteps) * 100;
@@ -1203,7 +1214,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <Text style={styles.quizQuestion}>{t('nutrition_current_weight')}</Text>
                   <TextInput
                     style={styles.weightInput}
-                    placeholder={isSpanish ? 'ej., 180' : 'e.g., 180'}
+                    placeholder={isSpanish ? 'ej., 80 kg' : 'e.g., 180'}
                     placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={currentWeight}
@@ -1216,38 +1227,54 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                 <>
                   <Text style={styles.quizQuestion}>{t('nutrition_height')}</Text>
                   <View style={styles.heightInputContainer}>
-                    <View style={styles.heightInputWrapper}>
-                      <TextInput
-                        style={styles.heightInput}
-                        placeholder={isSpanish ? 'Pies' : 'Feet'}
-                        placeholderTextColor="#6B7280"
-                        keyboardType="numeric"
-                        value={heightFeet}
-                        onChangeText={setHeightFeet}
-                      />
-                      <Text style={styles.heightLabel}>ft</Text>
-                    </View>
-                    <View style={styles.heightInputWrapper}>
-                      <TextInput
-                        style={styles.heightInput}
-                        placeholder={isSpanish ? 'Pulgadas' : 'Inches'}
-                        placeholderTextColor="#6B7280"
-                        keyboardType="numeric"
-                        value={heightInches}
-                        onChangeText={setHeightInches}
-                      />
-                      <Text style={styles.heightLabel}>in</Text>
-                    </View>
+                    {isSpanish ? (
+                      <View style={styles.heightInputWrapper}>
+                        <TextInput
+                          style={styles.heightInput}
+                          placeholder="170"
+                          placeholderTextColor="#6B7280"
+                          keyboardType="numeric"
+                          value={heightFeet}
+                          onChangeText={(text) => { setHeightFeet(text); setHeightInches('0'); }}
+                        />
+                        <Text style={styles.heightLabel}>cm</Text>
+                      </View>
+                    ) : (
+                      <>
+                        <View style={styles.heightInputWrapper}>
+                          <TextInput
+                            style={styles.heightInput}
+                            placeholder="Feet"
+                            placeholderTextColor="#6B7280"
+                            keyboardType="numeric"
+                            value={heightFeet}
+                            onChangeText={setHeightFeet}
+                          />
+                          <Text style={styles.heightLabel}>ft</Text>
+                        </View>
+                        <View style={styles.heightInputWrapper}>
+                          <TextInput
+                            style={styles.heightInput}
+                            placeholder="Inches"
+                            placeholderTextColor="#6B7280"
+                            keyboardType="numeric"
+                            value={heightInches}
+                            onChangeText={setHeightInches}
+                          />
+                          <Text style={styles.heightLabel}>in</Text>
+                        </View>
+                      </>
+                    )}
                   </View>
                 </>
               )}
 
-              {nutritionGoal && nutritionGoal !== 'maintain' && currentWeight && heightFeet && heightInches && (
+              {nutritionGoal && nutritionGoal !== 'maintain' && currentWeight && heightFeet && (isSpanish || heightInches) && (
                 <>
                   <Text style={styles.quizQuestion}>{t('nutrition_target_weight')}</Text>
                   <TextInput
                     style={styles.weightInput}
-                    placeholder={isSpanish ? 'ej., 165' : 'e.g., 165'}
+                    placeholder={isSpanish ? 'ej., 75 kg' : 'e.g., 165'}
                     placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={targetWeight}
@@ -1293,7 +1320,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                (!nutritionGoal || !currentWeight || !heightFeet || !heightInches ||
+                (!nutritionGoal || !currentWeight || !heightFeet || (!isSpanish && !heightInches) ||
                   (nutritionGoal !== 'maintain' && (!targetWeight || !goalEndDate))) &&
                   styles.actionButtonDisabled,
               ]}
@@ -1304,7 +1331,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                 calculateNutritionGoals();
               }}
               disabled={
-                !nutritionGoal || !currentWeight || !heightFeet || !heightInches ||
+                !nutritionGoal || !currentWeight || !heightFeet || (!isSpanish && !heightInches) ||
                 (nutritionGoal !== 'maintain' && (!targetWeight || !goalEndDate))
               }
             >

@@ -699,7 +699,7 @@ export default function GymScreen() {
     setIsGeneratingPlan(true);
     
     try {
-      const languageInstruction = isSpanish ? '\nIMPORTANT: Write ALL text content (plan name, description, day names, exercise descriptions) in Spanish.' : '';
+      const languageInstruction = isSpanish ? '\nIMPORTANT: Write ALL text content (plan name, description, day names, exercise descriptions) in Spanish. Use metric units (kg, cm, km) instead of imperial units (lbs, feet, miles).' : '';
       const prompt = `You are a certified personal trainer creating a personalized 5-day workout plan. Based on the user's quiz responses and specific goals, create a comprehensive training program.${languageInstruction}
 
 User's Quiz Responses:

@@ -38,7 +38,7 @@ export default function WorkoutScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { addWorkoutLog } = useApp();
   const insets = useSafeAreaInsets();
-  const { t } = useLanguage();
+  const { t, isSpanish } = useLanguage();
   const translateWorkoutName = useCallback((name: string): string => {
     const key = WORKOUT_NAME_TRANSLATION_KEYS[name];
     return key ? t(key) : name;
@@ -336,13 +336,13 @@ export default function WorkoutScreen() {
                     <View style={styles.inputGroup}>
                       <TextInput
                         style={styles.input}
-                        placeholder="lbs"
+                        placeholder={isSpanish ? "kg" : "lbs"}
                         value={set.weight > 0 ? set.weight.toString() : ''}
                         onChangeText={(value) => updateSetData(setIndex, 'weight', value)}
                         keyboardType="numeric"
                         maxLength={4}
                       />
-                      <Text style={styles.inputLabel}>lbs</Text>
+                      <Text style={styles.inputLabel}>{isSpanish ? 'kg' : 'lbs'}</Text>
                     </View>
                   </View>
 

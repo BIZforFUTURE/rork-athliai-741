@@ -84,7 +84,7 @@ export default function RunScreen() {
   const [treadmillEditDistance, setTreadmillEditDistance] = useState('');
   const [treadmillEditTime, setTreadmillEditTime] = useState('');
   const [treadmillEditing, setTreadmillEditing] = useState(false);
-  const { t } = useLanguage();
+  const { t, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = useCallback(() => {
@@ -720,12 +720,12 @@ export default function RunScreen() {
 
           <View style={styles.activeRunStats}>
             <View style={styles.activeRunStat}>
-              <Text style={styles.activeRunStatValue}>{runState.distance.toFixed(2)}</Text>
+              <Text style={styles.activeRunStatValue}>{isSpanish ? (runState.distance * 1.60934).toFixed(2) : runState.distance.toFixed(2)}</Text>
               <Text style={styles.activeRunStatLabel}>{t('run_miles')}</Text>
             </View>
             <View style={styles.activeRunStatDivider} />
             <View style={styles.activeRunStat}>
-              <Text style={styles.activeRunStatValue}>{formatPace(currentPace)}</Text>
+              <Text style={styles.activeRunStatValue}>{isSpanish ? formatPace(currentPace / 1.60934) : formatPace(currentPace)}</Text>
               <Text style={styles.activeRunStatLabel}>{t('run_min_mi')}</Text>
             </View>
             <View style={styles.activeRunStatDivider} />
@@ -776,15 +776,15 @@ export default function RunScreen() {
               <View style={styles.modalIconWrap}>
                 <Flame size={40} color="#FF6B35" />
               </View>
-              <Text style={styles.modalTitle}>Great Run!</Text>
-              <Text style={styles.modalCalText}>{lastRunCalories} calories burned</Text>
-              <Text style={styles.modalSubtext}>Subtract these from your daily intake?</Text>
+              <Text style={styles.modalTitle}>{t('run_great')}</Text>
+              <Text style={styles.modalCalText}>{t('run_calories_burned', { cal: String(lastRunCalories) })}</Text>
+              <Text style={styles.modalSubtext}>{t('run_subtract_question')}</Text>
               <View style={styles.modalBtns}>
                 <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowCalorieModal(false)}>
-                  <Text style={styles.modalBtnSecondaryText}>No Thanks</Text>
+                  <Text style={styles.modalBtnSecondaryText}>{t('run_no_thanks')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleSubtractCalories}>
-                  <Text style={styles.modalBtnPrimaryText}>Subtract</Text>
+                  <Text style={styles.modalBtnPrimaryText}>{t('run_subtract')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -839,14 +839,14 @@ export default function RunScreen() {
               <Route size={14} color="#00E5FF" />
             </View>
             <Text style={styles.statValue}>0.00</Text>
-            <Text style={styles.statUnit}>miles</Text>
+            <Text style={styles.statUnit}>{isSpanish ? 'km' : 'miles'}</Text>
           </View>
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: "rgba(191,255,0,0.08)" }]}>
               <TrendingUp size={14} color="#BFFF00" />
             </View>
             <Text style={styles.statValue}>0:00</Text>
-            <Text style={styles.statUnit}>min/mi</Text>
+            <Text style={styles.statUnit}>{isSpanish ? 'min/km' : 'min/mi'}</Text>
           </View>
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,107,53,0.08)" }]}>
@@ -920,9 +920,9 @@ export default function RunScreen() {
               <View style={styles.treadmillModalIconWrap}>
                 <ScanLine size={28} color="#00E5FF" />
               </View>
-              <Text style={styles.treadmillModalTitle}>Treadmill Run</Text>
+              <Text style={styles.treadmillModalTitle}>{t('run_treadmill')}</Text>
               <Text style={styles.treadmillModalSubtitle}>
-                {treadmillParsing ? 'Reading your dashboard...' : treadmillParsed ? 'Review your run data' : 'Analyzing photo...'}
+                {treadmillParsing ? t('run_reading_dashboard') : treadmillParsed ? t('run_review_data') : t('run_analyzing')}
               </Text>
             </View>
 
@@ -943,7 +943,7 @@ export default function RunScreen() {
                 {treadmillEditing ? (
                   <View style={styles.treadmillEditFields}>
                     <View style={styles.treadmillEditField}>
-                      <Text style={styles.treadmillEditLabel}>Distance (miles)</Text>
+                      <Text style={styles.treadmillEditLabel}>{isSpanish ? 'Distancia (km)' : 'Distance (miles)'}</Text>
                       <TextInput
                         style={styles.treadmillEditInput}
                         value={treadmillEditDistance}
@@ -954,7 +954,7 @@ export default function RunScreen() {
                       />
                     </View>
                     <View style={styles.treadmillEditField}>
-                      <Text style={styles.treadmillEditLabel}>Time (min:sec)</Text>
+                      <Text style={styles.treadmillEditLabel}>{isSpanish ? 'Tiempo (min:seg)' : 'Time (min:sec)'}</Text>
                       <TextInput
                         style={styles.treadmillEditInput}
                         value={treadmillEditTime}
@@ -969,7 +969,7 @@ export default function RunScreen() {
                     <View style={styles.treadmillParsedStat}>
                       <Route size={16} color="#00E5FF" />
                       <Text style={styles.treadmillParsedValue}>{treadmillEditDistance}</Text>
-                      <Text style={styles.treadmillParsedUnit}>miles</Text>
+                      <Text style={styles.treadmillParsedUnit}>{isSpanish ? 'km' : 'miles'}</Text>
                     </View>
                     <View style={styles.treadmillParsedDivider} />
                     <View style={styles.treadmillParsedStat}>
@@ -986,7 +986,7 @@ export default function RunScreen() {
                 >
                   <Edit3 size={14} color="#6B7280" />
                   <Text style={styles.treadmillEditToggleText}>
-                    {treadmillEditing ? 'Done editing' : 'Edit values'}
+                    {treadmillEditing ? t('run_done_editing') : t('run_edit_values')}
                   </Text>
                 </TouchableOpacity>
 

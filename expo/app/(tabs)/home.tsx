@@ -380,7 +380,7 @@ function TodayNutrition() {
 
 function WeeklyStats() {
   const { stats } = useApp();
-  const { t } = useLanguage();
+  const { t, isSpanish } = useLanguage();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -395,7 +395,7 @@ function WeeklyStats() {
   };
 
   const items = [
-    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: t('home_distance'), color: "#00E5FF", icon: <Route size={20} color="#00E5FF" /> },
+    { value: isSpanish ? (stats.weeklyMiles * 1.60934).toFixed(1) : stats.weeklyMiles.toFixed(1), unit: isSpanish ? "km" : "mi", label: t('home_distance'), color: "#00E5FF", icon: <Route size={20} color="#00E5FF" /> },
     { value: `${stats.weeklyRuns}`, unit: "", label: t('home_runs'), color: "#BFFF00", icon: <Footprints size={20} color="#BFFF00" /> },
     { value: formatTime(stats.weeklyTime), unit: "", label: t('home_active_time'), color: "#FF6B35", icon: <Timer size={20} color="#FF6B35" /> },
     { value: `${stats.weeklyWorkouts}`, unit: "", label: t('home_workouts'), color: "#00ADB5", icon: <Dumbbell size={20} color="#00ADB5" /> },
