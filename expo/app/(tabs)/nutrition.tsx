@@ -706,17 +706,18 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               const oneWeekAgo = new Date();
               oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
               const weeklyFoods = foodHistory.filter(entry => new Date(entry.date) >= oneWeekAgo);
-              if (weeklyFoods.length === 0) { setWeeklyReviewData("You haven't logged any meals this week yet. Start tracking your nutrition to get personalized insights!"); setIsGeneratingReview(false); return; }
+              if (weeklyFoods.length === 0) { setWeeklyReviewData(t('fuel_no_meals_week')); setIsGeneratingReview(false); return; }
               const totalCalories = weeklyFoods.reduce((sum, entry) => sum + entry.calories, 0);
               const totalProtein = weeklyFoods.reduce((sum, entry) => sum + entry.protein, 0);
               const totalCarbs = weeklyFoods.reduce((sum, entry) => sum + entry.carbs, 0);
               const totalFat = weeklyFoods.reduce((sum, entry) => sum + entry.fat, 0);
               const avgCaloriesPerDay = Math.round(totalCalories / 7);
               const foodList = weeklyFoods.map(f => `${f.name} (${f.calories} cal, ${f.protein}g P, ${f.carbs}g C, ${f.fat}g F)`).join(', ');
-              const prompt = `You are a professional nutritionist analyzing a week of food intake. Here's the data:\n\nTotal meals logged: ${weeklyFoods.length}\nTotal calories: ${totalCalories}\nAverage calories per day: ${avgCaloriesPerDay}\nTotal protein: ${totalProtein}g\nTotal carbs: ${totalCarbs}g\nTotal fat: ${totalFat}g\n\nUser's goals:\nDaily calorie goal: ${nutrition.calorieGoal}\nDaily protein goal: ${nutrition.proteinGoal}g\nDaily carbs goal: ${nutrition.carbsGoal}g\nDaily fat goal: ${nutrition.fatGoal}g\n\nFoods eaten this week: ${foodList}\n\nProvide a comprehensive weekly nutrition review with:\n1. Overall assessment\n2. How well they're meeting their goals\n3. Nutritional balance analysis\n4. Specific recommendations\n5. Positive reinforcement\n6. Suggestions for foods to add or reduce\n\nBe encouraging, specific, and actionable. Keep it under 400 words.`;
+              const langInstruction = isSpanish ? 'IMPORTANT: Respond entirely in Spanish.' : '';
+              const prompt = `You are a professional nutritionist analyzing a week of food intake. ${langInstruction} Here's the data:\n\nTotal meals logged: ${weeklyFoods.length}\nTotal calories: ${totalCalories}\nAverage calories per day: ${avgCaloriesPerDay}\nTotal protein: ${totalProtein}g\nTotal carbs: ${totalCarbs}g\nTotal fat: ${totalFat}g\n\nUser's goals:\nDaily calorie goal: ${nutrition.calorieGoal}\nDaily protein goal: ${nutrition.proteinGoal}g\nDaily carbs goal: ${nutrition.carbsGoal}g\nDaily fat goal: ${nutrition.fatGoal}g\n\nFoods eaten this week: ${foodList}\n\nProvide a comprehensive weekly nutrition review with:\n1. Overall assessment\n2. How well they're meeting their goals\n3. Nutritional balance analysis\n4. Specific recommendations\n5. Positive reinforcement\n6. Suggestions for foods to add or reduce\n\nBe encouraging, specific, and actionable. Keep it under 400 words.`;
               const response = await callOpenAI(prompt);
               setWeeklyReviewData(response);
-            } catch (error) { console.error('Error generating weekly review:', error); setWeeklyReviewData("Unable to generate your weekly review. Please try again later."); } finally { setIsGeneratingReview(false); }
+            } catch (error) { console.error('Error generating weekly review:', error); setWeeklyReviewData(t('fuel_review_error')); } finally { setIsGeneratingReview(false); }
           }}
         >
           <LinearGradient colors={["rgba(0,173,181,0.12)", "rgba(0,173,181,0.04)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.weeklyReviewGradient}>
