@@ -31,11 +31,13 @@ import { useApp } from "@/providers/AppProvider";
 import * as ImagePicker from "expo-image-picker";
 import RunMap from "@/components/RunMap";
 import colors from "@/constants/colors";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 export default function RunDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { recentRuns, updateRun } = useApp();
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   
   const [run, setRun] = useState(recentRuns.find(r => r.id === id));
   const [isEditing, setIsEditing] = useState(false);
@@ -56,7 +58,7 @@ export default function RunDetailsScreen() {
   if (!run) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <Text style={styles.errorText}>Run not found</Text>
+        <Text style={styles.errorText}>{t('run_not_found')}</Text>
       </View>
     );
   }
@@ -103,7 +105,7 @@ export default function RunDetailsScreen() {
     });
     
     setIsEditing(false);
-    Alert.alert("Success", "Run details updated successfully!");
+    Alert.alert(t('run_success'), t('run_updated'));
   };
 
   const handleAddPhoto = async () => {
@@ -111,8 +113,8 @@ export default function RunDetailsScreen() {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Permission Required",
-          "Please grant camera roll permissions to add photos."
+          t('run_permission_required'),
+          t('run_camera_roll_permission')
         );
         return;
       }
@@ -130,7 +132,7 @@ export default function RunDetailsScreen() {
       }
     } catch (error) {
       console.error("Error adding photo:", error);
-      Alert.alert("Error", "Failed to add photo. Please try again.");
+      Alert.alert(t('run_error'), t('run_photo_error'));
     }
   };
 
@@ -139,8 +141,8 @@ export default function RunDetailsScreen() {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Permission Required",
-          "Please grant camera permissions to take photos."
+          t('run_permission_required'),
+          t('run_camera_permission')
         );
         return;
       }
@@ -157,18 +159,18 @@ export default function RunDetailsScreen() {
       }
     } catch (error) {
       console.error("Error taking photo:", error);
-      Alert.alert("Error", "Failed to take photo. Please try again.");
+      Alert.alert(t('run_error'), t('run_take_photo_error'));
     }
   };
 
   const handleDeletePhoto = (photoIndex: number) => {
     Alert.alert(
-      "Delete Photo",
-      "Are you sure you want to delete this photo?",
+      t('run_delete_photo'),
+      t('run_delete_photo_confirm'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('run_cancel'), style: "cancel" },
         {
-          text: "Delete",
+          text: t('run_delete').split(' ').pop() || t('run_delete'),
           style: "destructive",
           onPress: () => {
             const newPhotos = run.photos?.filter((_, index) => index !== photoIndex) || [];
@@ -181,12 +183,12 @@ export default function RunDetailsScreen() {
 
   const showPhotoOptions = () => {
     Alert.alert(
-      "Add Photo",
-      "Choose how you'd like to add a photo",
+      t('run_add_photo'),
+      '',
       [
-        { text: "Cancel", style: "cancel" },
-        { text: "Take Photo", onPress: handleTakePhoto },
-        { text: "Choose from Library", onPress: handleAddPhoto },
+        { text: t('run_cancel'), style: "cancel" },
+        { text: t('run_take_photo'), onPress: handleTakePhoto },
+        { text: t('run_choose_library'), onPress: handleAddPhoto },
       ]
     );
   };
@@ -213,7 +215,7 @@ export default function RunDetailsScreen() {
           >
             <ArrowLeft size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Run Details</Text>
+          <Text style={styles.headerTitle}>{t('run_details')}</Text>
           <TouchableOpacity
             style={styles.editButton}
             onPress={isEditing ? handleSave : () => setIsEditing(true)}
@@ -240,27 +242,27 @@ export default function RunDetailsScreen() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <MapPin size={24} color={colors.accent.teal} />
-            <Text style={styles.statLabel}>DISTANCE</Text>
+            <Text style={styles.statLabel}>{t('run_distance')}</Text>
             <Text style={styles.statValue}>{run.distance.toFixed(2)}</Text>
-            <Text style={styles.statUnit}>miles</Text>
+            <Text style={styles.statUnit}>{t('run_miles_lower')}</Text>
           </View>
           <View style={styles.statCard}>
             <Clock size={24} color="#10B981" />
-            <Text style={styles.statLabel}>TIME</Text>
+            <Text style={styles.statLabel}>{t('run_time')}</Text>
             <Text style={styles.statValue}>{formatTime(run.time)}</Text>
-            <Text style={styles.statUnit}>duration</Text>
+            <Text style={styles.statUnit}>{t('run_duration')}</Text>
           </View>
           <View style={styles.statCard}>
             <TrendingUp size={24} color="#F59E0B" />
-            <Text style={styles.statLabel}>PACE</Text>
+            <Text style={styles.statLabel}>{t('run_pace_upper')}</Text>
             <Text style={styles.statValue}>{formatPace(run.pace)}</Text>
-            <Text style={styles.statUnit}>min/mi</Text>
+            <Text style={styles.statUnit}>{t('run_min_mi_lower')}</Text>
           </View>
           <View style={styles.statCard}>
             <Flame size={24} color="#EF4444" />
-            <Text style={styles.statLabel}>CALORIES</Text>
+            <Text style={styles.statLabel}>{t('run_calories_upper')}</Text>
             <Text style={styles.statValue}>{run.calories}</Text>
-            <Text style={styles.statUnit}>burned</Text>
+            <Text style={styles.statUnit}>{t('run_burned')}</Text>
           </View>
         </View>
 
@@ -271,56 +273,56 @@ export default function RunDetailsScreen() {
           showMap={true}
           isRunning={false}
           isHistorical={true}
-          title="Your Route"
+          title={t('run_your_route')}
         />
 
         <View style={styles.detailsSection}>
-          <Text style={styles.sectionTitle}>Route</Text>
+          <Text style={styles.sectionTitle}>{t('run_route')}</Text>
           {isEditing ? (
             <TextInput
               style={styles.textInput}
               value={route}
               onChangeText={setRoute}
-              placeholder="Where did you run? (e.g., Central Park Loop)"
+              placeholder={t('run_where_placeholder')}
               multiline
               testID="route-input"
             />
           ) : (
             <Text style={styles.detailText}>
-              {route || "No route specified"}
+              {route || t('run_no_route')}
             </Text>
           )}
         </View>
 
         <View style={styles.detailsSection}>
-          <Text style={styles.sectionTitle}>Notes</Text>
+          <Text style={styles.sectionTitle}>{t('run_notes')}</Text>
           {isEditing ? (
             <TextInput
               style={[styles.textInput, styles.notesInput]}
               value={notes}
               onChangeText={setNotes}
-              placeholder="How did the run feel? Any thoughts or memories?"
+              placeholder={t('run_notes_placeholder')}
               multiline
               numberOfLines={4}
               testID="notes-input"
             />
           ) : (
             <Text style={styles.detailText}>
-              {notes || "No notes added"}
+              {notes || t('run_no_notes')}
             </Text>
           )}
         </View>
 
         <View style={styles.photosSection}>
           <View style={styles.photosSectionHeader}>
-            <Text style={styles.sectionTitle}>Photos</Text>
+            <Text style={styles.sectionTitle}>{t('run_photos')}</Text>
             <TouchableOpacity
               style={styles.addPhotoButton}
               onPress={showPhotoOptions}
               testID="add-photo-button"
             >
               <Plus size={20} color={colors.accent.teal} />
-              <Text style={styles.addPhotoText}>Add Photo</Text>
+              <Text style={styles.addPhotoText}>{t('run_add_photo')}</Text>
             </TouchableOpacity>
           </View>
           
@@ -357,7 +359,7 @@ export default function RunDetailsScreen() {
             <View style={styles.emptyPhotos}>
               <Camera size={48} color="#9CA3AF" />
               <Text style={styles.emptyPhotosText}>
-                No photos yet. Add some memories from your run!
+                {t('run_no_photos')}
               </Text>
             </View>
           )}
@@ -387,7 +389,7 @@ export default function RunDetailsScreen() {
           ) : (
             <View style={styles.fullScreenImagePlaceholder}>
               <Camera size={48} color="#9CA3AF" />
-              <Text style={styles.placeholderText}>Image not available</Text>
+              <Text style={styles.placeholderText}>{t('run_image_not_available')}</Text>
             </View>
           )}
         </View>

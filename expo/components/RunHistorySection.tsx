@@ -23,6 +23,7 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface RouteCoordinate {
   latitude: number;
@@ -62,6 +63,7 @@ export default function RunHistorySection({
   formatTime, 
   formatPace 
 }: RunHistorySectionProps) {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('all');
@@ -81,12 +83,12 @@ export default function RunHistorySection({
     });
 
     Alert.alert(
-      "Delete Run",
-      `Delete your ${run.distance.toFixed(2)} mi run from ${dateStr}? This cannot be undone.`,
+      t('run_delete'),
+      t('run_delete_confirm').replace('{distance}', run.distance.toFixed(2)).replace('{date}', dateStr),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('run_cancel'), style: "cancel" },
         {
-          text: "Delete",
+          text: t('run_delete').split(' ').pop() || t('run_delete'),
           style: "destructive",
           onPress: () => {
             if (Platform.OS !== 'web') {
@@ -97,7 +99,7 @@ export default function RunHistorySection({
         },
       ]
     );
-  }, [onDeleteRun]);
+  }, [onDeleteRun, t]);
 
   const filteredByPeriod = useMemo(() => {
     if (filterPeriod === 'all') return runs;
@@ -178,29 +180,29 @@ export default function RunHistorySection({
 
   const getPeriodLabel = (period: FilterPeriod) => {
     switch (period) {
-      case 'all': return 'All Time';
-      case 'week': return 'This Week';
-      case 'month': return 'This Month';
-      case '3months': return 'Last 3 Months';
-      case 'year': return 'This Year';
+      case 'all': return t('run_all_time');
+      case 'week': return t('run_this_week');
+      case 'month': return t('run_this_month');
+      case '3months': return t('run_last_3_months');
+      case 'year': return t('run_this_year');
     }
   };
 
   const getSortLabel = (sort: SortOption) => {
     switch (sort) {
-      case 'date': return 'Date';
-      case 'distance': return 'Distance';
-      case 'time': return 'Duration';
-      case 'pace': return 'Pace';
+      case 'date': return t('run_sort_date');
+      case 'distance': return t('run_sort_distance');
+      case 'time': return t('run_sort_duration');
+      case 'pace': return t('run_sort_pace');
     }
   };
 
   if (runs.length === 0) {
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Run History</Text>
+        <Text style={styles.sectionTitle}>{t('run_history')}</Text>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No runs yet. Start your first run!</Text>
+          <Text style={styles.emptyText}>{t('run_no_runs')}</Text>
         </View>
       </View>
     );
@@ -209,13 +211,13 @@ export default function RunHistorySection({
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Run History</Text>
+        <Text style={styles.sectionTitle}>{t('run_history')}</Text>
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
         >
           <Filter size={20} color="#00ADB5" />
-          <Text style={styles.filterButtonText}>Filters</Text>
+          <Text style={styles.filterButtonText}>{t('run_filters')}</Text>
           {showFilters ? (
             <ChevronUp size={16} color="#00ADB5" />
           ) : (
@@ -230,7 +232,7 @@ export default function RunHistorySection({
             <Search size={20} color="#6B7280" />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search runs..."
+              placeholder={t('run_search')}
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor="#9CA3AF"
@@ -239,7 +241,7 @@ export default function RunHistorySection({
 
           <View style={styles.filterRow}>
             <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Period:</Text>
+              <Text style={styles.filterLabel}>{t('run_period')}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.filterOptions}>
                   {(['all', 'week', 'month', '3months', 'year'] as FilterPeriod[]).map((period) => (
@@ -264,7 +266,7 @@ export default function RunHistorySection({
             </View>
 
             <View style={styles.filterGroup}>
-              <Text style={styles.filterLabel}>Sort by:</Text>
+              <Text style={styles.filterLabel}>{t('run_sort_by')}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.filterOptions}>
                   {(['date', 'distance', 'time', 'pace'] as SortOption[]).map((sort) => (
@@ -294,28 +296,28 @@ export default function RunHistorySection({
       {sortedRuns.length > 0 && (
         <View style={styles.summaryContainer}>
           <Text style={styles.summaryTitle}>
-            {getPeriodLabel(filterPeriod)} Summary ({summaryStats.totalRuns} runs)
+            {getPeriodLabel(filterPeriod)} {t('run_summary')} ({summaryStats.totalRuns} {t('run_runs')})
           </Text>
           <View style={styles.summaryStats}>
             <View style={styles.summaryStat}>
               <MapPin size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{summaryStats.totalDistance.toFixed(1)}</Text>
-              <Text style={styles.summaryStatLabel}>miles</Text>
+              <Text style={styles.summaryStatLabel}>{t('run_miles_lower')}</Text>
             </View>
             <View style={styles.summaryStat}>
               <Clock size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{formatTime(summaryStats.totalTime)}</Text>
-              <Text style={styles.summaryStatLabel}>total</Text>
+              <Text style={styles.summaryStatLabel}>{t('run_total')}</Text>
             </View>
             <View style={styles.summaryStat}>
               <TrendingUp size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{formatPace(summaryStats.avgPace)}</Text>
-              <Text style={styles.summaryStatLabel}>avg pace</Text>
+              <Text style={styles.summaryStatLabel}>{t('run_avg_pace')}</Text>
             </View>
             <View style={styles.summaryStat}>
               <Flame size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{summaryStats.totalCalories}</Text>
-              <Text style={styles.summaryStatLabel}>calories</Text>
+              <Text style={styles.summaryStatLabel}>{t('run_calories_lower')}</Text>
             </View>
           </View>
         </View>
@@ -324,13 +326,13 @@ export default function RunHistorySection({
       {displayRuns.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>
-            No runs found for the selected filters.
+            {t('run_no_runs_filtered')}
           </Text>
         </View>
       ) : (
         <>
           {onDeleteRun && (
-            <Text style={styles.deleteHint}>Long-press a run to delete it</Text>
+            <Text style={styles.deleteHint}>{t('run_delete_hint')}</Text>
           )}
           {displayRuns.map((run) => (
             <TouchableOpacity
@@ -358,7 +360,7 @@ export default function RunHistorySection({
                 {run.treadmillVerified && (
                   <View style={styles.treadmillBadge}>
                     <Camera size={10} color="#00E5FF" />
-                    <Text style={styles.treadmillBadgeText}>Treadmill</Text>
+                    <Text style={styles.treadmillBadgeText}>{t('run_treadmill_label')}</Text>
                   </View>
                 )}
                 {run.weather && (
@@ -368,19 +370,19 @@ export default function RunHistorySection({
               <View style={styles.runStats}>
                 <View style={styles.runStat}>
                   <Text style={styles.runStatValue}>{run.distance.toFixed(2)}</Text>
-                  <Text style={styles.runStatLabel}>mi</Text>
+                  <Text style={styles.runStatLabel}>{t('run_mi')}</Text>
                 </View>
                 <View style={styles.runStat}>
                   <Text style={styles.runStatValue}>{formatTime(run.time)}</Text>
-                  <Text style={styles.runStatLabel}>time</Text>
+                  <Text style={styles.runStatLabel}>{t('run_time_lower')}</Text>
                 </View>
                 <View style={styles.runStat}>
                   <Text style={styles.runStatValue}>{formatPace(run.pace)}</Text>
-                  <Text style={styles.runStatLabel}>pace</Text>
+                  <Text style={styles.runStatLabel}>{t('run_pace')}</Text>
                 </View>
                 <View style={styles.runStat}>
                   <Text style={styles.runStatValue}>{run.calories}</Text>
-                  <Text style={styles.runStatLabel}>cal</Text>
+                  <Text style={styles.runStatLabel}>{t('run_cal_lower')}</Text>
                 </View>
               </View>
               <View style={styles.runCardActions}>
@@ -406,8 +408,8 @@ export default function RunHistorySection({
             >
               <Text style={styles.showMoreText}>
                 {showAllRuns 
-                  ? `Show Less (${sortedRuns.length - 10} hidden)` 
-                  : `Show All ${sortedRuns.length} Runs`
+                  ? t('run_show_less').replace('{count}', String(sortedRuns.length - 10))
+                  : t('run_show_all').replace('{count}', String(sortedRuns.length))
                 }
               </Text>
               {showAllRuns ? (

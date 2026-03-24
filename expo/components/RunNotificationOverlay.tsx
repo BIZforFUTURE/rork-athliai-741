@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import RunMap from './RunMap';
 import * as Location from 'expo-location';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 interface RouteCoordinate {
   latitude: number;
@@ -41,7 +42,7 @@ export default function RunNotificationOverlay({
   isRunning,
 }: RunNotificationOverlayProps) {
   const insets = useSafeAreaInsets();
-
+  const { t } = useLanguage();
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -77,10 +78,10 @@ export default function RunNotificationOverlay({
           <View style={styles.headerContent}>
             <View>
               <Text style={styles.headerTitle}>
-                {isRunning ? '🏃‍♂️ Active Run' : '🏃‍♂️ Run Complete'}
+                {isRunning ? `🏃‍♂️ ${t('run_active')}` : `🏃‍♂️ ${t('run_complete')}`}
               </Text>
               <Text style={styles.headerSubtitle}>
-                {isRunning ? 'Live tracking in progress' : 'Run summary'}
+                {isRunning ? t('run_live_tracking') : t('run_summary_label')}
               </Text>
             </View>
             <TouchableOpacity
@@ -99,22 +100,22 @@ export default function RunNotificationOverlay({
             <View style={styles.statCard}>
               <MapPin size={24} color="#3B82F6" />
               <Text style={styles.statValue}>{distance.toFixed(2)}</Text>
-              <Text style={styles.statLabel}>MILES</Text>
+              <Text style={styles.statLabel}>{t('run_miles')}</Text>
             </View>
             <View style={styles.statCard}>
               <Clock size={24} color="#10B981" />
               <Text style={styles.statValue}>{formatTime(time)}</Text>
-              <Text style={styles.statLabel}>TIME</Text>
+              <Text style={styles.statLabel}>{t('run_time')}</Text>
             </View>
             <View style={styles.statCard}>
               <TrendingUp size={24} color="#F59E0B" />
               <Text style={styles.statValue}>{formatPace(pace)}</Text>
-              <Text style={styles.statLabel}>PACE</Text>
+              <Text style={styles.statLabel}>{t('run_pace_upper')}</Text>
             </View>
             <View style={styles.statCard}>
               <Flame size={24} color="#EF4444" />
               <Text style={styles.statValue}>{calories}</Text>
-              <Text style={styles.statLabel}>CALORIES</Text>
+              <Text style={styles.statLabel}>{t('run_calories_upper')}</Text>
             </View>
           </View>
 
@@ -125,7 +126,7 @@ export default function RunNotificationOverlay({
               routeCoordinates={routeCoordinates}
               showMap={true}
               isRunning={isRunning}
-              title={isRunning ? "Live Route" : "Route Summary"}
+              title={isRunning ? t('run_live_route') : t('run_route_summary')}
             />
           </View>
 
@@ -133,8 +134,8 @@ export default function RunNotificationOverlay({
           <View style={styles.statusSection}>
             <Text style={styles.statusText}>
               {isRunning 
-                ? "Your run is being tracked continuously. Return to the app anytime to see detailed progress."
-                : "Great job on completing your run! All data has been saved to your history."
+                ? t('run_tracking_msg')
+                : t('run_complete_msg')
               }
             </Text>
           </View>
