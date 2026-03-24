@@ -50,7 +50,7 @@ const LOADING_STEPS_ES = [
   { label: 'Finalizando tu plan', icon: Sparkles },
 ];
 
-const FITNESS_TIPS = [
+const FITNESS_TIPS_EN = [
   "Progressive overload is the #1 driver of muscle growth — aim to increase weight or reps each week.",
   "Sleep 7-9 hours per night. Your muscles grow during recovery, not during the workout.",
   "Protein timing matters less than total daily intake. Aim for 0.7-1g per pound of bodyweight.",
@@ -63,6 +63,19 @@ const FITNESS_TIPS = [
   "Creatine monohydrate is the most researched and effective supplement for strength gains.",
 ];
 
+const FITNESS_TIPS_ES = [
+  "La sobrecarga progresiva es el motor #1 del crecimiento muscular — intenta aumentar peso o repeticiones cada semana.",
+  "Duerme 7-9 horas por noche. Tus músculos crecen durante la recuperación, no durante el entrenamiento.",
+  "El momento de la proteína importa menos que la ingesta diaria total. Apunta a 1.5-2.2g por kg de peso corporal.",
+  "Los movimientos compuestos como sentadillas y peso muerto reclutan más fibras musculares que los ejercicios de aislamiento.",
+  "Beber agua antes de las comidas puede reducir la ingesta calórica hasta un 13%.",
+  "La constancia supera la intensidad. Ir 4 veces a la semana al 80% supera ir 1 vez al 100%.",
+  "Periodos de descanso de 2-3 min para fuerza, 60-90s para hipertrofia y 30-45s para resistencia.",
+  "Calentar con estiramientos dinámicos reduce el riesgo de lesiones hasta un 30%.",
+  "La conexión mente-músculo es real — enfocarte en el músculo objetivo mejora la activación un 20%.",
+  "La creatina monohidratada es el suplemento más investigado y efectivo para ganar fuerza.",
+];
+
 function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number; bottom: number; left: number; right: number }, progress: number, isSpanish: boolean }) {
   const LOADING_STEPS = isSpanish ? LOADING_STEPS_ES : LOADING_STEPS_EN;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -70,7 +83,8 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const tipOpacity = useRef(new Animated.Value(1)).current;
   const tipTranslateY = useRef(new Animated.Value(0)).current;
-  const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * FITNESS_TIPS.length));
+  const FITNESS_TIPS = isSpanish ? FITNESS_TIPS_ES : FITNESS_TIPS_EN;
+  const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * FITNESS_TIPS_EN.length));
   const [activeStep, setActiveStep] = useState(0);
   const stepAnims = useRef(LOADING_STEPS.map(() => new Animated.Value(0))).current;
   const stepScaleAnims = useRef(LOADING_STEPS.map(() => new Animated.Value(0.8))).current;
@@ -304,6 +318,8 @@ export default function WelcomeScreen() {
   const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
   const insets = useSafeAreaInsets();
+  const { t, setLanguage, isSpanish } = useLanguage();
+  void setLanguage;
 
   const handleNext = async () => {
     if (Platform.OS !== 'web') {
@@ -407,49 +423,49 @@ export default function WelcomeScreen() {
 
   const gymQuestions = [
     {
-      question: "What is your primary fitness goal?",
+      question: t('gym_q1'),
       options: [
-        "Build muscle mass and size",
-        "Increase strength and power",
-        "Lose weight and tone up",
-        "Improve overall fitness",
-        "Athletic performance"
+        t('gym_q1_o1'),
+        t('gym_q1_o2'),
+        t('gym_q1_o3'),
+        t('gym_q1_o4'),
+        t('gym_q1_o5'),
       ]
     },
     {
-      question: "What is your current fitness level?",
+      question: t('gym_q2'),
       options: [
-        "Beginner (new to working out)",
-        "Intermediate (6 months - 2 years)",
-        "Advanced (2+ years of consistent training)"
+        t('gym_q2_o1'),
+        t('gym_q2_o2'),
+        t('gym_q2_o3'),
       ]
     },
     {
-      question: "What equipment do you have access to?",
+      question: t('gym_q3'),
       options: [
-        "Full gym with free weights and machines",
-        "Home gym with dumbbells and basic equipment",
-        "Bodyweight only (no equipment)",
-        "Limited equipment (resistance bands, light weights)"
+        t('gym_q3_o1'),
+        t('gym_q3_o2'),
+        t('gym_q3_o3'),
+        t('gym_q3_o4'),
       ]
     },
     {
-      question: "How much time can you dedicate per workout?",
+      question: t('gym_q4'),
       options: [
-        "30-45 minutes",
-        "45-60 minutes",
-        "60-90 minutes",
-        "I'm flexible with time"
+        t('gym_q4_o1'),
+        t('gym_q4_o2'),
+        t('gym_q4_o3'),
+        t('gym_q4_o4'),
       ]
     },
     {
-      question: "Do you have any physical limitations or injuries?",
+      question: t('gym_q5'),
       options: [
-        "No limitations or injuries",
-        "Lower back issues",
-        "Knee or joint problems",
-        "Shoulder or arm issues",
-        "I'll specify in my goals"
+        t('gym_q5_o1'),
+        t('gym_q5_o2'),
+        t('gym_q5_o3'),
+        t('gym_q5_o4'),
+        t('gym_q5_o5'),
       ]
     }
   ];
@@ -885,9 +901,6 @@ Return ONLY valid JSON, no markdown or code blocks.`;
 
 
 
-  const { t, setLanguage, isSpanish } = useLanguage();
-  void setLanguage;
-
   if (isGeneratingPlan) {
     return <LoadingScreen insets={insets} progress={generationProgress} isSpanish={isSpanish} />;
   }
@@ -1082,7 +1095,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
           end={{ x: 0.5, y: 1 }}
         >
           <TouchableOpacity style={styles.skipButton} onPress={handleSkipNutrition}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t('welcome_skip')}</Text>
           </TouchableOpacity>
 
           <KeyboardAvoidingView
@@ -1190,7 +1203,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <Text style={styles.quizQuestion}>{t('nutrition_current_weight')}</Text>
                   <TextInput
                     style={styles.weightInput}
-                    placeholder="e.g., 180"
+                    placeholder={isSpanish ? 'ej., 180' : 'e.g., 180'}
                     placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={currentWeight}
@@ -1206,7 +1219,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     <View style={styles.heightInputWrapper}>
                       <TextInput
                         style={styles.heightInput}
-                        placeholder="Feet"
+                        placeholder={isSpanish ? 'Pies' : 'Feet'}
                         placeholderTextColor="#6B7280"
                         keyboardType="numeric"
                         value={heightFeet}
@@ -1217,7 +1230,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     <View style={styles.heightInputWrapper}>
                       <TextInput
                         style={styles.heightInput}
-                        placeholder="Inches"
+                        placeholder={isSpanish ? 'Pulgadas' : 'Inches'}
                         placeholderTextColor="#6B7280"
                         keyboardType="numeric"
                         value={heightInches}
@@ -1234,7 +1247,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <Text style={styles.quizQuestion}>{t('nutrition_target_weight')}</Text>
                   <TextInput
                     style={styles.weightInput}
-                    placeholder="e.g., 165"
+                    placeholder={isSpanish ? 'ej., 165' : 'e.g., 165'}
                     placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={targetWeight}
