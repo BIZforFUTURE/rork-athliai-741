@@ -50,6 +50,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
 import { RANKS, XPSource } from "@/constants/xp";
+import { useLanguage } from "@/providers/LanguageProvider"; // eslint-disable-line no-unused-vars
 
 interface WeightEntry {
   date: string;

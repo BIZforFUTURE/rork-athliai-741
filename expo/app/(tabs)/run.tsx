@@ -35,6 +35,7 @@ import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { router } from "expo-router";
 import RunMap from "@/components/RunMap";
 import RunHistorySection from "@/components/RunHistorySection";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 interface RouteCoordinate {
   latitude: number;
@@ -83,6 +84,7 @@ export default function RunScreen() {
   const [treadmillEditDistance, setTreadmillEditDistance] = useState('');
   const [treadmillEditTime, setTreadmillEditTime] = useState('');
   const [treadmillEditing, setTreadmillEditing] = useState(false);
+  const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = useCallback(() => {
@@ -707,11 +709,11 @@ export default function RunScreen() {
 
           <View style={styles.activeRunTimeWrap}>
             <Text style={styles.activeRunTime}>{formatTime(runState.elapsedTime)}</Text>
-            <Text style={styles.activeRunTimeLabel}>TIME</Text>
+            <Text style={styles.activeRunTimeLabel}>{t('run_time')}</Text>
             {runState.isPaused && (
               <View style={styles.activeRunPausedChip}>
                 <Pause size={10} color="#F59E0B" />
-                <Text style={styles.activeRunPausedText}>PAUSED</Text>
+                <Text style={styles.activeRunPausedText}>{t('run_paused')}</Text>
               </View>
             )}
           </View>
@@ -719,17 +721,17 @@ export default function RunScreen() {
           <View style={styles.activeRunStats}>
             <View style={styles.activeRunStat}>
               <Text style={styles.activeRunStatValue}>{runState.distance.toFixed(2)}</Text>
-              <Text style={styles.activeRunStatLabel}>MILES</Text>
+              <Text style={styles.activeRunStatLabel}>{t('run_miles')}</Text>
             </View>
             <View style={styles.activeRunStatDivider} />
             <View style={styles.activeRunStat}>
               <Text style={styles.activeRunStatValue}>{formatPace(currentPace)}</Text>
-              <Text style={styles.activeRunStatLabel}>MIN/MI</Text>
+              <Text style={styles.activeRunStatLabel}>{t('run_min_mi')}</Text>
             </View>
             <View style={styles.activeRunStatDivider} />
             <View style={styles.activeRunStat}>
               <Text style={styles.activeRunStatValue}>{currentCalories}</Text>
-              <Text style={styles.activeRunStatLabel}>CAL</Text>
+              <Text style={styles.activeRunStatLabel}>{t('run_cal')}</Text>
             </View>
           </View>
 
@@ -796,8 +798,8 @@ export default function RunScreen() {
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <View>
-          <Text style={styles.screenTitle}>Run</Text>
-          <Text style={styles.screenSubtitle}>Ready to go?</Text>
+          <Text style={styles.screenTitle}>{t('run_title')}</Text>
+          <Text style={styles.screenSubtitle}>{t('run_ready')}</Text>
         </View>
         <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "15", borderColor: xpInfo.rank.color + "30" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
@@ -826,7 +828,7 @@ export default function RunScreen() {
             </Svg>
             <View style={styles.timerInner}>
               <Text style={styles.timerValue}>0:00</Text>
-              <Text style={styles.timerLabel}>TIME</Text>
+              <Text style={styles.timerLabel}>{t('run_time')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -863,7 +865,7 @@ export default function RunScreen() {
           <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
             <View style={styles.startBtnInner}>
               <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
-              <Text style={styles.startBtnText}>START RUN</Text>
+              <Text style={styles.startBtnText}>{t('run_start')}</Text>
             </View>
             <View style={styles.startBtnXp}>
               <Zap size={10} color="#00E5FF" fill="#00E5FF" />
@@ -883,8 +885,8 @@ export default function RunScreen() {
               <Camera size={20} color="#00E5FF" />
             </View>
             <View style={styles.treadmillLogBtnTextWrap}>
-              <Text style={styles.treadmillLogBtnTitle}>Log Treadmill Run</Text>
-              <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
+              <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill')}</Text>
+              <Text style={styles.treadmillLogBtnSub}>{t('run_snap_dashboard')}</Text>
             </View>
           </View>
           <View style={styles.treadmillLogBtnXp}>

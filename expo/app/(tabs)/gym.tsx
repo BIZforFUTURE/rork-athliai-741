@@ -42,6 +42,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
 import { getVideoUrlForExercise } from "@/utils/videoUrls";
 import { callOpenAI } from "@/utils/openai";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 interface QuizAnswer {
   question: string;
@@ -470,6 +471,7 @@ function AnimatedStatCard({ icon: Icon, value, label, delay, color }: {
 export default function GymScreen() {
   const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan } = useApp();
   const { isPremium } = useRevenueCat();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const [showRecentWorkouts, setShowRecentWorkouts] = useState(true);
@@ -994,27 +996,27 @@ Format as JSON:
         <Animated.View style={[styles.headerContent, { opacity: heroFade, transform: [{ translateY: heroSlide }] }]}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.headerTitle}>Gym</Text>
+              <Text style={styles.headerTitle}>{t('gym_title')}</Text>
               <View style={styles.subtitleRow}>
                 {todaysWorkout ? (
                   <View style={styles.statusBadge}>
                     <Flame size={12} color="#FF6B35" />
-                    <Text style={styles.statusBadgeText}>Ready to train</Text>
+                    <Text style={styles.statusBadgeText}>{t('gym_ready_train')}</Text>
                   </View>
                 ) : generatedPlan ? (
                   hasCompletedToday ? (
                     <View style={[styles.statusBadge, { backgroundColor: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.25)' }]}>
                       <Check size={12} color="#10B981" strokeWidth={3} />
-                      <Text style={[styles.statusBadgeText, { color: '#10B981' }]}>Done for today</Text>
+                      <Text style={[styles.statusBadgeText, { color: '#10B981' }]}>{t('gym_done_today')}</Text>
                     </View>
                   ) : (
                     <View style={[styles.statusBadge, { backgroundColor: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.2)' }]}>
                       <Moon size={12} color="#94A3B8" />
-                      <Text style={[styles.statusBadgeText, { color: '#94A3B8' }]}>Rest day</Text>
+                      <Text style={[styles.statusBadgeText, { color: '#94A3B8' }]}>{t('gym_rest_day')}</Text>
                     </View>
                   )
                 ) : (
-                  <Text style={styles.headerSubtitle}>Get started</Text>
+                  <Text style={styles.headerSubtitle}>{t('gym_get_started')}</Text>
                 )}
               </View>
             </View>
@@ -1083,8 +1085,8 @@ Format as JSON:
                   <Zap size={28} color="#FFFFFF" strokeWidth={2.5} />
                 </View>
                 <View style={styles.ctaTextBlock}>
-                  <Text style={styles.ctaTitle}>Get Your Custom Plan</Text>
-                  <Text style={styles.ctaSubtitle}>Take a quick quiz for a personalized workout</Text>
+                  <Text style={styles.ctaTitle}>{t('gym_get_custom_plan')}</Text>
+                  <Text style={styles.ctaSubtitle}>{t('gym_take_quiz')}</Text>
                 </View>
                 <View style={styles.ctaArrow}>
                   <ArrowRight size={20} color="rgba(255,255,255,0.7)" />
@@ -1116,8 +1118,8 @@ Format as JSON:
                   <Hammer size={28} color="#FFFFFF" strokeWidth={2.5} />
                 </View>
                 <View style={styles.ctaTextBlock}>
-                  <Text style={styles.ctaTitle}>Build Your Own Workout</Text>
-                  <Text style={styles.ctaSubtitle}>Choose exercises and create a custom routine</Text>
+                  <Text style={styles.ctaTitle}>{t('gym_build_workout')}</Text>
+                  <Text style={styles.ctaSubtitle}>{t('gym_choose_exercises')}</Text>
                 </View>
                 <View style={styles.ctaArrow}>
                   <ArrowRight size={20} color="rgba(255,255,255,0.7)" />
@@ -1148,13 +1150,13 @@ Format as JSON:
                 >
                   <View style={styles.todaysLabel}>
                     <Sun size={14} color="rgba(255,255,255,0.8)" />
-                    <Text style={styles.todaysLabelText}>TODAY&apos;S WORKOUT</Text>
+                    <Text style={styles.todaysLabelText}>{t('gym_todays_workout').toUpperCase()}</Text>
                   </View>
                   <Text style={styles.todaysWorkoutName}>{todaysWorkout.name}</Text>
                   <View style={styles.todaysWorkoutMeta}>
                     <View style={styles.todayMetaPill}>
                       <Dumbbell size={13} color="rgba(255,255,255,0.85)" />
-                      <Text style={styles.todayMetaText}>{todaysWorkout.exercises.length} exercises</Text>
+                      <Text style={styles.todayMetaText}>{todaysWorkout.exercises.length} {t('gym_exercises')}</Text>
                     </View>
                     <View style={styles.todayMetaPill}>
                       <Clock size={13} color="rgba(255,255,255,0.85)" />
@@ -1164,7 +1166,7 @@ Format as JSON:
                   <View style={styles.todayStartRow}>
                     <View style={styles.todayStartBtn}>
                       <Play size={16} color="#0E7490" fill="#0E7490" />
-                      <Text style={styles.todayStartText}>Start Workout</Text>
+                      <Text style={styles.todayStartText}>{t('gym_start_workout')}</Text>
                     </View>
                   </View>
                 </LinearGradient>

@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider, useApp } from "@/providers/AppProvider";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 import { RevenueCatProvider } from "@/providers/RevenueCatProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 import LevelUpModal from "@/components/LevelUpModal";
 
 import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
@@ -89,15 +90,17 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NotificationProvider>
-        <AppProvider>
-          <RevenueCatProvider>
-            <GestureHandlerRootView style={styles.container}>
-              <RootLayoutNav />
-            </GestureHandlerRootView>
-          </RevenueCatProvider>
-        </AppProvider>
-      </NotificationProvider>
+      <LanguageProvider>
+        <NotificationProvider>
+          <AppProvider>
+            <RevenueCatProvider>
+              <GestureHandlerRootView style={styles.container}>
+                <RootLayoutNav />
+              </GestureHandlerRootView>
+            </RevenueCatProvider>
+          </AppProvider>
+        </NotificationProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

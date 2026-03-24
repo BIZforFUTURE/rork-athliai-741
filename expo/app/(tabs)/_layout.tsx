@@ -3,6 +3,7 @@ import { Home, Route, Utensils, Dumbbell, Trophy } from "lucide-react-native";
 import React from "react";
 import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet } from "react-native";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 function TabIcon({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +14,7 @@ function TabIcon({ children }: { children: React.ReactNode }) {
 }
 
 export default function TabLayout() {
+  const { t } = useLanguage();
   return (
     <Tabs
       screenOptions={{
@@ -38,7 +40,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: t('tab_home'),
           tabBarIcon: ({ color }) => (
             <TabIcon>
               <Home size={22} color={color} />
@@ -56,7 +58,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="run"
         options={{
-          title: "Run",
+          title: t('tab_run'),
           tabBarIcon: ({ color }) => (
             <TabIcon>
               <Route size={22} color={color} />
@@ -74,7 +76,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="nutrition"
         options={{
-          title: "Fuel",
+          title: t('tab_fuel'),
           tabBarIcon: ({ color }) => (
             <TabIcon>
               <Utensils size={22} color={color} />
@@ -92,7 +94,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="gym"
         options={{
-          title: "Gym",
+          title: t('tab_gym'),
           tabBarIcon: ({ color }) => (
             <TabIcon>
               <Dumbbell size={22} color={color} />
@@ -110,7 +112,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="leaderboard"
         options={{
-          title: "Stats",
+          title: t('tab_stats'),
           tabBarIcon: ({ color }) => (
             <TabIcon>
               <Trophy size={22} color={color} />

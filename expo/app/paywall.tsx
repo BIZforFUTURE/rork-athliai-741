@@ -26,34 +26,20 @@ import {
 import * as Haptics from "expo-haptics";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import colors from "@/constants/colors";
+import { useLanguage } from "@/providers/LanguageProvider";
 
-const FEATURES = [
-  {
-    icon: Brain,
-    title: "AI Workout Plans",
-    desc: "Personalized routines built for your goals",
-  },
-  {
-    icon: TrendingUp,
-    title: "Advanced Analytics",
-    desc: "Deep insights into your progress over time",
-  },
-  {
-    icon: Zap,
-    title: "Smart Nutrition",
-    desc: "AI-powered meal tracking and suggestions",
-  },
-  {
-    icon: Shield,
-    title: "Unlimited Everything",
-    desc: "No limits on workouts, runs, or logs",
-  },
+const FEATURES_EN = [
+  { icon: Brain, titleKey: 'paywall_ai_plans' as const, descKey: 'paywall_ai_plans_desc' as const },
+  { icon: TrendingUp, titleKey: 'paywall_analytics' as const, descKey: 'paywall_analytics_desc' as const },
+  { icon: Zap, titleKey: 'paywall_nutrition' as const, descKey: 'paywall_nutrition_desc' as const },
+  { icon: Shield, titleKey: 'paywall_unlimited' as const, descKey: 'paywall_unlimited_desc' as const },
 ];
 
 export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const { purchasePackage, restorePurchases, currentOffering, isLoading } =
     useRevenueCat();
+  const { t } = useLanguage();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
 
@@ -167,20 +153,20 @@ export default function PaywallScreen() {
           </LinearGradient>
         </View>
 
-        <Text style={styles.title}>Unlock AthliAI Premium</Text>
+        <Text style={styles.title}>{t('paywall_unlock')}</Text>
         <Text style={styles.subtitle}>
-          Train smarter with AI-powered insights
+          {t('paywall_subtitle')}
         </Text>
 
         <View style={styles.featuresContainer}>
-          {FEATURES.map((feature, index) => (
+          {FEATURES_EN.map((feature, index) => (
             <View key={index} style={styles.featureRow}>
               <View style={styles.featureIconWrap}>
                 <feature.icon size={20} color={colors.accent.teal} />
               </View>
               <View style={styles.featureTextWrap}>
-                <Text style={styles.featureTitle}>{feature.title}</Text>
-                <Text style={styles.featureDesc}>{feature.desc}</Text>
+                <Text style={styles.featureTitle}>{t(feature.titleKey)}</Text>
+                <Text style={styles.featureDesc}>{t(feature.descKey)}</Text>
               </View>
             </View>
           ))}
@@ -195,12 +181,12 @@ export default function PaywallScreen() {
           >
             <View style={styles.priceRow}>
               <View>
-                <Text style={styles.planName}>Annual Plan</Text>
-                <Text style={styles.trialText}>3-day free trial</Text>
+                <Text style={styles.planName}>{t('paywall_annual')}</Text>
+                <Text style={styles.trialText}>{t('paywall_trial')}</Text>
               </View>
               <View style={styles.priceRight}>
                 <Text style={styles.priceAmount}>{priceString}</Text>
-                <Text style={styles.pricePeriod}>/year</Text>
+                <Text style={styles.pricePeriod}>{t('paywall_year')}</Text>
               </View>
             </View>
           </LinearGradient>
@@ -224,7 +210,7 @@ export default function PaywallScreen() {
             ) : (
               <>
                 <Text style={styles.purchaseButtonText}>
-                  Start Free Trial
+                  {t('paywall_start_trial')}
                 </Text>
                 <ChevronRight size={20} color="#FFF" />
               </>
@@ -242,7 +228,7 @@ export default function PaywallScreen() {
             {isRestoring ? (
               <ActivityIndicator size="small" color={colors.text.secondary} />
             ) : (
-              <Text style={styles.restoreText}>Restore Purchases</Text>
+              <Text style={styles.restoreText}>{t('paywall_restore')}</Text>
             )}
           </TouchableOpacity>
 
@@ -254,17 +240,14 @@ export default function PaywallScreen() {
                 onPress={handleRedeemPromo}
                 testID="paywall-promo"
               >
-                <Text style={styles.restoreText}>Redeem Code</Text>
+                <Text style={styles.restoreText}>{t('paywall_redeem')}</Text>
               </TouchableOpacity>
             </>
           )}
         </View>
 
         <Text style={styles.legalText}>
-          Payment will be charged to your account after the 3-day free trial.
-          Subscription automatically renews unless canceled at least 24 hours
-          before the end of the current period. Manage or cancel anytime in your
-          device settings.
+          {t('paywall_legal')}
         </Text>
       </ScrollView>
       </KeyboardAvoidingView>

@@ -27,11 +27,13 @@ import {
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
 import { RANKS } from "@/constants/xp";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 
 
 function HeroSection() {
   const { xpInfo } = useApp();
+  const { t } = useLanguage();
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(20)).current;
   const shimmer = useRef(new Animated.Value(0)).current;
@@ -100,7 +102,7 @@ function HeroSection() {
           <View style={[heroStyles.rankTag, { backgroundColor: xpInfo.rank.color + "15" }]}>
             <Text style={[heroStyles.rankTagText, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
           </View>
-          <Text style={heroStyles.levelTitle}>Level {xpInfo.level}</Text>
+          <Text style={heroStyles.levelTitle}>{t('home_level', { level: String(xpInfo.level) })}</Text>
           <Text style={heroStyles.xpLabel}>
             <Text style={{ color: "#E5E7EB", fontWeight: "700" as const }}>{xpInfo.currentXP}</Text>
             <Text style={{ color: "#4B5563" }}> / {xpInfo.neededXP} XP</Text>
@@ -112,7 +114,7 @@ function HeroSection() {
             </View>
           </View>
           <Text style={heroStyles.xpToGo}>
-            <Text style={{ color: xpInfo.rank.color }}>{xpRemaining}</Text> XP to next level
+            {t('home_xp_to_next', { xp: String(xpRemaining) })}
           </Text>
         </View>
       </View>
@@ -121,12 +123,12 @@ function HeroSection() {
         <View style={heroStyles.statChip}>
           <Zap size={12} color={xpInfo.rank.color} fill={xpInfo.rank.color} />
           <Text style={[heroStyles.statChipValue, { color: xpInfo.rank.color }]}>{xpInfo.totalXP.toLocaleString()}</Text>
-          <Text style={heroStyles.statChipLabel}>Total XP</Text>
+          <Text style={heroStyles.statChipLabel}>{t('home_total_xp')}</Text>
         </View>
         <View style={heroStyles.statDivider} />
         <View style={heroStyles.statChip}>
           <Text style={heroStyles.statChipValue}>{Math.round(progressPct * 100)}%</Text>
-          <Text style={heroStyles.statChipLabel}>Progress</Text>
+          <Text style={heroStyles.statChipLabel}>{t('home_progress')}</Text>
         </View>
         {nextRank && (
           <>
@@ -145,6 +147,7 @@ function HeroSection() {
 
 function DailyQuests() {
   const { nutrition, todaysRuns, todaysWorkouts } = useApp();
+  const { t } = useLanguage();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -157,7 +160,7 @@ function DailyQuests() {
   const quests = useMemo(() => [
     {
       id: "run",
-      label: "Complete a run",
+      label: t('home_complete_run'),
       xp: "+25 XP",
       icon: <Footprints size={16} color="#00E5FF" />,
       color: "#00E5FF",
@@ -166,7 +169,7 @@ function DailyQuests() {
     },
     {
       id: "lift",
-      label: "Finish a workout",
+      label: t('home_finish_workout'),
       xp: "+75 XP",
       icon: <Dumbbell size={16} color="#FF6B35" />,
       color: "#FF6B35",
@@ -175,7 +178,7 @@ function DailyQuests() {
     },
     {
       id: "cal",
-      label: "Hit calorie goal",
+      label: t('home_hit_calorie'),
       xp: "+50 XP",
       icon: <Target size={16} color="#BFFF00" />,
       color: "#BFFF00",
@@ -184,14 +187,14 @@ function DailyQuests() {
     },
     {
       id: "protein",
-      label: "Hit protein goal",
+      label: t('home_hit_protein'),
       xp: "+30 XP",
       icon: <Award size={16} color="#F59E0B" />,
       color: "#F59E0B",
       done: proteinProgress >= 0.95,
       progress: proteinProgress,
     },
-  ], [todaysRuns.length, todaysWorkouts.length, calProgress, proteinProgress]);
+  ], [todaysRuns.length, todaysWorkouts.length, calProgress, proteinProgress, t]);
 
   const completedCount = quests.filter(q => q.done).length;
 
@@ -200,7 +203,7 @@ function DailyQuests() {
       <View style={questStyles.header}>
         <View style={questStyles.headerLeft}>
           <Crown size={14} color="#F59E0B" />
-          <Text style={questStyles.heading}>Daily Quests</Text>
+          <Text style={questStyles.heading}>{t('home_daily_quests')}</Text>
         </View>
         <View style={questStyles.completedBadge}>
           <Text style={questStyles.completedText}>{completedCount}/{quests.length}</Text>
@@ -231,6 +234,7 @@ function DailyQuests() {
 
 function StreakStrip() {
   const { stats } = useApp();
+  const { t } = useLanguage();
   const enterAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -238,9 +242,9 @@ function StreakStrip() {
   }, [enterAnim]);
 
   const streaks = [
-    { label: "Run", value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#4B5563"} /> },
-    { label: "Food", value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#4B5563"} /> },
-    { label: "Gym", value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#4B5563"} /> },
+    { label: t('home_run'), value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#4B5563"} /> },
+    { label: t('home_food'), value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#4B5563"} /> },
+    { label: t('home_gym'), value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#4B5563"} /> },
   ];
 
   const totalStreak = streaks.reduce((a, s) => a + s.value, 0);
@@ -273,6 +277,7 @@ function StreakStrip() {
 function TodayNutrition() {
   const { nutrition } = useApp();
   const router = useRouter();
+  const { t } = useLanguage();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const calPct = nutrition.calorieGoal > 0 ? Math.min(nutrition.calories / nutrition.calorieGoal, 1) : 0;
@@ -286,9 +291,9 @@ function TodayNutrition() {
   const offset = circ * (1 - calPct);
 
   const macros = [
-    { label: "Protein", value: nutrition.protein, goal: nutrition.proteinGoal, color: "#00E5FF", short: "P" },
-    { label: "Carbs", value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#BFFF00", short: "C" },
-    { label: "Fat", value: nutrition.fat, goal: nutrition.fatGoal, color: "#F59E0B", short: "F" },
+    { label: t('home_protein'), value: nutrition.protein, goal: nutrition.proteinGoal, color: "#00E5FF", short: "P" },
+    { label: t('home_carbs'), value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#BFFF00", short: "C" },
+    { label: t('home_fat'), value: nutrition.fat, goal: nutrition.fatGoal, color: "#F59E0B", short: "F" },
   ];
 
   const handlePressIn = useCallback(() => {
@@ -311,9 +316,9 @@ function TodayNutrition() {
             <UtensilsCrossed size={15} color="#FF6B35" />
           </View>
           <View style={nutStyles.headerTitleArea}>
-            <Text style={nutStyles.heading}>Today's Fuel</Text>
+            <Text style={nutStyles.heading}>{t('home_todays_fuel')}</Text>
             <Text style={nutStyles.headerSub}>
-              {isGoalHit ? "Goal reached!" : `${calRemaining} kcal remaining`}
+              {isGoalHit ? t('home_goal_reached') : t('home_kcal_remaining', { cal: String(calRemaining) })}
             </Text>
           </View>
           <View style={nutStyles.headerArrow}>
@@ -374,6 +379,7 @@ function TodayNutrition() {
 
 function WeeklyStats() {
   const { stats } = useApp();
+  const { t } = useLanguage();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -388,17 +394,17 @@ function WeeklyStats() {
   };
 
   const items = [
-    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: "Distance", color: "#00E5FF", icon: <Route size={20} color="#00E5FF" /> },
-    { value: `${stats.weeklyRuns}`, unit: "", label: "Runs", color: "#BFFF00", icon: <Footprints size={20} color="#BFFF00" /> },
-    { value: formatTime(stats.weeklyTime), unit: "", label: "Active Time", color: "#FF6B35", icon: <Timer size={20} color="#FF6B35" /> },
-    { value: `${stats.weeklyWorkouts}`, unit: "", label: "Workouts", color: "#00ADB5", icon: <Dumbbell size={20} color="#00ADB5" /> },
+    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: t('home_distance'), color: "#00E5FF", icon: <Route size={20} color="#00E5FF" /> },
+    { value: `${stats.weeklyRuns}`, unit: "", label: t('home_runs'), color: "#BFFF00", icon: <Footprints size={20} color="#BFFF00" /> },
+    { value: formatTime(stats.weeklyTime), unit: "", label: t('home_active_time'), color: "#FF6B35", icon: <Timer size={20} color="#FF6B35" /> },
+    { value: `${stats.weeklyWorkouts}`, unit: "", label: t('home_workouts'), color: "#00ADB5", icon: <Dumbbell size={20} color="#00ADB5" /> },
   ];
 
   return (
     <Animated.View style={[weekStyles.container, { opacity: fadeIn }]}>
       <View style={weekStyles.headerRow}>
         <TrendingUp size={15} color="#9CA3AF" />
-        <Text style={weekStyles.heading}>This Week</Text>
+        <Text style={weekStyles.heading}>{t('home_this_week')}</Text>
       </View>
       <View style={weekStyles.grid}>
         {items.map((item, idx) => (
@@ -425,6 +431,7 @@ function WeeklyStats() {
 
 function XPFeed() {
   const { xpInfo } = useApp();
+  const { t } = useLanguage();
 
   const recentEvents = useMemo(() => {
     return xpInfo.xpEvents.slice(-5).reverse();
@@ -468,7 +475,7 @@ function XPFeed() {
     <View style={feedStyles.container}>
       <View style={feedStyles.header}>
         <Zap size={13} color="#6B7280" />
-        <Text style={feedStyles.heading}>XP Activity</Text>
+        <Text style={feedStyles.heading}>{t('home_xp_activity')}</Text>
         <Text style={feedStyles.total}>{xpInfo.totalXP.toLocaleString()} total</Text>
       </View>
       <View style={feedStyles.timeline}>
@@ -495,20 +502,22 @@ function XPFeed() {
 }
 
 function useGreeting() {
+  const { t } = useLanguage();
   return useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 5) return "Night owl mode 🦉";
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    if (hour < 21) return "Good evening";
-    return "Night owl mode 🦉";
-  }, []);
+    if (hour < 5) return t('home_night_owl');
+    if (hour < 12) return t('home_good_morning');
+    if (hour < 17) return t('home_good_afternoon');
+    if (hour < 21) return t('home_good_evening');
+    return t('home_night_owl');
+  }, [t]);
 }
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const greeting = useGreeting();
   const { xpInfo } = useApp();
+  const { t } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = useCallback(() => {
@@ -521,7 +530,7 @@ export default function DashboardScreen() {
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
         <View>
           <Text style={styles.greetingText}>{greeting}</Text>
-          <Text style={styles.subGreeting}>Keep leveling up</Text>
+          <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
         </View>
         <View style={[styles.levelChip, { backgroundColor: xpInfo.rank.color + "18", borderColor: xpInfo.rank.color + "35" }]}>
           <Text style={styles.levelChipEmoji}>{xpInfo.rank.emoji}</Text>

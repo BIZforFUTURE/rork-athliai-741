@@ -19,6 +19,7 @@ import {
   CheckCircle,
   ArrowRight
 } from "lucide-react-native";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 export default function WorkoutCompleteScreen() {
   const { workoutName, exerciseCount, duration, calories } = useLocalSearchParams<{
@@ -29,6 +30,7 @@ export default function WorkoutCompleteScreen() {
   }>();
   const { scheduleWorkoutReminder } = useNotifications();
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   
   const [scaleAnim] = useState(new Animated.Value(0));
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -110,8 +112,8 @@ export default function WorkoutCompleteScreen() {
               }
             ]}
           >
-            <Text style={styles.congratsText}>Congratulations!</Text>
-            <Text style={styles.completedText}>Workout Complete</Text>
+            <Text style={styles.congratsText}>{t('workout_complete_title')}</Text>
+            <Text style={styles.completedText}>{t('workout_complete_great')}</Text>
             <Text style={styles.workoutNameText}>{workoutName}</Text>
           </Animated.View>
         </View>
@@ -132,7 +134,7 @@ export default function WorkoutCompleteScreen() {
                 <Target size={24} color="#10B981" />
               </View>
               <Text style={styles.statNumber}>{exerciseCount}</Text>
-              <Text style={styles.statLabel}>Exercises</Text>
+              <Text style={styles.statLabel}>{t('workout_complete_exercises')}</Text>
             </View>
             
             <View style={styles.statCard}>
@@ -140,7 +142,7 @@ export default function WorkoutCompleteScreen() {
                 <Clock size={24} color="#3B82F6" />
               </View>
               <Text style={styles.statNumber}>{duration}</Text>
-              <Text style={styles.statLabel}>Minutes</Text>
+              <Text style={styles.statLabel}>{t('workout_complete_duration')}</Text>
             </View>
             
             <View style={styles.statCard}>
@@ -148,7 +150,7 @@ export default function WorkoutCompleteScreen() {
                 <Flame size={24} color="#F59E0B" />
               </View>
               <Text style={styles.statNumber}>{calories}</Text>
-              <Text style={styles.statLabel}>Calories</Text>
+              <Text style={styles.statLabel}>{t('workout_complete_calories')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -185,7 +187,7 @@ export default function WorkoutCompleteScreen() {
           ]}
         >
           <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-            <Text style={styles.continueButtonText}>Go Back to Dashboard</Text>
+            <Text style={styles.continueButtonText}>{t('workout_complete_done')}</Text>
             <ArrowRight size={20} color="#10B981" />
           </TouchableOpacity>
         </Animated.View>

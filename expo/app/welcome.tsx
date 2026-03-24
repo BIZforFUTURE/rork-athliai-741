@@ -22,6 +22,7 @@ import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getVideoUrlForExercise } from '@/utils/videoUrls';
 import { callOpenAI } from '@/utils/openai';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 
 interface WelcomeSlide {
@@ -33,12 +34,20 @@ interface WelcomeSlide {
   gradient: string[];
 }
 
-const LOADING_STEPS = [
+const LOADING_STEPS_EN = [
   { label: 'Analyzing your goals', icon: Target },
   { label: 'Selecting exercises', icon: Dumbbell },
   { label: 'Optimizing sets & reps', icon: Activity },
   { label: 'Building your schedule', icon: Calendar },
   { label: 'Finalizing your plan', icon: Sparkles },
+];
+
+const LOADING_STEPS_ES = [
+  { label: 'Analizando tus objetivos', icon: Target },
+  { label: 'Seleccionando ejercicios', icon: Dumbbell },
+  { label: 'Optimizando series y repeticiones', icon: Activity },
+  { label: 'Construyendo tu horario', icon: Calendar },
+  { label: 'Finalizando tu plan', icon: Sparkles },
 ];
 
 const FITNESS_TIPS = [
@@ -54,7 +63,8 @@ const FITNESS_TIPS = [
   "Creatine monohydrate is the most researched and effective supplement for strength gains.",
 ];
 
-function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: number; left: number; right: number }, progress: number }) {
+function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number; bottom: number; left: number; right: number }, progress: number, isSpanish: boolean }) {
+  const LOADING_STEPS = isSpanish ? LOADING_STEPS_ES : LOADING_STEPS_EN;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -73,6 +83,7 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress, activeStep]);
 
   useEffect(() => {
@@ -93,6 +104,7 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
         ]).start();
       }
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeStep, stepAnims, stepScaleAnims]);
 
   useEffect(() => {
@@ -157,7 +169,7 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
               </Animated.View>
             </View>
 
-            <Text style={styles.loadingTitle}>Building Your Plan</Text>
+            <Text style={styles.loadingTitle}>{isSpanish ? 'Creando Tu Plan' : 'Building Your Plan'}</Text>
             <Text style={styles.loadingPercent}>{percentText}%</Text>
 
             <View style={styles.progressBarContainer}>
@@ -215,7 +227,7 @@ function LoadingScreen({ insets, progress }: { insets: { top: number; bottom: nu
           <View style={styles.loadingTipCard}>
             <View style={styles.loadingTipHeader}>
               <Sparkles size={14} color="#00ADB5" />
-              <Text style={styles.loadingTipHeaderText}>DID YOU KNOW?</Text>
+              <Text style={styles.loadingTipHeaderText}>{isSpanish ? '¿SABÍAS QUE?' : 'DID YOU KNOW?'}</Text>
             </View>
             <Animated.Text
               style={[
@@ -873,8 +885,11 @@ Return ONLY valid JSON, no markdown or code blocks.`;
 
 
 
+  const { t, setLanguage, isSpanish } = useLanguage();
+  void setLanguage;
+
   if (isGeneratingPlan) {
-    return <LoadingScreen insets={insets} progress={generationProgress} />;
+    return <LoadingScreen insets={insets} progress={generationProgress} isSpanish={isSpanish} />;
   }
 
   if (showGymQuiz) {
@@ -893,7 +908,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
           end={{ x: 0.5, y: 1 }}
         >
           <TouchableOpacity style={styles.skipButton} onPress={handleSkipGym}>
-            <Text style={styles.skipText}>Skip</Text>
+            <Text style={styles.skipText}>{t('welcome_skip')}</Text>
           </TouchableOpacity>
 
           <KeyboardAvoidingView
@@ -915,30 +930,30 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </View>
 
             <View style={styles.contentContainer}>
-              <Text style={styles.title}>Create Your Gym Plan</Text>
-              <Text style={styles.subtitle}>Let&apos;s build your personalized workout routine</Text>
+              <Text style={styles.title}>{t('gym_quiz_title')}</Text>
+              <Text style={styles.subtitle}>{t('gym_quiz_subtitle')}</Text>
               <Text style={styles.description}>
-                Answer a few questions to get a custom 5-day training plan.
+                {t('gym_quiz_description')}
               </Text>
               <Text style={styles.quizStepIndicator}>
-                {showDaySelector ? 'Final Step' : currentGymStep >= gymQuestions.length ? 'Almost Done' : `Question ${currentGymStep + 1} of ${gymQuestions.length}`}
+                {showDaySelector ? t('gym_quiz_final_step') : currentGymStep >= gymQuestions.length ? t('gym_quiz_almost_done') : t('gym_quiz_question_of', { current: String(currentGymStep + 1), total: String(gymQuestions.length) })}
               </Text>
             </View>
 
             <View style={styles.quizContainer}>
               {showDaySelector ? (
                 <>
-                  <Text style={styles.quizQuestion}>Select your workout days</Text>
+                  <Text style={styles.quizQuestion}>{t('gym_quiz_select_days')}</Text>
                   <Text style={styles.daySelectionSubtext}>
-                    Choose which days of the week you want to workout
+                    {t('gym_quiz_select_days_sub')}
                   </Text>
                   <View style={styles.daySelectionContainer}>
-                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                      const dayKey = day.toLowerCase();
+                    {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((dayKey) => {
+                      const dayLabel = t(`day_${dayKey}` as any);
                       const isSelected = selectedWorkoutDays.includes(dayKey);
                       return (
                         <TouchableOpacity
-                          key={day}
+                          key={dayKey}
                           style={[
                             styles.dayButton,
                             isSelected && styles.dayButtonSelected,
@@ -960,7 +975,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                               isSelected && styles.dayButtonTextSelected,
                             ]}
                           >
-                            {day}
+                            {dayLabel}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -982,7 +997,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     }}
                     disabled={selectedWorkoutDays.length === 0}
                   >
-                    <Text style={styles.actionButtonText}>Continue</Text>
+                    <Text style={styles.actionButtonText}>{t('gym_quiz_continue')}</Text>
                     <ChevronRight size={20} color="#FFFFFF" style={styles.chevron} />
                   </TouchableOpacity>
                 </>
@@ -1007,16 +1022,16 @@ Return ONLY valid JSON, no markdown or code blocks.`;
               ) : (
                 <>
                   <Text style={styles.quizQuestion}>
-                    Any specific goals or limitations?
+                    {t('gym_quiz_goals_question')}
                   </Text>
                   <Text style={styles.goalsSubtext}>
-                    Tell us about any specific areas you want to focus on or limitations we should know about.
+                    {t('gym_quiz_goals_sub')}
                   </Text>
                   <TextInput
                     style={styles.goalsInput}
                     multiline
                     numberOfLines={4}
-                    placeholder="e.g., I want to build bigger arms and chest, improve my posture..."
+                    placeholder={isSpanish ? 'ej., Quiero construir brazos y pecho más grandes, mejorar mi postura...' : 'e.g., I want to build bigger arms and chest, improve my posture...'}
                     placeholderTextColor="#6B7280"
                     value={customGoals}
                     onChangeText={setCustomGoals}
@@ -1035,7 +1050,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     }}
                     disabled={!customGoals.trim()}
                   >
-                    <Text style={styles.actionButtonText}>Create My Plan</Text>
+                    <Text style={styles.actionButtonText}>{t('gym_quiz_create_plan')}</Text>
                     <Target size={20} color="#FFFFFF" style={styles.chevron} />
                   </TouchableOpacity>
                 </>
@@ -1089,18 +1104,18 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </View>
 
             <View style={styles.contentContainer}>
-              <Text style={styles.title}>Nutrition Goals</Text>
-              <Text style={styles.subtitle}>Let&apos;s personalize your nutrition plan</Text>
+              <Text style={styles.title}>{t('nutrition_title')}</Text>
+              <Text style={styles.subtitle}>{t('nutrition_subtitle')}</Text>
               <Text style={styles.description}>
-                Tell us your goals so we can calculate your daily calorie and macro targets.
+                {t('nutrition_description')}
               </Text>
               <Text style={styles.quizStepIndicator}>
-                Step {currentNutritionStep + 1} of {totalNutritionSteps}
+                {t('nutrition_step_of', { current: String(currentNutritionStep + 1), total: String(totalNutritionSteps) })}
               </Text>
             </View>
 
             <View style={styles.quizContainer}>
-              <Text style={styles.quizQuestion}>What&apos;s your primary goal?</Text>
+              <Text style={styles.quizQuestion}>{t('nutrition_primary_goal')}</Text>
               <View style={styles.optionsContainer}>
                 <TouchableOpacity
                   style={[
@@ -1121,7 +1136,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                       nutritionGoal === 'lose' && styles.optionTextSelected,
                     ]}
                   >
-                    Lose Weight
+                    {t('nutrition_lose')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1143,7 +1158,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                       nutritionGoal === 'maintain' && styles.optionTextSelected,
                     ]}
                   >
-                    Maintain Weight
+                    {t('nutrition_maintain')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -1165,14 +1180,14 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                       nutritionGoal === 'gain' && styles.optionTextSelected,
                     ]}
                   >
-                    Gain Weight
+                    {t('nutrition_gain')}
                   </Text>
                 </TouchableOpacity>
               </View>
 
               {nutritionGoal && (
                 <>
-                  <Text style={styles.quizQuestion}>Current weight (lbs)?</Text>
+                  <Text style={styles.quizQuestion}>{t('nutrition_current_weight')}</Text>
                   <TextInput
                     style={styles.weightInput}
                     placeholder="e.g., 180"
@@ -1186,7 +1201,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
 
               {nutritionGoal && currentWeight && (
                 <>
-                  <Text style={styles.quizQuestion}>Height</Text>
+                  <Text style={styles.quizQuestion}>{t('nutrition_height')}</Text>
                   <View style={styles.heightInputContainer}>
                     <View style={styles.heightInputWrapper}>
                       <TextInput
@@ -1216,7 +1231,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
 
               {nutritionGoal && nutritionGoal !== 'maintain' && currentWeight && heightFeet && heightInches && (
                 <>
-                  <Text style={styles.quizQuestion}>Target weight (lbs)?</Text>
+                  <Text style={styles.quizQuestion}>{t('nutrition_target_weight')}</Text>
                   <TextInput
                     style={styles.weightInput}
                     placeholder="e.g., 165"
@@ -1226,7 +1241,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     onChangeText={setTargetWeight}
                   />
 
-                  <Text style={styles.quizQuestion}>When do you want to achieve this by?</Text>
+                  <Text style={styles.quizQuestion}>{t('nutrition_when_achieve')}</Text>
                   <TouchableOpacity
                     style={styles.datePickerButton}
                     onPress={() => {
@@ -1238,7 +1253,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   >
                     <Calendar size={20} color="#F9FAFB" />
                     <Text style={styles.datePickerButtonText}>
-                      {goalEndDate ? goalEndDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Select End Date'}
+                      {goalEndDate ? goalEndDate.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : t('nutrition_select_date')}
                     </Text>
                   </TouchableOpacity>
                   
@@ -1280,7 +1295,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                 (nutritionGoal !== 'maintain' && (!targetWeight || !goalEndDate))
               }
             >
-              <Text style={styles.actionButtonText}>Complete Setup</Text>
+              <Text style={styles.actionButtonText}>{t('nutrition_complete_setup')}</Text>
               <Target size={20} color="#FFFFFF" style={styles.chevron} />
             </TouchableOpacity>
             </ScrollView>
@@ -1300,8 +1315,20 @@ Return ONLY valid JSON, no markdown or code blocks.`;
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
       >
+        <TouchableOpacity
+          style={styles.langButton}
+          onPress={() => {
+            if (Platform.OS !== 'web') {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            setLanguage(isSpanish ? 'en' : 'es');
+          }}
+        >
+          <Text style={styles.langButtonText}>{isSpanish ? 'English' : 'Español'}</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.skipButtonMain} onPress={handleSkip}>
-          <Text style={styles.skipTextMain}>Skip</Text>
+          <Text style={styles.skipTextMain}>{t('welcome_skip')}</Text>
         </TouchableOpacity>
 
         <ScrollView
@@ -1322,9 +1349,21 @@ Return ONLY valid JSON, no markdown or code blocks.`;
           </View>
 
           <View style={styles.contentContainer}>
-            <Text style={styles.titleDark}>{currentSlideData.title}</Text>
-            <Text style={styles.subtitleDark}>{currentSlideData.subtitle}</Text>
-            <Text style={styles.descriptionDark}>{currentSlideData.description}</Text>
+            <Text style={styles.titleDark}>{isSpanish ? (
+              currentSlide === 0 ? t('welcome_slide1_title') :
+              currentSlide === 1 ? t('welcome_slide2_title') :
+              currentSlide === 2 ? t('welcome_slide3_title') : t('welcome_slide4_title')
+            ) : currentSlideData.title}</Text>
+            <Text style={styles.subtitleDark}>{isSpanish ? (
+              currentSlide === 0 ? t('welcome_slide1_subtitle') :
+              currentSlide === 1 ? t('welcome_slide2_subtitle') :
+              currentSlide === 2 ? t('welcome_slide3_subtitle') : t('welcome_slide4_subtitle')
+            ) : currentSlideData.subtitle}</Text>
+            <Text style={styles.descriptionDark}>{isSpanish ? (
+              currentSlide === 0 ? t('welcome_slide1_description') :
+              currentSlide === 1 ? t('welcome_slide2_description') :
+              currentSlide === 2 ? t('welcome_slide3_description') : t('welcome_slide4_description')
+            ) : currentSlideData.description}</Text>
           </View>
 
           <View style={styles.pagination}>
@@ -1348,9 +1387,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             disabled={isRequestingPermissions}
           >
             <Text style={styles.actionButtonText}>
-              {isRequestingPermissions ? 'Requesting...' : 
-               currentSlide === 3 ? 'Allow Notifications' :
-               isLastSlide ? 'Get Started' : 'Next'}
+              {isRequestingPermissions ? t('welcome_requesting') : 
+               currentSlide === 3 ? t('welcome_allow_notifications') :
+               isLastSlide ? t('welcome_get_started') : t('welcome_next')}
             </Text>
             {!isRequestingPermissions && (
               <ChevronRight size={20} color="#FFFFFF" style={styles.chevron} />
@@ -1367,7 +1406,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                 setCurrentSlide(currentSlide + 1);
               }}
             >
-              <Text style={styles.skipNotificationsText}>Skip for now</Text>
+              <Text style={styles.skipNotificationsText}>{t('welcome_skip_for_now')}</Text>
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -2153,5 +2192,22 @@ const styles = StyleSheet.create({
     textAlign: 'center' as const,
     lineHeight: 16,
     paddingHorizontal: 12,
+  },
+  langButton: {
+    position: 'absolute' as const,
+    top: 60,
+    left: 20,
+    zIndex: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(0, 173, 181, 0.15)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 173, 181, 0.3)',
+  },
+  langButtonText: {
+    color: '#00ADB5',
+    fontSize: 14,
+    fontWeight: '600' as const,
   },
 });

@@ -27,6 +27,7 @@ import { callOpenAI, callOpenAIWithVision } from "@/utils/openai";
 import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
 import { calculateHealthScore } from "@/utils/healthScore";
 import Svg, { Circle } from "react-native-svg";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 const _SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -139,6 +140,7 @@ const macroBarStyles = StyleSheet.create({
 
 export default function NutritionScreen() {
   const _router = useRouter();
+  const { t, isSpanish } = useLanguage();
   const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries } = useApp();
   const { isPremium } = useRevenueCat();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
@@ -670,9 +672,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <Animated.View style={[styles.headerSection, { opacity: headerFadeAnim, transform: [{ translateY: headerFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.headerTitle}>Fuel</Text>
+              <Text style={styles.headerTitle}>{t('fuel_title')}</Text>
               <Text style={styles.headerSubtitle}>
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                {new Date().toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
               </Text>
             </View>
             <View style={styles.headerActions}>
@@ -719,7 +721,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         >
           <LinearGradient colors={["rgba(0,173,181,0.12)", "rgba(0,173,181,0.04)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.weeklyReviewGradient}>
             <FileText size={18} color="#00ADB5" />
-            <Text style={styles.weeklyReviewText}>Weekly Nutrition Review</Text>
+            <Text style={styles.weeklyReviewText}>{t('fuel_weekly_review')}</Text>
             <ChevronRight size={16} color="#00ADB5" />
           </LinearGradient>
         </TouchableOpacity>

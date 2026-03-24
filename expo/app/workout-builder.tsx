@@ -35,6 +35,7 @@ import {
 } from "@/constants/exercises";
 import { WorkoutPlan } from "@/constants/workouts";
 import { useApp } from "@/providers/AppProvider";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 interface SelectedExercise extends ExerciseTemplate {
   sets: number;
@@ -68,6 +69,7 @@ function getExerciseIcon(exercise: ExerciseTemplate) {
 export default function WorkoutBuilderScreen() {
   const insets = useSafeAreaInsets();
   const { savedWorkouts, saveCustomWorkout, deleteSavedWorkout } = useApp();
+  const { t } = useLanguage();
   const [workoutName, setWorkoutName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
@@ -215,14 +217,14 @@ export default function WorkoutBuilderScreen() {
         >
           <X size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Build Workout</Text>
+        <Text style={styles.headerTitle}>{t('builder_title')}</Text>
         <TouchableOpacity 
           style={[styles.saveButton, (!workoutName.trim() || selectedExercises.length === 0) && styles.saveButtonDisabled]}
           onPress={saveWorkout}
           disabled={!workoutName.trim() || selectedExercises.length === 0}
         >
           <Play size={20} color="#FFFFFF" />
-          <Text style={styles.saveButtonText}>Start</Text>
+          <Text style={styles.saveButtonText}>{t('builder_start')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -238,8 +240,8 @@ export default function WorkoutBuilderScreen() {
                 setShowSavedWorkouts(!showSavedWorkouts);
               }}
             >
-              <Text style={styles.savedWorkoutsTitle}>Load Past Workout ({savedWorkouts.length})</Text>
-              <Text style={styles.savedWorkoutsToggle}>{showSavedWorkouts ? 'Hide' : 'Show'}</Text>
+              <Text style={styles.savedWorkoutsTitle}>{t('builder_load_past')} ({savedWorkouts.length})</Text>
+              <Text style={styles.savedWorkoutsToggle}>{showSavedWorkouts ? t('builder_hide') : t('builder_show')}</Text>
             </TouchableOpacity>
             
             {showSavedWorkouts && (
@@ -290,10 +292,10 @@ export default function WorkoutBuilderScreen() {
         )}
 
         <View style={styles.nameSection}>
-          <Text style={styles.label}>Workout Name</Text>
+          <Text style={styles.label}>{t('builder_workout_name')}</Text>
           <TextInput
             style={styles.nameInput}
-            placeholder="e.g., Upper Body Blast"
+            placeholder={t('builder_name_placeholder')}
             placeholderTextColor="#6B7280"
             value={workoutName}
             onChangeText={setWorkoutName}
@@ -302,21 +304,21 @@ export default function WorkoutBuilderScreen() {
 
         <View style={styles.exercisesSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Exercises ({selectedExercises.length})</Text>
+            <Text style={styles.sectionTitle}>{t('builder_exercises')} ({selectedExercises.length})</Text>
             <TouchableOpacity 
               style={styles.addButton}
               onPress={openPicker}
             >
               <Plus size={20} color="#FFFFFF" />
-              <Text style={styles.addButtonText}>Add Exercise</Text>
+              <Text style={styles.addButtonText}>{t('builder_add_exercise')}</Text>
             </TouchableOpacity>
           </View>
 
           {selectedExercises.length === 0 ? (
             <View style={styles.emptyState}>
               <Dumbbell size={40} color="#374151" />
-              <Text style={styles.emptyStateText}>No exercises added yet</Text>
-              <Text style={styles.emptyStateSubtext}>Tap "Add Exercise" to get started</Text>
+              <Text style={styles.emptyStateText}>{t('builder_no_exercises')}</Text>
+              <Text style={styles.emptyStateSubtext}>{t('builder_add_to_start')}</Text>
             </View>
           ) : (
             <View style={styles.exercisesList}>
@@ -356,7 +358,7 @@ export default function WorkoutBuilderScreen() {
 
                   <View style={styles.exerciseParams}>
                     <View style={styles.paramGroup}>
-                      <Text style={styles.paramLabel}>Sets</Text>
+                      <Text style={styles.paramLabel}>{t('builder_sets')}</Text>
                       <View style={styles.paramControls}>
                         <TouchableOpacity 
                           style={styles.paramButton}
@@ -385,7 +387,7 @@ export default function WorkoutBuilderScreen() {
                     </View>
 
                     <View style={styles.paramGroup}>
-                      <Text style={styles.paramLabel}>Reps</Text>
+                      <Text style={styles.paramLabel}>{t('builder_reps')}</Text>
                       <TextInput
                         style={styles.repsInput}
                         value={exercise.reps}
@@ -396,7 +398,7 @@ export default function WorkoutBuilderScreen() {
                     </View>
 
                     <View style={styles.paramGroup}>
-                      <Text style={styles.paramLabel}>Rest (s)</Text>
+                      <Text style={styles.paramLabel}>{t('builder_rest')}</Text>
                       <View style={styles.paramControls}>
                         <TouchableOpacity 
                           style={styles.paramButton}
@@ -445,7 +447,7 @@ export default function WorkoutBuilderScreen() {
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            <Text style={styles.pickerTitle}>Choose Exercises</Text>
+            <Text style={styles.pickerTitle}>{t('builder_choose_exercises')}</Text>
             <View style={styles.cancelButton} />
           </View>
 
@@ -492,7 +494,7 @@ export default function WorkoutBuilderScreen() {
                             </View>
                             {isSelected && (
                               <View style={styles.selectedBadge}>
-                                <Text style={styles.selectedBadgeText}>Added</Text>
+                                <Text style={styles.selectedBadgeText}>{t('builder_added')}</Text>
                               </View>
                             )}
                           </TouchableOpacity>

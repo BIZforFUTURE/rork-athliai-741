@@ -19,6 +19,7 @@ import {
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { getWorkoutById, WorkoutLog, calculateWorkoutCalories, Exercise } from "@/constants/workouts";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 
 interface SetData {
@@ -37,6 +38,8 @@ export default function WorkoutScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { addWorkoutLog } = useApp();
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
+  void t;
   
 
   
