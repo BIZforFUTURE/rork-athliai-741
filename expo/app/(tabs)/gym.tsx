@@ -44,6 +44,7 @@ import { WORKOUT_NAME_TRANSLATION_KEYS } from "@/constants/xp";
 import { getVideoUrlForExercise } from "@/utils/videoUrls";
 import { callOpenAI } from "@/utils/openai";
 import { useLanguage } from "@/providers/LanguageProvider";
+import { TranslationKey } from "@/constants/translations";
 
 interface QuizAnswer {
   question: string;
@@ -515,59 +516,59 @@ export default function GymScreen() {
 
   const quizQuestions = [
     {
-      question: "What is your primary fitness goal?",
+      question: t('gym_q1'),
       options: [
-        "Build muscle mass and size",
-        "Increase strength and power",
-        "Lose weight and tone up",
-        "Improve overall fitness",
-        "Athletic performance"
+        t('gym_q1_o1'),
+        t('gym_q1_o2'),
+        t('gym_q1_o3'),
+        t('gym_q1_o4'),
+        t('gym_q1_o5')
       ]
     },
     {
-      question: "What is your current fitness level?",
+      question: t('gym_q2'),
       options: [
-        "Beginner (new to working out)",
-        "Intermediate (6 months - 2 years)",
-        "Advanced (2+ years of consistent training)"
+        t('gym_q2_o1'),
+        t('gym_q2_o2'),
+        t('gym_q2_o3')
       ]
     },
     {
-      question: "What equipment do you have access to?",
+      question: t('gym_q3'),
       options: [
-        "Full gym with free weights and machines",
-        "Home gym with dumbbells and basic equipment",
-        "Bodyweight only (no equipment)",
-        "Limited equipment (resistance bands, light weights)"
+        t('gym_q3_o1'),
+        t('gym_q3_o2'),
+        t('gym_q3_o3'),
+        t('gym_q3_o4')
       ]
     },
     {
-      question: "How much time can you dedicate per workout?",
+      question: t('gym_q4'),
       options: [
-        "30-45 minutes",
-        "45-60 minutes",
-        "60-90 minutes",
-        "I'm flexible with time"
+        t('gym_q4_o1'),
+        t('gym_q4_o2'),
+        t('gym_q4_o3'),
+        t('gym_q4_o4')
       ]
     },
     {
-      question: "Which days of the week do you want to workout?",
+      question: t('gym_quiz_select_days'),
       options: [
-        "Monday, Wednesday, Friday (3 days)",
-        "Monday, Tuesday, Thursday, Friday (4 days)",
-        "Monday, Tuesday, Wednesday, Thursday, Friday (5 days)",
-        "Monday, Wednesday, Friday, Saturday, Sunday (5 days)",
-        "Custom schedule (select specific days)"
+        `${t('day_monday')}, ${t('day_wednesday')}, ${t('day_friday')} (3 ${isSpanish ? 'días' : 'days'})`,
+        `${t('day_monday')}, ${t('day_tuesday')}, ${t('day_thursday')}, ${t('day_friday')} (4 ${isSpanish ? 'días' : 'days'})`,
+        `${t('day_monday')}, ${t('day_tuesday')}, ${t('day_wednesday')}, ${t('day_thursday')}, ${t('day_friday')} (5 ${isSpanish ? 'días' : 'days'})`,
+        `${t('day_monday')}, ${t('day_wednesday')}, ${t('day_friday')}, ${t('day_saturday')}, ${t('day_sunday')} (5 ${isSpanish ? 'días' : 'days'})`,
+        isSpanish ? 'Horario personalizado (seleccionar días específicos)' : 'Custom schedule (select specific days)'
       ]
     },
     {
-      question: "Do you have any physical limitations or injuries?",
+      question: t('gym_q5'),
       options: [
-        "No limitations or injuries",
-        "Lower back issues",
-        "Knee or joint problems",
-        "Shoulder or arm issues",
-        "I'll specify in my goals"
+        t('gym_q5_o1'),
+        t('gym_q5_o2'),
+        t('gym_q5_o3'),
+        t('gym_q5_o4'),
+        t('gym_q5_o5')
       ]
     }
   ];
@@ -583,7 +584,7 @@ export default function GymScreen() {
     };
     setQuizAnswers(newAnswers);
 
-    if (currentQuizStep === 4 && answer === "Custom schedule (select specific days)") {
+    if (currentQuizStep === 4 && (answer === "Custom schedule (select specific days)" || answer === "Horario personalizado (seleccionar días específicos)")) {
       setShowDaySelector(true);
       return;
     }
@@ -1376,12 +1377,12 @@ Format as JSON:
                   {t('gym_select_days_sub')}
                 </Text>
                 <View style={styles.daySelectionContainer}>
-                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                    const dayKey = day.toLowerCase();
+                  {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((dayKey) => {
+                    const dayLabel = t(`day_${dayKey}` as TranslationKey);
                     const isSelected = selectedWorkoutDays.includes(dayKey);
                     return (
                       <TouchableOpacity
-                        key={day}
+                        key={dayKey}
                         style={[
                           styles.daySelectionButton,
                           isSelected && styles.daySelectionButtonSelected
@@ -1405,7 +1406,7 @@ Format as JSON:
                           styles.daySelectionText,
                           isSelected && styles.daySelectionTextSelected
                         ]}>
-                          {day}
+                          {dayLabel}
                         </Text>
                       </TouchableOpacity>
                     );
