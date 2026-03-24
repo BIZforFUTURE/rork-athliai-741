@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Fitness Tracker",
-    "slug": "oj0o06yiwonri1p1lo5rr",
-    "version": "1.0.0",
+    "name": "AthliAI",
+    "slug": "athliai-fitness-tracker-end1bye",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "rork-app",
+    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -14,15 +14,43 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "app.rork.oj0o06yiwonri1p1lo5rr"
+      "supportsTablet": true,
+      "bundleIdentifier": "app.rork.athliai-fitness-tracker-end1bye",
+      "infoPlist": {
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "AthliAI needs access to your location to track runs, map workouts, and provide stats even when the app is not in the foreground.",
+        "NSLocationAlwaysUsageDescription": "AthliAI uses your location to provide accurate workout tracking and performance insights even in the background.",
+        "NSLocationWhenInUseUsageDescription": "AthliAI uses your location to track your runs and routes while you use the app.",
+        "UIBackgroundModes": [
+          "location"
+        ],
+        "NSCameraUsageDescription": "AthliAI uses your camera to let you capture workout photos and share progress.",
+        "NSMicrophoneUsageDescription": "AthliAI may use your microphone for audio features while recording workouts.",
+        "NSPhotoLibraryUsageDescription": "AthliAI accesses your photo library so you can upload and share pictures of your activities."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.oj0o06yiwonri1p1lo5rr"
+      "package": "app.rork.athliai-fitness-tracker-end1bye",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "RECEIVE_BOOT_COMPLETED",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "WAKE_LOCK",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.REQUEST_INSTALL_PACKAGES",
+        "android.permission.VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -34,8 +62,37 @@
           "origin": "https://rork.com/"
         }
       ],
-      "expo-font",
-      "expo-web-browser"
+      [
+        "expo-location",
+        {
+          "isAndroidForegroundServiceEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isIosBackgroundLocationEnabled": true,
+          "locationAlwaysAndWhenInUsePermission": "AthliAI uses your location to track runs and provide detailed stats even in the background."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow AthliAI to access your camera for workout and progress photos.",
+          "microphonePermission": "Allow AthliAI to access your microphone for audio features.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow AthliAI to access your photos so you can upload and share pictures of your workouts."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

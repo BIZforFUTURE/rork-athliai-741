@@ -10,8 +10,6 @@ web-build/
 expo-env.d.ts
 
 # Native
-ios/
-android/
 *.orig.*
 *.jks
 *.p8
@@ -38,7 +36,8 @@ yarn-error.*
 *.tsbuildinfo
 .vercel
 
-.rork
+ios/
+android/
 .env
 core
 node_modules
