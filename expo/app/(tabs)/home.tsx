@@ -27,7 +27,7 @@ import {
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter } from "expo-router";
-import { RANKS } from "@/constants/xp";
+import { RANKS, RANK_TRANSLATION_KEYS } from "@/constants/xp";
 import { useLanguage } from "@/providers/LanguageProvider";
 
 
@@ -101,7 +101,7 @@ function HeroSection() {
 
         <View style={heroStyles.infoCol}>
           <View style={[heroStyles.rankTag, { backgroundColor: xpInfo.rank.color + "15" }]}>
-            <Text style={[heroStyles.rankTagText, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
+            <Text style={[heroStyles.rankTagText, { color: xpInfo.rank.color }]}>{RANK_TRANSLATION_KEYS[xpInfo.rank.title] ? t(RANK_TRANSLATION_KEYS[xpInfo.rank.title]) : xpInfo.rank.title}</Text>
           </View>
           <Text style={heroStyles.levelTitle}>{t('home_level', { level: String(xpInfo.level) })}</Text>
           <Text style={heroStyles.xpLabel}>
@@ -136,7 +136,7 @@ function HeroSection() {
             <View style={heroStyles.statDivider} />
             <View style={heroStyles.statChip}>
               <Text style={heroStyles.nextRankEmoji}>{nextRank.emoji}</Text>
-              <Text style={[heroStyles.statChipValue, { color: nextRank.color + "CC" }]}>{nextRank.title}</Text>
+              <Text style={[heroStyles.statChipValue, { color: nextRank.color + "CC" }]}>{RANK_TRANSLATION_KEYS[nextRank.title] ? t(RANK_TRANSLATION_KEYS[nextRank.title]) : nextRank.title}</Text>
               <Text style={heroStyles.statChipLabel}>Lv {nextRank.minLevel}</Text>
             </View>
           </>

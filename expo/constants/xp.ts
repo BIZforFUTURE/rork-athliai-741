@@ -112,6 +112,42 @@ export function getStartingLevelFromQuiz(fitnessLevelAnswer: string): { level: n
   return { level: 1, totalXP: 0 };
 }
 
+import type { TranslationKey } from '@/constants/translations';
+
+export const RANK_TRANSLATION_KEYS: Record<string, TranslationKey> = {
+  'Rookie': 'rank_rookie',
+  'Warrior': 'rank_warrior',
+  'Gladiator': 'rank_gladiator',
+  'Champion': 'rank_champion',
+  'Titan': 'rank_titan',
+  'Legend': 'rank_legend',
+  'Mythic': 'rank_mythic',
+};
+
+export const WORKOUT_NAME_TRANSLATION_KEYS: Record<string, TranslationKey> = {
+  'Upper Body Strength': 'workout_upper_body_strength',
+  'Lower Body Strength': 'workout_lower_body_strength',
+  'Push Day (Hypertrophy)': 'workout_push_day_hypertrophy',
+  'Endurance Circuit': 'workout_endurance_circuit',
+  'Push Day (Strength)': 'workout_push_day_strength',
+  'Pull Day (Hypertrophy)': 'workout_pull_day_hypertrophy',
+  'Leg Day (Hypertrophy)': 'workout_leg_day_hypertrophy',
+  'HIIT Cardio Blast': 'workout_hiit_cardio_blast',
+};
+
+export const LEVEL_UP_MESSAGE_KEYS: TranslationKey[] = [
+  'levelup_msg_1',
+  'levelup_msg_2',
+  'levelup_msg_3',
+  'levelup_msg_4',
+  'levelup_msg_5',
+  'levelup_msg_6',
+  'levelup_msg_7',
+  'levelup_msg_8',
+  'levelup_msg_9',
+  'levelup_msg_10',
+];
+
 export const LEVEL_UP_MESSAGES = [
   "You're unstoppable!",
   "New heights unlocked!",
@@ -127,4 +163,8 @@ export const LEVEL_UP_MESSAGES = [
 
 export function getRandomLevelUpMessage(): string {
   return LEVEL_UP_MESSAGES[Math.floor(Math.random() * LEVEL_UP_MESSAGES.length)];
+}
+
+export function getRandomLevelUpMessageKey(): TranslationKey {
+  return LEVEL_UP_MESSAGE_KEYS[Math.floor(Math.random() * LEVEL_UP_MESSAGE_KEYS.length)];
 }

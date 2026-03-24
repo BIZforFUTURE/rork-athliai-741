@@ -10,7 +10,8 @@ import {
   Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { getRankForLevel, getRandomLevelUpMessage } from '@/constants/xp';
+import { getRankForLevel, getRandomLevelUpMessageKey, RANK_TRANSLATION_KEYS } from '@/constants/xp';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PARTICLE_COUNT = 24;
@@ -78,10 +79,13 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
   const buttonOpacity = useRef(new Animated.Value(0)).current;
   const glowPulse = useRef(new Animated.Value(0.5)).current;
 
+  const { t } = useLanguage();
   const rank = getRankForLevel(level);
   const previousRank = getRankForLevel(previousLevel);
   const isNewRank = rank.title !== previousRank.title;
-  const message = useMemo(() => getRandomLevelUpMessage(), []);
+  const messageKey = useMemo(() => getRandomLevelUpMessageKey(), []);
+  const message = t(messageKey);
+  const translatedRankTitle = RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title;
 
   const particleColors = useMemo(() => {
     const base = [rank.color, '#FFFFFF', '#FFD700', '#00E5FF'];
@@ -167,11 +171,11 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
             }}
           >
             <View style={[styles.rankBadge, { backgroundColor: rank.color + '20', borderColor: rank.color + '40' }]}>
-              <Text style={[styles.rankTitle, { color: rank.color }]}>{rank.title}</Text>
+              <Text style={[styles.rankTitle, { color: rank.color }]}>{translatedRankTitle}</Text>
             </View>
 
             {isNewRank && (
-              <Text style={styles.newRankText}>New Rank Unlocked!</Text>
+              <Text style={styles.newRankText}>{t('levelup_new_rank')}</Text>
             )}
 
             <Text style={styles.message}>{message}</Text>

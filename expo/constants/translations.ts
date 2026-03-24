@@ -517,6 +517,38 @@ export const translations = {
     stats_paste_backup: 'Paste backup JSON here...',
     stats_data_restored: 'Data restored successfully!',
 
+    // Ranks
+    rank_rookie: 'Rookie',
+    rank_warrior: 'Warrior',
+    rank_gladiator: 'Gladiator',
+    rank_champion: 'Champion',
+    rank_titan: 'Titan',
+    rank_legend: 'Legend',
+    rank_mythic: 'Mythic',
+
+    // Workout names (static)
+    workout_upper_body_strength: 'Upper Body Strength',
+    workout_lower_body_strength: 'Lower Body Strength',
+    workout_push_day_hypertrophy: 'Push Day (Hypertrophy)',
+    workout_endurance_circuit: 'Endurance Circuit',
+    workout_push_day_strength: 'Push Day (Strength)',
+    workout_pull_day_hypertrophy: 'Pull Day (Hypertrophy)',
+    workout_leg_day_hypertrophy: 'Leg Day (Hypertrophy)',
+    workout_hiit_cardio_blast: 'HIIT Cardio Blast',
+
+    // Level up
+    levelup_new_rank: 'New Rank Unlocked!',
+    levelup_msg_1: "You're unstoppable!",
+    levelup_msg_2: 'New heights unlocked!',
+    levelup_msg_3: 'The grind pays off!',
+    levelup_msg_4: 'Built different.',
+    levelup_msg_5: 'Another level conquered!',
+    levelup_msg_6: 'Keep pushing limits!',
+    levelup_msg_7: 'Strength is earned!',
+    levelup_msg_8: 'No shortcuts, just progress!',
+    levelup_msg_9: 'The journey continues!',
+    levelup_msg_10: 'Leveling up in real life!',
+
     // Common
     common_cancel: 'Cancel',
     common_delete: 'Delete',
@@ -1042,6 +1074,38 @@ export const translations = {
     stats_restore_info: 'Pega el texto de respaldo que exportaste previamente. Esto reemplazará todos los datos actuales.',
     stats_paste_backup: 'Pega el JSON de respaldo aquí...',
     stats_data_restored: '¡Datos restaurados exitosamente!',
+
+    // Ranks
+    rank_rookie: 'Novato',
+    rank_warrior: 'Guerrero',
+    rank_gladiator: 'Gladiador',
+    rank_champion: 'Campeón',
+    rank_titan: 'Titán',
+    rank_legend: 'Leyenda',
+    rank_mythic: 'Mítico',
+
+    // Workout names (static)
+    workout_upper_body_strength: 'Fuerza Tren Superior',
+    workout_lower_body_strength: 'Fuerza Tren Inferior',
+    workout_push_day_hypertrophy: 'Día de Empuje (Hipertrofia)',
+    workout_endurance_circuit: 'Circuito de Resistencia',
+    workout_push_day_strength: 'Día de Empuje (Fuerza)',
+    workout_pull_day_hypertrophy: 'Día de Tirón (Hipertrofia)',
+    workout_leg_day_hypertrophy: 'Día de Piernas (Hipertrofia)',
+    workout_hiit_cardio_blast: 'HIIT Cardio Explosivo',
+
+    // Level up
+    levelup_new_rank: '¡Nuevo Rango Desbloqueado!',
+    levelup_msg_1: '¡Eres imparable!',
+    levelup_msg_2: '¡Nuevas alturas desbloqueadas!',
+    levelup_msg_3: '¡El esfuerzo vale la pena!',
+    levelup_msg_4: 'Hecho diferente.',
+    levelup_msg_5: '¡Otro nivel conquistado!',
+    levelup_msg_6: '¡Sigue superando límites!',
+    levelup_msg_7: '¡La fuerza se gana!',
+    levelup_msg_8: '¡Sin atajos, solo progreso!',
+    levelup_msg_9: '¡El viaje continúa!',
+    levelup_msg_10: '¡Subiendo de nivel en la vida real!',
 
     // Common
     common_cancel: 'Cancelar',

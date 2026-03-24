@@ -3,7 +3,8 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import createContextHook from '@nkzw/create-context-hook';
-import { getRankForLevel, getXPProgress, type RankInfo } from '@/constants/xp';
+import { getRankForLevel, getXPProgress, RANK_TRANSLATION_KEYS, type RankInfo } from '@/constants/xp';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { estimateRunCalories } from '@/utils/healthScore';
 
 Notifications.setNotificationHandler({
@@ -17,6 +18,7 @@ Notifications.setNotificationHandler({
 });
 
 export const [NotificationProvider, useNotifications] = createContextHook(() => {
+  const { t, isSpanish } = useLanguage();
   const [expoPushToken, setExpoPushToken] = React.useState<string | null>(null);
   const [notification, setNotification] = React.useState<Notifications.Notification | null>(null);
   const notificationListener = useRef<Notifications.Subscription | null>(null);
@@ -569,8 +571,8 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: `🎉 LEVEL UP! You're now Level ${newLevel}!`,
-          body: `${rankInfo.emoji} New rank: ${rankInfo.title}! Keep grinding to unlock the next tier!`,
+          title: isSpanish ? `🎉 ¡SUBISTE DE NIVEL! ¡Ahora eres Nivel ${newLevel}!` : `🎉 LEVEL UP! You're now Level ${newLevel}!`,
+          body: `${rankInfo.emoji} ${isSpanish ? 'Nuevo rango' : 'New rank'}: ${RANK_TRANSLATION_KEYS[rankInfo.title] ? t(RANK_TRANSLATION_KEYS[rankInfo.title]) : rankInfo.title}! ${isSpanish ? '¡Sigue avanzando para desbloquear el siguiente nivel!' : 'Keep grinding to unlock the next tier!'}`,
           sound: 'default',
           data: { type: 'level-up', level: newLevel, rank: rankInfo.title, timestamp: Date.now() },
         },
@@ -583,7 +585,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending level up notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish, t]);
 
   const sendRankUpNotification = useCallback(async (newRank: RankInfo, level: number): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
@@ -594,8 +596,8 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: `${newRank.emoji} NEW RANK UNLOCKED: ${newRank.title}!`,
-          body: `You've ascended to ${newRank.title} at Level ${level}. Few warriors reach this tier. Legendary!`,
+          title: `${newRank.emoji} ${isSpanish ? 'NUEVO RANGO DESBLOQUEADO' : 'NEW RANK UNLOCKED'}: ${RANK_TRANSLATION_KEYS[newRank.title] ? t(RANK_TRANSLATION_KEYS[newRank.title]) : newRank.title}!`,
+          body: isSpanish ? `¡Has ascendido a ${RANK_TRANSLATION_KEYS[newRank.title] ? t(RANK_TRANSLATION_KEYS[newRank.title]) : newRank.title} en el Nivel ${level}. Pocos guerreros llegan a este nivel. ¡Legendario!` : `You've ascended to ${newRank.title} at Level ${level}. Few warriors reach this tier. Legendary!`,
           sound: 'default',
           data: { type: 'rank-up', rank: newRank.title, level, timestamp: Date.now() },
         },
@@ -608,7 +610,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending rank up notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish, t]);
 
   const sendStreakMilestoneNotification = useCallback(async (streakType: string, days: number): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
@@ -651,7 +653,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
           title: `+${amount} XP ${rank.emoji} ${source}`,
-          body: `${progress.current}/${progress.needed} XP to Level ${level + 1}. ${rank.title} rank — keep pushing!`,
+          body: isSpanish ? `${progress.current}/${progress.needed} XP para Nivel ${level + 1}. Rango ${RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title} — ¡sigue adelante!` : `${progress.current}/${progress.needed} XP to Level ${level + 1}. ${rank.title} rank — keep pushing!`,
           sound: 'default',
           data: { type: 'xp-earned', amount, source, timestamp: Date.now() },
         },
@@ -664,7 +666,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending XP earned notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish, t]);
 
   const scheduleStreakWarning = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') return;

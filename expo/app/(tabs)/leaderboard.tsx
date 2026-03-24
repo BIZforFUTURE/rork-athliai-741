@@ -49,7 +49,7 @@ import {
 } from "lucide-react-native";
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
-import { RANKS, XPSource } from "@/constants/xp";
+import { RANKS, XPSource, RANK_TRANSLATION_KEYS } from "@/constants/xp";
 import { useLanguage } from "@/providers/LanguageProvider";
 
 interface WeightEntry {
@@ -104,7 +104,7 @@ function XPRankCard({ t }: { t: (key: any, params?: Record<string, string | numb
 
         <View style={xpStyles.rankInfo}>
           <View style={[xpStyles.rankBadge, { backgroundColor: xpInfo.rank.color + "15" }]}>
-            <Text style={[xpStyles.rankTitle, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
+            <Text style={[xpStyles.rankTitle, { color: xpInfo.rank.color }]}>{RANK_TRANSLATION_KEYS[xpInfo.rank.title] ? t(RANK_TRANSLATION_KEYS[xpInfo.rank.title]) : xpInfo.rank.title}</Text>
           </View>
           <View style={xpStyles.xpBarOuter}>
             <View style={[xpStyles.xpBarFill, { width: `${xpInfo.progress * 100}%`, backgroundColor: xpInfo.rank.color }]} />
@@ -141,7 +141,7 @@ function XPRankCard({ t }: { t: (key: any, params?: Record<string, string | numb
               ]} />
               <Text style={xpStyles.timelineEmoji}>{rank.emoji}</Text>
               <Text style={[xpStyles.timelineName, isCurrentOrPast && { color: rank.color + "AA" }]}>
-                {rank.title}
+                {RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title}
               </Text>
             </View>
           );

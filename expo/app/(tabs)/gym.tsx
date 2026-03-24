@@ -40,6 +40,7 @@ import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { workoutPlans, WorkoutPlan, getTargetedMuscleGroups } from "@/constants/workouts";
+import { WORKOUT_NAME_TRANSLATION_KEYS } from "@/constants/xp";
 import { getVideoUrlForExercise } from "@/utils/videoUrls";
 import { callOpenAI } from "@/utils/openai";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -472,8 +473,13 @@ function AnimatedStatCard({ icon: Icon, value, label, delay, color }: {
 export default function GymScreen() {
   const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan } = useApp();
   const { isPremium } = useRevenueCat();
-  const { t } = useLanguage();
+  const { t, isSpanish } = useLanguage();
   const insets = useSafeAreaInsets();
+
+  const translateWorkoutName = useCallback((name: string): string => {
+    const key = WORKOUT_NAME_TRANSLATION_KEYS[name];
+    return key ? t(key) : name;
+  }, [t]);
 
   const [showRecentWorkouts, setShowRecentWorkouts] = useState(true);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -692,7 +698,8 @@ export default function GymScreen() {
     setIsGeneratingPlan(true);
     
     try {
-      const prompt = `You are a certified personal trainer creating a personalized 5-day workout plan. Based on the user's quiz responses and specific goals, create a comprehensive training program.
+      const languageInstruction = isSpanish ? '\nIMPORTANT: Write ALL text content (plan name, description, day names, exercise descriptions) in Spanish.' : '';
+      const prompt = `You are a certified personal trainer creating a personalized 5-day workout plan. Based on the user's quiz responses and specific goals, create a comprehensive training program.${languageInstruction}
 
 User's Quiz Responses:
 ${quizAnswers.map(qa => `${qa.question}: ${qa.answer}`).join('\n')}
@@ -707,7 +714,7 @@ Create a 5-day workout plan that:
 5. Follows proper training principles (progressive overload, muscle balance, recovery)
 
 Structure each day with:
-- Descriptive day name (e.g., "Upper Body Power", "Lower Body Hypertrophy", "Full Body Circuit")
+- Descriptive day name (e.g., ${isSpanish ? '"Fuerza Tren Superior", "Hipertrofia Tren Inferior", "Circuito Cuerpo Completo"' : '"Upper Body Power", "Lower Body Hypertrophy", "Full Body Circuit"'})
 - 4-6 exercises that complement each other
 - Appropriate sets, reps, and rest times for their goals
 - Equipment that matches their access
@@ -715,7 +722,7 @@ Structure each day with:
 
 Format as JSON:
 {
-  "name": "Personalized 5-Day Training Plan",
+  "name": "${isSpanish ? 'Plan de Entrenamiento Personalizado de 5 Días' : 'Personalized 5-Day Training Plan'}",
   "description": "2-3 sentence description of the plan's focus and benefits",
   "days": [
     {
@@ -1263,7 +1270,7 @@ Format as JSON:
                     let _muscleGroups: string[] = [];
                     
                     if (workout) {
-                      workoutName = workout.name;
+                      workoutName = translateWorkoutName(workout.name);
                       _muscleGroups = getTargetedMuscleGroups(workout);
                     } else if (customWorkout && log.workoutPlanId === customWorkout.id) {
                       workoutName = customWorkout.name;
@@ -1290,7 +1297,7 @@ Format as JSON:
                           <View style={styles.recentWorkoutInfo}>
                             <Text style={styles.recentWorkoutName} numberOfLines={1}>{workoutName}</Text>
                             <Text style={styles.recentWorkoutDate}>
-                              {new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {new Date(log.date).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric' })}
                             </Text>
                           </View>
                         </View>

@@ -20,7 +20,7 @@ import {
 import { useApp } from "@/providers/AppProvider";
 import { getWorkoutById, WorkoutLog, calculateWorkoutCalories, Exercise } from "@/constants/workouts";
 import { useLanguage } from "@/providers/LanguageProvider";
-
+import { WORKOUT_NAME_TRANSLATION_KEYS } from "@/constants/xp";
 
 interface SetData {
   reps: number;
@@ -39,7 +39,10 @@ export default function WorkoutScreen() {
   const { addWorkoutLog } = useApp();
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  void t;
+  const translateWorkoutName = useCallback((name: string): string => {
+    const key = WORKOUT_NAME_TRANSLATION_KEYS[name];
+    return key ? t(key) : name;
+  }, [t]);
   
 
   
@@ -214,13 +217,13 @@ export default function WorkoutScreen() {
     router.push({
       pathname: "/workout-complete" as any,
       params: { 
-        workoutName: workout.name,
+        workoutName: translateWorkoutName(workout.name),
         exerciseCount: completedExercises.length.toString(),
         duration: Math.floor((new Date().getTime() - workoutStartTime.getTime()) / 60000).toString(), // minutes
         calories: calculateWorkoutCalories(workoutLog).toString()
       }
     });
-  }, [workout, workoutStartTime, exerciseProgress, addWorkoutLog]);
+  }, [workout, workoutStartTime, exerciseProgress, addWorkoutLog, translateWorkoutName]);
 
   const autoFillSets = () => {
     if (!currentProgress) return;
@@ -262,7 +265,7 @@ export default function WorkoutScreen() {
             <X size={24} color="#9CA3AF" />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
-            <Text style={styles.workoutTitle}>{workout.name}</Text>
+            <Text style={styles.workoutTitle}>{translateWorkoutName(workout.name)}</Text>
             <Text style={styles.exerciseCounter}>
               {currentExerciseIndex + 1} of {workout.exercises.length}
             </Text>
