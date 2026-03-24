@@ -49,12 +49,12 @@ interface QuizAnswer {
   answer: string;
 }
 
-const GYM_LOADING_STEPS = [
-  { label: 'Analyzing your goals', icon: Target },
-  { label: 'Selecting exercises', icon: Dumbbell },
-  { label: 'Optimizing sets & reps', icon: Activity },
-  { label: 'Building your schedule', icon: Calendar },
-  { label: 'Finalizing your plan', icon: Sparkles },
+const GYM_LOADING_STEP_KEYS = [
+  { key: 'gym_analyzing_goals', icon: Target },
+  { key: 'gym_selecting_exercises', icon: Dumbbell },
+  { key: 'gym_optimizing', icon: Activity },
+  { key: 'gym_building_schedule', icon: Calendar },
+  { key: 'gym_finalizing', icon: Sparkles },
 ];
 
 const GYM_TIPS = [
@@ -86,7 +86,7 @@ const RECOVERY_QUOTES = [
 const WEEK_DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const WEEK_DAYS_FULL = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-function GymLoadingScreen() {
+function GymLoadingScreen({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -95,8 +95,8 @@ function GymLoadingScreen() {
   const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * GYM_TIPS.length));
   const [activeStep, setActiveStep] = useState(0);
   const [fakeProgress, setFakeProgress] = useState(0);
-  const stepAnims = useRef(GYM_LOADING_STEPS.map(() => new Animated.Value(0))).current;
-  const stepScaleAnims = useRef(GYM_LOADING_STEPS.map(() => new Animated.Value(0.8))).current;
+  const stepAnims = useRef(GYM_LOADING_STEP_KEYS.map(() => new Animated.Value(0))).current;
+  const stepScaleAnims = useRef(GYM_LOADING_STEP_KEYS.map(() => new Animated.Value(0.8))).current;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -113,7 +113,7 @@ function GymLoadingScreen() {
   }, []);
 
   useEffect(() => {
-    const stepIndex = Math.min(Math.floor(fakeProgress * GYM_LOADING_STEPS.length), GYM_LOADING_STEPS.length - 1);
+    const stepIndex = Math.min(Math.floor(fakeProgress * GYM_LOADING_STEP_KEYS.length), GYM_LOADING_STEP_KEYS.length - 1);
     if (stepIndex !== activeStep) {
       setActiveStep(stepIndex);
       if (Platform.OS !== 'web') {
@@ -123,7 +123,7 @@ function GymLoadingScreen() {
   }, [fakeProgress, activeStep]);
 
   useEffect(() => {
-    GYM_LOADING_STEPS.forEach((_, index) => {
+    GYM_LOADING_STEP_KEYS.forEach((_, index) => {
       if (index <= activeStep) {
         Animated.parallel([
           Animated.timing(stepAnims[index], {
@@ -204,7 +204,7 @@ function GymLoadingScreen() {
             </Animated.View>
           </View>
 
-          <Text style={styles.loadingTitle}>Building Your Plan</Text>
+          <Text style={styles.loadingTitle}>{t('gym_building_plan')}</Text>
           <Text style={styles.loadingPercent}>{percentText}%</Text>
 
           <View style={styles.loadingProgressBarContainer}>
@@ -215,13 +215,13 @@ function GymLoadingScreen() {
         </View>
 
         <View style={styles.loadingStepsContainer}>
-          {GYM_LOADING_STEPS.map((step, index) => {
+          {GYM_LOADING_STEP_KEYS.map((step, index) => {
             const IconComponent = step.icon;
             const isActive = index === activeStep;
             const isComplete = index < activeStep;
             return (
               <Animated.View
-                key={step.label}
+                key={step.key}
                 style={[
                   styles.loadingStepRow,
                   {
@@ -249,7 +249,7 @@ function GymLoadingScreen() {
                   isActive && styles.loadingStepLabelActive,
                   isComplete && styles.loadingStepLabelComplete,
                 ]}>
-                  {step.label}
+                  {t(step.key as any)}
                 </Text>
                 {isActive && (
                   <View style={styles.loadingStepPulse} />
@@ -262,7 +262,7 @@ function GymLoadingScreen() {
         <View style={styles.loadingTipCard}>
           <View style={styles.loadingTipHeader}>
             <Sparkles size={14} color="#00ADB5" />
-            <Text style={styles.loadingTipHeaderText}>DID YOU KNOW?</Text>
+            <Text style={styles.loadingTipHeaderText}>{t('gym_did_you_know')}</Text>
           </View>
           <Animated.Text
             style={[
@@ -332,10 +332,11 @@ function WeekDayIndicator({ workoutDays }: { workoutDays: string[] }) {
   );
 }
 
-function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan }: {
+function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
   hasCompletedToday: boolean;
   nextWorkoutDay: string;
   onViewPlan: () => void;
+  t: (key: any, params?: Record<string, string | number>) => string;
 }) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const quoteIndex = useMemo(() => {
@@ -398,17 +399,17 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan }: {
           </View>
           <View style={styles.restDayTextBlock}>
             <Text style={styles.restDayTitle}>
-              {hasCompletedToday ? "Workout Complete" : "Rest Day"}
+              {hasCompletedToday ? t('gym_workout_complete') : t('gym_rest_day')}
             </Text>
             <Text style={styles.restDayQuote}>
               {hasCompletedToday
-                ? "Great job today! Recovery starts now."
+                ? t('gym_great_job')
                 : `"${RECOVERY_QUOTES[quoteIndex]}"`}
             </Text>
             <View style={styles.restDayNextRow}>
               <Calendar size={13} color="#38BDF8" />
               <Text style={styles.nextWorkoutText}>
-                Next workout: {nextWorkoutDay}
+                {t('gym_next_workout', { day: nextWorkoutDay })}
               </Text>
             </View>
           </View>
@@ -419,7 +420,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan }: {
         activeOpacity={0.7}
         onPress={onViewPlan}
       >
-        <Text style={styles.viewPlanButtonText}>View Full Plan</Text>
+        <Text style={styles.viewPlanButtonText}>{t('gym_view_full_plan')}</Text>
         <ChevronRight size={16} color="#38BDF8" />
       </TouchableOpacity>
     </View>
@@ -1175,6 +1176,7 @@ Format as JSON:
               <RestDayCard
                 hasCompletedToday={hasCompletedToday}
                 nextWorkoutDay={getNextWorkoutDay(generatedPlan)}
+                t={t}
                 onViewPlan={() => {
                   if (Platform.OS !== 'web') {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1206,8 +1208,8 @@ Format as JSON:
                 <Hammer size={18} color="#6366F1" />
               </View>
               <View style={styles.buildSmallText}>
-                <Text style={styles.buildSmallTitle}>Build Custom Workout</Text>
-                <Text style={styles.buildSmallSub}>Pick exercises by body part</Text>
+                <Text style={styles.buildSmallTitle}>{t('gym_build_custom')}</Text>
+                <Text style={styles.buildSmallSub}>{t('gym_pick_exercises')}</Text>
               </View>
               <ChevronRight size={18} color="#4B5563" />
             </View>
@@ -1215,14 +1217,14 @@ Format as JSON:
         )}
 
         <View style={styles.statsContainer}>
-          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label="Streak" delay={0} color="#FF6B35" />
-          <AnimatedStatCard icon={Calendar} value={stats.weeklyWorkouts} label="This Week" delay={80} color="#00ADB5" />
-          <AnimatedStatCard icon={TrendingUp} value={stats.totalWorkouts} label="Total" delay={160} color="#8B5CF6" />
+          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label={t('gym_streak')} delay={0} color="#FF6B35" />
+          <AnimatedStatCard icon={Calendar} value={stats.weeklyWorkouts} label={t('gym_this_week')} delay={80} color="#00ADB5" />
+          <AnimatedStatCard icon={TrendingUp} value={stats.totalWorkouts} label={t('gym_total')} delay={160} color="#8B5CF6" />
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Workouts</Text>
+            <Text style={styles.sectionTitle}>{t('gym_recent_workouts')}</Text>
             <TouchableOpacity 
               style={styles.toggleButton}
               activeOpacity={0.7}
@@ -1234,7 +1236,7 @@ Format as JSON:
               }}
             >
               <Text style={styles.toggleButtonText}>
-                {showRecentWorkouts ? 'Hide' : 'Show'}
+                {showRecentWorkouts ? t('gym_hide') : t('gym_show')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -1246,9 +1248,9 @@ Format as JSON:
                   <View style={styles.emptyIconWrap}>
                     <Dumbbell size={36} color="#4B5563" />
                   </View>
-                  <Text style={styles.emptyStateText}>No workouts yet</Text>
+                  <Text style={styles.emptyStateText}>{t('gym_no_workouts')}</Text>
                   <Text style={styles.emptyStateSubtext}>
-                    Start your first workout to see it here
+                    {t('gym_start_first')}
                   </Text>
                 </View>
               ) : (
@@ -1257,7 +1259,7 @@ Format as JSON:
                     const workout = workoutPlans.find(w => w.id === log.workoutPlanId);
                     const customWorkout = (global as any).customWorkout;
                     
-                    let workoutName = 'Custom Workout';
+                    let workoutName = t('gym_custom_workout');
                     let _muscleGroups: string[] = [];
                     
                     if (workout) {
@@ -1295,17 +1297,17 @@ Format as JSON:
                         <View style={styles.recentWorkoutMetrics}>
                           <View style={styles.recentMetric}>
                             <Text style={styles.recentMetricValue}>{duration}m</Text>
-                            <Text style={styles.recentMetricLabel}>Time</Text>
+                            <Text style={styles.recentMetricLabel}>{t('gym_time')}</Text>
                           </View>
                           <View style={styles.recentMetricDivider} />
                           <View style={styles.recentMetric}>
                             <Text style={styles.recentMetricValue}>{completedExercises}</Text>
-                            <Text style={styles.recentMetricLabel}>Exer</Text>
+                            <Text style={styles.recentMetricLabel}>{t('gym_exer')}</Text>
                           </View>
                           <View style={styles.recentMetricDivider} />
                           <View style={styles.recentMetric}>
                             <Text style={styles.recentMetricValue}>{totalSets}</Text>
-                            <Text style={styles.recentMetricLabel}>Sets</Text>
+                            <Text style={styles.recentMetricLabel}>{t('gym_sets')}</Text>
                           </View>
                         </View>
                       </View>
@@ -1324,7 +1326,7 @@ Format as JSON:
         presentationStyle="fullScreen"
         transparent={false}
       >
-        <GymLoadingScreen />
+        <GymLoadingScreen t={t} />
       </Modal>
 
       <Modal
@@ -1345,7 +1347,7 @@ Format as JSON:
             >
               <X size={24} color="#9CA3AF" />
             </TouchableOpacity>
-            <Text style={styles.quizTitle}>Fitness Assessment</Text>
+            <Text style={styles.quizTitle}>{t('gym_fitness_assessment')}</Text>
             <View style={styles.quizProgress}>
               <Text style={styles.progressText}>
                 {currentQuizStep + 1} / {quizQuestions.length + 1}
@@ -1361,10 +1363,10 @@ Format as JSON:
             {showDaySelector ? (
               <View style={styles.questionContainer}>
                 <Text style={styles.questionText}>
-                  Select your workout days
+                  {t('gym_select_workout_days')}
                 </Text>
                 <Text style={styles.daySelectionSubtext}>
-                  Choose which days of the week you want to workout
+                  {t('gym_select_days_sub')}
                 </Text>
                 <View style={styles.daySelectionContainer}>
                   {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
@@ -1422,7 +1424,7 @@ Format as JSON:
                   }}
                   disabled={selectedWorkoutDays.length === 0}
                 >
-                  <Text style={styles.continueButtonText}>Continue</Text>
+                  <Text style={styles.continueButtonText}>{t('gym_continue')}</Text>
                   <ChevronRight size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
@@ -1448,17 +1450,16 @@ Format as JSON:
             ) : (
               <View style={styles.quizGoalsContainer}>
                 <Text style={styles.questionText}>
-                  Tell us about your specific fitness goals
+                  {t('gym_tell_goals')}
                 </Text>
                 <Text style={styles.goalsSubtext}>
-                  Be as detailed as possible about what you want to achieve, any problem areas you want to focus on, 
-                  specific muscles you want to target, or any other preferences that will help us create your perfect plan.
+                  {t('gym_goals_detail')}
                 </Text>
                 <TextInput
                   style={styles.goalsInput}
                   multiline
                   numberOfLines={6}
-                  placeholder="e.g., I want to build bigger arms and chest, lose belly fat, improve my posture..."
+                  placeholder={t('gym_goals_placeholder')}
                   placeholderTextColor="#4B5563"
                   value={customGoals}
                   onChangeText={setCustomGoals}
@@ -1479,11 +1480,11 @@ Format as JSON:
                   disabled={isGeneratingPlan}
                 >
                   {isGeneratingPlan ? (
-                    <Text style={styles.generateButtonText}>Generating Plan...</Text>
+                    <Text style={styles.generateButtonText}>{t('gym_generating')}</Text>
                   ) : (
                     <>
                       <Zap size={20} color="#FFFFFF" />
-                      <Text style={styles.generateButtonText}>Generate My Plan</Text>
+                      <Text style={styles.generateButtonText}>{t('gym_generate_plan')}</Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -1503,7 +1504,7 @@ Format as JSON:
             <View style={styles.modalHeader}>
               <View>
                 <Text style={styles.modalTitle}>{generatedPlan.name}</Text>
-                <Text style={styles.modalSubtitle}>{generatedPlan.days.length} day program</Text>
+                <Text style={styles.modalSubtitle}>{generatedPlan.days.length} {t('gym_day_program')}</Text>
               </View>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -1531,7 +1532,7 @@ Format as JSON:
                     </View>
                     <View style={styles.dayTitleBlock}>
                       <Text style={styles.dayTitle}>{day.name}</Text>
-                      <Text style={styles.exerciseCount}>{day.exercises.length} exercises</Text>
+                      <Text style={styles.exerciseCount}>{day.exercises.length} {t('gym_exercises')}</Text>
                     </View>
                     <TouchableOpacity
                       style={styles.startDayButton}
@@ -1561,7 +1562,7 @@ Format as JSON:
                         </View>
                         <View style={styles.exerciseMetaPill}>
                           <Text style={styles.exerciseMetaPillText}>
-                            Rest {Math.floor(exercise.restTime / 60)}:{(exercise.restTime % 60).toString().padStart(2, '0')}
+                            {t('gym_rest')} {Math.floor(exercise.restTime / 60)}:{(exercise.restTime % 60).toString().padStart(2, '0')}
                           </Text>
                         </View>
                         <View style={styles.exerciseMetaPill}>
@@ -1592,7 +1593,7 @@ Format as JSON:
                 }}
               >
                 <RotateCcw size={18} color="#9CA3AF" />
-                <Text style={styles.newPlanButtonText}>Create New Plan</Text>
+                <Text style={styles.newPlanButtonText}>{t('gym_create_new_plan')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1609,7 +1610,7 @@ Format as JSON:
           <View style={[styles.settingsModalContainer, { paddingBottom: insets.bottom + 16 }]}>
             <View style={styles.settingsHandle} />
             <View style={styles.settingsModalHeader}>
-              <Text style={styles.settingsModalTitle}>Workout Settings</Text>
+              <Text style={styles.settingsModalTitle}>{t('gym_workout_settings')}</Text>
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => {
@@ -1638,9 +1639,9 @@ Format as JSON:
                   <Calendar size={20} color="#00ADB5" />
                 </View>
                 <View style={styles.settingsOptionText}>
-                  <Text style={styles.settingsOptionTitle}>Adjust Workout Days</Text>
+                  <Text style={styles.settingsOptionTitle}>{t('gym_adjust_workout_days')}</Text>
                   <Text style={styles.settingsOptionSubtitle}>
-                    Change which days you train
+                    {t('gym_change_days')}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#4B5563" />
@@ -1661,9 +1662,9 @@ Format as JSON:
                   <Dumbbell size={20} color="#6366F1" />
                 </View>
                 <View style={styles.settingsOptionText}>
-                  <Text style={styles.settingsOptionTitle}>View Full Plan</Text>
+                  <Text style={styles.settingsOptionTitle}>{t('gym_view_full_plan')}</Text>
                   <Text style={styles.settingsOptionSubtitle}>
-                    Browse all workout days
+                    {t('gym_browse_days')}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#4B5563" />
@@ -1683,9 +1684,9 @@ Format as JSON:
                   <RotateCcw size={20} color="#F59E0B" />
                 </View>
                 <View style={styles.settingsOptionText}>
-                  <Text style={styles.settingsOptionTitle}>Retake Quiz</Text>
+                  <Text style={styles.settingsOptionTitle}>{t('gym_retake')}</Text>
                   <Text style={styles.settingsOptionSubtitle}>
-                    Generate a completely new plan
+                    {t('gym_generate_new')}
                   </Text>
                 </View>
                 <ChevronRight size={18} color="#4B5563" />
@@ -1702,7 +1703,7 @@ Format as JSON:
       >
         <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Adjust Workout Days</Text>
+            <Text style={styles.modalTitle}>{t('gym_adjust_workout_days')}</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => {
@@ -1719,10 +1720,10 @@ Format as JSON:
           <View style={styles.modalContent}>
             <View style={styles.dayAdjustmentContainer}>
               <Text style={styles.dayAdjustmentTitle}>
-                Select your workout days
+                {t('gym_select_workout_days')}
               </Text>
               <Text style={styles.dayAdjustmentSubtext}>
-                Your plan will adapt to your schedule.
+                {t('gym_plan_adapt')}
               </Text>
               
               <View style={styles.daySelectionContainer}>
@@ -1779,7 +1780,7 @@ Format as JSON:
               }}
               disabled={adjustedWorkoutDays.length === 0}
             >
-              <Text style={styles.saveDaysButtonText}>Save Changes</Text>
+              <Text style={styles.saveDaysButtonText}>{t('gym_save_changes')}</Text>
             </TouchableOpacity>
           </View>
         </View>

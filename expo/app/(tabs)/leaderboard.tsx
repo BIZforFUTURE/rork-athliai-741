@@ -50,7 +50,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
 import { RANKS, XPSource } from "@/constants/xp";
-import { useLanguage } from "@/providers/LanguageProvider"; // eslint-disable-line no-unused-vars
+import { useLanguage } from "@/providers/LanguageProvider";
 
 interface WeightEntry {
   date: string;
@@ -60,7 +60,7 @@ interface WeightEntry {
 type StatPeriod = '7d' | '30d' | '90d' | '1y';
 type StatsTab = 'progress' | 'profile';
 
-function XPRankCard() {
+function XPRankCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
   const { xpInfo } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
   const ringAnim = useRef(new Animated.Value(0)).current;
@@ -82,7 +82,7 @@ function XPRankCard() {
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <Zap size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>XP & Rank</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_xp_rank')}</Text>
       </View>
 
       <View style={xpStyles.rankRow}>
@@ -115,7 +115,7 @@ function XPRankCard() {
               <Text style={{ color: "#4B5563" }}> / {xpInfo.neededXP} XP</Text>
             </Text>
             <Text style={[xpStyles.xpRemaining, { color: xpInfo.rank.color + "BB" }]}>
-              {xpInfo.neededXP - xpInfo.currentXP} to go
+              {xpInfo.neededXP - xpInfo.currentXP} {t('stats_to_go_xp')}
             </Text>
           </View>
         </View>
@@ -151,7 +151,7 @@ function XPRankCard() {
   );
 }
 
-function XPBreakdownCard() {
+function XPBreakdownCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
   const { xpInfo } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -164,7 +164,7 @@ function XPBreakdownCard() {
   const grouped: Record<XPSource, number> = { run: 0, workout: 0, food: 0, nutrition_goal: 0, streak: 0, treadmill_photo: 0 };
   xpInfo.xpEvents.forEach(e => { grouped[e.source] = (grouped[e.source] || 0) + e.amount; });
 
-  const labels: Record<XPSource, string> = { run: 'Runs', workout: 'Workouts', food: 'Food', nutrition_goal: 'Goals', streak: 'Streaks', treadmill_photo: 'Treadmill' };
+  const labels: Record<XPSource, string> = { run: t('stats_runs'), workout: t('stats_workouts_label'), food: t('home_food'), nutrition_goal: t('stats_goals'), streak: t('stats_streaks'), treadmill_photo: t('stats_treadmill') };
   const colors: Record<XPSource, string> = { run: '#00E5FF', workout: '#FF6B35', food: '#BFFF00', nutrition_goal: '#F59E0B', streak: '#E879F9', treadmill_photo: '#38BDF8' };
   const icons: Record<XPSource, React.ReactNode> = {
     run: <Footprints size={12} color="#00E5FF" />,
@@ -184,8 +184,8 @@ function XPBreakdownCard() {
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <BarChart3 size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>XP Breakdown</Text>
-        <Text style={breakdownStyles.totalLabel}>{totalXP.toLocaleString()} total</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_xp_breakdown')}</Text>
+        <Text style={breakdownStyles.totalLabel}>{totalXP.toLocaleString()} {t('stats_total_label')}</Text>
       </View>
       {entries.map(([key, value]) => (
         <View key={key} style={breakdownStyles.row}>
@@ -203,7 +203,7 @@ function XPBreakdownCard() {
   );
 }
 
-function RecentXPCard() {
+function RecentXPCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
   const { xpInfo } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -230,7 +230,7 @@ function RecentXPCard() {
   const timeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "now";
+    if (mins < 1) return t('common_now');
     if (mins < 60) return `${mins}m`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h`;
@@ -241,14 +241,14 @@ function RecentXPCard() {
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <Zap size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>Recent XP</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_recent_xp')}</Text>
       </View>
       {recentEvents.map((event) => (
         <View key={event.id} style={recentStyles.row}>
           <View style={[recentStyles.dot, { backgroundColor: getColor(event.source) + "20", borderColor: getColor(event.source) + "40" }]} />
           <View style={recentStyles.info}>
             <Text style={recentStyles.desc} numberOfLines={1}>{event.description}</Text>
-            <Text style={recentStyles.time}>{timeAgo(event.date)} ago</Text>
+            <Text style={recentStyles.time}>{timeAgo(event.date)} {t('common_ago')}</Text>
           </View>
           <Text style={[recentStyles.amount, { color: getColor(event.source) }]}>+{event.amount}</Text>
         </View>
@@ -257,7 +257,7 @@ function RecentXPCard() {
   );
 }
 
-function WeightGoalCard({ onAddWeight }: { onAddWeight: () => void }) {
+function WeightGoalCard({ onAddWeight, t }: { onAddWeight: () => void; t: (key: any, params?: Record<string, string | number>) => string }) {
   const { personalStats, getWeightHistory } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -314,23 +314,23 @@ function WeightGoalCard({ onAddWeight }: { onAddWeight: () => void }) {
       <Animated.View style={[cardStyles.card, { opacity: fadeIn, transform: [{ scale: scaleAnim }] }]}>
         <View style={cardStyles.cardHeader}>
           <Target size={13} color="#6B7280" />
-          <Text style={cardStyles.cardHeading}>Weight Goal</Text>
+          <Text style={cardStyles.cardHeading}>{t('stats_weight_goal')}</Text>
           <ChevronRight size={14} color="#374151" />
         </View>
 
         <View style={goalStyles.statsRow}>
           <View style={goalStyles.statItem}>
-            <Text style={goalStyles.statLabel}>Current</Text>
+            <Text style={goalStyles.statLabel}>{t('stats_current')}</Text>
             <Text style={goalStyles.statValue}>{currentWeight}<Text style={goalStyles.statUnit}> lbs</Text></Text>
           </View>
           <View style={goalStyles.divider} />
           <View style={goalStyles.statItem}>
-            <Text style={goalStyles.statLabel}>Target</Text>
+            <Text style={goalStyles.statLabel}>{t('stats_target')}</Text>
             <Text style={goalStyles.statValue}>{targetWeight}<Text style={goalStyles.statUnit}> lbs</Text></Text>
           </View>
           <View style={goalStyles.divider} />
           <View style={goalStyles.statItem}>
-            <Text style={goalStyles.statLabel}>Left</Text>
+            <Text style={goalStyles.statLabel}>{t('stats_left')}</Text>
             <View style={{ flexDirection: "row" as const, alignItems: "center" as const, gap: 3 }}>
               {isGaining ? (
                 <TrendingUp size={12} color={remaining > 0 ? "#10B981" : "#EF4444"} />
@@ -351,7 +351,7 @@ function WeightGoalCard({ onAddWeight }: { onAddWeight: () => void }) {
           }]} />
         </View>
         <Text style={goalStyles.barLabel}>
-          {Math.round(Math.min(Math.max(progress, 0), 100))}% complete
+          {Math.round(Math.min(Math.max(progress, 0), 100))}{t('stats_complete')}
         </Text>
 
         {personalStats.goalEndDate && (
@@ -379,16 +379,16 @@ function WeightGoalCard({ onAddWeight }: { onAddWeight: () => void }) {
               onPaceStatus === 'ahead' && { color: "#00ADB5" },
               onPaceStatus === 'behind' && { color: "#F59E0B" },
             ]}>
-              {onPaceStatus === 'on-pace' && 'On Pace'}
-              {onPaceStatus === 'ahead' && 'Ahead of Schedule'}
-              {onPaceStatus === 'behind' && 'Behind Schedule'}
+              {onPaceStatus === 'on-pace' && t('stats_on_pace')}
+              {onPaceStatus === 'ahead' && t('stats_ahead')}
+              {onPaceStatus === 'behind' && t('stats_behind')}
             </Text>
           </View>
         )}
 
         {Math.abs(remaining) < 5 && (
           <View style={goalStyles.nearBadge}>
-            <Text style={goalStyles.nearText}>🎯 Almost there!</Text>
+            <Text style={goalStyles.nearText}>{t('stats_almost_there')}</Text>
           </View>
         )}
       </Animated.View>
@@ -396,7 +396,7 @@ function WeightGoalCard({ onAddWeight }: { onAddWeight: () => void }) {
   );
 }
 
-function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
+function PhysicalStatsCard({ onEdit, t }: { onEdit: () => void; t: (key: any, params?: Record<string, string | number>) => string }) {
   const { personalStats } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -432,13 +432,13 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
       {
         icon: <Ruler size={16} color="#00ADB5" />,
         value: (() => { const { feet, inches } = inchesToFeetAndInches(personalStats.height!); return `${feet}'${inches}"`; })(),
-        label: "Height",
+        label: t('stats_height'),
         color: "#00ADB5",
       },
       {
         icon: <Scale size={16} color="#10B981" />,
         value: `${personalStats.weight} lbs`,
-        label: "Weight",
+        label: t('stats_weight'),
         color: "#10B981",
       },
     ];
@@ -447,7 +447,7 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
       result.push({
         icon: <Activity size={16} color={cat.color} />,
         value: bmi.toFixed(1),
-        label: `BMI · ${cat.category}`,
+        label: `${t('stats_bmi')} · ${cat.category}`,
         color: cat.color,
       });
     }
@@ -455,18 +455,18 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
       result.push({
         icon: <Target size={16} color="#F59E0B" />,
         value: `${personalStats.targetWeight} lbs`,
-        label: "Target",
+        label: t('stats_target'),
         color: "#F59E0B",
       });
     }
     return result;
-  }, [personalStats, bmi, hasStats]);
+  }, [personalStats, bmi, hasStats, t]);
 
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <User size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>Physical Stats</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_physical_stats')}</Text>
         {hasStats && (
           <TouchableOpacity
             onPress={() => {
@@ -476,7 +476,7 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
             style={physStyles.editBtn}
           >
             <Edit3 size={12} color="#9CA3AF" />
-            <Text style={physStyles.editText}>Edit</Text>
+            <Text style={physStyles.editText}>{t('stats_edit')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -496,8 +496,8 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
       ) : (
         <View style={physStyles.empty}>
           <Scale size={36} color="#374151" />
-          <Text style={physStyles.emptyTitle}>No stats yet</Text>
-          <Text style={physStyles.emptyDesc}>Add your height and weight to track progress</Text>
+          <Text style={physStyles.emptyTitle}>{t('stats_no_stats')}</Text>
+          <Text style={physStyles.emptyDesc}>{t('stats_add_stats_desc')}</Text>
           <TouchableOpacity
             style={physStyles.addBtn}
             onPress={() => {
@@ -506,7 +506,7 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
             }}
           >
             <Plus size={14} color="#FFFFFF" />
-            <Text style={physStyles.addBtnText}>Add Stats</Text>
+            <Text style={physStyles.addBtnText}>{t('stats_add_stats')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -514,12 +514,13 @@ function PhysicalStatsCard({ onEdit }: { onEdit: () => void }) {
   );
 }
 
-function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selectedPeriod, setSelectedPeriod }: {
+function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selectedPeriod, setSelectedPeriod, t }: {
   onAddWeight: () => void;
   onEditWeight: (entry: WeightEntry) => void;
   onDeleteWeight: (entry: WeightEntry) => void;
   selectedPeriod: StatPeriod;
   setSelectedPeriod: (p: StatPeriod) => void;
+  t: (key: any, params?: Record<string, string | number>) => string;
 }) {
   const { personalStats, getWeightHistory } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
@@ -544,7 +545,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <TrendingUp size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>Weight Progress</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_weight_progress')}</Text>
         <TouchableOpacity
           onPress={() => {
             if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -553,7 +554,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
           style={physStyles.editBtn}
         >
           <Plus size={12} color="#9CA3AF" />
-          <Text style={physStyles.editText}>Log</Text>
+          <Text style={physStyles.editText}>{t('stats_log')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -568,7 +569,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
             {Math.abs(weightProgress).toFixed(1)} lbs
           </Text>
           <Text style={wpStyles.progressLabel}>
-            {isOnTrack ? 'on track' : `${Math.abs(weightProgress).toFixed(1)} lbs to go`}
+            {isOnTrack ? t('stats_on_track') : t('stats_to_go', { weight: Math.abs(weightProgress).toFixed(1) })}
           </Text>
         </View>
       )}
@@ -593,14 +594,14 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
       {filteredHistory.length === 0 && (
         <View style={wpStyles.emptyChart}>
           <Calendar size={24} color="#374151" />
-          <Text style={wpStyles.emptyText}>No entries yet</Text>
+          <Text style={wpStyles.emptyText}>{t('stats_no_entries')}</Text>
         </View>
       )}
 
       {filteredHistory.length === 1 && (
         <View style={wpStyles.emptyChart}>
           <BarChart3 size={24} color="#00ADB5" />
-          <Text style={wpStyles.emptyTextSub}>Add more entries to see your graph</Text>
+          <Text style={wpStyles.emptyTextSub}>{t('stats_add_more')}</Text>
           <View style={wpStyles.singleEntry}>
             <Text style={wpStyles.singleDate}>{new Date(filteredHistory[0].date + 'T00:00:00').toLocaleDateString()}</Text>
             <Text style={wpStyles.singleWeight}>{filteredHistory[0].weight} lbs</Text>
@@ -650,7 +651,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
               style={{ borderRadius: 12, marginLeft: -8 }}
             />
             <View style={wpStyles.recentHeader}>
-              <Text style={wpStyles.recentTitle}>Recent</Text>
+              <Text style={wpStyles.recentTitle}>{t('stats_recent')}</Text>
             </View>
             {filteredHistory.slice(0, 5).map((entry: WeightEntry, index: number) => (
               <View key={index} style={wpStyles.historyRow}>
@@ -681,7 +682,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
   );
 }
 
-function FitnessStatsCard() {
+function FitnessStatsCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
   const { recentRuns, weeklyRuns } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
 
@@ -693,17 +694,17 @@ function FitnessStatsCard() {
   const currentLifetimeMiles = recentRuns.reduce((sum, run) => sum + run.distance, 0);
 
   const items = [
-    { value: currentWeeklyMiles.toFixed(1), unit: "mi", label: "This Week", color: "#00E5FF", icon: <Footprints size={14} color="#00E5FF" /> },
-    { value: currentLifetimeMiles.toFixed(1), unit: "mi", label: "All Time", color: "#FF6B35", icon: <TrendingUp size={14} color="#FF6B35" /> },
-    { value: `${weeklyRuns.length}`, unit: "", label: "Runs/Wk", color: "#BFFF00", icon: <Activity size={14} color="#BFFF00" /> },
-    { value: `${recentRuns.length}`, unit: "", label: "Total Runs", color: "#F59E0B", icon: <Target size={14} color="#F59E0B" /> },
+    { value: currentWeeklyMiles.toFixed(1), unit: "mi", label: t('stats_this_week'), color: "#00E5FF", icon: <Footprints size={14} color="#00E5FF" /> },
+    { value: currentLifetimeMiles.toFixed(1), unit: "mi", label: t('stats_all_time'), color: "#FF6B35", icon: <TrendingUp size={14} color="#FF6B35" /> },
+    { value: `${weeklyRuns.length}`, unit: "", label: t('stats_runs_wk'), color: "#BFFF00", icon: <Activity size={14} color="#BFFF00" /> },
+    { value: `${recentRuns.length}`, unit: "", label: t('stats_total_runs'), color: "#F59E0B", icon: <Target size={14} color="#F59E0B" /> },
   ];
 
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <Activity size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>Fitness Stats</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_fitness_stats')}</Text>
       </View>
       <View style={fitStyles.grid}>
         {items.map((item, idx) => (
@@ -732,7 +733,7 @@ interface DataBackupCardProps {
   workoutCount: number;
 }
 
-function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount, workoutCount }: DataBackupCardProps) {
+function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount, workoutCount, t }: DataBackupCardProps & { t: (key: any, params?: Record<string, string | number>) => string }) {
   const fadeIn = useRef(new Animated.Value(0)).current;
   const exportScale = useRef(new Animated.Value(1)).current;
   const importScale = useRef(new Animated.Value(1)).current;
@@ -747,28 +748,28 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
         <Shield size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>Data Backup</Text>
+        <Text style={cardStyles.cardHeading}>{t('stats_data_backup')}</Text>
       </View>
 
       <View style={bkStyles.statsRow}>
         <View style={bkStyles.statPill}>
           <Footprints size={10} color="#00E5FF" />
-          <Text style={[bkStyles.statText, { color: '#00E5FF' }]}>{runCount} runs</Text>
+          <Text style={[bkStyles.statText, { color: '#00E5FF' }]}>{runCount} {t('stats_runs_label')}</Text>
         </View>
         <View style={bkStyles.statPill}>
           <UtensilsCrossed size={10} color="#BFFF00" />
-          <Text style={[bkStyles.statText, { color: '#BFFF00' }]}>{foodCount} meals</Text>
+          <Text style={[bkStyles.statText, { color: '#BFFF00' }]}>{foodCount} {t('stats_meals')}</Text>
         </View>
         <View style={bkStyles.statPill}>
           <Dumbbell size={10} color="#FF6B35" />
-          <Text style={[bkStyles.statText, { color: '#FF6B35' }]}>{workoutCount} workouts</Text>
+          <Text style={[bkStyles.statText, { color: '#FF6B35' }]}>{workoutCount} {t('stats_workouts_count')}</Text>
         </View>
       </View>
 
       <Text style={bkStyles.desc}>
         {totalEntries > 0
-          ? `You have ${totalEntries} entries. Export a backup to keep your data safe.`
-          : 'No data yet. Start tracking to build your backup.'}
+          ? `${totalEntries} ${t('stats_entries_count')}. ${t('stats_export_desc')}`
+          : t('stats_no_data')}
       </Text>
 
       <View style={bkStyles.btnRow}>
@@ -781,7 +782,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
           <Animated.View style={[bkStyles.exportBtn, { transform: [{ scale: exportScale }] }]}>
             {exportCopied ? <Check size={16} color="#10B981" /> : <Download size={16} color="#00E5FF" />}
             <Text style={[bkStyles.exportText, exportCopied && { color: '#10B981' }]}>
-              {exportCopied ? 'Copied!' : 'Export'}
+              {exportCopied ? t('stats_copied') : t('stats_export')}
             </Text>
           </Animated.View>
         </Pressable>
@@ -793,7 +794,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
         >
           <Animated.View style={bkStyles.importBtn}>
             <Upload size={16} color="#F59E0B" />
-            <Text style={bkStyles.importText}>Restore</Text>
+            <Text style={bkStyles.importText}>{t('stats_restore')}</Text>
           </Animated.View>
         </Pressable>
       </View>
@@ -803,6 +804,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
 
 export default function PersonalStatsScreen() {
   const { personalStats, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, exportAllData, importAllData, recentRuns, foodHistory, workoutLogs, isLoading: appLoading } = useApp();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
   const [activeTab, setActiveTab] = useState<StatsTab>('progress');
@@ -993,23 +995,23 @@ export default function PersonalStatsScreen() {
       <Modal visible={showImportModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { setShowImportModal(false); setImportText(''); setImportStatus('idle'); }}>
         <View style={[modalStyles.container, { paddingTop: insets.top }]}>
           <View style={modalStyles.header}>
-            <Text style={modalStyles.headerTitle}>Restore Backup</Text>
+            <Text style={modalStyles.headerTitle}>{t('stats_restore_backup')}</Text>
             <TouchableOpacity onPress={() => { setShowImportModal(false); setImportText(''); setImportStatus('idle'); }} style={modalStyles.closeBtn}>
-              <Text style={modalStyles.closeText}>Cancel</Text>
+              <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <View style={backupModalStyles.infoBox}>
               <Shield size={16} color="#F59E0B" />
-              <Text style={backupModalStyles.infoText}>Paste the backup text you previously exported. This will replace all current data.</Text>
+              <Text style={backupModalStyles.infoText}>{t('stats_restore_info')}</Text>
             </View>
             <TouchableOpacity style={backupModalStyles.pasteBtn} onPress={handlePasteFromClipboard} activeOpacity={0.7}>
               <ClipboardPaste size={16} color="#00E5FF" />
-              <Text style={backupModalStyles.pasteBtnText}>Paste from Clipboard</Text>
+              <Text style={backupModalStyles.pasteBtnText}>{t('stats_paste_clipboard')}</Text>
             </TouchableOpacity>
             <TextInput
               style={backupModalStyles.textArea}
-              placeholder='Paste backup JSON here...'
+              placeholder={t('stats_paste_backup')}
               placeholderTextColor="#374151"
               value={importText}
               onChangeText={(t) => { setImportText(t); setImportStatus('idle'); setImportError(''); }}
@@ -1025,7 +1027,7 @@ export default function PersonalStatsScreen() {
             {importStatus === 'success' && (
               <View style={backupModalStyles.successBox}>
                 <Check size={14} color="#10B981" />
-                <Text style={backupModalStyles.successText}>Data restored successfully!</Text>
+                <Text style={backupModalStyles.successText}>{t('stats_data_restored')}</Text>
               </View>
             )}
             <TouchableOpacity
@@ -1033,7 +1035,7 @@ export default function PersonalStatsScreen() {
               onPress={handleImport}
               disabled={!importText.trim() || importStatus === 'success'}
             >
-              <Text style={modalStyles.saveBtnText}>Restore Data</Text>
+              <Text style={modalStyles.saveBtnText}>{t('stats_restore_data')}</Text>
             </TouchableOpacity>
             <View style={{ height: 60 }} />
           </ScrollView>
@@ -1043,14 +1045,14 @@ export default function PersonalStatsScreen() {
       <Modal visible={showStatsModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowStatsModal(false)}>
         <View style={[modalStyles.container, { paddingTop: insets.top }]}>
           <View style={modalStyles.header}>
-            <Text style={modalStyles.headerTitle}>Update Stats</Text>
+            <Text style={modalStyles.headerTitle}>{t('stats_update_stats')}</Text>
             <TouchableOpacity onPress={() => setShowStatsModal(false)} style={modalStyles.closeBtn}>
-              <Text style={modalStyles.closeText}>Cancel</Text>
+              <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false}>
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Height</Text>
+              <Text style={modalStyles.sectionLabel}>{t('stats_height')}</Text>
               <View style={modalStyles.heightRow}>
                 <View style={modalStyles.heightField}>
                   <TextInput style={modalStyles.input} placeholder="5" placeholderTextColor="#374151" value={tempHeightFeet} onChangeText={setTempHeightFeet} keyboardType="numeric" />
@@ -1063,19 +1065,19 @@ export default function PersonalStatsScreen() {
               </View>
             </View>
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Current Weight (lbs)</Text>
+              <Text style={modalStyles.sectionLabel}>{t('stats_current_weight_lbs')}</Text>
               <TextInput style={modalStyles.input} placeholder="150" placeholderTextColor="#374151" value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Target Weight (lbs)</Text>
+              <Text style={modalStyles.sectionLabel}>{t('stats_target_weight_lbs')}</Text>
               <TextInput style={modalStyles.input} placeholder="140" placeholderTextColor="#374151" value={tempTargetWeight} onChangeText={setTempTargetWeight} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Age</Text>
+              <Text style={modalStyles.sectionLabel}>{t('stats_age')}</Text>
               <TextInput style={modalStyles.input} placeholder="25" placeholderTextColor="#374151" value={tempAge} onChangeText={setTempAge} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Gender</Text>
+              <Text style={modalStyles.sectionLabel}>{t('stats_gender')}</Text>
               <View style={modalStyles.genderRow}>
                 {(['male', 'female', 'other'] as const).map((g) => (
                   <TouchableOpacity
@@ -1094,7 +1096,7 @@ export default function PersonalStatsScreen() {
               </View>
             </View>
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSaveStats}>
-              <Text style={modalStyles.saveBtnText}>Save</Text>
+              <Text style={modalStyles.saveBtnText}>{t('common_save')}</Text>
             </TouchableOpacity>
             <View style={{ height: 60 }} />
           </ScrollView>
@@ -1104,9 +1106,9 @@ export default function PersonalStatsScreen() {
       <Modal visible={showEditWeightModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { setShowEditWeightModal(false); setEditingWeightEntry(null); }}>
         <View style={[modalStyles.container, { paddingTop: insets.top }]}>
           <View style={modalStyles.header}>
-            <Text style={modalStyles.headerTitle}>Edit Weight</Text>
+            <Text style={modalStyles.headerTitle}>{t('stats_edit_weight')}</Text>
             <TouchableOpacity onPress={() => { setShowEditWeightModal(false); setEditingWeightEntry(null); setEditWeight(''); }} style={modalStyles.closeBtn}>
-              <Text style={modalStyles.closeText}>Cancel</Text>
+              <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
           <View style={modalStyles.body}>
@@ -1115,7 +1117,7 @@ export default function PersonalStatsScreen() {
               <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={editWeight} onChangeText={setEditWeight} keyboardType="numeric" autoFocus />
             </View>
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSaveEditWeight}>
-              <Text style={modalStyles.saveBtnText}>Save</Text>
+              <Text style={modalStyles.saveBtnText}>{t('common_save')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1124,18 +1126,18 @@ export default function PersonalStatsScreen() {
       <Modal visible={showWeightModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowWeightModal(false)}>
         <View style={[modalStyles.container, { paddingTop: insets.top }]}>
           <View style={modalStyles.header}>
-            <Text style={modalStyles.headerTitle}>Log Weight</Text>
+            <Text style={modalStyles.headerTitle}>{t('stats_log_weight')}</Text>
             <TouchableOpacity onPress={() => { setShowWeightModal(false); setNewWeight(''); }} style={modalStyles.closeBtn}>
-              <Text style={modalStyles.closeText}>Cancel</Text>
+              <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
           <View style={modalStyles.body}>
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Today&apos;s Weight (lbs)</Text>
+              <Text style={modalStyles.sectionLabel}>{t('stats_todays_weight')}</Text>
               <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={newWeight} onChangeText={setNewWeight} keyboardType="numeric" autoFocus />
             </View>
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleAddWeight}>
-              <Text style={modalStyles.saveBtnText}>Add Entry</Text>
+              <Text style={modalStyles.saveBtnText}>{t('stats_add_entry')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -1143,8 +1145,8 @@ export default function PersonalStatsScreen() {
 
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
         <View>
-          <Text style={styles.pageTitle}>Stats</Text>
-          <Text style={styles.pageSubtitle}>Your fitness journey</Text>
+          <Text style={styles.pageTitle}>{t('stats_title')}</Text>
+          <Text style={styles.pageSubtitle}>{t('stats_your_journey')}</Text>
         </View>
       </View>
 
@@ -1172,7 +1174,7 @@ export default function PersonalStatsScreen() {
             }}
           >
             <Zap size={13} color={activeTab === 'progress' ? '#00E5FF' : '#4B5563'} />
-            <Text style={[segStyles.btnText, activeTab === 'progress' && segStyles.btnTextActive]}>Progress</Text>
+            <Text style={[segStyles.btnText, activeTab === 'progress' && segStyles.btnTextActive]}>{t('stats_progress')}</Text>
           </Pressable>
           <Pressable
             style={segStyles.btn}
@@ -1183,7 +1185,7 @@ export default function PersonalStatsScreen() {
             }}
           >
             <User size={13} color={activeTab === 'profile' ? '#00E5FF' : '#4B5563'} />
-            <Text style={[segStyles.btnText, activeTab === 'profile' && segStyles.btnTextActive]}>Profile</Text>
+            <Text style={[segStyles.btnText, activeTab === 'profile' && segStyles.btnTextActive]}>{t('stats_profile')}</Text>
           </Pressable>
         </View>
       </View>
@@ -1201,16 +1203,16 @@ export default function PersonalStatsScreen() {
       >
         {activeTab === 'progress' ? (
           <>
-            <XPRankCard />
-            <XPBreakdownCard />
-            <RecentXPCard />
-            <FitnessStatsCard />
+            <XPRankCard t={t} />
+            <XPBreakdownCard t={t} />
+            <RecentXPCard t={t} />
+            <FitnessStatsCard t={t} />
           </>
         ) : (
           <>
-            <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} />
-            <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} />
-            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
+            <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} />
+            <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} />
+            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} />
             <DataBackupCard
               onExport={handleExport}
               onImport={() => { setShowImportModal(true); setImportText(''); setImportStatus('idle'); setImportError(''); }}
@@ -1218,6 +1220,7 @@ export default function PersonalStatsScreen() {
               runCount={recentRuns.length}
               foodCount={foodHistory.length}
               workoutCount={workoutLogs.length}
+              t={t}
             />
           </>
         )}

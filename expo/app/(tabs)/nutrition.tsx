@@ -31,7 +31,7 @@ import { useLanguage } from "@/providers/LanguageProvider";
 
 const _SCREEN_WIDTH = Dimensions.get("window").width;
 
-const CalorieRing = React.memo(({ calories, goal }: { calories: number; goal: number }) => {
+const CalorieRing = React.memo(({ calories, goal, t }: { calories: number; goal: number; t: (key: any, params?: Record<string, string | number>) => string }) => {
   const percentage = Math.min((calories / goal) * 100, 100);
   const exceeds = calories > goal;
   const remaining = Math.max(goal - calories, 0);
@@ -73,12 +73,12 @@ const CalorieRing = React.memo(({ calories, goal }: { calories: number; goal: nu
       </Svg>
       <View style={calorieRingStyles.center}>
         <Text style={[calorieRingStyles.value, exceeds && { color: "#EF4444" }]}>{calories}</Text>
-        <Text style={calorieRingStyles.label}>of {goal} cal</Text>
+        <Text style={calorieRingStyles.label}>{t('fuel_of')} {goal} cal</Text>
         {!exceeds && remaining > 0 && (
-          <Text style={calorieRingStyles.remaining}>{remaining} left</Text>
+          <Text style={calorieRingStyles.remaining}>{remaining} {t('fuel_left')}</Text>
         )}
         {exceeds && (
-          <Text style={calorieRingStyles.over}>{calories - goal} over</Text>
+          <Text style={calorieRingStyles.over}>{calories - goal} {t('fuel_over')}</Text>
         )}
       </View>
     </Animated.View>
@@ -618,25 +618,25 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
   };
 
   const quizQuestions = useMemo(() => [
-    { title: "What's your age?", key: "age", type: "number" as const, placeholder: "Enter your age" },
-    { title: "What's your weight?", key: "weight", type: "number" as const, placeholder: "Enter weight in pounds" },
-    { title: "What's your height?", key: "height", type: "height" as const, placeholder: "Enter height" },
-    { title: "What's your gender?", key: "gender", type: "choice" as const, choices: [{ label: "Male", value: "male" }, { label: "Female", value: "female" }] },
-    { title: "How active are you?", key: "activityLevel", type: "choice" as const, choices: [
-      { label: "Sedentary", value: "sedentary" }, { label: "Lightly Active", value: "light" },
-      { label: "Moderately Active", value: "moderate" }, { label: "Very Active", value: "active" },
-      { label: "Extremely Active", value: "veryActive" },
+    { title: t('fuel_whats_age'), key: "age", type: "number" as const, placeholder: t('fuel_enter_age') },
+    { title: t('fuel_whats_weight'), key: "weight", type: "number" as const, placeholder: t('fuel_enter_weight') },
+    { title: t('fuel_whats_height'), key: "height", type: "height" as const, placeholder: t('fuel_enter_age') },
+    { title: t('fuel_whats_gender'), key: "gender", type: "choice" as const, choices: [{ label: t('fuel_male'), value: "male" }, { label: t('fuel_female'), value: "female" }] },
+    { title: t('fuel_how_active'), key: "activityLevel", type: "choice" as const, choices: [
+      { label: t('fuel_sedentary'), value: "sedentary" }, { label: t('fuel_lightly_active'), value: "light" },
+      { label: t('fuel_moderately_active'), value: "moderate" }, { label: t('fuel_very_active'), value: "active" },
+      { label: t('fuel_extremely_active'), value: "veryActive" },
     ]},
-    { title: "What's your goal?", key: "goal", type: "choice" as const, choices: [
-      { label: "Lose Weight", value: "lose" }, { label: "Maintain Weight", value: "maintain" }, { label: "Gain Weight", value: "gain" },
+    { title: t('fuel_whats_goal'), key: "goal", type: "choice" as const, choices: [
+      { label: t('fuel_lose_weight'), value: "lose" }, { label: t('fuel_maintain_weight'), value: "maintain" }, { label: t('fuel_gain_weight'), value: "gain" },
     ]},
-    { title: "How much weight do you want to lose/gain?", key: "weightGoal", type: "number" as const, placeholder: "Enter weight in pounds (optional)", skipCondition: (answers: { goal: string }) => answers.goal === "maintain" },
-    { title: "How long do you plan to be on this diet?", key: "dietDuration", type: "choice" as const, choices: [
-      { label: "1-3 months (Faster results)", value: "short" },
-      { label: "3-6 months (Balanced approach)", value: "medium" },
-      { label: "6+ months (Sustainable long-term)", value: "long" },
+    { title: t('fuel_how_much_weight'), key: "weightGoal", type: "number" as const, placeholder: t('fuel_weight_placeholder'), skipCondition: (answers: { goal: string }) => answers.goal === "maintain" },
+    { title: t('fuel_diet_duration'), key: "dietDuration", type: "choice" as const, choices: [
+      { label: t('fuel_short_duration'), value: "short" },
+      { label: t('fuel_medium_duration'), value: "medium" },
+      { label: t('fuel_long_duration'), value: "long" },
     ], skipCondition: (answers: { goal: string }) => answers.goal === "maintain" },
-  ], []);
+  ], [t]);
 
   const filteredQuizQuestions = useMemo(() => 
     quizQuestions.filter((q: { skipCondition?: (a: { goal: string }) => boolean }) => !q.skipCondition || !q.skipCondition(quizAnswers)),
@@ -730,7 +730,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           <View style={styles.calorieCardHeader}>
             <View style={styles.calorieCardTitleRow}>
               <Flame size={18} color="#FF6B35" />
-              <Text style={styles.calorieCardTitle}>Today's Calories</Text>
+              <Text style={styles.calorieCardTitle}>{t('fuel_todays_calories')}</Text>
             </View>
             <View style={styles.resetBadge}>
               <Clock size={12} color="#6B7280" />
@@ -739,38 +739,38 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           </View>
           
           <View style={styles.calorieRingWrapper}>
-            <CalorieRing calories={nutrition.calories} goal={nutrition.calorieGoal} />
+            <CalorieRing calories={nutrition.calories} goal={nutrition.calorieGoal} t={t} />
           </View>
 
           {todaysFoodEntries.length > 0 && totalMacrosCal > 0 && (
             <View style={styles.macroSplitRow}>
               <View style={styles.macroSplitItem}>
                 <View style={[styles.macroSplitDot, { backgroundColor: "#FF4FB6" }]} />
-                <Text style={styles.macroSplitLabel}>Protein {proteinPct}%</Text>
+                <Text style={styles.macroSplitLabel}>{t('home_protein')} {proteinPct}%</Text>
               </View>
               <View style={styles.macroSplitItem}>
                 <View style={[styles.macroSplitDot, { backgroundColor: "#00FFC6" }]} />
-                <Text style={styles.macroSplitLabel}>Carbs {carbsPct}%</Text>
+                <Text style={styles.macroSplitLabel}>{t('home_carbs')} {carbsPct}%</Text>
               </View>
               <View style={styles.macroSplitItem}>
                 <View style={[styles.macroSplitDot, { backgroundColor: "#FFB400" }]} />
-                <Text style={styles.macroSplitLabel}>Fat {fatPct}%</Text>
+                <Text style={styles.macroSplitLabel}>{t('home_fat')} {fatPct}%</Text>
               </View>
             </View>
           )}
         </View>
 
         <View style={styles.macrosCard}>
-          <Text style={styles.macrosCardTitle}>Macros</Text>
-          <MacroBar label="Protein" value={nutrition.protein} goal={nutrition.proteinGoal} color="#FF4FB6" icon={<Drumstick size={16} color="#FF4FB6" />} />
-          <MacroBar label="Carbs" value={nutrition.carbs} goal={nutrition.carbsGoal} color="#00FFC6" icon={<Wheat size={16} color="#00FFC6" />} />
-          <MacroBar label="Fat" value={nutrition.fat} goal={nutrition.fatGoal} color="#FFB400" icon={<Droplet size={16} color="#FFB400" />} />
+          <Text style={styles.macrosCardTitle}>{t('fuel_macros')}</Text>
+          <MacroBar label={t('home_protein')} value={nutrition.protein} goal={nutrition.proteinGoal} color="#FF4FB6" icon={<Drumstick size={16} color="#FF4FB6" />} />
+          <MacroBar label={t('home_carbs')} value={nutrition.carbs} goal={nutrition.carbsGoal} color="#00FFC6" icon={<Wheat size={16} color="#00FFC6" />} />
+          <MacroBar label={t('home_fat')} value={nutrition.fat} goal={nutrition.fatGoal} color="#FFB400" icon={<Droplet size={16} color="#FFB400" />} />
         </View>
 
         {showAddFood ? (
           <View style={styles.addFoodCard}>
             <View style={styles.addFoodHeader}>
-              <Text style={styles.addFoodTitle}>{isMealPrep ? "Meal Prep Food" : "Add Food"}</Text>
+              <Text style={styles.addFoodTitle}>{isMealPrep ? t('fuel_meal_prep_food') : t('fuel_add_food_title')}</Text>
               {isMealPrep && (
                 <TouchableOpacity style={styles.datePickerButton} onPress={() => {
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -784,38 +784,38 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               )}
             </View>
             {isMealPrep && (
-              <Text style={styles.mealPrepSubtitle}>Planning meals for {mealPrepDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+              <Text style={styles.mealPrepSubtitle}>{t('fuel_planning_meals')} {mealPrepDate.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
             )}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Food name</Text>
-              <TextInput style={styles.input} placeholder="Enter food name" placeholderTextColor="#4B5563" value={foodName} onChangeText={setFoodName} />
+              <Text style={styles.inputLabel}>{t('fuel_food_name')}</Text>
+              <TextInput style={styles.input} placeholder={t('fuel_enter_food_name')} placeholderTextColor="#4B5563" value={foodName} onChangeText={setFoodName} />
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
-                <Text style={styles.inputLabel}>Calories</Text>
+                <Text style={styles.inputLabel}>{t('fuel_calories')}</Text>
                 <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={calories} onChangeText={setCalories} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
-                <Text style={styles.inputLabel}>Protein (g)</Text>
+                <Text style={styles.inputLabel}>{t('fuel_protein_g')}</Text>
                 <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={protein} onChangeText={setProtein} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
-                <Text style={styles.inputLabel}>Carbs (g)</Text>
+                <Text style={styles.inputLabel}>{t('fuel_carbs_g')}</Text>
                 <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={carbs} onChangeText={setCarbs} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
-                <Text style={styles.inputLabel}>Fat (g)</Text>
+                <Text style={styles.inputLabel}>{t('fuel_fat_g')}</Text>
                 <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={fat} onChangeText={setFat} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.addFoodButtons}>
               <TouchableOpacity style={[styles.addFoodBtn, styles.cancelBtn]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowAddFood(false); setIsMealPrep(false); }}>
-                <Text style={styles.cancelBtnText}>Cancel</Text>
+                <Text style={styles.cancelBtnText}>{t('common_cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.addFoodBtn, styles.confirmBtn]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleAddFood(); }}>
-                <Text style={styles.confirmBtnText}>{isMealPrep ? "Prep Meal" : "Add"}</Text>
+                <Text style={styles.confirmBtnText}>{isMealPrep ? t('fuel_prep_meal') : t('fuel_add')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -826,16 +826,16 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 <View style={styles.quizRequiredIconWrap}>
                   <Brain size={40} color="#00ADB5" />
                 </View>
-                <Text style={styles.quizRequiredTitle}>Set Up Your Goals</Text>
-                <Text style={styles.quizRequiredDescription}>Take a quick quiz to calculate personalized calorie and macro targets based on your body and goals.</Text>
+                <Text style={styles.quizRequiredTitle}>{t('fuel_setup_goals')}</Text>
+                <Text style={styles.quizRequiredDescription}>{t('fuel_setup_desc')}</Text>
                 <TouchableOpacity style={styles.startQuizButton} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowQuiz(true); }}>
                   <Brain size={18} color="#FFFFFF" />
-                  <Text style={styles.startQuizButtonText}>Start Setup</Text>
+                  <Text style={styles.startQuizButtonText}>{t('fuel_start_setup')}</Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <View style={styles.quickActions}>
-                <Text style={styles.quickActionsTitle}>Log Food</Text>
+                <Text style={styles.quickActionsTitle}>{t('fuel_log_food')}</Text>
                 <View style={styles.actionRow}>
                   <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={async () => {
                     if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -846,8 +846,8 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <ScanLine size={20} color="#00E5FF" />
                     </View>
                     <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>Scan</Text>
-                      <Text style={styles.actionChipSub}>Camera</Text>
+                      <Text style={styles.actionChipLabel}>{t('fuel_scan')}</Text>
+                      <Text style={styles.actionChipSub}>{t('fuel_camera')}</Text>
                     </View>
                   </TouchableOpacity>
 
@@ -860,8 +860,8 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <Brain size={20} color="#BFFF00" />
                     </View>
                     <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>Describe</Text>
-                      <Text style={styles.actionChipSub}>AI</Text>
+                      <Text style={styles.actionChipLabel}>{t('fuel_describe')}</Text>
+                      <Text style={styles.actionChipSub}>{t('fuel_ai_text')}</Text>
                     </View>
                   </TouchableOpacity>
 
@@ -874,7 +874,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <Search size={20} color="#FF6B35" />
                     </View>
                     <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>Search</Text>
+                      <Text style={styles.actionChipLabel}>{t('fuel_search')}</Text>
                       <Text style={styles.actionChipSub}>USDA</Text>
                     </View>
                   </TouchableOpacity>
@@ -887,8 +887,8 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <Plus size={20} color="#F59E0B" />
                     </View>
                     <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>Manual</Text>
-                      <Text style={styles.actionChipSub}>Entry</Text>
+                      <Text style={styles.actionChipLabel}>{t('fuel_manual')}</Text>
+                      <Text style={styles.actionChipSub}>{t('fuel_enter_manually')}</Text>
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -906,8 +906,8 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     <Dumbbell size={20} color="#8B5CF6" />
                   </View>
                   <View style={styles.exerciseChipTextWrap}>
-                    <Text style={styles.actionChipLabel}>Log Exercise</Text>
-                    <Text style={styles.exerciseChipSub}>Describe your workout to subtract burned calories</Text>
+                    <Text style={styles.actionChipLabel}>{t('fuel_log_exercise')}</Text>
+                    <Text style={styles.exerciseChipSub}>{t('fuel_exercise_desc')}</Text>
                   </View>
                   <ChevronRight size={16} color="#4B5563" />
                 </TouchableOpacity>
@@ -919,14 +919,14 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         {nutrition.quizCompleted && (
           <View style={styles.mealsSection}>
             <View style={styles.mealsSectionHeader}>
-              <Text style={styles.mealsSectionTitle}>Today's Meals</Text>
-              <Text style={styles.mealsSectionCount}>{todaysFoodEntries.length} logged</Text>
+              <Text style={styles.mealsSectionTitle}>{t('fuel_todays_meals')}</Text>
+              <Text style={styles.mealsSectionCount}>{todaysFoodEntries.length} {t('fuel_logged')}</Text>
             </View>
             {todaysFoodEntries.length === 0 ? (
               <View style={styles.emptyMeals}>
                 <UtensilsCrossed size={32} color="#2A2F3A" />
-                <Text style={styles.emptyMealsText}>No meals logged yet</Text>
-                <Text style={styles.emptyMealsHint}>Use the options above to add your first meal</Text>
+                <Text style={styles.emptyMealsText}>{t('fuel_no_meals_logged')}</Text>
+                <Text style={styles.emptyMealsHint}>{t('fuel_use_options')}</Text>
               </View>
             ) : (
               todaysFoodEntries.map((entry, index) => {
@@ -975,9 +975,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                         onPress={(e) => {
                           e.stopPropagation();
                           if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          Alert.alert("Delete Food Entry", `Are you sure you want to delete "${entry.name}"?`, [
-                            { text: "Cancel", style: "cancel" },
-                            { text: "Delete", style: "destructive", onPress: () => deleteFoodEntry(entry.id) }
+                          Alert.alert(t('fuel_delete_food'), t('fuel_delete_food_confirm', { name: entry.name }), [
+                            { text: t('common_cancel'), style: "cancel" },
+                            { text: t('common_delete'), style: "destructive", onPress: () => deleteFoodEntry(entry.id) }
                           ]);
                         }}
                       >
@@ -995,16 +995,16 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
       <Modal visible={showQuiz} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.quizModal}>
-            <Text style={styles.quizTitle}>Nutrition Goals Setup</Text>
-            <Text style={styles.quizProgress}>Step {quizStep + 1} of {filteredQuizQuestions.length}</Text>
+            <Text style={styles.quizTitle}>{t('fuel_nutrition_goals_setup')}</Text>
+            <Text style={styles.quizProgress}>{t('fuel_step')} {quizStep + 1} {t('fuel_of_total')} {filteredQuizQuestions.length}</Text>
             {currentQuizQuestion && (
               <>
                 <Text style={styles.quizQuestion}>{currentQuizQuestion.title}</Text>
                 
                 {currentQuizQuestion.type === "height" ? (
                   <View style={styles.heightInputContainer}>
-                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Feet" placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
-                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="Inches" placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
+                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
+                    <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
                   </View>
                 ) : currentQuizQuestion.type === "number" ? (
                   <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />
@@ -1028,7 +1028,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 <View style={styles.quizButtons}>
                   {quizStep > 0 && (
                     <TouchableOpacity style={[styles.quizButton, styles.quizButtonSecondary]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setQuizStep(quizStep - 1); }}>
-                      <Text style={styles.quizButtonTextSecondary}>Back</Text>
+                      <Text style={styles.quizButtonTextSecondary}>{t('fuel_back')}</Text>
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
@@ -1043,7 +1043,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     }}
                     disabled={currentQuizQuestion.type === "height" ? !quizAnswers.heightFeet || !quizAnswers.heightInches : currentQuizQuestion.key === "weightGoal" ? false : !quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]}
                   >
-                    <Text style={styles.quizButtonTextPrimary}>{quizStep < filteredQuizQuestions.length - 1 ? "Next" : "Calculate Goals"}</Text>
+                    <Text style={styles.quizButtonTextPrimary}>{quizStep < filteredQuizQuestions.length - 1 ? t('fuel_next') : t('fuel_calculate_goals')}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -1058,29 +1058,29 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <View style={styles.firstTimeIconWrap}>
               <Brain size={40} color="#10B981" />
             </View>
-            <Text style={styles.firstTimeTitle}>Welcome to Nutrition Tracking!</Text>
-            <Text style={styles.firstTimeDesc}>Set up personalized nutrition goals based on your body stats and fitness objectives.</Text>
+            <Text style={styles.firstTimeTitle}>{t('fuel_welcome_title')}</Text>
+            <Text style={styles.firstTimeDesc}>{t('fuel_welcome_desc')}</Text>
             <View style={styles.firstTimeFeatures}>
               <View style={styles.firstTimeFeatureRow}>
                 <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#00E5FF" }]} />
-                <Text style={styles.firstTimeFeatureText}>Personalized daily calorie targets</Text>
+                <Text style={styles.firstTimeFeatureText}>{t('fuel_feature_calories')}</Text>
               </View>
               <View style={styles.firstTimeFeatureRow}>
                 <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#FF4FB6" }]} />
-                <Text style={styles.firstTimeFeatureText}>Optimized macro breakdown</Text>
+                <Text style={styles.firstTimeFeatureText}>{t('fuel_feature_macros')}</Text>
               </View>
               <View style={styles.firstTimeFeatureRow}>
                 <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#00FFC6" }]} />
-                <Text style={styles.firstTimeFeatureText}>Track progress toward your goals</Text>
+                <Text style={styles.firstTimeFeatureText}>{t('fuel_feature_progress')}</Text>
               </View>
             </View>
             <View style={styles.firstTimeBtns}>
               <TouchableOpacity style={styles.firstTimeSkipBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFirstTimePrompt(false); }}>
-                <Text style={styles.firstTimeSkipText}>Later</Text>
+                <Text style={styles.firstTimeSkipText}>{t('fuel_later')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.firstTimeStartBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFirstTimePrompt(false); setShowQuiz(true); }}>
                 <TrendingUp size={18} color="#FFFFFF" />
-                <Text style={styles.firstTimeStartText}>Take Quiz</Text>
+                <Text style={styles.firstTimeStartText}>{t('fuel_take_quiz')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1093,11 +1093,11 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowAIInput(false); setAiInput(""); }}>
               <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.sheetTitle}>Describe Your Food</Text>
-            <Text style={styles.sheetSubtitle}>Tell me what you ate and I'll estimate the nutrition</Text>
-            <TextInput style={styles.sheetTextInput} placeholder="e.g., 'grilled chicken breast with rice and broccoli'" placeholderTextColor="#4B5563" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
+            <Text style={styles.sheetTitle}>{t('fuel_describe_food')}</Text>
+            <Text style={styles.sheetSubtitle}>{t('fuel_describe_food_sub')}</Text>
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_describe_placeholder')} placeholderTextColor="#4B5563" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, (!aiInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeWithAI(aiInput); }} disabled={!aiInput || isAnalyzing}>
-              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>Analyze Food</Text>}
+              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_analyze_food')}</Text>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1107,9 +1107,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <View style={styles.cameraContainer}>
           {!permission?.granted ? (
             <View style={styles.permissionContainer}>
-              <Text style={styles.permissionText}>We need camera permission</Text>
+              <Text style={styles.permissionText}>{t('fuel_camera_permission')}</Text>
               <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-                <Text style={styles.permissionButtonText}>Grant Permission</Text>
+                <Text style={styles.permissionButtonText}>{t('fuel_grant_permission')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -1125,7 +1125,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerBL]} />
                     <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerBR]} />
                   </View>
-                  <Text style={styles.cameraText}>Position food in frame</Text>
+                  <Text style={styles.cameraText}>{t('fuel_position_food')}</Text>
                   <View style={styles.cameraBottomContainer}>
                     <TouchableOpacity style={styles.captureButton} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void takePicture(); }} disabled={isAnalyzing}>
                       <View style={styles.captureButtonInner} />
@@ -1136,7 +1136,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               {isAnalyzing && (
                 <View style={styles.analyzingOverlay}>
                   <ActivityIndicator size="large" color="#FFFFFF" />
-                  <Text style={styles.analyzingText}>Analyzing food...</Text>
+                  <Text style={styles.analyzingText}>{t('fuel_analyzing_food')}</Text>
                 </View>
               )}
             </>
@@ -1150,9 +1150,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]); }}>
               <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.sheetTitle}>Search Foods</Text>
+            <Text style={styles.sheetTitle}>{t('fuel_search_foods')}</Text>
             <View style={styles.foodSearchInputRow}>
-              <TextInput style={styles.foodSearchInput} placeholder="e.g., apple, chicken breast, pizza" placeholderTextColor="#4B5563" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
+              <TextInput style={styles.foodSearchInput} placeholder={t('fuel_search_placeholder')} placeholderTextColor="#4B5563" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
                 onSubmitEditing={async () => {
                   if (!foodSearchQuery || isSearching) return;
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1175,13 +1175,13 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </View>
             <ScrollView style={styles.foodSearchResultsList} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {isSearching && foodSearchResults.length === 0 && (
-                <View style={styles.foodSearchLoading}><ActivityIndicator size="large" color="#00ADB5" /><Text style={styles.foodSearchLoadingText}>Searching USDA database...</Text></View>
+                <View style={styles.foodSearchLoading}><ActivityIndicator size="large" color="#00ADB5" /><Text style={styles.foodSearchLoadingText}>{t('fuel_searching_usda')}</Text></View>
               )}
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length > 0 && (
-                <View style={styles.foodSearchEmpty}><UtensilsCrossed size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>Press search to find foods</Text></View>
+                <View style={styles.foodSearchEmpty}><UtensilsCrossed size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>{t('fuel_press_search')}</Text></View>
               )}
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length === 0 && (
-                <View style={styles.foodSearchEmpty}><Search size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>Search USDA food database</Text><Text style={styles.foodSearchEmptyHint}>Try "banana", "chicken breast", or "rice"</Text></View>
+                <View style={styles.foodSearchEmpty}><Search size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>{t('fuel_search_usda_db')}</Text><Text style={styles.foodSearchEmptyHint}>{t('fuel_search_hint')}</Text></View>
               )}
               {foodSearchResults.map((item, index) => (
                 <TouchableOpacity key={`${item.name}-${index}`} style={styles.foodSearchResultItem} activeOpacity={0.7}
@@ -1190,7 +1190,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     const newEntry = { id: Date.now().toString(), name: item.name, calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat, date: new Date().toISOString() };
                     addFoodEntry(newEntry);
                     setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]);
-                    Alert.alert("Food Added", `"${item.name}" has been added to today's log.`);
+                    Alert.alert(t('fuel_food_added'), t('fuel_food_added_msg', { name: item.name }));
                   }}>
                   <View style={styles.foodSearchResultLeft}>
                     <Text style={styles.foodSearchResultName} numberOfLines={2}>{item.name}</Text>
@@ -1209,7 +1209,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               ))}
             </ScrollView>
             <TouchableOpacity style={styles.foodSearchManualBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]); setShowAddFood(true); }}>
-              <Plus size={14} color="#6B7280" /><Text style={styles.foodSearchManualText}>Enter manually instead</Text>
+              <Plus size={14} color="#6B7280" /><Text style={styles.foodSearchManualText}>{t('fuel_enter_manually_instead')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1221,14 +1221,14 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowEditGoals(false); }}>
               <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.sheetTitle}>Edit Nutrition Goals</Text>
-            <Text style={styles.sheetSubtitle}>Adjust your daily targets</Text>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Calorie Goal</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#4B5563" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Protein Goal (g)</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#4B5563" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Carbs Goal (g)</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#4B5563" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>Daily Fat Goal (g)</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#4B5563" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
+            <Text style={styles.sheetTitle}>{t('fuel_edit_goals')}</Text>
+            <Text style={styles.sheetSubtitle}>{t('fuel_adjust_targets')}</Text>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_calorie')}</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#4B5563" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_protein')}</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#4B5563" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_carbs')}</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#4B5563" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_fat')}</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#4B5563" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
             <TouchableOpacity style={styles.sheetPrimaryBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleEditGoals(); }}>
-              <Text style={styles.sheetPrimaryBtnText}>Save Goals</Text>
+              <Text style={styles.sheetPrimaryBtnText}>{t('fuel_save_goals')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1240,11 +1240,11 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowExerciseInput(false); setExerciseInput(""); }}>
               <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.sheetTitle}>Log Exercise</Text>
-            <Text style={styles.sheetSubtitle}>Describe your exercise and I'll estimate calories burned</Text>
-            <TextInput style={styles.sheetTextInput} placeholder="e.g., '30 min jog', 'chest and triceps for 45 min', '100 pushups'" placeholderTextColor="#4B5563" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
+            <Text style={styles.sheetTitle}>{t('fuel_log_exercise')}</Text>
+            <Text style={styles.sheetSubtitle}>{t('fuel_exercise_sub_desc')}</Text>
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_exercise_placeholder')} placeholderTextColor="#4B5563" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, styles.exercisePrimaryBtn, (!exerciseInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeExercise(exerciseInput); }} disabled={!exerciseInput || isAnalyzing}>
-              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>Estimate Calories</Text>}
+              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_estimate_calories')}</Text>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1256,17 +1256,17 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowRefineFood(false); setSelectedFoodEntry(null); setRefinementInput(""); }}>
               <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.sheetTitle}>Refine Food Entry</Text>
-            <Text style={styles.sheetSubtitle}>Add details to improve accuracy</Text>
+            <Text style={styles.sheetTitle}>{t('fuel_refine_entry')}</Text>
+            <Text style={styles.sheetSubtitle}>{t('fuel_refine_sub')}</Text>
             {selectedFoodEntry && (
               <View style={styles.refineEntryPreview}>
                 <Text style={styles.refineEntryName}>{selectedFoodEntry.name}</Text>
                 <Text style={styles.refineEntryMacros}>{selectedFoodEntry.calories} cal · P: {selectedFoodEntry.protein}g · C: {selectedFoodEntry.carbs}g · F: {selectedFoodEntry.fat}g</Text>
               </View>
             )}
-            <TextInput style={styles.sheetTextInput} placeholder="e.g., 'it was a large portion, deep fried'" placeholderTextColor="#4B5563" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_refine_placeholder')} placeholderTextColor="#4B5563" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, (!refinementInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); if (selectedFoodEntry) void refineWithAI(selectedFoodEntry, refinementInput); }} disabled={!refinementInput || isAnalyzing}>
-              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>Refine Entry</Text>}
+              {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_refine_btn')}</Text>}
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1278,12 +1278,12 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowWeeklyReview(false); setWeeklyReviewData(""); }}>
               <X size={22} color="#6B7280" />
             </TouchableOpacity>
-            <Text style={styles.sheetTitle}>Weekly Nutrition Review</Text>
+            <Text style={styles.sheetTitle}>{t('fuel_weekly_review_title')}</Text>
             <ScrollView style={{ maxHeight: 400, marginTop: 16 }}>
               {isGeneratingReview ? (
                 <View style={{ alignItems: "center" as const, paddingVertical: 40 }}>
                   <ActivityIndicator size="large" color="#00ADB5" />
-                  <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 15 }}>Analyzing your week...</Text>
+                  <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 15 }}>{t('fuel_analyzing_week')}</Text>
                 </View>
               ) : (
                 <Text style={{ fontSize: 15, color: "#D1D5DB", lineHeight: 24 }}>{weeklyReviewData}</Text>
