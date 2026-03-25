@@ -9,6 +9,8 @@ import {
   TextInput,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router, Stack } from "expo-router";
@@ -223,7 +225,12 @@ export default function RunDetailsScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={insets.top + 60}
+      >
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.dateCard}>
           <View style={styles.dateIconWrap}>
             <Calendar size={18} color={colors.accent.teal} />
@@ -364,6 +371,7 @@ export default function RunDetailsScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <Modal
         visible={showImageModal}
@@ -441,6 +449,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent.teal,
   },
   content: {
+    flex: 1,
+  },
+  scrollView: {
     flex: 1,
   },
   contentContainer: {
