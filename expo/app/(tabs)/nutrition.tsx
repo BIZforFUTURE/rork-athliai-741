@@ -1414,7 +1414,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
       </Modal>
 
       <Modal visible={showFoodDetail} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={fdStyles.detailModal}>
             <View style={fdStyles.detailHeader}>
               <TouchableOpacity
@@ -1626,7 +1626,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                   </TouchableOpacity>
                 )}
 
-                <View style={{ height: 20 }} />
+                <View style={{ height: 40 }} />
               </ScrollView>
             )}
 
@@ -1656,7 +1656,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               <Text style={fdStyles.doneBtnText}>{t('fuel_detail_done')}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={showRefineFood} animationType="slide" transparent>
