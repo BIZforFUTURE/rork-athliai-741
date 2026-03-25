@@ -30,7 +30,6 @@ import {
 import { 
   ExerciseTemplate, 
   BodyPart, 
-  bodyPartLabels, 
   exercisesByBodyPart 
 } from "@/constants/exercises";
 import { WorkoutPlan } from "@/constants/workouts";
@@ -76,6 +75,126 @@ export default function WorkoutBuilderScreen() {
   const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
 
   const bodyParts: BodyPart[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'cardio'];
+
+  const bodyPartTranslationKeys: Record<BodyPart, string> = {
+    chest: 'body_part_chest',
+    back: 'body_part_back',
+    shoulders: 'body_part_shoulders',
+    arms: 'body_part_arms',
+    legs: 'body_part_legs',
+    core: 'body_part_core',
+    cardio: 'body_part_cardio',
+  };
+
+  const exerciseNameKeys: Record<string, string> = {
+    'bench-press': 'ex_bench_press',
+    'incline-dumbbell-press': 'ex_incline_bench_press',
+    'push-ups': 'ex_push_up',
+    'dips': 'ex_chest_dip',
+    'cable-flyes': 'ex_cable_crossover',
+    'dumbbell-fly': 'ex_dumbbell_fly',
+    'deadlift': 'ex_deadlift',
+    'bent-over-row': 'ex_barbell_row',
+    'pull-ups': 'ex_pull_up',
+    'lat-pulldown': 'ex_lat_pulldown',
+    'cable-row': 'ex_seated_row',
+    'face-pull': 'ex_face_pull',
+    'overhead-press': 'ex_overhead_press',
+    'lateral-raise': 'ex_lateral_raise',
+    'front-raise': 'ex_front_raise',
+    'reverse-fly': 'ex_reverse_fly',
+    'arnold-press': 'ex_arnold_press',
+    'bicep-curl': 'ex_bicep_curl',
+    'hammer-curl': 'ex_hammer_curl',
+    'tricep-pushdown': 'ex_tricep_pushdown',
+    'skull-crusher': 'ex_skull_crusher',
+    'preacher-curl': 'ex_preacher_curl',
+    'overhead-tricep-extension': 'ex_overhead_tricep_extension',
+    'squat': 'ex_squat',
+    'leg-press': 'ex_leg_press',
+    'romanian-deadlift': 'ex_romanian_deadlift',
+    'leg-extension': 'ex_leg_extension',
+    'leg-curl': 'ex_leg_curl',
+    'calf-raise': 'ex_calf_raise',
+    'lunge': 'ex_lunge',
+    'bulgarian-split-squat': 'ex_bulgarian_split_squat',
+    'plank': 'ex_plank',
+    'crunch': 'ex_crunch',
+    'russian-twist': 'ex_russian_twist',
+    'leg-raise': 'ex_leg_raise',
+    'ab-wheel': 'ex_ab_wheel_rollout',
+    'mountain-climber': 'ex_mountain_climber',
+    'treadmill': 'ex_treadmill',
+    'elliptical': 'ex_elliptical',
+    'rowing-machine': 'ex_rowing_machine',
+    'jump-rope': 'ex_jump_rope',
+    'stair-climber': 'ex_stair_climber',
+    'battle-ropes': 'ex_battle_ropes',
+  };
+
+  const targetMuscleKeys: Record<string, string> = {
+    'Chest': 'muscle_chest',
+    'Upper Chest': 'muscle_upper_chest',
+    'Lower Chest': 'muscle_lower_chest',
+    'Lower Back': 'muscle_lower_back',
+    'Back': 'muscle_back',
+    'Lats': 'muscle_lats',
+    'Mid Back': 'muscle_mid_back',
+    'Rear Delts': 'muscle_rear_delts',
+    'Shoulders': 'muscle_shoulders',
+    'Side Delts': 'muscle_side_delts',
+    'Front Delts': 'muscle_front_delts',
+    'Biceps': 'muscle_biceps',
+    'Triceps': 'muscle_triceps',
+    'Quads': 'muscle_quads',
+    'Hamstrings': 'muscle_hamstrings',
+    'Calves': 'muscle_calves',
+    'Core': 'muscle_core',
+    'Abs': 'muscle_abs',
+    'Obliques': 'muscle_obliques',
+    'Lower Abs': 'muscle_lower_abs',
+    'Cardio': 'muscle_cardio',
+  };
+
+  const equipmentKeys: Record<string, string> = {
+    'Barbell': 'equip_barbell',
+    'Dumbbells': 'equip_dumbbells',
+    'Dumbbell': 'equip_dumbbell',
+    'Bodyweight': 'equip_bodyweight',
+    'Dip Station': 'equip_dip_station',
+    'Cable Machine': 'equip_cable_machine',
+    'Pull-up Bar': 'equip_pull_up_bar',
+    'Leg Press Machine': 'equip_leg_press_machine',
+    'Leg Extension Machine': 'equip_leg_extension_machine',
+    'Leg Curl Machine': 'equip_leg_curl_machine',
+    'Machine': 'equip_machine',
+    'Ab Wheel': 'equip_ab_wheel',
+    'Treadmill': 'equip_treadmill',
+    'Elliptical': 'equip_elliptical',
+    'Rowing Machine': 'equip_rowing_machine',
+    'Jump Rope': 'equip_jump_rope',
+    'Stair Climber': 'equip_stair_climber',
+    'Battle Ropes': 'equip_battle_ropes',
+  };
+
+  const translateExerciseName = (exercise: ExerciseTemplate) => {
+    const key = exerciseNameKeys[exercise.id];
+    return key ? t(key as any) : exercise.name;
+  };
+
+  const translateTarget = (target: string) => {
+    const key = targetMuscleKeys[target];
+    return key ? t(key as any) : target;
+  };
+
+  const translateEquipment = (equipment: string) => {
+    const key = equipmentKeys[equipment];
+    return key ? t(key as any) : equipment;
+  };
+
+  const translateBodyPart = (bp: BodyPart) => {
+    return t(bodyPartTranslationKeys[bp] as any);
+  };
 
   const addExercise = useCallback((exercise: ExerciseTemplate) => {
     if (Platform.OS !== 'web') {
@@ -344,8 +463,8 @@ export default function WorkoutBuilderScreen() {
                     </View>
                     
                     <View style={styles.exerciseInfo}>
-                      <Text style={styles.exerciseName}>{exercise.name}</Text>
-                      <Text style={styles.exerciseEquipment}>{exercise.equipment}</Text>
+                      <Text style={styles.exerciseName}>{translateExerciseName(exercise)}</Text>
+                      <Text style={styles.exerciseEquipment}>{translateEquipment(exercise.equipment)}</Text>
                     </View>
 
                     <TouchableOpacity 
@@ -445,7 +564,7 @@ export default function WorkoutBuilderScreen() {
               style={styles.cancelButton}
               onPress={closePicker}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('builder_cancel')}</Text>
             </TouchableOpacity>
             <Text style={styles.pickerTitle}>{t('builder_choose_exercises')}</Text>
             <View style={styles.cancelButton} />
@@ -462,7 +581,7 @@ export default function WorkoutBuilderScreen() {
                 <View key={bodyPart} style={styles.bodyPartSection}>
                   <View style={styles.bodyPartHeader}>
                     {BODY_PART_ICONS[bodyPart]}
-                    <Text style={styles.bodyPartTitle}>{bodyPartLabels[bodyPart]}</Text>
+                    <Text style={styles.bodyPartTitle}>{translateBodyPart(bodyPart)}</Text>
                   </View>
 
                   <View style={styles.exerciseGroupCard}>
@@ -486,10 +605,10 @@ export default function WorkoutBuilderScreen() {
                                 styles.exercisePickerName,
                                 isSelected && styles.exercisePickerNameSelected,
                               ]}>
-                                {exercise.name}
+                                {translateExerciseName(exercise)}
                               </Text>
                               <Text style={styles.exercisePickerTarget}>
-                                {exercise.targetMuscle}
+                                {translateTarget(exercise.targetMuscle)}
                               </Text>
                             </View>
                             {isSelected && (

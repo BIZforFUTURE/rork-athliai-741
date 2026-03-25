@@ -529,8 +529,8 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-        <View>
-          <Text style={styles.greetingText}>{greeting}</Text>
+        <View style={{ flex: 1, flexShrink: 1 }}>
+          <Text style={styles.greetingText} numberOfLines={1}>{greeting}</Text>
           <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
         </View>
         <View style={[styles.levelChip, { backgroundColor: xpInfo.rank.color + "18", borderColor: xpInfo.rank.color + "35" }]}>
@@ -583,12 +583,14 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
+    gap: 10,
   },
   greetingText: {
     fontSize: 28,
     fontWeight: "800" as const,
     color: "#F3F4F6",
     letterSpacing: -0.8,
+    flexShrink: 1,
   },
   subGreeting: {
     fontSize: 13,
@@ -605,6 +607,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginBottom: 2,
+    flexShrink: 0,
   },
   levelChipEmoji: {
     fontSize: 14,
@@ -1081,21 +1084,23 @@ const weekStyles = StyleSheet.create({
     gap: 10,
   },
   cell: {
-    width: "48%" as unknown as number,
+    width: "47%" as unknown as number,
     flexGrow: 1,
-    flexBasis: "46%" as unknown as number,
+    flexBasis: "44%" as unknown as number,
     backgroundColor: "rgba(255,255,255,0.025)",
     borderRadius: 16,
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
     overflow: "hidden" as const,
     position: "relative" as const,
+    minHeight: 110,
   },
   cellTop: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 8,
     marginBottom: 12,
+    flexWrap: "wrap" as const,
   },
   cellIcon: {
     width: 38,
@@ -1115,10 +1120,11 @@ const weekStyles = StyleSheet.create({
     fontWeight: "700" as const,
   },
   cellLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600" as const,
     textTransform: "uppercase" as const,
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
+    flexShrink: 1,
   },
   cellAccent: {
     position: "absolute" as const,
