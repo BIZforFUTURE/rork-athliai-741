@@ -1500,9 +1500,12 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <TouchableOpacity
                         key={m}
                         style={[fdStyles.measurementChip, isActive && fdStyles.measurementChipActive]}
+                        activeOpacity={0.7}
                         onPress={() => {
+                          console.log('Measurement button pressed:', m);
                           if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                           setDetailMeasurement(m);
+                          setDetailServings("1");
                         }}
                       >
                         <Text style={[fdStyles.measurementChipText, isActive && fdStyles.measurementChipTextActive]}>
@@ -1528,7 +1531,17 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 </View>
 
                 {(() => {
-                  const multiplier = parseFloat(detailServings) || 1;
+                  const measurementScales: Record<string, number> = {
+                    serving: 1,
+                    g: 0.01,
+                    tbsp: 0.1,
+                    cup: 2,
+                    oz: 0.25,
+                    piece: 0.5,
+                  };
+                  const scale = measurementScales[detailMeasurement] ?? 1;
+                  const servings = parseFloat(detailServings) || 1;
+                  const multiplier = scale * servings;
                   const cal = Math.round(selectedFoodEntry.calories * multiplier);
                   const prot = Math.round(selectedFoodEntry.protein * multiplier);
                   const carb = Math.round(selectedFoodEntry.carbs * multiplier);
@@ -1621,13 +1634,17 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               style={fdStyles.doneBtn}
               onPress={() => {
                 if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                const multiplier = parseFloat(detailServings) || 1;
-                if (selectedFoodEntry && multiplier !== 1) {
+                const measurementScalesDone: Record<string, number> = {
+                  serving: 1, g: 0.01, tbsp: 0.1, cup: 2, oz: 0.25, piece: 0.5,
+                };
+                const scaleDone = measurementScalesDone[detailMeasurement] ?? 1;
+                const finalMultiplier = scaleDone * (parseFloat(detailServings) || 1);
+                if (selectedFoodEntry && finalMultiplier !== 1) {
                   updateFoodEntry(selectedFoodEntry.id, {
-                    calories: Math.round(selectedFoodEntry.calories * multiplier),
-                    protein: Math.round(selectedFoodEntry.protein * multiplier),
-                    carbs: Math.round(selectedFoodEntry.carbs * multiplier),
-                    fat: Math.round(selectedFoodEntry.fat * multiplier),
+                    calories: Math.round(selectedFoodEntry.calories * finalMultiplier),
+                    protein: Math.round(selectedFoodEntry.protein * finalMultiplier),
+                    carbs: Math.round(selectedFoodEntry.carbs * finalMultiplier),
+                    fat: Math.round(selectedFoodEntry.fat * finalMultiplier),
                   });
                 }
                 setShowFoodDetail(false);
