@@ -738,6 +738,19 @@ export const translations = {
     levelup_msg_9: 'The journey continues!',
     levelup_msg_10: 'Leveling up in real life!',
 
+    // Saved foods
+    fuel_saved: 'Saved',
+    fuel_saved_foods: 'Saved Foods',
+    fuel_saved_sub: 'Quick log from your favorites',
+    fuel_save_food: 'Save Food',
+    fuel_food_saved: 'Food Saved!',
+    fuel_food_saved_msg: '"{name}" added to your saved foods.',
+    fuel_food_unsaved: 'Food Removed',
+    fuel_food_unsaved_msg: '"{name}" removed from saved foods.',
+    fuel_no_saved_foods: 'No saved foods yet',
+    fuel_no_saved_foods_hint: 'Tap the bookmark icon on any food to save it here.',
+    fuel_log_saved_food: 'Log This Food',
+
     // Food detail modal
     fuel_detail_title: 'Nutrition',
     fuel_detail_measurement: 'Measurement',
@@ -1500,6 +1513,19 @@ export const translations = {
     levelup_msg_8: '¡Sin atajos, solo progreso!',
     levelup_msg_9: '¡El viaje continúa!',
     levelup_msg_10: '¡Subiendo de nivel en la vida real!',
+
+    // Saved foods
+    fuel_saved: 'Guardado',
+    fuel_saved_foods: 'Alimentos Guardados',
+    fuel_saved_sub: 'Registra rápido desde tus favoritos',
+    fuel_save_food: 'Guardar Alimento',
+    fuel_food_saved: '¡Alimento Guardado!',
+    fuel_food_saved_msg: '"{name}" agregado a tus alimentos guardados.',
+    fuel_food_unsaved: 'Alimento Eliminado',
+    fuel_food_unsaved_msg: '"{name}" eliminado de alimentos guardados.',
+    fuel_no_saved_foods: 'No hay alimentos guardados',
+    fuel_no_saved_foods_hint: 'Toca el icono de marcador en cualquier alimento para guardarlo aquí.',
+    fuel_log_saved_food: 'Registrar Este Alimento',
 
     // Food detail modal
     fuel_detail_title: 'Nutrición',

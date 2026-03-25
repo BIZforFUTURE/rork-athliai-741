@@ -78,6 +78,16 @@ interface FoodEntry {
   date: string;
 }
 
+interface SavedFood {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  savedAt: string;
+}
+
 
 
 interface PersonalStats {
@@ -135,6 +145,7 @@ interface CoreState {
   nutrition: Nutrition;
   customWorkoutPlan: CustomWorkoutPlan | null;
   savedWorkouts: SavedWorkout[];
+  savedFoods: SavedFood[];
   personalStats: PersonalStats;
   weightHistory: WeightEntry[];
   xp: XPState;
@@ -198,6 +209,7 @@ const defaultState: AppState = {
   workoutLogs: [],
   customWorkoutPlan: null,
   savedWorkouts: [],
+  savedFoods: [],
   personalStats: {},
   weightHistory: [],
   xp: defaultXPState,
@@ -265,6 +277,7 @@ function validateState(parsed: Record<string, unknown>): AppState {
     workoutLogs: Array.isArray(parsed.workoutLogs) ? parsed.workoutLogs : [],
     customWorkoutPlan: (parsed.customWorkoutPlan as CustomWorkoutPlan) || null,
     savedWorkouts: Array.isArray(parsed.savedWorkouts) ? parsed.savedWorkouts : [],
+    savedFoods: Array.isArray(parsed.savedFoods) ? parsed.savedFoods : [],
     personalStats: (parsed.personalStats as PersonalStats) || {},
     weightHistory: Array.isArray(parsed.weightHistory) ? parsed.weightHistory : [],
     xp: parsed.xp ? {
@@ -990,6 +1003,34 @@ export const [AppProvider, useApp] = createContextHook(() => {
       return updated;
     });
   }, [persistState]);
+
+  const saveFoodItem = useCallback((food: Omit<SavedFood, 'id' | 'savedAt'>) => {
+    setAppState(prev => {
+      const newSavedFood: SavedFood = {
+        ...food,
+        id: `saved-food-${Date.now()}`,
+        savedAt: new Date().toISOString(),
+      };
+      const updated = { ...prev, savedFoods: [newSavedFood, ...prev.savedFoods] };
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const deleteSavedFood = useCallback((foodId: string) => {
+    setAppState(prev => {
+      const updated = {
+        ...prev,
+        savedFoods: prev.savedFoods.filter(f => f.id !== foodId),
+      };
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const isFoodSaved = useCallback((name: string) => {
+    return appState.savedFoods.some(f => f.name.toLowerCase() === name.toLowerCase());
+  }, [appState.savedFoods]);
   
   const updatePersonalStats = useCallback((stats: PersonalStats) => {
     setAppState(prev => {
@@ -1189,6 +1230,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     workoutLogs: appState.workoutLogs,
     customWorkoutPlan: appState.customWorkoutPlan,
     savedWorkouts: appState.savedWorkouts,
+    savedFoods: appState.savedFoods,
     personalStats: appState.personalStats,
     weightHistory: appState.weightHistory,
     hasSeenWelcome: appState.hasSeenWelcome,
@@ -1212,6 +1254,9 @@ export const [AppProvider, useApp] = createContextHook(() => {
     updateCustomWorkoutPlan,
     saveCustomWorkout,
     deleteSavedWorkout,
+    saveFoodItem,
+    deleteSavedFood,
+    isFoodSaved,
     updatePersonalStats,
     addWeightEntry,
     deleteWeightEntry,
@@ -1225,5 +1270,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     importAllData,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.savedFoods, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, saveFoodItem, deleteSavedFood, isFoodSaved, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
 });

@@ -18,7 +18,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Dumbbell, ArrowLeft, Pencil, Sparkles, ChevronLeft } from "lucide-react-native";
+import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Dumbbell, ArrowLeft, Pencil, Sparkles, ChevronLeft, Bookmark } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -118,7 +118,7 @@ const macroCardStyles = StyleSheet.create({
 export default function NutritionScreen() {
   const _router = useRouter();
   const { t, isSpanish } = useLanguage();
-  const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries, stats } = useApp();
+  const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries, stats, savedFoods, saveFoodItem, deleteSavedFood, isFoodSaved } = useApp();
   const { isPremium } = useRevenueCat();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
 
@@ -167,6 +167,7 @@ export default function NutritionScreen() {
   const [detailMeasurement, setDetailMeasurement] = useState("serving");
   const [showDetailRefineInput, setShowDetailRefineInput] = useState(false);
   const [detailRefineText, setDetailRefineText] = useState("");
+  const [showSavedFoods, setShowSavedFoods] = useState(false);
   const [showWeeklyReview, setShowWeeklyReview] = useState(false);
   const [weeklyReviewData, setWeeklyReviewData] = useState<string>("");
   const [_isGeneratingReview, _setIsGeneratingReview] = useState(false);
@@ -1021,6 +1022,26 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                   </TouchableOpacity>
                 </View>
 
+                {savedFoods.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.exerciseChip}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowSavedFoods(true);
+                    }}
+                  >
+                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
+                      <Bookmark size={20} color="#EF4444" fill="#EF4444" />
+                    </View>
+                    <View style={styles.exerciseChipTextWrap}>
+                      <Text style={styles.actionChipLabel}>{t('fuel_saved_foods')}</Text>
+                      <Text style={styles.exerciseChipSub}>{savedFoods.length} {t('fuel_saved').toLowerCase()}</Text>
+                    </View>
+                    <ChevronRight size={16} color="#4B5563" />
+                  </TouchableOpacity>
+                )}
+
                 <TouchableOpacity
                   style={styles.exerciseChip}
                   activeOpacity={0.7}
@@ -1409,23 +1430,48 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 <ArrowLeft size={20} color="#F9FAFB" />
               </TouchableOpacity>
               <Text style={fdStyles.detailHeaderTitle}>{t('fuel_detail_title')}</Text>
-              <TouchableOpacity
-                style={fdStyles.detailDeleteBtn}
-                onPress={() => {
-                  if (!selectedFoodEntry) return;
-                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  Alert.alert(t('fuel_delete_food'), t('fuel_delete_food_confirm', { name: selectedFoodEntry.name }), [
-                    { text: t('common_cancel'), style: "cancel" },
-                    { text: t('common_delete'), style: "destructive", onPress: () => {
-                      deleteFoodEntry(selectedFoodEntry.id);
-                      setShowFoodDetail(false);
-                      setSelectedFoodEntry(null);
-                    }}
-                  ]);
-                }}
-              >
-                <Trash2 size={18} color="#6B7280" />
-              </TouchableOpacity>
+              <View style={fdStyles.detailHeaderRight}>
+                <TouchableOpacity
+                  style={[fdStyles.detailBookmarkBtn, selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) && fdStyles.detailBookmarkBtnActive]}
+                  onPress={() => {
+                    if (!selectedFoodEntry) return;
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    if (isFoodSaved(selectedFoodEntry.name)) {
+                      const saved = savedFoods.find(f => f.name.toLowerCase() === selectedFoodEntry.name.toLowerCase());
+                      if (saved) deleteSavedFood(saved.id);
+                      Alert.alert(t('fuel_food_unsaved'), t('fuel_food_unsaved_msg', { name: selectedFoodEntry.name }));
+                    } else {
+                      saveFoodItem({
+                        name: selectedFoodEntry.name,
+                        calories: selectedFoodEntry.calories,
+                        protein: selectedFoodEntry.protein,
+                        carbs: selectedFoodEntry.carbs,
+                        fat: selectedFoodEntry.fat,
+                      });
+                      Alert.alert(t('fuel_food_saved'), t('fuel_food_saved_msg', { name: selectedFoodEntry.name }));
+                    }
+                  }}
+                >
+                  <Bookmark size={18} color={selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) ? "#EF4444" : "#6B7280"} fill={selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) ? "#EF4444" : "none"} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={fdStyles.detailDeleteBtn}
+                  onPress={() => {
+                    if (!selectedFoodEntry) return;
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    Alert.alert(t('fuel_delete_food'), t('fuel_delete_food_confirm', { name: selectedFoodEntry.name }), [
+                      { text: t('common_cancel'), style: "cancel" },
+                      { text: t('common_delete'), style: "destructive", onPress: () => {
+                        deleteFoodEntry(selectedFoodEntry.id);
+                        setShowFoodDetail(false);
+                        setSelectedFoodEntry(null);
+                      }}
+                    ]);
+                  }}
+                >
+                  <Trash2 size={18} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {selectedFoodEntry && (
@@ -1616,6 +1662,78 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={showSavedFoods} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.foodSearchModal}>
+            <TouchableOpacity style={styles.sheetClose} onPress={() => {
+              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowSavedFoods(false);
+            }}>
+              <X size={22} color="#6B7280" />
+            </TouchableOpacity>
+            <Text style={styles.sheetTitle}>{t('fuel_saved_foods')}</Text>
+            <Text style={styles.sheetSubtitle}>{t('fuel_saved_sub')}</Text>
+            <ScrollView style={styles.foodSearchResultsList} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              {savedFoods.length === 0 ? (
+                <View style={styles.foodSearchEmpty}>
+                  <Bookmark size={36} color="#2A2F3A" />
+                  <Text style={styles.foodSearchEmptyText}>{t('fuel_no_saved_foods')}</Text>
+                  <Text style={styles.foodSearchEmptyHint}>{t('fuel_no_saved_foods_hint')}</Text>
+                </View>
+              ) : (
+                savedFoods.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.foodSearchResultItem}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      const newEntry = {
+                        id: Date.now().toString(),
+                        name: item.name,
+                        calories: item.calories,
+                        protein: item.protein,
+                        carbs: item.carbs,
+                        fat: item.fat,
+                        date: new Date().toISOString(),
+                      };
+                      addFoodEntry(newEntry);
+                      setShowSavedFoods(false);
+                      Alert.alert(t('fuel_food_added'), t('fuel_food_added_msg', { name: item.name }));
+                    }}
+                  >
+                    <View style={styles.foodSearchResultLeft}>
+                      <Text style={styles.foodSearchResultName} numberOfLines={2}>{item.name}</Text>
+                      <View style={styles.foodSearchResultMacros}>
+                        <Text style={styles.foodSearchMacroP}>P: {item.protein}g</Text>
+                        <Text style={styles.foodSearchMacroC}>C: {item.carbs}g</Text>
+                        <Text style={styles.foodSearchMacroF}>F: {item.fat}g</Text>
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                      <View style={styles.foodSearchResultRight}>
+                        <Text style={styles.foodSearchResultCal}>{item.calories}</Text>
+                        <Text style={styles.foodSearchResultCalLabel}>cal</Text>
+                      </View>
+                      <TouchableOpacity
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          deleteSavedFood(item.id);
+                        }}
+                      >
+                        <Trash2 size={14} color="#6B7280" />
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
       </Modal>
 
       <Modal visible={showWeeklyReview} animationType="slide" transparent>
@@ -2918,5 +3036,21 @@ const fdStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700" as const,
     color: "#F9FAFB",
+  },
+  detailHeaderRight: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  detailBookmarkBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  detailBookmarkBtnActive: {
+    backgroundColor: "rgba(239,68,68,0.12)",
   },
 });
