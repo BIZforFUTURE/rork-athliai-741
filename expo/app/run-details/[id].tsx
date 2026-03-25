@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   dateCard: {
     flexDirection: "row",

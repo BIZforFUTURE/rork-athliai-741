@@ -1050,11 +1050,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#0A0C10",
   },
   activeRunPanel: {
-    flex: 1,
     backgroundColor: "#0A0C10",
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 24,
+    paddingBottom: 100,
     justifyContent: "center" as const,
   },
   activeRunClose: {
