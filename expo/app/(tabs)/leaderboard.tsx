@@ -128,7 +128,7 @@ function XPRankCard({ t }: { t: (key: any, params?: Record<string, string | numb
         </View>
       </View>
 
-      <View style={xpStyles.timeline}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={xpStyles.timelineScroll} contentContainerStyle={xpStyles.timeline}>
         {RANKS.map((rank, index) => {
           const isCurrentOrPast = xpInfo.level >= rank.minLevel;
           const isCurrent = index < RANKS.length - 1
@@ -142,13 +142,13 @@ function XPRankCard({ t }: { t: (key: any, params?: Record<string, string | numb
                 isCurrent && { borderWidth: 1.5, borderColor: "#FFFFFF" },
               ]} />
               <Text style={xpStyles.timelineEmoji}>{rank.emoji}</Text>
-              <Text style={[xpStyles.timelineName, isCurrentOrPast && { color: rank.color + "AA" }]}>
+              <Text style={[xpStyles.timelineName, isCurrentOrPast && { color: rank.color + "AA" }]} numberOfLines={1}>
                 {RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title}
               </Text>
             </View>
           );
         })}
-      </View>
+      </ScrollView>
     </Animated.View>
   );
 }
@@ -703,6 +703,9 @@ function FitnessStatsCard({ t, isSpanish }: { t: (key: any, params?: Record<stri
     { value: `${recentRuns.length}`, unit: "", label: t('stats_total_runs'), color: "#F59E0B", icon: <Target size={14} color="#F59E0B" /> },
   ];
 
+  const topRow = items.slice(0, 2);
+  const bottomRow = items.slice(2);
+
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
@@ -710,18 +713,35 @@ function FitnessStatsCard({ t, isSpanish }: { t: (key: any, params?: Record<stri
         <Text style={cardStyles.cardHeading}>{t('stats_fitness_stats')}</Text>
       </View>
       <View style={fitStyles.grid}>
-        {items.map((item, idx) => (
-          <View key={item.label} style={[fitStyles.cell, idx < 3 && fitStyles.cellBorder]}>
-            <View style={[fitStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
-              {item.icon}
+        <View style={fitStyles.gridRow}>
+          {topRow.map((item, idx) => (
+            <View key={item.label} style={[fitStyles.cell, idx < topRow.length - 1 && fitStyles.cellBorder]}>
+              <View style={[fitStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
+                {item.icon}
+              </View>
+              <Text style={fitStyles.cellValue}>
+                {item.value}
+                {item.unit ? <Text style={[fitStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
+              </Text>
+              <Text style={fitStyles.cellLabel} numberOfLines={2}>{item.label}</Text>
             </View>
-            <Text style={fitStyles.cellValue}>
-              {item.value}
-              {item.unit ? <Text style={[fitStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
-            </Text>
-            <Text style={fitStyles.cellLabel}>{item.label}</Text>
-          </View>
-        ))}
+          ))}
+        </View>
+        <View style={fitStyles.gridDivider} />
+        <View style={fitStyles.gridRow}>
+          {bottomRow.map((item, idx) => (
+            <View key={item.label} style={[fitStyles.cell, idx < bottomRow.length - 1 && fitStyles.cellBorder]}>
+              <View style={[fitStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
+                {item.icon}
+              </View>
+              <Text style={fitStyles.cellValue}>
+                {item.value}
+                {item.unit ? <Text style={[fitStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
+              </Text>
+              <Text style={fitStyles.cellLabel} numberOfLines={2}>{item.label}</Text>
+            </View>
+          ))}
+        </View>
       </View>
     </Animated.View>
   );
@@ -1449,16 +1469,21 @@ const xpStyles = StyleSheet.create({
     fontWeight: "800" as const,
     letterSpacing: -0.3,
   },
-  timeline: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
+  timelineScroll: {
     paddingTop: 14,
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.06)",
+    marginHorizontal: -4,
+  },
+  timeline: {
+    flexDirection: "row" as const,
+    gap: 16,
+    paddingHorizontal: 4,
   },
   timelineItem: {
     alignItems: "center" as const,
     gap: 3,
+    minWidth: 44,
   },
   timelineDot: {
     width: 8,
@@ -1469,11 +1494,12 @@ const xpStyles = StyleSheet.create({
     fontSize: 14,
   },
   timelineName: {
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: "600" as const,
     color: "#4B5563",
     textTransform: "uppercase" as const,
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
+    textAlign: "center" as const,
   },
 });
 
@@ -1852,13 +1878,22 @@ const wpStyles = StyleSheet.create({
 
 const fitStyles = StyleSheet.create({
   grid: {
+    gap: 0,
+  },
+  gridRow: {
     flexDirection: "row" as const,
+  },
+  gridDivider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    marginVertical: 4,
   },
   cell: {
     flex: 1,
     alignItems: "center" as const,
     gap: 6,
-    paddingVertical: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
   },
   cellBorder: {
     borderRightWidth: 1,
@@ -1882,11 +1917,12 @@ const fitStyles = StyleSheet.create({
     fontWeight: "600" as const,
   },
   cellLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "600" as const,
     color: "#4B5563",
     textTransform: "uppercase" as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    textAlign: "center" as const,
   },
 });
 
