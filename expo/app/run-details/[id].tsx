@@ -11,12 +11,10 @@ import {
   Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import {
   ArrowLeft,
   Camera,
-  MapPin,
   Clock,
   TrendingUp,
   Flame,
@@ -201,68 +199,69 @@ export default function RunDetailsScreen() {
         }}
       />
       
-      <LinearGradient
-        colors={[colors.accent.teal, colors.accent.violet]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <View style={styles.headerContent}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
             testID="back-button"
           >
-            <ArrowLeft size={24} color="#FFFFFF" />
+            <ArrowLeft size={22} color={colors.text.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('run_details')}</Text>
           <TouchableOpacity
-            style={styles.editButton}
+            style={[styles.editButton, isEditing && styles.editButtonActive]}
             onPress={isEditing ? handleSave : () => setIsEditing(true)}
             testID="edit-button"
           >
             {isEditing ? (
-              <Save size={24} color="#FFFFFF" />
+              <Save size={20} color="#FFFFFF" />
             ) : (
-              <Edit3 size={24} color="#FFFFFF" />
+              <Edit3 size={20} color={colors.text.secondary} />
             )}
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
         <View style={styles.dateCard}>
-          <Calendar size={20} color={colors.accent.teal} />
+          <View style={styles.dateIconWrap}>
+            <Calendar size={18} color={colors.accent.teal} />
+          </View>
           <View style={styles.dateInfo}>
             <Text style={styles.dateText}>{formatDate(run.date)}</Text>
             <Text style={styles.timeText}>{formatDateTime(run.date)}</Text>
           </View>
         </View>
 
-        <View style={styles.statsGrid}>
+        <View style={styles.heroStat}>
+          <Text style={styles.heroStatValue}>{isSpanish ? (run.distance * 1.60934).toFixed(2) : run.distance.toFixed(2)}</Text>
+          <Text style={styles.heroStatUnit}>{t('run_miles_lower')}</Text>
+        </View>
+
+        <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <MapPin size={24} color={colors.accent.teal} />
-            <Text style={styles.statLabel}>{t('run_distance')}</Text>
-            <Text style={styles.statValue}>{isSpanish ? (run.distance * 1.60934).toFixed(2) : run.distance.toFixed(2)}</Text>
-            <Text style={styles.statUnit}>{t('run_miles_lower')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Clock size={24} color="#10B981" />
-            <Text style={styles.statLabel}>{t('run_time')}</Text>
+            <View style={[styles.statIconWrap, { backgroundColor: 'rgba(16, 185, 129, 0.12)' }]}> 
+              <Clock size={18} color="#10B981" />
+            </View>
             <Text style={styles.statValue}>{formatTime(run.time)}</Text>
-            <Text style={styles.statUnit}>{t('run_duration')}</Text>
+            <Text style={styles.statLabel}>{t('run_duration')}</Text>
           </View>
+          <View style={styles.statDivider} />
           <View style={styles.statCard}>
-            <TrendingUp size={24} color="#F59E0B" />
-            <Text style={styles.statLabel}>{t('run_pace_upper')}</Text>
+            <View style={[styles.statIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
+              <TrendingUp size={18} color="#F59E0B" />
+            </View>
             <Text style={styles.statValue}>{isSpanish ? formatPace(run.pace / 1.60934) : formatPace(run.pace)}</Text>
-            <Text style={styles.statUnit}>{t('run_min_mi_lower')}</Text>
+            <Text style={styles.statLabel}>{t('run_min_mi_lower')}</Text>
           </View>
+          <View style={styles.statDivider} />
           <View style={styles.statCard}>
-            <Flame size={24} color="#EF4444" />
-            <Text style={styles.statLabel}>{t('run_calories_upper')}</Text>
+            <View style={[styles.statIconWrap, { backgroundColor: 'rgba(239, 68, 68, 0.12)' }]}>
+              <Flame size={18} color="#EF4444" />
+            </View>
             <Text style={styles.statValue}>{run.calories}</Text>
-            <Text style={styles.statUnit}>{t('run_burned')}</Text>
+            <Text style={styles.statLabel}>{t('run_burned')}</Text>
           </View>
         </View>
 
@@ -404,11 +403,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
   headerContent: {
     flexDirection: "row",
@@ -416,70 +415,119 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   backButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.background.secondary,
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold" as const,
-    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "600" as const,
+    color: colors.text.primary,
     flex: 1,
     textAlign: "center",
   },
   editButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.background.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  editButtonActive: {
+    backgroundColor: colors.accent.teal,
   },
   content: {
     flex: 1,
+  },
+  contentContainer: {
     paddingHorizontal: 20,
-    marginTop: -20,
+    paddingBottom: 40,
   },
   dateCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 20,
-    padding: 20,
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 30,
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 24,
+  },
+  dateIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0, 173, 181, 0.1)',
+    alignItems: "center",
+    justifyContent: "center",
   },
   dateInfo: {
-    marginLeft: 15,
+    marginLeft: 12,
   },
   dateText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600" as const,
     color: colors.text.primary,
   },
   timeText: {
-    fontSize: 14,
-    color: colors.text.secondary,
+    fontSize: 13,
+    color: colors.text.tertiary,
     marginTop: 2,
   },
-  statsGrid: {
+  heroStat: {
+    alignItems: "center",
+    marginBottom: 28,
+  },
+  heroStatValue: {
+    fontSize: 56,
+    fontWeight: "700" as const,
+    color: colors.text.primary,
+    letterSpacing: -2,
+  },
+  heroStatUnit: {
+    fontSize: 15,
+    color: colors.text.tertiary,
+    marginTop: 2,
+    fontWeight: "500" as const,
+    letterSpacing: 1,
+    textTransform: "lowercase" as const,
+  },
+  statsRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 15,
-    marginBottom: 30,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 8,
+    marginBottom: 24,
+    alignItems: "center",
   },
   statCard: {
     flex: 1,
-    minWidth: "45%",
-    backgroundColor: colors.background.secondary,
-    borderRadius: 20,
-    padding: 20,
     alignItems: "center",
   },
+  statIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  statDivider: {
+    width: 1,
+    height: 48,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: colors.text.tertiary,
-    letterSpacing: 1,
-    marginTop: 10,
+    marginTop: 4,
+    fontWeight: "500" as const,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: "bold" as const,
+    fontSize: 20,
+    fontWeight: "700" as const,
     color: colors.text.primary,
-    marginTop: 5,
   },
   statUnit: {
     fontSize: 12,
@@ -487,27 +535,27 @@ const styles = StyleSheet.create({
   },
   detailsSection: {
     backgroundColor: colors.background.secondary,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: "600" as const,
     color: colors.text.primary,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   detailText: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text.secondary,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: colors.background.tertiary,
-    borderRadius: 10,
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 12,
     padding: 12,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text.primary,
     backgroundColor: colors.background.tertiary,
   },
@@ -517,8 +565,8 @@ const styles = StyleSheet.create({
   },
   photosSection: {
     backgroundColor: colors.background.secondary,
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 30,
   },
   photosSectionHeader: {
@@ -530,14 +578,14 @@ const styles = StyleSheet.create({
   addPhotoButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 173, 181, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
+    backgroundColor: "rgba(0, 173, 181, 0.1)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+    gap: 4,
   },
   addPhotoText: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.accent.teal,
     fontWeight: "500" as const,
   },
@@ -554,7 +602,7 @@ const styles = StyleSheet.create({
   photo: {
     width: "100%",
     height: "100%",
-    borderRadius: 10,
+    borderRadius: 12,
   },
   deletePhotoButton: {
     position: "absolute",
