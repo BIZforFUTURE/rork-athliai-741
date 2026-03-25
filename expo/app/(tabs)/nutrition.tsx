@@ -17,8 +17,8 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Clock, Dumbbell, ArrowLeft, Pencil, Sparkles } from "lucide-react-native";
+
+import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Dumbbell, ArrowLeft, Pencil, Sparkles } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -31,122 +31,99 @@ import { useLanguage } from "@/providers/LanguageProvider";
 
 const _SCREEN_WIDTH = Dimensions.get("window").width;
 
-const CalorieRing = React.memo(({ calories, goal, t }: { calories: number; goal: number; t: (key: any, params?: Record<string, string | number>) => string }) => {
-  const percentage = Math.min((calories / goal) * 100, 100);
-  const exceeds = calories > goal;
-  const remaining = Math.max(goal - calories, 0);
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (percentage >= 90 && percentage <= 100) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.03, duration: 1000, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
-        ])
-      ).start();
-    } else {
-      pulseAnim.setValue(1);
-    }
-  }, [percentage, pulseAnim]);
-
-  const size = 160;
-  const strokeWidth = 12;
+const MiniRing = React.memo(({ percentage, color, size, strokeWidth }: { percentage: number; color: string; size: number; strokeWidth: number }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
-  const ringColor = exceeds ? "#EF4444" : "#00E5FF";
+  const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
 
   return (
-    <Animated.View style={[calorieRingStyles.container, { transform: [{ scale: pulseAnim }] }]}>
-      <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
-        <Circle
-          cx={size / 2} cy={size / 2} r={radius}
-          stroke="rgba(0,229,255,0.08)" strokeWidth={strokeWidth} fill="none"
-        />
-        <Circle
-          cx={size / 2} cy={size / 2} r={radius}
-          stroke={ringColor} strokeWidth={strokeWidth} fill="none"
-          strokeDasharray={`${circumference}`} strokeDashoffset={`${offset}`}
-          strokeLinecap="round"
-        />
-      </Svg>
-      <View style={calorieRingStyles.center}>
-        <Text style={[calorieRingStyles.value, exceeds && { color: "#EF4444" }]}>{calories}</Text>
-        <Text style={calorieRingStyles.label}>{t('fuel_of')} {goal} cal</Text>
-        {!exceeds && remaining > 0 && (
-          <Text style={calorieRingStyles.remaining}>{remaining} {t('fuel_left')}</Text>
-        )}
-        {exceeds && (
-          <Text style={calorieRingStyles.over}>{calories - goal} {t('fuel_over')}</Text>
-        )}
-      </View>
-    </Animated.View>
+    <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
+      <Circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.06)" strokeWidth={strokeWidth} fill="none" />
+      <Circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={strokeWidth} fill="none" strokeDasharray={`${circumference}`} strokeDashoffset={`${offset}`} strokeLinecap="round" />
+    </Svg>
   );
 });
-CalorieRing.displayName = "CalorieRing";
+MiniRing.displayName = "MiniRing";
 
-const calorieRingStyles = StyleSheet.create({
-  container: { alignItems: "center", justifyContent: "center" },
-  center: { position: "absolute", alignItems: "center" },
-  value: { fontSize: 36, fontWeight: "800" as const, color: "#F9FAFB", letterSpacing: -1 },
-  label: { fontSize: 13, color: "#6B7280", marginTop: 2, fontWeight: "500" as const },
-  remaining: { fontSize: 12, color: "#00E5FF", marginTop: 4, fontWeight: "600" as const },
-  over: { fontSize: 12, color: "#EF4444", marginTop: 4, fontWeight: "600" as const },
-});
-
-const MacroBar = React.memo(({ label, value, goal, color, icon }: { label: string; value: number; goal: number; color: string; icon: React.ReactNode }) => {
-  const percentage = Math.min((value / goal) * 100, 100);
-  const widthAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(widthAnim, { toValue: percentage, duration: 800, useNativeDriver: false }).start();
-  }, [percentage, widthAnim]);
-
-  const animatedWidth = widthAnim.interpolate({
-    inputRange: [0, 100],
-    outputRange: ["0%", "100%"],
-  });
+const CalorieRing = React.memo(({ percentage, color, size }: { percentage: number; color: string; size: number }) => {
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
 
   return (
-    <View style={macroBarStyles.container}>
-      <View style={macroBarStyles.header}>
-        <View style={macroBarStyles.labelRow}>
-          {icon}
-          <Text style={macroBarStyles.label}>{label}</Text>
-        </View>
-        <Text style={[macroBarStyles.values, { color }]}>
-          {value}g <Text style={macroBarStyles.goal}>/ {goal}g</Text>
-        </Text>
-      </View>
-      <View style={macroBarStyles.trackOuter}>
-        <Animated.View style={[macroBarStyles.trackFill, { width: animatedWidth, backgroundColor: color }]} />
+    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
+        <Circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.06)" strokeWidth={strokeWidth} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={strokeWidth} fill="none" strokeDasharray={`${circumference}`} strokeDashoffset={`${offset}`} strokeLinecap="round" />
+      </Svg>
+      <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
+        <Flame size={28} color="#F9FAFB" />
       </View>
     </View>
   );
 });
-MacroBar.displayName = "MacroBar";
+CalorieRing.displayName = "CalorieRing";
 
-const macroBarStyles = StyleSheet.create({
-  container: { marginBottom: 16 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  labelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  label: { fontSize: 14, fontWeight: "600" as const, color: "#D1D5DB" },
-  values: { fontSize: 14, fontWeight: "700" as const },
-  goal: { fontSize: 12, fontWeight: "400" as const, color: "#6B7280" },
-  trackOuter: { height: 8, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 4, overflow: "hidden" },
-  trackFill: { height: "100%", borderRadius: 4 },
+const MacroCard = React.memo(({ value, label, color, icon, percentage }: { value: number; label: string; color: string; icon: React.ReactNode; percentage: number }) => {
+  return (
+    <View style={macroCardStyles.container}>
+      <Text style={macroCardStyles.value}>{value}g</Text>
+      <Text style={macroCardStyles.label}>{label}</Text>
+      <View style={macroCardStyles.ringWrap}>
+        <MiniRing percentage={percentage} color={color} size={52} strokeWidth={5} />
+        <View style={macroCardStyles.ringIcon}>
+          {icon}
+        </View>
+      </View>
+    </View>
+  );
+});
+MacroCard.displayName = "MacroCard";
+
+const macroCardStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#141720',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
+  },
+  value: {
+    fontSize: 26,
+    fontWeight: '800' as const,
+    color: '#F9FAFB',
+    letterSpacing: -0.5,
+  },
+  label: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '500' as const,
+    marginTop: 2,
+  },
+  ringWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  ringIcon: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 export default function NutritionScreen() {
   const _router = useRouter();
   const { t, isSpanish } = useLanguage();
-  const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries } = useApp();
+  const { nutrition, updateNutrition, foodHistory: _foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries } = useApp();
   const { isPremium } = useRevenueCat();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
 
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [timeUntilReset, setTimeUntilReset] = useState<string>("");
+  const [_timeUntilReset, _setTimeUntilReset] = useState<string>("");
   const insets = useSafeAreaInsets();
 
   const onRefresh = useCallback(() => {
@@ -191,7 +168,7 @@ export default function NutritionScreen() {
   const [detailRefineText, setDetailRefineText] = useState("");
   const [showWeeklyReview, setShowWeeklyReview] = useState(false);
   const [weeklyReviewData, setWeeklyReviewData] = useState<string>("");
-  const [isGeneratingReview, setIsGeneratingReview] = useState(false);
+  const [_isGeneratingReview, _setIsGeneratingReview] = useState(false);
   const [showEditGoals, setShowEditGoals] = useState(false);
   const [editGoals, setEditGoals] = useState({
     calorieGoal: nutrition.calorieGoal.toString(),
@@ -237,7 +214,7 @@ export default function NutritionScreen() {
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       
-      setTimeUntilReset(`${hours}h ${minutes}m`);
+      _setTimeUntilReset(`${hours}h ${minutes}m`);
     };
 
     calculateTimeUntilReset();
@@ -658,10 +635,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 
   if (!permission) return <View />;
 
-  const totalMacrosCal = (nutrition.protein * 4) + (nutrition.carbs * 4) + (nutrition.fat * 9);
-  const proteinPct = totalMacrosCal > 0 ? Math.round((nutrition.protein * 4) / totalMacrosCal * 100) : 0;
-  const carbsPct = totalMacrosCal > 0 ? Math.round((nutrition.carbs * 4) / totalMacrosCal * 100) : 0;
-  const fatPct = totalMacrosCal > 0 ? Math.round((nutrition.fat * 9) / totalMacrosCal * 100) : 0;
+
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -707,78 +681,83 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           </View>
         </Animated.View>
 
-        <TouchableOpacity
-          style={styles.weeklyReviewBtn}
-          activeOpacity={0.7}
-          onPress={async () => {
-            if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            setIsGeneratingReview(true);
-            setShowWeeklyReview(true);
-            try {
-              const oneWeekAgo = new Date();
-              oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-              const weeklyFoods = foodHistory.filter(entry => new Date(entry.date) >= oneWeekAgo);
-              if (weeklyFoods.length === 0) { setWeeklyReviewData(t('fuel_no_meals_week')); setIsGeneratingReview(false); return; }
-              const totalCalories = weeklyFoods.reduce((sum, entry) => sum + entry.calories, 0);
-              const totalProtein = weeklyFoods.reduce((sum, entry) => sum + entry.protein, 0);
-              const totalCarbs = weeklyFoods.reduce((sum, entry) => sum + entry.carbs, 0);
-              const totalFat = weeklyFoods.reduce((sum, entry) => sum + entry.fat, 0);
-              const avgCaloriesPerDay = Math.round(totalCalories / 7);
-              const foodList = weeklyFoods.map(f => `${f.name} (${f.calories} cal, ${f.protein}g P, ${f.carbs}g C, ${f.fat}g F)`).join(', ');
-              const langInstruction = isSpanish ? 'IMPORTANT: Respond entirely in Spanish. Use metric units (kg, cm, km) instead of imperial units (lbs, feet, miles).' : '';
-              const prompt = `You are a professional nutritionist analyzing a week of food intake. ${langInstruction} Here's the data:\n\nTotal meals logged: ${weeklyFoods.length}\nTotal calories: ${totalCalories}\nAverage calories per day: ${avgCaloriesPerDay}\nTotal protein: ${totalProtein}g\nTotal carbs: ${totalCarbs}g\nTotal fat: ${totalFat}g\n\nUser's goals:\nDaily calorie goal: ${nutrition.calorieGoal}\nDaily protein goal: ${nutrition.proteinGoal}g\nDaily carbs goal: ${nutrition.carbsGoal}g\nDaily fat goal: ${nutrition.fatGoal}g\n\nFoods eaten this week: ${foodList}\n\nProvide a comprehensive weekly nutrition review with:\n1. Overall assessment\n2. How well they're meeting their goals\n3. Nutritional balance analysis\n4. Specific recommendations\n5. Positive reinforcement\n6. Suggestions for foods to add or reduce\n\nBe encouraging, specific, and actionable. Keep it under 400 words.`;
-              const response = await callOpenAI(prompt);
-              setWeeklyReviewData(response);
-            } catch (error) { console.error('Error generating weekly review:', error); setWeeklyReviewData(t('fuel_review_error')); } finally { setIsGeneratingReview(false); }
-          }}
-        >
-          <LinearGradient colors={["rgba(0,173,181,0.12)", "rgba(0,173,181,0.04)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.weeklyReviewGradient}>
-            <FileText size={18} color="#00ADB5" />
-            <Text style={styles.weeklyReviewText}>{t('fuel_weekly_review')}</Text>
-            <ChevronRight size={16} color="#00ADB5" />
-          </LinearGradient>
-        </TouchableOpacity>
-
         <View style={styles.calorieCard}>
-          <View style={styles.calorieCardHeader}>
-            <View style={styles.calorieCardTitleRow}>
-              <Flame size={18} color="#FF6B35" />
-              <Text style={styles.calorieCardTitle}>{t('fuel_todays_calories')}</Text>
+          <View style={styles.calorieCardInner}>
+            <View style={styles.calorieCardLeft}>
+              <Text style={styles.calorieMainNumber}>{Math.max(nutrition.calorieGoal - nutrition.calories, 0)}</Text>
+              <Text style={styles.calorieLeftLabel}>{t('fuel_calories_left')}</Text>
+              {todaysFoodEntries.some(e => e.calories < 0) && (
+                <View style={styles.exerciseBadge}>
+                  <Dumbbell size={12} color="#9CA3AF" />
+                  <Text style={styles.exerciseBadgeText}>+{Math.abs(todaysFoodEntries.filter(e => e.calories < 0).reduce((s, e) => s + e.calories, 0))}</Text>
+                </View>
+              )}
             </View>
-            <View style={styles.resetBadge}>
-              <Clock size={12} color="#6B7280" />
-              <Text style={styles.resetText}>{timeUntilReset}</Text>
+            <View style={styles.calorieCardRight}>
+              <CalorieRing percentage={Math.min((nutrition.calories / nutrition.calorieGoal) * 100, 100)} color={nutrition.calories > nutrition.calorieGoal ? '#EF4444' : '#00E5FF'} size={100} />
             </View>
           </View>
-          
-          <View style={styles.calorieRingWrapper}>
-            <CalorieRing calories={nutrition.calories} goal={nutrition.calorieGoal} t={t} />
-          </View>
+        </View>
 
-          {todaysFoodEntries.length > 0 && totalMacrosCal > 0 && (
-            <View style={styles.macroSplitRow}>
-              <View style={styles.macroSplitItem}>
-                <View style={[styles.macroSplitDot, { backgroundColor: "#FF4FB6" }]} />
-                <Text style={styles.macroSplitLabel}>{t('home_protein')} {proteinPct}%</Text>
+        <View style={styles.macroCardsRow}>
+          <MacroCard
+            value={Math.max(nutrition.proteinGoal - nutrition.protein, 0)}
+            label={t('fuel_protein_left')}
+            color="#FF4FB6"
+            icon={<Drumstick size={16} color="#FF4FB6" />}
+            percentage={Math.min((nutrition.protein / nutrition.proteinGoal) * 100, 100)}
+          />
+          <MacroCard
+            value={Math.max(nutrition.carbsGoal - nutrition.carbs, 0)}
+            label={t('fuel_carbs_left')}
+            color="#00FFC6"
+            icon={<Wheat size={16} color="#00FFC6" />}
+            percentage={Math.min((nutrition.carbs / nutrition.carbsGoal) * 100, 100)}
+          />
+          <MacroCard
+            value={Math.max(nutrition.fatGoal - nutrition.fat, 0)}
+            label={t('fuel_fat_left')}
+            color="#FFB400"
+            icon={<Droplet size={16} color="#FFB400" />}
+            percentage={Math.min((nutrition.fat / nutrition.fatGoal) * 100, 100)}
+          />
+        </View>
+
+        {(() => {
+          const hasFood = todaysFoodEntries.filter(e => e.calories > 0).length > 0;
+          if (!hasFood) {
+            return (
+              <View style={styles.healthScoreCard}>
+                <View style={styles.healthScoreHeader}>
+                  <Text style={styles.healthScoreTitle}>{t('fuel_health_score')}</Text>
+                  <Text style={styles.healthScoreValue}>{t('fuel_health_score_na')}</Text>
+                </View>
+                <View style={styles.healthScoreBarTrack}>
+                  <View style={[styles.healthScoreBarFill, { width: '0%', backgroundColor: '#6B7280' }]} />
+                </View>
+                <Text style={styles.healthScoreDesc}>{t('fuel_health_score_desc')}</Text>
               </View>
-              <View style={styles.macroSplitItem}>
-                <View style={[styles.macroSplitDot, { backgroundColor: "#00FFC6" }]} />
-                <Text style={styles.macroSplitLabel}>{t('home_carbs')} {carbsPct}%</Text>
+            );
+          }
+          const foodEntries = todaysFoodEntries.filter(e => e.calories > 0);
+          const avgScore = foodEntries.reduce((sum, e) => sum + calculateHealthScore(e).score, 0) / foodEntries.length;
+          const roundedScore = Math.round(avgScore * 10) / 10;
+          const scoreColor = roundedScore >= 7.5 ? '#10B981' : roundedScore >= 5 ? '#F59E0B' : '#EF4444';
+          const scorePercent = (roundedScore / 10) * 100;
+          const scoreMsg = roundedScore >= 7.5 ? t('fuel_health_score_great') : roundedScore >= 5 ? t('fuel_health_score_good') : roundedScore >= 3 ? t('fuel_health_score_fair') : t('fuel_health_score_poor');
+          return (
+            <View style={styles.healthScoreCard}>
+              <View style={styles.healthScoreHeader}>
+                <Text style={styles.healthScoreTitle}>{t('fuel_health_score')}</Text>
+                <Text style={[styles.healthScoreValue, { color: scoreColor }]}>{roundedScore}/10</Text>
               </View>
-              <View style={styles.macroSplitItem}>
-                <View style={[styles.macroSplitDot, { backgroundColor: "#FFB400" }]} />
-                <Text style={styles.macroSplitLabel}>{t('home_fat')} {fatPct}%</Text>
+              <View style={styles.healthScoreBarTrack}>
+                <View style={[styles.healthScoreBarFill, { width: `${scorePercent}%`, backgroundColor: scoreColor }]} />
               </View>
+              <Text style={styles.healthScoreDesc}>{scoreMsg}</Text>
             </View>
-          )}
-        </View>
-
-        <View style={styles.macrosCard}>
-          <Text style={styles.macrosCardTitle}>{t('fuel_macros')}</Text>
-          <MacroBar label={t('home_protein')} value={nutrition.protein} goal={nutrition.proteinGoal} color="#FF4FB6" icon={<Drumstick size={16} color="#FF4FB6" />} />
-          <MacroBar label={t('home_carbs')} value={nutrition.carbs} goal={nutrition.carbsGoal} color="#00FFC6" icon={<Wheat size={16} color="#00FFC6" />} />
-          <MacroBar label={t('home_fat')} value={nutrition.fat} goal={nutrition.fatGoal} color="#FFB400" icon={<Droplet size={16} color="#FFB400" />} />
-        </View>
+          );
+        })()}
 
         {showAddFood ? (
           <View style={styles.addFoodCard}>
@@ -1511,7 +1490,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_weekly_review_title')}</Text>
             <ScrollView style={{ maxHeight: 400, marginTop: 16 }}>
-              {isGeneratingReview ? (
+              {_isGeneratingReview ? (
                 <View style={{ alignItems: "center" as const, paddingVertical: 40 }}>
                   <ActivityIndicator size="large" color="#00ADB5" />
                   <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 15 }}>{t('fuel_analyzing_week')}</Text>
@@ -1575,109 +1554,97 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  weeklyReviewBtn: {
-    marginTop: 16,
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  weeklyReviewGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    gap: 10,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "rgba(0,173,181,0.15)",
-  },
-  weeklyReviewText: {
-    flex: 1,
-    color: "#00ADB5",
-    fontSize: 14,
-    fontWeight: "600" as const,
-  },
-
   calorieCard: {
     backgroundColor: "#141720",
     borderRadius: 24,
-    padding: 24,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
-  },
-  calorieCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  calorieCardTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  calorieCardTitle: {
-    fontSize: 17,
-    fontWeight: "700" as const,
-    color: "#F9FAFB",
-  },
-  resetBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
-  resetText: {
-    fontSize: 12,
-    color: "#6B7280",
-    fontWeight: "500" as const,
-  },
-  calorieRingWrapper: {
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  macroSplitRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 20,
-    marginTop: 20,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
-  },
-  macroSplitItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  macroSplitDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  macroSplitLabel: {
-    fontSize: 12,
-    color: "#9CA3AF",
-    fontWeight: "500" as const,
-  },
-
-  macrosCard: {
-    backgroundColor: "#141720",
-    borderRadius: 20,
     padding: 20,
     marginTop: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
   },
-  macrosCardTitle: {
-    fontSize: 17,
-    fontWeight: "700" as const,
+  calorieCardInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  calorieCardLeft: {
+    flex: 1,
+  },
+  calorieMainNumber: {
+    fontSize: 48,
+    fontWeight: "900" as const,
     color: "#F9FAFB",
-    marginBottom: 20,
+    letterSpacing: -2,
+  },
+  calorieLeftLabel: {
+    fontSize: 15,
+    color: "#6B7280",
+    fontWeight: "500" as const,
+    marginTop: 2,
+  },
+  exerciseBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    alignSelf: "flex-start",
+    marginTop: 8,
+  },
+  exerciseBadgeText: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    fontWeight: "600" as const,
+  },
+  calorieCardRight: {
+    marginLeft: 16,
+  },
+  macroCardsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  healthScoreCard: {
+    backgroundColor: "#141720",
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  healthScoreHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  healthScoreTitle: {
+    fontSize: 18,
+    fontWeight: "800" as const,
+    color: "#F9FAFB",
+  },
+  healthScoreValue: {
+    fontSize: 18,
+    fontWeight: "800" as const,
+    color: "#F9FAFB",
+  },
+  healthScoreBarTrack: {
+    height: 6,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderRadius: 3,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
+  healthScoreBarFill: {
+    height: "100%",
+    borderRadius: 3,
+  },
+  healthScoreDesc: {
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 20,
   },
 
   quickActions: {
