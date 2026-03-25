@@ -18,7 +18,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Dumbbell, ArrowLeft, Pencil, Sparkles } from "lucide-react-native";
+import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Dumbbell, ArrowLeft, Pencil, Sparkles, ChevronLeft } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -118,7 +118,7 @@ const macroCardStyles = StyleSheet.create({
 export default function NutritionScreen() {
   const _router = useRouter();
   const { t, isSpanish } = useLanguage();
-  const { nutrition, updateNutrition, foodHistory: _foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries } = useApp();
+  const { nutrition, updateNutrition, foodHistory, addFoodEntry, deleteFoodEntry, updateFoodEntry, todaysFoodEntries, stats } = useApp();
   const { isPremium } = useRevenueCat();
   const [showFirstTimePrompt, setShowFirstTimePrompt] = useState(false);
 
@@ -135,7 +135,8 @@ export default function NutritionScreen() {
   const [showCamera, setShowCamera] = useState(false);
   const [showAIInput, setShowAIInput] = useState(false);
   const [_showCalendar, _setShowCalendar] = useState(false);
-  const [_selectedDate, _setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [weekOffset, setWeekOffset] = useState<number>(0);
   const [_showProteinShake, setShowProteinShake] = useState(false);
   const [_proteinIngredients, setProteinIngredients] = useState("");
   const [showFoodSearch, setShowFoodSearch] = useState(false);
@@ -633,9 +634,57 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 
   const currentQuizQuestion = filteredQuizQuestions[quizStep];
 
+  const isViewingToday = useMemo(() => {
+    return selectedDate.toDateString() === new Date().toDateString();
+  }, [selectedDate]);
+
+  const weekDays = useMemo(() => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      days.push(d);
+    }
+    return days;
+  }, [weekOffset]);
+
+  const selectedDayEntries = useMemo(() => {
+    const dateStr = selectedDate.toDateString();
+    return foodHistory.filter((entry: { date: string }) => new Date(entry.date).toDateString() === dateStr);
+  }, [selectedDate, foodHistory]);
+
+  const selectedDayNutrition = useMemo(() => {
+    const entries = selectedDayEntries.filter((e: { calories: number }) => e.calories > 0);
+    return {
+      calories: entries.reduce((s: number, e: { calories: number }) => s + e.calories, 0),
+      protein: entries.reduce((s: number, e: { protein: number }) => s + e.protein, 0),
+      carbs: entries.reduce((s: number, e: { carbs: number }) => s + e.carbs, 0),
+      fat: entries.reduce((s: number, e: { fat: number }) => s + e.fat, 0),
+    };
+  }, [selectedDayEntries]);
+
+  const dayHitGoal = useCallback((date: Date) => {
+    const dateStr = date.toDateString();
+    const entries = foodHistory.filter((entry: { date: string; calories: number }) => new Date(entry.date).toDateString() === dateStr && entry.calories > 0);
+    if (entries.length === 0) return 'none' as const;
+    const totalCal = entries.reduce((s: number, e: { calories: number }) => s + e.calories, 0);
+    return totalCal >= nutrition.calorieGoal * 0.8 && totalCal <= nutrition.calorieGoal * 1.2 ? 'hit' as const : 'missed' as const;
+  }, [foodHistory, nutrition.calorieGoal]);
+
+  const activeNutrition = isViewingToday ? nutrition : {
+    ...nutrition,
+    calories: selectedDayNutrition.calories,
+    protein: selectedDayNutrition.protein,
+    carbs: selectedDayNutrition.carbs,
+    fat: selectedDayNutrition.fat,
+  };
+
+  const activeEntries = isViewingToday ? todaysFoodEntries : selectedDayEntries;
+
   if (!permission) return <View />;
-
-
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -657,13 +706,16 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
       >
         <Animated.View style={[styles.headerSection, { opacity: headerFadeAnim, transform: [{ translateY: headerFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }]}>
           <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.headerTitle}>{t('fuel_title')}</Text>
-              <Text style={styles.headerSubtitle}>
-                {new Date().toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-              </Text>
+            <View style={styles.headerTitleRow}>
+              <Text style={styles.headerTitle}>{t('fuel_nutrition_header')}</Text>
             </View>
             <View style={styles.headerActions}>
+              {stats.foodStreak > 0 && (
+                <View style={styles.streakBadge}>
+                  <Text style={styles.streakEmoji}>🔥</Text>
+                  <Text style={styles.streakCount}>{stats.foodStreak}</Text>
+                </View>
+              )}
               <TouchableOpacity style={styles.headerIconBtn} onPress={() => {
                 if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setEditGoals({ calorieGoal: nutrition.calorieGoal.toString(), proteinGoal: nutrition.proteinGoal.toString(), carbsGoal: nutrition.carbsGoal.toString(), fatGoal: nutrition.fatGoal.toString() });
@@ -679,52 +731,136 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               </TouchableOpacity>
             </View>
           </View>
+
+          <View style={styles.weekSelector}>
+            <TouchableOpacity
+              style={styles.weekArrowBtn}
+              onPress={() => {
+                if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setWeekOffset(prev => prev - 1);
+              }}
+            >
+              <ChevronLeft size={16} color="#6B7280" />
+            </TouchableOpacity>
+            {weekDays.map((day) => {
+              const isToday = day.toDateString() === new Date().toDateString();
+              const isSelected = day.toDateString() === selectedDate.toDateString();
+              const isFuture = day > new Date();
+              const goalStatus = !isFuture ? dayHitGoal(day) : 'none';
+              const dayLabel = day.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { weekday: 'short' });
+              const dayNum = day.getDate();
+              return (
+                <TouchableOpacity
+                  key={day.toISOString()}
+                  style={[
+                    styles.weekDayItem,
+                    isSelected && styles.weekDayItemSelected,
+                  ]}
+                  onPress={() => {
+                    if (isFuture) return;
+                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedDate(day);
+                  }}
+                  activeOpacity={isFuture ? 1 : 0.7}
+                  disabled={isFuture}
+                >
+                  <Text style={[
+                    styles.weekDayLabel,
+                    isSelected && styles.weekDayLabelSelected,
+                    isFuture && styles.weekDayLabelFuture,
+                  ]}>{dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1, 3)}</Text>
+                  <View style={[
+                    styles.weekDayCircle,
+                    isSelected && styles.weekDayCircleSelected,
+                    !isSelected && !isFuture && goalStatus === 'hit' && styles.weekDayCircleHit,
+                    !isSelected && !isFuture && goalStatus === 'missed' && styles.weekDayCircleMissed,
+                    !isSelected && !isFuture && goalStatus === 'none' && styles.weekDayCircleEmpty,
+                    isFuture && styles.weekDayCircleFuture,
+                  ]}>
+                    <Text style={[
+                      styles.weekDayNum,
+                      isSelected && styles.weekDayNumSelected,
+                      isFuture && styles.weekDayNumFuture,
+                    ]}>{dayNum}</Text>
+                  </View>
+                  {isToday && <View style={styles.todayDot} />}
+                </TouchableOpacity>
+              );
+            })}
+            <TouchableOpacity
+              style={styles.weekArrowBtn}
+              onPress={() => {
+                if (weekOffset >= 0) return;
+                if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setWeekOffset(prev => prev + 1);
+              }}
+              disabled={weekOffset >= 0}
+            >
+              <ChevronRight size={16} color={weekOffset >= 0 ? '#2A2F3A' : '#6B7280'} />
+            </TouchableOpacity>
+          </View>
+
+          {!isViewingToday && (
+            <TouchableOpacity
+              style={styles.viewingPastBanner}
+              onPress={() => {
+                if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSelectedDate(new Date());
+                setWeekOffset(0);
+              }}
+            >
+              <Text style={styles.viewingPastText}>
+                {t('fuel_viewing_past')} {selectedDate.toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              </Text>
+              <Text style={styles.viewingPastBack}>← {t('fuel_today')}</Text>
+            </TouchableOpacity>
+          )}
         </Animated.View>
 
         <View style={styles.calorieCard}>
           <View style={styles.calorieCardInner}>
             <View style={styles.calorieCardLeft}>
-              <Text style={styles.calorieMainNumber}>{Math.max(nutrition.calorieGoal - nutrition.calories, 0)}</Text>
+              <Text style={styles.calorieMainNumber}>{Math.max(activeNutrition.calorieGoal - activeNutrition.calories, 0)}</Text>
               <Text style={styles.calorieLeftLabel}>{t('fuel_calories_left')}</Text>
-              {todaysFoodEntries.some(e => e.calories < 0) && (
+              {activeEntries.some(e => e.calories < 0) && (
                 <View style={styles.exerciseBadge}>
                   <Dumbbell size={12} color="#9CA3AF" />
-                  <Text style={styles.exerciseBadgeText}>+{Math.abs(todaysFoodEntries.filter(e => e.calories < 0).reduce((s, e) => s + e.calories, 0))}</Text>
+                  <Text style={styles.exerciseBadgeText}>+{Math.abs(activeEntries.filter(e => e.calories < 0).reduce((s, e) => s + e.calories, 0))}</Text>
                 </View>
               )}
             </View>
             <View style={styles.calorieCardRight}>
-              <CalorieRing percentage={Math.min((nutrition.calories / nutrition.calorieGoal) * 100, 100)} color={nutrition.calories > nutrition.calorieGoal ? '#EF4444' : '#00E5FF'} size={100} />
+              <CalorieRing percentage={Math.min((activeNutrition.calories / activeNutrition.calorieGoal) * 100, 100)} color={activeNutrition.calories > activeNutrition.calorieGoal ? '#EF4444' : '#00E5FF'} size={100} />
             </View>
           </View>
         </View>
 
         <View style={styles.macroCardsRow}>
           <MacroCard
-            value={Math.max(nutrition.proteinGoal - nutrition.protein, 0)}
+            value={Math.max(activeNutrition.proteinGoal - activeNutrition.protein, 0)}
             label={t('fuel_protein_left')}
             color="#FF4FB6"
             icon={<Drumstick size={16} color="#FF4FB6" />}
-            percentage={Math.min((nutrition.protein / nutrition.proteinGoal) * 100, 100)}
+            percentage={Math.min((activeNutrition.protein / activeNutrition.proteinGoal) * 100, 100)}
           />
           <MacroCard
-            value={Math.max(nutrition.carbsGoal - nutrition.carbs, 0)}
+            value={Math.max(activeNutrition.carbsGoal - activeNutrition.carbs, 0)}
             label={t('fuel_carbs_left')}
             color="#00FFC6"
             icon={<Wheat size={16} color="#00FFC6" />}
-            percentage={Math.min((nutrition.carbs / nutrition.carbsGoal) * 100, 100)}
+            percentage={Math.min((activeNutrition.carbs / activeNutrition.carbsGoal) * 100, 100)}
           />
           <MacroCard
-            value={Math.max(nutrition.fatGoal - nutrition.fat, 0)}
+            value={Math.max(activeNutrition.fatGoal - activeNutrition.fat, 0)}
             label={t('fuel_fat_left')}
             color="#FFB400"
             icon={<Droplet size={16} color="#FFB400" />}
-            percentage={Math.min((nutrition.fat / nutrition.fatGoal) * 100, 100)}
+            percentage={Math.min((activeNutrition.fat / activeNutrition.fatGoal) * 100, 100)}
           />
         </View>
 
         {(() => {
-          const hasFood = todaysFoodEntries.filter(e => e.calories > 0).length > 0;
+          const hasFood = activeEntries.filter(e => e.calories > 0).length > 0;
           if (!hasFood) {
             return (
               <View style={styles.healthScoreCard}>
@@ -739,7 +875,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               </View>
             );
           }
-          const foodEntries = todaysFoodEntries.filter(e => e.calories > 0);
+          const foodEntries = activeEntries.filter(e => e.calories > 0);
           const avgScore = foodEntries.reduce((sum, e) => sum + calculateHealthScore(e).score, 0) / foodEntries.length;
           const roundedScore = Math.round(avgScore * 10) / 10;
           const scoreColor = roundedScore >= 7.5 ? '#10B981' : roundedScore >= 5 ? '#F59E0B' : '#EF4444';
@@ -911,22 +1047,22 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         {nutrition.quizCompleted && (
           <View style={styles.mealsSection}>
             <View style={styles.mealsSectionHeader}>
-              <Text style={styles.mealsSectionTitle}>{t('fuel_todays_meals')}</Text>
-              <Text style={styles.mealsSectionCount}>{todaysFoodEntries.length} {t('fuel_logged')}</Text>
+              <Text style={styles.mealsSectionTitle}>{isViewingToday ? t('fuel_todays_meals') : t('fuel_meals_for_day')}</Text>
+              <Text style={styles.mealsSectionCount}>{activeEntries.length} {t('fuel_logged')}</Text>
             </View>
-            {todaysFoodEntries.length === 0 ? (
+            {activeEntries.length === 0 ? (
               <View style={styles.emptyMeals}>
                 <UtensilsCrossed size={32} color="#2A2F3A" />
                 <Text style={styles.emptyMealsText}>{t('fuel_no_meals_logged')}</Text>
                 <Text style={styles.emptyMealsHint}>{t('fuel_use_options')}</Text>
               </View>
             ) : (
-              todaysFoodEntries.map((entry, index) => {
+              activeEntries.map((entry, index) => {
                 const healthScore = calculateHealthScore(entry);
                 return (
                   <TouchableOpacity
                     key={entry.id}
-                    style={[styles.mealCard, index === todaysFoodEntries.length - 1 && { marginBottom: 0 }]}
+                    style={[styles.mealCard, index === activeEntries.length - 1 && { marginBottom: 0 }]}
                     onPress={() => {
                       if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setSelectedFoodEntry(entry);
@@ -1528,30 +1664,153 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+  headerTitleRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
   headerTitle: {
     fontSize: 34,
     fontWeight: "800" as const,
     color: "#F9FAFB",
     letterSpacing: -0.5,
   },
-  headerSubtitle: {
-    fontSize: 15,
-    color: "#6B7280",
-    marginTop: 4,
-    fontWeight: "500" as const,
-  },
   headerActions: {
-    flexDirection: "row",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     gap: 8,
-    marginTop: 4,
+  },
+  streakBadge: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "rgba(255,180,0,0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,180,0,0.15)",
+  },
+  streakEmoji: {
+    fontSize: 16,
+  },
+  streakCount: {
+    fontSize: 16,
+    fontWeight: "800" as const,
+    color: "#FFB400",
   },
   headerIconBtn: {
     width: 38,
     height: 38,
     borderRadius: 12,
     backgroundColor: "rgba(255,255,255,0.05)",
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  weekSelector: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    marginTop: 20,
+    paddingVertical: 4,
+  },
+  weekArrowBtn: {
+    width: 28,
+    height: 28,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  weekDayItem: {
+    alignItems: "center" as const,
+    gap: 6,
+    flex: 1,
+  },
+  weekDayItemSelected: {
+    transform: [{ scale: 1.05 }],
+  },
+  weekDayLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+  },
+  weekDayLabelSelected: {
+    color: "#F9FAFB",
+    fontWeight: "700" as const,
+  },
+  weekDayLabelFuture: {
+    color: "#2A2F3A",
+  },
+  weekDayCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  weekDayCircleSelected: {
+    backgroundColor: "#F9FAFB",
+    borderColor: "#F9FAFB",
+  },
+  weekDayCircleHit: {
+    borderColor: "#10B981",
+    borderStyle: "solid" as const,
+  },
+  weekDayCircleMissed: {
+    borderColor: "#EF4444",
+    borderStyle: "dashed" as const,
+  },
+  weekDayCircleEmpty: {
+    borderColor: "rgba(255,255,255,0.08)",
+    borderStyle: "dashed" as const,
+  },
+  weekDayCircleFuture: {
+    borderColor: "rgba(255,255,255,0.04)",
+    borderStyle: "solid" as const,
+  },
+  weekDayNum: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#9CA3AF",
+  },
+  weekDayNumSelected: {
+    color: "#0D0F13",
+    fontWeight: "800" as const,
+  },
+  weekDayNumFuture: {
+    color: "#2A2F3A",
+  },
+  todayDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: "#00E5FF",
+    marginTop: 2,
+  },
+  viewingPastBanner: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.12)",
+  },
+  viewingPastText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#00E5FF",
+    flex: 1,
+  },
+  viewingPastBack: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#00E5FF",
+    marginLeft: 8,
   },
 
   calorieCard: {

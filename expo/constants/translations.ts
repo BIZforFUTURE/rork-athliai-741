@@ -280,7 +280,14 @@ export const translations = {
     gym_failed_generate: 'Failed to generate workout plan. Please check your connection and try again.',
 
     // Nutrition screen
-    fuel_title: 'Fuel',
+    fuel_title: 'Nutrition',
+    fuel_nutrition_header: 'Nutrition',
+    fuel_viewing_past: 'Viewing',
+    fuel_goal_hit: 'Goal Hit!',
+    fuel_goal_missed: 'Goal Missed',
+    fuel_no_data: 'No data logged',
+    fuel_meals_for_day: 'Meals',
+    fuel_today: 'Today',
     fuel_weekly_review: 'Weekly Nutrition Review',
     fuel_todays_calories: "Today's Calories",
     fuel_macros: 'Macros',
@@ -1037,6 +1044,13 @@ export const translations = {
 
     // Nutrition screen
     fuel_title: 'Nutrición',
+    fuel_nutrition_header: 'Nutrición',
+    fuel_viewing_past: 'Viendo',
+    fuel_goal_hit: '¡Meta Alcanzada!',
+    fuel_goal_missed: 'Meta No Alcanzada',
+    fuel_no_data: 'Sin datos registrados',
+    fuel_meals_for_day: 'Comidas',
+    fuel_today: 'Hoy',
     fuel_weekly_review: 'Revisión Nutricional Semanal',
     fuel_todays_calories: 'Calorías de Hoy',
     fuel_macros: 'Macros',
