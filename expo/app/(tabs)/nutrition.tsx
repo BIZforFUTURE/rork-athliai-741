@@ -304,7 +304,7 @@ export default function NutritionScreen() {
     let heightCm: number;
     if (isSpanish) {
       weightKg = parseFloat(a.weight);
-      heightCm = parseFloat(a.heightFeet) * 100 + parseFloat(a.heightInches || '0');
+      heightCm = parseFloat(a.heightFeet);
     } else {
       const weightPounds = parseFloat(a.weight);
       weightKg = weightPounds * 0.453592;
