@@ -720,6 +720,22 @@ export const translations = {
     levelup_msg_9: 'The journey continues!',
     levelup_msg_10: 'Leveling up in real life!',
 
+    // Food detail modal
+    fuel_detail_title: 'Nutrition',
+    fuel_detail_measurement: 'Measurement',
+    fuel_detail_servings: 'Number of Servings',
+    fuel_detail_calories: 'Calories',
+    fuel_detail_other_nutrition: 'Other nutrition facts',
+    fuel_detail_done: 'Done',
+    fuel_detail_refine_ai: 'Refine with AI',
+    fuel_detail_refine_placeholder: 'e.g., it was a large portion, add dressing...',
+    fuel_detail_serving: 'Serving',
+    fuel_detail_grams: 'G',
+    fuel_detail_tbsp: 'Tbsp',
+    fuel_detail_cup: 'Cup',
+    fuel_detail_oz: 'Oz',
+    fuel_detail_piece: 'Piece',
+
     // Common
     common_cancel: 'Cancel',
     common_delete: 'Delete',
@@ -1448,6 +1464,22 @@ export const translations = {
     levelup_msg_8: '¡Sin atajos, solo progreso!',
     levelup_msg_9: '¡El viaje continúa!',
     levelup_msg_10: '¡Subiendo de nivel en la vida real!',
+
+    // Food detail modal
+    fuel_detail_title: 'Nutrición',
+    fuel_detail_measurement: 'Medida',
+    fuel_detail_servings: 'Número de Porciones',
+    fuel_detail_calories: 'Calorías',
+    fuel_detail_other_nutrition: 'Otros datos nutricionales',
+    fuel_detail_done: 'Listo',
+    fuel_detail_refine_ai: 'Refinar con IA',
+    fuel_detail_refine_placeholder: 'ej., era una porción grande, agregar aderezo...',
+    fuel_detail_serving: 'Porción',
+    fuel_detail_grams: 'G',
+    fuel_detail_tbsp: 'Cda',
+    fuel_detail_cup: 'Taza',
+    fuel_detail_oz: 'Oz',
+    fuel_detail_piece: 'Pieza',
 
     // Common
     common_cancel: 'Cancelar',

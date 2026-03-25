@@ -18,7 +18,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Clock, Dumbbell } from "lucide-react-native";
+import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, FileText, Drumstick, Wheat, Droplet, Search, ChevronRight, UtensilsCrossed, Flame, TrendingUp, Clock, Dumbbell, ArrowLeft, Pencil, Sparkles } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -184,6 +184,11 @@ export default function NutritionScreen() {
   const [showRefineFood, setShowRefineFood] = useState(false);
   const [selectedFoodEntry, setSelectedFoodEntry] = useState<any>(null);
   const [refinementInput, setRefinementInput] = useState("");
+  const [showFoodDetail, setShowFoodDetail] = useState(false);
+  const [detailServings, setDetailServings] = useState("1");
+  const [detailMeasurement, setDetailMeasurement] = useState("serving");
+  const [showDetailRefineInput, setShowDetailRefineInput] = useState(false);
+  const [detailRefineText, setDetailRefineText] = useState("");
   const [showWeeklyReview, setShowWeeklyReview] = useState(false);
   const [weeklyReviewData, setWeeklyReviewData] = useState<string>("");
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
@@ -943,7 +948,15 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                   <TouchableOpacity
                     key={entry.id}
                     style={[styles.mealCard, index === todaysFoodEntries.length - 1 && { marginBottom: 0 }]}
-                    onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSelectedFoodEntry(entry); setShowRefineFood(true); }}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setSelectedFoodEntry(entry);
+                      setDetailServings("1");
+                      setDetailMeasurement("serving");
+                      setShowDetailRefineInput(false);
+                      setDetailRefineText("");
+                      setShowFoodDetail(true);
+                    }}
                     activeOpacity={0.7}
                   >
                     <View style={styles.mealCardTop}>
@@ -1262,6 +1275,210 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={showFoodDetail} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={fdStyles.detailModal}>
+            <View style={fdStyles.detailHeader}>
+              <TouchableOpacity
+                style={fdStyles.detailBackBtn}
+                onPress={() => {
+                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowFoodDetail(false);
+                  setSelectedFoodEntry(null);
+                  setShowDetailRefineInput(false);
+                  setDetailRefineText("");
+                }}
+              >
+                <ArrowLeft size={20} color="#F9FAFB" />
+              </TouchableOpacity>
+              <Text style={fdStyles.detailHeaderTitle}>{t('fuel_detail_title')}</Text>
+              <TouchableOpacity
+                style={fdStyles.detailDeleteBtn}
+                onPress={() => {
+                  if (!selectedFoodEntry) return;
+                  if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  Alert.alert(t('fuel_delete_food'), t('fuel_delete_food_confirm', { name: selectedFoodEntry.name }), [
+                    { text: t('common_cancel'), style: "cancel" },
+                    { text: t('common_delete'), style: "destructive", onPress: () => {
+                      deleteFoodEntry(selectedFoodEntry.id);
+                      setShowFoodDetail(false);
+                      setSelectedFoodEntry(null);
+                    }}
+                  ]);
+                }}
+              >
+                <Trash2 size={18} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedFoodEntry && (
+              <ScrollView style={fdStyles.detailScroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                <View style={fdStyles.detailTimeBadge}>
+                  <Text style={fdStyles.detailTimeText}>
+                    {new Date(selectedFoodEntry.date).toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US', { hour: 'numeric', minute: '2-digit' })}
+                  </Text>
+                </View>
+
+                <Text style={fdStyles.detailFoodName}>{selectedFoodEntry.name}</Text>
+
+                <Text style={fdStyles.detailSectionLabel}>{t('fuel_detail_measurement')}</Text>
+                <View style={fdStyles.measurementRow}>
+                  {(['serving', 'g', 'tbsp', 'cup', 'oz', 'piece'] as const).map((m) => {
+                    const labels: Record<string, string> = {
+                      serving: t('fuel_detail_serving'),
+                      g: t('fuel_detail_grams'),
+                      tbsp: t('fuel_detail_tbsp'),
+                      cup: t('fuel_detail_cup'),
+                      oz: t('fuel_detail_oz'),
+                      piece: t('fuel_detail_piece'),
+                    };
+                    const isActive = detailMeasurement === m;
+                    return (
+                      <TouchableOpacity
+                        key={m}
+                        style={[fdStyles.measurementChip, isActive && fdStyles.measurementChipActive]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setDetailMeasurement(m);
+                        }}
+                      >
+                        <Text style={[fdStyles.measurementChipText, isActive && fdStyles.measurementChipTextActive]}>
+                          {labels[m]}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <View style={fdStyles.servingsRow}>
+                  <Text style={fdStyles.servingsLabel}>{t('fuel_detail_servings')}</Text>
+                  <View style={fdStyles.servingsInputWrap}>
+                    <TextInput
+                      style={fdStyles.servingsInput}
+                      value={detailServings}
+                      onChangeText={setDetailServings}
+                      keyboardType="numeric"
+                      selectTextOnFocus
+                    />
+                    <Pencil size={14} color="#6B7280" />
+                  </View>
+                </View>
+
+                {(() => {
+                  const multiplier = parseFloat(detailServings) || 1;
+                  const cal = Math.round(selectedFoodEntry.calories * multiplier);
+                  const prot = Math.round(selectedFoodEntry.protein * multiplier);
+                  const carb = Math.round(selectedFoodEntry.carbs * multiplier);
+                  const fatVal = Math.round(selectedFoodEntry.fat * multiplier);
+                  return (
+                    <>
+                      <View style={fdStyles.calorieBox}>
+                        <Flame size={22} color="#1F2937" />
+                        <View>
+                          <Text style={fdStyles.calorieBoxLabel}>{t('fuel_detail_calories')}</Text>
+                          <Text style={fdStyles.calorieBoxValue}>{cal}</Text>
+                        </View>
+                      </View>
+
+                      <View style={fdStyles.macroRow}>
+                        <View style={fdStyles.macroBox}>
+                          <Drumstick size={16} color="#FF4FB6" />
+                          <Text style={fdStyles.macroBoxLabel}>{t('home_protein')}</Text>
+                          <Text style={fdStyles.macroBoxValue}>{prot}g</Text>
+                        </View>
+                        <View style={fdStyles.macroBox}>
+                          <Wheat size={16} color="#00FFC6" />
+                          <Text style={fdStyles.macroBoxLabel}>{t('home_carbs')}</Text>
+                          <Text style={fdStyles.macroBoxValue}>{carb}g</Text>
+                        </View>
+                        <View style={fdStyles.macroBox}>
+                          <Droplet size={16} color="#FFB400" />
+                          <Text style={fdStyles.macroBoxLabel}>{t('home_fat')}</Text>
+                          <Text style={fdStyles.macroBoxValue}>{fatVal}g</Text>
+                        </View>
+                      </View>
+                    </>
+                  );
+                })()}
+
+                {showDetailRefineInput ? (
+                  <View style={fdStyles.refineSection}>
+                    <Text style={fdStyles.refineSectionTitle}>{t('fuel_detail_refine_ai')}</Text>
+                    <TextInput
+                      style={fdStyles.refineInput}
+                      placeholder={t('fuel_detail_refine_placeholder')}
+                      placeholderTextColor="#4B5563"
+                      value={detailRefineText}
+                      onChangeText={setDetailRefineText}
+                      multiline
+                      autoFocus
+                    />
+                    <TouchableOpacity
+                      style={[fdStyles.refineSubmitBtn, (!detailRefineText || isAnalyzing) && styles.disabledButton]}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        if (selectedFoodEntry && detailRefineText) {
+                          void refineWithAI(selectedFoodEntry, detailRefineText).then(() => {
+                            setShowFoodDetail(false);
+                          });
+                        }
+                      }}
+                      disabled={!detailRefineText || isAnalyzing}
+                    >
+                      {isAnalyzing ? (
+                        <ActivityIndicator color="#FFFFFF" />
+                      ) : (
+                        <>
+                          <Sparkles size={16} color="#FFFFFF" />
+                          <Text style={fdStyles.refineSubmitText}>{t('fuel_refine_btn')}</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={fdStyles.refineAIBtn}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setShowDetailRefineInput(true);
+                    }}
+                  >
+                    <Sparkles size={18} color="#00ADB5" />
+                    <Text style={fdStyles.refineAIBtnText}>{t('fuel_detail_refine_ai')}</Text>
+                    <ChevronRight size={16} color="#00ADB5" />
+                  </TouchableOpacity>
+                )}
+
+                <View style={{ height: 20 }} />
+              </ScrollView>
+            )}
+
+            <TouchableOpacity
+              style={fdStyles.doneBtn}
+              onPress={() => {
+                if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                const multiplier = parseFloat(detailServings) || 1;
+                if (selectedFoodEntry && multiplier !== 1) {
+                  updateFoodEntry(selectedFoodEntry.id, {
+                    calories: Math.round(selectedFoodEntry.calories * multiplier),
+                    protein: Math.round(selectedFoodEntry.protein * multiplier),
+                    carbs: Math.round(selectedFoodEntry.carbs * multiplier),
+                    fat: Math.round(selectedFoodEntry.fat * multiplier),
+                  });
+                }
+                setShowFoodDetail(false);
+                setSelectedFoodEntry(null);
+                setShowDetailRefineInput(false);
+                setDetailRefineText("");
+              }}
+            >
+              <Text style={fdStyles.doneBtnText}>{t('fuel_detail_done')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       <Modal visible={showRefineFood} animationType="slide" transparent>
@@ -2240,5 +2457,238 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     fontWeight: "500" as const,
+  },
+});
+
+const fdStyles = StyleSheet.create({
+  detailModal: {
+    backgroundColor: "#0D0F13",
+    borderRadius: 28,
+    width: "94%",
+    maxWidth: 440,
+    maxHeight: "90%",
+    overflow: "hidden",
+  },
+  detailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  detailBackBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailHeaderTitle: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#F9FAFB",
+  },
+  detailDeleteBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  detailScroll: {
+    paddingHorizontal: 20,
+  },
+  detailTimeBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,255,255,0.06)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 4,
+    marginBottom: 10,
+  },
+  detailTimeText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+  },
+  detailFoodName: {
+    fontSize: 26,
+    fontWeight: "800" as const,
+    color: "#F9FAFB",
+    marginBottom: 20,
+    letterSpacing: -0.3,
+  },
+  detailSectionLabel: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+    marginBottom: 10,
+  },
+  measurementRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 20,
+  },
+  measurementChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.06)",
+  },
+  measurementChipActive: {
+    backgroundColor: "#1F2937",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
+  measurementChipText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+  },
+  measurementChipTextActive: {
+    color: "#F9FAFB",
+  },
+  servingsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  servingsLabel: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+  },
+  servingsInputWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    minWidth: 80,
+  },
+  servingsInput: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#F9FAFB",
+    textAlign: "center" as const,
+    minWidth: 30,
+    padding: 0,
+  },
+  calorieBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 12,
+  },
+  calorieBoxLabel: {
+    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#6B7280",
+  },
+  calorieBoxValue: {
+    fontSize: 32,
+    fontWeight: "800" as const,
+    color: "#111827",
+    letterSpacing: -1,
+  },
+  macroRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 24,
+  },
+  macroBox: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 14,
+    padding: 14,
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  macroBoxLabel: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#6B7280",
+  },
+  macroBoxValue: {
+    fontSize: 18,
+    fontWeight: "800" as const,
+    color: "#F9FAFB",
+  },
+  refineAIBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,173,181,0.08)",
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "rgba(0,173,181,0.15)",
+  },
+  refineAIBtnText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#00ADB5",
+  },
+  refineSection: {
+    gap: 12,
+  },
+  refineSectionTitle: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#F9FAFB",
+  },
+  refineInput: {
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 14,
+    padding: 16,
+    fontSize: 15,
+    color: "#F3F4F6",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    minHeight: 80,
+    textAlignVertical: "top" as const,
+  },
+  refineSubmitBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#00ADB5",
+    borderRadius: 14,
+    paddingVertical: 14,
+    gap: 8,
+  },
+  refineSubmitText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+  },
+  doneBtn: {
+    backgroundColor: "#1A1D24",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    marginTop: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  doneBtnText: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#F9FAFB",
   },
 });
