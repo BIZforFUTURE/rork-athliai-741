@@ -517,7 +517,6 @@ function useGreeting() {
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const greeting = useGreeting();
-  const { xpInfo } = useApp();
   const { t, setLanguage, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
@@ -529,13 +528,9 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-        <View style={{ flex: 1, flexShrink: 1 }}>
+        <View style={{ flex: 1 }}>
           <Text style={styles.greetingText} numberOfLines={1}>{greeting}</Text>
           <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
-        </View>
-        <View style={[styles.levelChip, { backgroundColor: xpInfo.rank.color + "18", borderColor: xpInfo.rank.color + "35" }]}>
-          <Text style={styles.levelChipEmoji}>{xpInfo.rank.emoji}</Text>
-          <Text style={[styles.levelChipText, { color: xpInfo.rank.color }]}>Lv {xpInfo.level}</Text>
         </View>
       </View>
       <ScrollView
