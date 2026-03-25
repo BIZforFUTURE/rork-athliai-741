@@ -1972,19 +1972,21 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
   },
   firstTimeStartBtn: {
-    flex: 1,
+    flex: 1.5,
     paddingVertical: 15,
+    paddingHorizontal: 12,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#10B981",
     flexDirection: "row",
-    gap: 8,
+    gap: 6,
   },
   firstTimeStartText: {
     color: "#FFFFFF",
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600" as const,
+    flexShrink: 1,
   },
 
   quizModal: {
