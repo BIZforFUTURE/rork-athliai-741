@@ -767,6 +767,21 @@ export const translations = {
     fuel_detail_oz: 'Oz',
     fuel_detail_piece: 'Piece',
 
+    // XP descriptions
+    xp_completed_run: 'Completed a {distance} mi run',
+    xp_treadmill_verified: 'Treadmill photo verified',
+    xp_run_streak: '{days}-day run streak bonus',
+    xp_logged_food: 'Logged {name}',
+    xp_calorie_goal: 'Hit daily calorie goal',
+    xp_protein_goal: 'Hit daily protein goal',
+    xp_food_streak: '{days}-day food streak bonus',
+    xp_completed_workout: 'Completed workout',
+    xp_workout_streak: '{days}-day workout streak bonus',
+    xp_time_now: 'now',
+    xp_time_m: '{n}m ago',
+    xp_time_h: '{n}h ago',
+    xp_time_d: '{n}d ago',
+
     // Common
     common_cancel: 'Cancel',
     common_delete: 'Delete',
@@ -1542,6 +1557,21 @@ export const translations = {
     fuel_detail_cup: 'Taza',
     fuel_detail_oz: 'Oz',
     fuel_detail_piece: 'Pieza',
+
+    // XP descriptions
+    xp_completed_run: 'Completó una carrera de {distance} mi',
+    xp_treadmill_verified: 'Foto de caminadora verificada',
+    xp_run_streak: 'Bono de racha de {days} días corriendo',
+    xp_logged_food: 'Registró {name}',
+    xp_calorie_goal: 'Alcanzó meta diaria de calorías',
+    xp_protein_goal: 'Alcanzó meta diaria de proteína',
+    xp_food_streak: 'Bono de racha de {days} días comiendo',
+    xp_completed_workout: 'Completó entrenamiento',
+    xp_workout_streak: 'Bono de racha de {days} días entrenando',
+    xp_time_now: 'ahora',
+    xp_time_m: 'hace {n}m',
+    xp_time_h: 'hace {n}h',
+    xp_time_d: 'hace {n}d',
 
     // Common
     common_cancel: 'Cancelar',

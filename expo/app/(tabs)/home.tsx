@@ -465,11 +465,29 @@ function XPFeed() {
   const timeAgo = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "now";
-    if (mins < 60) return `${mins}m`;
+    if (mins < 1) return t('xp_time_now');
+    if (mins < 60) return t('xp_time_m').replace('{n}', String(mins));
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
+    if (hrs < 24) return t('xp_time_h').replace('{n}', String(hrs));
+    return t('xp_time_d').replace('{n}', String(Math.floor(hrs / 24)));
+  };
+
+  const translateDescription = (desc: string) => {
+    const runMatch = desc.match(/^Completed a ([\d.]+) mi run$/);
+    if (runMatch) return t('xp_completed_run').replace('{distance}', runMatch[1]);
+    if (desc === 'Treadmill photo verified') return t('xp_treadmill_verified');
+    if (desc === 'Completed workout') return t('xp_completed_workout');
+    if (desc === 'Hit daily calorie goal') return t('xp_calorie_goal');
+    if (desc === 'Hit daily protein goal') return t('xp_protein_goal');
+    const runStreakMatch = desc.match(/^(\d+)-day run streak bonus$/);
+    if (runStreakMatch) return t('xp_run_streak').replace('{days}', runStreakMatch[1]);
+    const foodStreakMatch = desc.match(/^(\d+)-day food streak bonus$/);
+    if (foodStreakMatch) return t('xp_food_streak').replace('{days}', foodStreakMatch[1]);
+    const workoutStreakMatch = desc.match(/^(\d+)-day workout streak bonus$/);
+    if (workoutStreakMatch) return t('xp_workout_streak').replace('{days}', workoutStreakMatch[1]);
+    const loggedMatch = desc.match(/^Logged (.+)$/);
+    if (loggedMatch) return t('xp_logged_food').replace('{name}', loggedMatch[1]);
+    return desc;
   };
 
   return (
@@ -477,7 +495,7 @@ function XPFeed() {
       <View style={feedStyles.header}>
         <Zap size={13} color="#6B7280" />
         <Text style={feedStyles.heading}>{t('home_xp_activity')}</Text>
-        <Text style={feedStyles.total}>{xpInfo.totalXP.toLocaleString()} total</Text>
+        <Text style={feedStyles.total}>{t('home_total').replace('{xp}', xpInfo.totalXP.toLocaleString())}</Text>
       </View>
       <View style={feedStyles.timeline}>
         {recentEvents.map((event, index) => (
@@ -490,10 +508,10 @@ function XPFeed() {
             </View>
             <View style={feedStyles.rowContent}>
               <View style={feedStyles.rowTop}>
-                <Text style={feedStyles.desc} numberOfLines={1}>{event.description}</Text>
+                <Text style={feedStyles.desc} numberOfLines={1}>{translateDescription(event.description)}</Text>
                 <Text style={[feedStyles.amount, { color: getColor(event.source) }]}>+{event.amount}</Text>
               </View>
-              <Text style={feedStyles.time}>{timeAgo(event.date)} ago</Text>
+              <Text style={feedStyles.time}>{timeAgo(event.date)}</Text>
             </View>
           </View>
         ))}
