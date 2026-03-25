@@ -529,7 +529,7 @@ export default function DashboardScreen() {
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.greetingText} numberOfLines={1}>{greeting}</Text>
+          <Text style={styles.greetingText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{greeting}</Text>
           <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
         </View>
       </View>
