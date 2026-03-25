@@ -1414,7 +1414,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
       </Modal>
 
       <Modal visible={showFoodDetail} animationType="slide" transparent>
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <KeyboardAvoidingView style={styles.foodDetailOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={0}>
           <View style={fdStyles.detailModal}>
             <View style={fdStyles.detailHeader}>
               <TouchableOpacity
@@ -2407,6 +2407,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  foodDetailOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: 40,
+  },
   sheetModal: {
     backgroundColor: "#141720",
     borderRadius: 24,
@@ -2829,8 +2836,9 @@ const fdStyles = StyleSheet.create({
     borderRadius: 28,
     width: "94%",
     maxWidth: 440,
-    maxHeight: "90%",
+    maxHeight: "85%",
     overflow: "hidden",
+    flexShrink: 1,
   },
   detailHeader: {
     flexDirection: "row",
