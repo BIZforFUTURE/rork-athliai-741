@@ -13,6 +13,7 @@ import {
   Pressable,
   RefreshControl,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -1078,14 +1079,14 @@ export default function PersonalStatsScreen() {
       </Modal>
 
       <Modal visible={showStatsModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowStatsModal(false)}>
-        <View style={[modalStyles.container, { paddingTop: insets.top }]}>
+        <KeyboardAvoidingView style={[modalStyles.container, { paddingTop: insets.top }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={modalStyles.header}>
             <Text style={modalStyles.headerTitle}>{t('stats_update_stats')}</Text>
             <TouchableOpacity onPress={() => setShowStatsModal(false)} style={modalStyles.closeBtn}>
               <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false}>
+          <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_height')}</Text>
               <View style={modalStyles.heightRow}>
@@ -1137,18 +1138,18 @@ export default function PersonalStatsScreen() {
             </TouchableOpacity>
             <View style={{ height: 60 }} />
           </ScrollView>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={showEditWeightModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { setShowEditWeightModal(false); setEditingWeightEntry(null); }}>
-        <View style={[modalStyles.container, { paddingTop: insets.top }]}>
+        <KeyboardAvoidingView style={[modalStyles.container, { paddingTop: insets.top }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={modalStyles.header}>
             <Text style={modalStyles.headerTitle}>{t('stats_edit_weight')}</Text>
             <TouchableOpacity onPress={() => { setShowEditWeightModal(false); setEditingWeightEntry(null); setEditWeight(''); }} style={modalStyles.closeBtn}>
               <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
-          <View style={modalStyles.body}>
+          <ScrollView style={modalStyles.body} keyboardShouldPersistTaps="handled">
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{editingWeightEntry ? new Date(editingWeightEntry.date + 'T00:00:00').toLocaleDateString() : ''}</Text>
               <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={editWeight} onChangeText={setEditWeight} keyboardType="numeric" autoFocus />
@@ -1156,19 +1157,20 @@ export default function PersonalStatsScreen() {
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSaveEditWeight}>
               <Text style={modalStyles.saveBtnText}>{t('common_save')}</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+            <View style={{ height: 60 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal visible={showWeightModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowWeightModal(false)}>
-        <View style={[modalStyles.container, { paddingTop: insets.top }]}>
+        <KeyboardAvoidingView style={[modalStyles.container, { paddingTop: insets.top }]} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={modalStyles.header}>
             <Text style={modalStyles.headerTitle}>{t('stats_log_weight')}</Text>
             <TouchableOpacity onPress={() => { setShowWeightModal(false); setNewWeight(''); }} style={modalStyles.closeBtn}>
               <Text style={modalStyles.closeText}>{t('common_cancel')}</Text>
             </TouchableOpacity>
           </View>
-          <View style={modalStyles.body}>
+          <ScrollView style={modalStyles.body} keyboardShouldPersistTaps="handled">
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_todays_weight')}</Text>
               <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={newWeight} onChangeText={setNewWeight} keyboardType="numeric" autoFocus />
@@ -1176,8 +1178,9 @@ export default function PersonalStatsScreen() {
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleAddWeight}>
               <Text style={modalStyles.saveBtnText}>{t('stats_add_entry')}</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+            <View style={{ height: 60 }} />
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
 
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
