@@ -18,7 +18,7 @@ import {
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LineChart } from "react-native-chart-kit";
-import Svg, { Circle } from "react-native-svg";
+
 import {
   User,
   Scale,
@@ -33,14 +33,10 @@ import {
   BarChart3,
   AlertCircle,
   CheckCircle,
-  Zap,
+  ChevronRight,
   Footprints,
   Dumbbell,
   UtensilsCrossed,
-  Award,
-  Flame,
-  ChevronRight,
-  Camera,
   Trash2,
   Download,
   Upload,
@@ -50,7 +46,7 @@ import {
 } from "lucide-react-native";
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
-import { RANKS, XPSource, RANK_TRANSLATION_KEYS } from "@/constants/xp";
+
 import { useLanguage } from "@/providers/LanguageProvider";
 import { lbsToKg, formatHeightMetric } from "@/utils/metricConversions";
 
@@ -60,204 +56,13 @@ interface WeightEntry {
 }
 
 type StatPeriod = '7d' | '30d' | '90d' | '1y';
-type StatsTab = 'progress' | 'profile';
 
-function XPRankCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
-  const { xpInfo } = useApp();
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const ringAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.spring(ringAnim, { toValue: 1, tension: 40, friction: 10, useNativeDriver: false }),
-    ]).start();
-  }, [fadeIn, ringAnim]);
 
-  const ringSize = 80;
-  const ringStroke = 6;
-  const r = (ringSize - ringStroke) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ * (1 - Math.min(Math.max(xpInfo.progress, 0), 1));
 
-  return (
-    <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
-      <View style={cardStyles.cardHeader}>
-        <Zap size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>{t('stats_xp_rank')}</Text>
-      </View>
 
-      <View style={xpStyles.rankRow}>
-        <View style={xpStyles.ringWrap}>
-          <Svg width={ringSize} height={ringSize}>
-            <Circle cx={ringSize / 2} cy={ringSize / 2} r={r} stroke="rgba(255,255,255,0.04)" strokeWidth={3} fill="none" />
-            <Circle
-              cx={ringSize / 2} cy={ringSize / 2} r={r}
-              stroke={xpInfo.rank.color} strokeWidth={ringStroke} fill="none"
-              strokeDasharray={`${circ}`} strokeDashoffset={offset}
-              strokeLinecap="round" transform={`rotate(-90 ${ringSize / 2} ${ringSize / 2})`}
-            />
-          </Svg>
-          <View style={xpStyles.ringInner}>
-            <Text style={xpStyles.ringEmoji}>{xpInfo.rank.emoji}</Text>
-            <Text style={[xpStyles.ringLevel, { color: xpInfo.rank.color }]}>{xpInfo.level}</Text>
-          </View>
-        </View>
 
-        <View style={xpStyles.rankInfo}>
-          <View style={[xpStyles.rankBadge, { backgroundColor: xpInfo.rank.color + "15" }]}>
-            <Text style={[xpStyles.rankTitle, { color: xpInfo.rank.color }]}>{RANK_TRANSLATION_KEYS[xpInfo.rank.title] ? t(RANK_TRANSLATION_KEYS[xpInfo.rank.title]) : xpInfo.rank.title}</Text>
-          </View>
-          <View style={xpStyles.xpBarOuter}>
-            <View style={[xpStyles.xpBarFill, { width: `${xpInfo.progress * 100}%`, backgroundColor: xpInfo.rank.color }]} />
-          </View>
-          <View style={xpStyles.xpNumbers}>
-            <Text style={xpStyles.xpText}>
-              <Text style={{ color: "#E5E7EB", fontWeight: "700" as const }}>{xpInfo.currentXP}</Text>
-              <Text style={{ color: "#4B5563" }}> / {xpInfo.neededXP} XP</Text>
-            </Text>
-            <Text style={[xpStyles.xpRemaining, { color: xpInfo.rank.color + "BB" }]}>
-              {xpInfo.neededXP - xpInfo.currentXP} {t('stats_to_go_xp')}
-            </Text>
-          </View>
-        </View>
 
-        <View style={xpStyles.totalBadge}>
-          <Zap size={10} color={xpInfo.rank.color} fill={xpInfo.rank.color} />
-          <Text style={[xpStyles.totalText, { color: xpInfo.rank.color }]}>{xpInfo.totalXP.toLocaleString()}</Text>
-        </View>
-      </View>
-
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={xpStyles.timelineScroll} contentContainerStyle={xpStyles.timeline}>
-        {RANKS.map((rank, index) => {
-          const isCurrentOrPast = xpInfo.level >= rank.minLevel;
-          const isCurrent = index < RANKS.length - 1
-            ? xpInfo.level >= rank.minLevel && xpInfo.level < RANKS[index + 1].minLevel
-            : xpInfo.level >= rank.minLevel;
-          return (
-            <View key={rank.title} style={xpStyles.timelineItem}>
-              <View style={[
-                xpStyles.timelineDot,
-                { backgroundColor: isCurrentOrPast ? rank.color : "rgba(255,255,255,0.06)" },
-                isCurrent && { borderWidth: 1.5, borderColor: "#FFFFFF" },
-              ]} />
-              <Text style={xpStyles.timelineEmoji}>{rank.emoji}</Text>
-              <Text style={[xpStyles.timelineName, isCurrentOrPast && { color: rank.color + "AA" }]} numberOfLines={1}>
-                {RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title}
-              </Text>
-            </View>
-          );
-        })}
-      </ScrollView>
-    </Animated.View>
-  );
-}
-
-function XPBreakdownCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
-  const { xpInfo } = useApp();
-  const fadeIn = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 500, delay: 100, useNativeDriver: true }).start();
-  }, [fadeIn]);
-
-  if (xpInfo.xpEvents.length === 0) return null;
-
-  const grouped: Record<XPSource, number> = { run: 0, workout: 0, food: 0, nutrition_goal: 0, streak: 0, treadmill_photo: 0 };
-  xpInfo.xpEvents.forEach(e => { grouped[e.source] = (grouped[e.source] || 0) + e.amount; });
-
-  const labels: Record<XPSource, string> = { run: t('stats_runs'), workout: t('stats_workouts_label'), food: t('home_food'), nutrition_goal: t('stats_goals'), streak: t('stats_streaks'), treadmill_photo: t('stats_treadmill') };
-  const colors: Record<XPSource, string> = { run: '#00E5FF', workout: '#FF6B35', food: '#BFFF00', nutrition_goal: '#F59E0B', streak: '#E879F9', treadmill_photo: '#38BDF8' };
-  const icons: Record<XPSource, React.ReactNode> = {
-    run: <Footprints size={12} color="#00E5FF" />,
-    workout: <Dumbbell size={12} color="#FF6B35" />,
-    food: <UtensilsCrossed size={12} color="#BFFF00" />,
-    nutrition_goal: <Award size={12} color="#F59E0B" />,
-    streak: <Flame size={12} color="#E879F9" />,
-    treadmill_photo: <Camera size={12} color="#38BDF8" />,
-  };
-  const totalXP = Object.values(grouped).reduce((a, b) => a + b, 0);
-
-  const entries = Object.entries(grouped)
-    .filter(([, v]) => v > 0)
-    .sort(([, a], [, b]) => b - a);
-
-  return (
-    <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
-      <View style={cardStyles.cardHeader}>
-        <BarChart3 size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>{t('stats_xp_breakdown')}</Text>
-        <Text style={breakdownStyles.totalLabel}>{totalXP.toLocaleString()} {t('stats_total_label')}</Text>
-      </View>
-      {entries.map(([key, value]) => (
-        <View key={key} style={breakdownStyles.row}>
-          <View style={[breakdownStyles.iconWrap, { backgroundColor: colors[key as XPSource] + "12" }]}>
-            {icons[key as XPSource]}
-          </View>
-          <Text style={breakdownStyles.label}>{labels[key as XPSource]}</Text>
-          <View style={breakdownStyles.barTrack}>
-            <View style={[breakdownStyles.barFill, { width: `${totalXP > 0 ? (value / totalXP) * 100 : 0}%`, backgroundColor: colors[key as XPSource] }]} />
-          </View>
-          <Text style={[breakdownStyles.value, { color: colors[key as XPSource] }]}>{value}</Text>
-        </View>
-      ))}
-    </Animated.View>
-  );
-}
-
-function RecentXPCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
-  const { xpInfo } = useApp();
-  const fadeIn = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 500, delay: 150, useNativeDriver: true }).start();
-  }, [fadeIn]);
-
-  const recentEvents = useMemo(() => xpInfo.xpEvents.slice(-5).reverse(), [xpInfo.xpEvents]);
-
-  if (recentEvents.length === 0) return null;
-
-  const getColor = (source: string) => {
-    switch (source) {
-      case "run": return "#00E5FF";
-      case "workout": return "#FF6B35";
-      case "food": return "#BFFF00";
-      case "nutrition_goal": return "#F59E0B";
-      case "streak": return "#E879F9";
-      case "treadmill_photo": return "#38BDF8";
-      default: return "#9CA3AF";
-    }
-  };
-
-  const timeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return t('common_now');
-    if (mins < 60) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
-  };
-
-  return (
-    <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
-      <View style={cardStyles.cardHeader}>
-        <Zap size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>{t('stats_recent_xp')}</Text>
-      </View>
-      {recentEvents.map((event) => (
-        <View key={event.id} style={recentStyles.row}>
-          <View style={[recentStyles.dot, { backgroundColor: getColor(event.source) + "20", borderColor: getColor(event.source) + "40" }]} />
-          <View style={recentStyles.info}>
-            <Text style={recentStyles.desc} numberOfLines={1}>{event.description}</Text>
-            <Text style={recentStyles.time}>{timeAgo(event.date)} {t('common_ago')}</Text>
-          </View>
-          <Text style={[recentStyles.amount, { color: getColor(event.source) }]}>+{event.amount}</Text>
-        </View>
-      ))}
-    </Animated.View>
-  );
-}
 
 function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void; t: (key: any, params?: Record<string, string | number>) => string; isSpanish: boolean }) {
   const { personalStats, getWeightHistory } = useApp();
@@ -685,67 +490,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
   );
 }
 
-function FitnessStatsCard({ t, isSpanish }: { t: (key: any, params?: Record<string, string | number>) => string; isSpanish: boolean }) {
-  const { recentRuns, weeklyRuns } = useApp();
-  const fadeIn = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 500, delay: 350, useNativeDriver: true }).start();
-  }, [fadeIn]);
-
-  const currentWeeklyMiles = weeklyRuns.reduce((sum, run) => sum + run.distance, 0);
-  const currentLifetimeMiles = recentRuns.reduce((sum, run) => sum + run.distance, 0);
-
-  const items = [
-    { value: isSpanish ? (currentWeeklyMiles * 1.60934).toFixed(1) : currentWeeklyMiles.toFixed(1), unit: isSpanish ? "km" : "mi", label: t('stats_this_week'), color: "#00E5FF", icon: <Footprints size={14} color="#00E5FF" /> },
-    { value: isSpanish ? (currentLifetimeMiles * 1.60934).toFixed(1) : currentLifetimeMiles.toFixed(1), unit: isSpanish ? "km" : "mi", label: t('stats_all_time'), color: "#FF6B35", icon: <TrendingUp size={14} color="#FF6B35" /> },
-    { value: `${weeklyRuns.length}`, unit: "", label: t('stats_runs_wk'), color: "#BFFF00", icon: <Activity size={14} color="#BFFF00" /> },
-    { value: `${recentRuns.length}`, unit: "", label: t('stats_total_runs'), color: "#F59E0B", icon: <Target size={14} color="#F59E0B" /> },
-  ];
-
-  const topRow = items.slice(0, 2);
-  const bottomRow = items.slice(2);
-
-  return (
-    <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
-      <View style={cardStyles.cardHeader}>
-        <Activity size={13} color="#6B7280" />
-        <Text style={cardStyles.cardHeading}>{t('stats_fitness_stats')}</Text>
-      </View>
-      <View style={fitStyles.grid}>
-        <View style={fitStyles.gridRow}>
-          {topRow.map((item, idx) => (
-            <View key={item.label} style={[fitStyles.cell, idx < topRow.length - 1 && fitStyles.cellBorder]}>
-              <View style={[fitStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
-                {item.icon}
-              </View>
-              <Text style={fitStyles.cellValue}>
-                {item.value}
-                {item.unit ? <Text style={[fitStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
-              </Text>
-              <Text style={fitStyles.cellLabel} numberOfLines={2}>{item.label}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={fitStyles.gridDivider} />
-        <View style={fitStyles.gridRow}>
-          {bottomRow.map((item, idx) => (
-            <View key={item.label} style={[fitStyles.cell, idx < bottomRow.length - 1 && fitStyles.cellBorder]}>
-              <View style={[fitStyles.cellIcon, { backgroundColor: item.color + "10" }]}>
-                {item.icon}
-              </View>
-              <Text style={fitStyles.cellValue}>
-                {item.value}
-                {item.unit ? <Text style={[fitStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
-              </Text>
-              <Text style={fitStyles.cellLabel} numberOfLines={2}>{item.label}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    </Animated.View>
-  );
-}
 
 interface DataBackupCardProps {
   onExport: () => void;
@@ -830,10 +575,8 @@ export default function PersonalStatsScreen() {
   const { t, isSpanish } = useLanguage();
   const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<StatPeriod>('30d');
-  const [activeTab, setActiveTab] = useState<StatsTab>('progress');
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
-  const segmentAnim = useRef(new Animated.Value(0)).current;
   const [tempHeightFeet, setTempHeightFeet] = useState('');
   const [tempHeightInches, setTempHeightInches] = useState('');
   const [tempWeight, setTempWeight] = useState('');
@@ -1210,46 +953,6 @@ export default function PersonalStatsScreen() {
         </View>
       </View>
 
-      <View style={segStyles.container}>
-        <View style={segStyles.track}>
-          <Animated.View
-            style={[
-              segStyles.slider,
-              {
-                transform: [{
-                  translateX: segmentAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [2, (Dimensions.get('window').width - 40) / 2 - 2],
-                  }),
-                }],
-              },
-            ]}
-          />
-          <Pressable
-            style={segStyles.btn}
-            onPress={() => {
-              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setActiveTab('progress');
-              Animated.spring(segmentAnim, { toValue: 0, useNativeDriver: true, tension: 300, friction: 25 }).start();
-            }}
-          >
-            <Zap size={13} color={activeTab === 'progress' ? '#00E5FF' : '#4B5563'} />
-            <Text style={[segStyles.btnText, activeTab === 'progress' && segStyles.btnTextActive]}>{t('stats_progress')}</Text>
-          </Pressable>
-          <Pressable
-            style={segStyles.btn}
-            onPress={() => {
-              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setActiveTab('profile');
-              Animated.spring(segmentAnim, { toValue: 1, useNativeDriver: true, tension: 300, friction: 25 }).start();
-            }}
-          >
-            <User size={13} color={activeTab === 'profile' ? '#00E5FF' : '#4B5563'} />
-            <Text style={[segStyles.btnText, activeTab === 'profile' && segStyles.btnTextActive]}>{t('stats_profile')}</Text>
-          </Pressable>
-        </View>
-      </View>
-
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
@@ -1261,16 +964,7 @@ export default function PersonalStatsScreen() {
           />
         }
       >
-        {activeTab === 'progress' ? (
-          <>
-            <XPRankCard t={t} />
-            <XPBreakdownCard t={t} />
-            <RecentXPCard t={t} />
-            <FitnessStatsCard t={t} isSpanish={isSpanish} />
-          </>
-        ) : (
-          <>
-            <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
+        <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
             <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
             <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} isSpanish={isSpanish} />
             <DataBackupCard
@@ -1282,8 +976,6 @@ export default function PersonalStatsScreen() {
               workoutCount={workoutLogs.length}
               t={t}
             />
-          </>
-        )}
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
@@ -1322,50 +1014,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const segStyles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    marginBottom: 4,
-  },
-  track: {
-    flexDirection: "row" as const,
-    backgroundColor: "#0E1015",
-    borderRadius: 14,
-    padding: 2,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-    position: "relative" as const,
-  },
-  slider: {
-    position: "absolute" as const,
-    top: 2,
-    left: 0,
-    width: "50%" as const,
-    height: "100%" as const,
-    backgroundColor: "rgba(0,229,255,0.08)",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(0,229,255,0.15)",
-  },
-  btn: {
-    flex: 1,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    gap: 6,
-    paddingVertical: 11,
-    borderRadius: 12,
-  },
-  btnText: {
-    fontSize: 13,
-    fontWeight: "700" as const,
-    color: "#4B5563",
-    letterSpacing: -0.2,
-  },
-  btnTextActive: {
-    color: "#E5E7EB",
-  },
-});
 
 const cardStyles = StyleSheet.create({
   card: {
@@ -1389,198 +1037,8 @@ const cardStyles = StyleSheet.create({
   },
 });
 
-const xpStyles = StyleSheet.create({
-  rankRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 14,
-    marginBottom: 16,
-  },
-  ringWrap: {
-    width: 80,
-    height: 80,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  ringInner: {
-    position: "absolute" as const,
-    alignItems: "center" as const,
-  },
-  ringEmoji: {
-    fontSize: 14,
-    marginBottom: -2,
-  },
-  ringLevel: {
-    fontSize: 28,
-    fontWeight: "900" as const,
-    letterSpacing: -2,
-    lineHeight: 32,
-  },
-  rankInfo: {
-    flex: 1,
-    gap: 8,
-  },
-  rankBadge: {
-    alignSelf: "flex-start" as const,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  rankTitle: {
-    fontSize: 12,
-    fontWeight: "800" as const,
-    letterSpacing: 0.5,
-    textTransform: "uppercase" as const,
-  },
-  xpBarOuter: {
-    height: 6,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderRadius: 3,
-    overflow: "hidden" as const,
-  },
-  xpBarFill: {
-    height: "100%" as const,
-    borderRadius: 3,
-  },
-  xpNumbers: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-  },
-  xpText: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-  },
-  xpRemaining: {
-    fontSize: 11,
-    fontWeight: "700" as const,
-  },
-  totalBadge: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 3,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  totalText: {
-    fontSize: 11,
-    fontWeight: "800" as const,
-    letterSpacing: -0.3,
-  },
-  timelineScroll: {
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.06)",
-    marginHorizontal: -4,
-  },
-  timeline: {
-    flexDirection: "row" as const,
-    gap: 16,
-    paddingHorizontal: 4,
-  },
-  timelineItem: {
-    alignItems: "center" as const,
-    gap: 3,
-    minWidth: 44,
-  },
-  timelineDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  timelineEmoji: {
-    fontSize: 14,
-  },
-  timelineName: {
-    fontSize: 8,
-    fontWeight: "600" as const,
-    color: "#4B5563",
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.2,
-    textAlign: "center" as const,
-  },
-});
 
-const breakdownStyles = StyleSheet.create({
-  totalLabel: {
-    fontSize: 11,
-    fontWeight: "700" as const,
-    color: "#6B7280",
-  },
-  row: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 8,
-    paddingVertical: 6,
-  },
-  iconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-    color: "#9CA3AF",
-    width: 65,
-  },
-  barTrack: {
-    flex: 1,
-    height: 4,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderRadius: 2,
-    overflow: "hidden" as const,
-  },
-  barFill: {
-    height: "100%" as const,
-    borderRadius: 2,
-  },
-  value: {
-    fontSize: 13,
-    fontWeight: "800" as const,
-    width: 40,
-    textAlign: "right" as const,
-    letterSpacing: -0.3,
-  },
-});
 
-const recentStyles = StyleSheet.create({
-  row: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 10,
-    paddingVertical: 7,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-  },
-  info: {
-    flex: 1,
-    gap: 1,
-  },
-  desc: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#D1D5DB",
-  },
-  time: {
-    fontSize: 11,
-    fontWeight: "500" as const,
-    color: "#374151",
-  },
-  amount: {
-    fontSize: 14,
-    fontWeight: "800" as const,
-    letterSpacing: -0.3,
-  },
-});
 
 const goalStyles = StyleSheet.create({
   statsRow: {
@@ -1876,55 +1334,6 @@ const wpStyles = StyleSheet.create({
   },
 });
 
-const fitStyles = StyleSheet.create({
-  grid: {
-    gap: 0,
-  },
-  gridRow: {
-    flexDirection: "row" as const,
-  },
-  gridDivider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.06)",
-    marginVertical: 4,
-  },
-  cell: {
-    flex: 1,
-    alignItems: "center" as const,
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-  },
-  cellBorder: {
-    borderRightWidth: 1,
-    borderRightColor: "rgba(255,255,255,0.06)",
-  },
-  cellIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  cellValue: {
-    fontSize: 18,
-    fontWeight: "800" as const,
-    color: "#F3F4F6",
-    letterSpacing: -0.5,
-  },
-  cellUnit: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-  },
-  cellLabel: {
-    fontSize: 9,
-    fontWeight: "600" as const,
-    color: "#4B5563",
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.3,
-    textAlign: "center" as const,
-  },
-});
 
 const modalStyles = StyleSheet.create({
   container: {
