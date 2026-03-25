@@ -156,19 +156,28 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       const hasPermission = await requestPermissions();
       if (!hasPermission) return null;
 
-      const xpText = xpEarned ? ` +${xpEarned} XP earned!` : '';
-      const titles = [
-        '⚔️ Victory! Workout Conquered!',
-        '🏆 Quest Complete!',
-        '💪 Boss Defeated!',
-        '🎯 Mission Accomplished!',
-      ];
+      const xpText = xpEarned ? (isSpanish ? ` +${xpEarned} XP ganado!` : ` +${xpEarned} XP earned!`) : '';
+      const titles = isSpanish
+        ? [
+            '⚔️ ¡Victoria! ¡Entrenamiento Conquistado!',
+            '🏆 ¡Misión Completa!',
+            '💪 ¡Jefe Derrotado!',
+            '🎯 ¡Misión Cumplida!',
+          ]
+        : [
+            '⚔️ Victory! Workout Conquered!',
+            '🏆 Quest Complete!',
+            '💪 Boss Defeated!',
+            '🎯 Mission Accomplished!',
+          ];
       const title = titles[Math.floor(Math.random() * titles.length)];
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
           title,
-          body: `${workoutType} crushed in ${Math.round(duration)} min.${xpText} The grind never stops!`,
+          body: isSpanish
+            ? `${workoutType} completado en ${Math.round(duration)} min.${xpText} ¡La dedicación nunca para!`
+            : `${workoutType} crushed in ${Math.round(duration)} min.${xpText} The grind never stops!`,
           sound: 'default',
           data: { type: 'workout-complete', timestamp: Date.now() },
         },
@@ -181,7 +190,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending workout completion notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish]);
 
   const sendRunCompletionNotification = useCallback(async (distance: number, duration: number, xpEarned?: number): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
@@ -191,18 +200,27 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       if (!hasPermission) return null;
 
       const xpText = xpEarned ? ` +${xpEarned} XP!` : '';
-      const titles = [
-        '🏃 Run Quest Complete!',
-        '⚡ Distance Conquered!',
-        '🔥 Trail Blazed!',
-        '🎯 Run Mission Done!',
-      ];
+      const titles = isSpanish
+        ? [
+            '🏃 ¡Misión de Carrera Completa!',
+            '⚡ ¡Distancia Conquistada!',
+            '🔥 ¡Camino Recorrido!',
+            '🎯 ¡Misión de Carrera Cumplida!',
+          ]
+        : [
+            '🏃 Run Quest Complete!',
+            '⚡ Distance Conquered!',
+            '🔥 Trail Blazed!',
+            '🎯 Run Mission Done!',
+          ];
       const title = titles[Math.floor(Math.random() * titles.length)];
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
           title,
-          body: `${distance.toFixed(1)} mi in ${Math.round(duration)} min.${xpText} Every step levels you up!`,
+          body: isSpanish
+            ? `${distance.toFixed(1)} mi en ${Math.round(duration)} min.${xpText} ¡Cada paso te sube de nivel!`
+            : `${distance.toFixed(1)} mi in ${Math.round(duration)} min.${xpText} Every step levels you up!`,
           sound: 'default',
           data: { type: 'run-complete', timestamp: Date.now() },
         },
@@ -215,7 +233,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending run completion notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish]);
 
   const sendRunStartNotification = useCallback(async (): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
@@ -226,8 +244,8 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Run Started - Tap to View Map',
-          body: 'Tracking your route | Timer running | Calories counting',
+          title: isSpanish ? 'Carrera Iniciada - Toca para Ver Mapa' : 'Run Started - Tap to View Map',
+          body: isSpanish ? 'Rastreando tu ruta | Temporizador activo | Contando calorías' : 'Tracking your route | Timer running | Calories counting',
           sound: 'default',
           sticky: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
@@ -246,7 +264,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending run start notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish]);
 
   const updateRunProgressNotification = useCallback(async (identifier: string | null, distance: number, time: number, calories?: number): Promise<void> => {
     if (Platform.OS === 'web' || !identifier) return;
@@ -272,7 +290,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       await Notifications.scheduleNotificationAsync({
         identifier,
         content: {
-          title: 'Active Run - Tap to View Map',
+          title: isSpanish ? 'Carrera Activa - Toca para Ver Mapa' : 'Active Run - Tap to View Map',
           body: `${distance.toFixed(2)} mi | ${formatTime(time)} | ${formatPace(pace)} pace | ${estimatedCalories} cal`,
           sound: undefined,
           sticky: true,
@@ -294,7 +312,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error updating run progress notification:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const cancelRunNotification = useCallback(async (identifier: string | null): Promise<void> => {
     if (Platform.OS === 'web' || !identifier) return;
@@ -319,11 +337,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
-      const messages = [
-        { title: '🍳 Daily Quest: Fuel Up!', body: 'Log your breakfast to earn +15 XP. Every meal tracked levels you up!' },
-        { title: '⚡ Morning XP Awaits', body: 'Scan your breakfast and stack that XP. Nutrition streaks = bonus XP!' },
-        { title: '🎯 Side Quest: Breakfast', body: 'Hit your calorie goal today for a +50 XP bonus. Start with breakfast!' },
-      ];
+      const messages = isSpanish
+        ? [
+            { title: '🍳 Misión Diaria: ¡A Comer!', body: 'Registra tu desayuno para ganar +15 XP. ¡Cada comida registrada te sube de nivel!' },
+            { title: '⚡ XP Matutino Te Espera', body: 'Escanea tu desayuno y acumula XP. ¡Rachas de nutrición = XP extra!' },
+            { title: '🎯 Misión Secundaria: Desayuno', body: '¡Alcanza tu meta de calorías hoy para un bono de +50 XP. Empieza con el desayuno!' },
+          ]
+        : [
+            { title: '🍳 Daily Quest: Fuel Up!', body: 'Log your breakfast to earn +15 XP. Every meal tracked levels you up!' },
+            { title: '⚡ Morning XP Awaits', body: 'Scan your breakfast and stack that XP. Nutrition streaks = bonus XP!' },
+            { title: '🎯 Side Quest: Breakfast', body: 'Hit your calorie goal today for a +50 XP bonus. Start with breakfast!' },
+          ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
       await Notifications.scheduleNotificationAsync({
@@ -345,7 +369,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error scheduling morning food reminder:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const scheduleMiddayRunReminder = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') return;
@@ -359,11 +383,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
-      const messages = [
-        { title: '🏃 Boss Battle: The Open Road', body: 'Earn 25+ XP per run. The further you go, the more XP you collect!' },
-        { title: '⚔️ Quest Available: Go for a Run', body: 'Every 0.25 mi = +15 XP. Lace up and grind those levels!' },
-        { title: '🔥 Your Run Streak is Calling', body: 'Keep the streak alive for massive bonus XP. Don\'t let it reset!' },
-      ];
+      const messages = isSpanish
+        ? [
+            { title: '🏃 Batalla de Jefe: El Camino Abierto', body: '¡Gana 25+ XP por carrera. Cuanto más lejos vayas, más XP colectas!' },
+            { title: '⚔️ Misión Disponible: Sal a Correr', body: '¡Cada 0.25 mi = +15 XP. Ponte las zapatillas y sube de nivel!' },
+            { title: '🔥 Tu Racha de Carrera Te Llama', body: '¡Mantén la racha viva para XP extra masivo. No dejes que se reinicie!' },
+          ]
+        : [
+            { title: '🏃 Boss Battle: The Open Road', body: 'Earn 25+ XP per run. The further you go, the more XP you collect!' },
+            { title: '⚔️ Quest Available: Go for a Run', body: 'Every 0.25 mi = +15 XP. Lace up and grind those levels!' },
+            { title: '🔥 Your Run Streak is Calling', body: 'Keep the streak alive for massive bonus XP. Don\'t let it reset!' },
+          ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
       await Notifications.scheduleNotificationAsync({
@@ -385,7 +415,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error scheduling midday run reminder:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const scheduleEveningWorkoutReminder = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') return;
@@ -399,11 +429,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
-      const messages = [
-        { title: '💪 Raid Boss: Evening Workout', body: 'Earn +75 XP for completing today\'s workout. Time to level up!' },
-        { title: '🛡️ Final Quest of the Day', body: 'One workout = 75 XP closer to your next rank. Don\'t skip this one!' },
-        { title: '⚡ Power Hour: Workout Time', body: 'The gym is your arena. Crush it and collect your XP reward!' },
-      ];
+      const messages = isSpanish
+        ? [
+            { title: '💪 Jefe Final: Entrenamiento Nocturno', body: '¡Gana +75 XP por completar el entrenamiento de hoy. Es hora de subir de nivel!' },
+            { title: '🛡️ Última Misión del Día', body: '¡Un entrenamiento = 75 XP más cerca de tu próximo rango. No te la saltes!' },
+            { title: '⚡ Hora de Poder: Hora de Entrenar', body: '¡El gimnasio es tu arena. Destrúyelo y recoge tu recompensa de XP!' },
+          ]
+        : [
+            { title: '💪 Raid Boss: Evening Workout', body: 'Earn +75 XP for completing today\'s workout. Time to level up!' },
+            { title: '🛡️ Final Quest of the Day', body: 'One workout = 75 XP closer to your next rank. Don\'t skip this one!' },
+            { title: '⚡ Power Hour: Workout Time', body: 'The gym is your arena. Crush it and collect your XP reward!' },
+          ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
       await Notifications.scheduleNotificationAsync({
@@ -425,7 +461,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error scheduling evening workout reminder:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const scheduleWeeklyReport = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') return;
@@ -442,8 +478,8 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Weekly Fitness Report',
-          body: 'Your weekly progress summary is ready! Tap to see how you did this week.',
+          title: isSpanish ? 'Reporte Semanal de Fitness' : 'Weekly Fitness Report',
+          body: isSpanish ? '¡Tu resumen semanal de progreso está listo! Toca para ver cómo te fue esta semana.' : 'Your weekly progress summary is ready! Tap to see how you did this week.',
           sound: 'default',
           data: {
             type: 'weekly-report',
@@ -463,7 +499,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error scheduling weekly report:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const sendWeeklyReport = useCallback(async (reportData: {
     weeklyRuns: number;
@@ -481,36 +517,42 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const { weeklyRuns, weeklyMiles, weeklyWorkouts, runStreak, workoutStreak, caloriesBurned } = reportData;
 
-      let title = 'Your Weekly Fitness Report';
+      let title = isSpanish ? 'Tu Reporte Semanal de Fitness' : 'Your Weekly Fitness Report';
       let body = '';
 
       if (weeklyRuns > 0 || weeklyWorkouts > 0) {
         const activities: string[] = [];
         if (weeklyRuns > 0) {
-          activities.push(`${weeklyRuns} run${weeklyRuns > 1 ? 's' : ''} (${weeklyMiles.toFixed(1)} mi)`);
+          activities.push(isSpanish
+            ? `${weeklyRuns} carrera${weeklyRuns > 1 ? 's' : ''} (${weeklyMiles.toFixed(1)} mi)`
+            : `${weeklyRuns} run${weeklyRuns > 1 ? 's' : ''} (${weeklyMiles.toFixed(1)} mi)`);
         }
         if (weeklyWorkouts > 0) {
-          activities.push(`${weeklyWorkouts} workout${weeklyWorkouts > 1 ? 's' : ''}`);
+          activities.push(isSpanish
+            ? `${weeklyWorkouts} entrenamiento${weeklyWorkouts > 1 ? 's' : ''}`
+            : `${weeklyWorkouts} workout${weeklyWorkouts > 1 ? 's' : ''}`);
         }
 
-        body = `This week: ${activities.join(' | ')}`;
+        body = isSpanish ? `Esta semana: ${activities.join(' | ')}` : `This week: ${activities.join(' | ')}`;
 
         if (caloriesBurned > 0) {
-          body += ` | ${Math.round(caloriesBurned)} calories burned`;
+          body += isSpanish ? ` | ${Math.round(caloriesBurned)} calorías quemadas` : ` | ${Math.round(caloriesBurned)} calories burned`;
         }
 
         const streaks: string[] = [];
-        if (runStreak > 0) streaks.push(`${runStreak} day run streak`);
-        if (workoutStreak > 0) streaks.push(`${workoutStreak} day workout streak`);
+        if (runStreak > 0) streaks.push(isSpanish ? `racha de ${runStreak} días corriendo` : `${runStreak} day run streak`);
+        if (workoutStreak > 0) streaks.push(isSpanish ? `racha de ${workoutStreak} días entrenando` : `${workoutStreak} day workout streak`);
 
         if (streaks.length > 0) {
           body += ` ${streaks.join(' | ')}`;
         }
 
-        body += ' Keep up the great work!';
+        body += isSpanish ? ' ¡Sigue así!' : ' Keep up the great work!';
       } else {
-        title = 'Ready for a New Week?';
-        body = "Last week was quiet - let's make this week amazing! Your fitness journey is waiting.";
+        title = isSpanish ? '¿Listo para una Nueva Semana?' : 'Ready for a New Week?';
+        body = isSpanish
+          ? 'La semana pasada fue tranquila — ¡hagamos que esta semana sea increíble! Tu viaje fitness te espera.'
+          : "Last week was quiet - let's make this week amazing! Your fitness journey is waiting.";
       }
 
       const identifier = await Notifications.scheduleNotificationAsync({
@@ -533,7 +575,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending weekly report notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish]);
 
   const cancelNotification = useCallback(async (identifier: string): Promise<void> => {
     if (Platform.OS === 'web') return;
@@ -621,11 +663,14 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const milestoneEmoji = days >= 30 ? '👑' : days >= 14 ? '🔥' : days >= 7 ? '⚡' : '🎯';
       const bonusXP = streakType === 'food' ? days * 5 : days * 10;
+      const streakTypeEs = streakType === 'food' ? 'comida' : streakType === 'run' ? 'carrera' : 'entrenamiento';
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: `${milestoneEmoji} ${days}-Day ${streakType} Streak!`,
-          body: `Unstoppable! Your ${streakType} streak earns +${bonusXP} bonus XP daily. Don't break the chain!`,
+          title: isSpanish ? `${milestoneEmoji} ¡Racha de ${days} Días de ${streakTypeEs}!` : `${milestoneEmoji} ${days}-Day ${streakType} Streak!`,
+          body: isSpanish
+            ? `¡Imparable! Tu racha de ${streakTypeEs} te da +${bonusXP} XP extra diario. ¡No rompas la cadena!`
+            : `Unstoppable! Your ${streakType} streak earns +${bonusXP} bonus XP daily. Don't break the chain!`,
           sound: 'default',
           data: { type: 'streak-milestone', streakType, days, timestamp: Date.now() },
         },
@@ -638,7 +683,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       console.error('Error sending streak milestone notification:', error);
       return null;
     }
-  }, [requestPermissions]);
+  }, [requestPermissions, isSpanish]);
 
   const sendXPEarnedNotification = useCallback(async (amount: number, source: string, totalXP: number, level: number): Promise<string | null> => {
     if (Platform.OS === 'web') return null;
@@ -682,8 +727,10 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: '⚠️ Streak in Danger!',
-          body: 'Your streaks reset at midnight! Log a meal, run, or workout to protect your bonus XP.',
+          title: isSpanish ? '⚠️ ¡Racha en Peligro!' : '⚠️ Streak in Danger!',
+          body: isSpanish
+            ? '¡Tus rachas se reinician a medianoche! Registra una comida, carrera o entrenamiento para proteger tu XP extra.'
+            : 'Your streaks reset at midnight! Log a meal, run, or workout to protect your bonus XP.',
           sound: 'default',
           data: { type: 'streak-warning', timestamp: Date.now() },
         },
@@ -699,7 +746,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error scheduling streak warning:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const scheduleMorningXPReminder = useCallback(async (): Promise<void> => {
     if (Platform.OS === 'web') return;
@@ -713,11 +760,17 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
         await Notifications.cancelScheduledNotificationAsync(n.identifier);
       }
 
-      const messages = [
-        { title: '🌅 New Day, New XP!', body: 'Your daily quests have reset. Complete all 3 for max XP today!' },
-        { title: '⚔️ Daily Quests Available', body: 'Log food, go for a run, crush a workout — each one earns XP!' },
-        { title: '🎮 Ready Player One', body: 'A fresh day of XP grinding awaits. How much will you earn today?' },
-      ];
+      const messages = isSpanish
+        ? [
+            { title: '🌅 ¡Nuevo Día, Nuevo XP!', body: '¡Tus misiones diarias se han reiniciado. Completa las 3 para máximo XP hoy!' },
+            { title: '⚔️ Misiones Diarias Disponibles', body: '¡Registra comida, sal a correr, destroza un entrenamiento — cada uno te da XP!' },
+            { title: '🎮 Jugador Listo', body: '¡Un nuevo día de XP te espera. ¿Cuánto ganarás hoy?' },
+          ]
+        : [
+            { title: '🌅 New Day, New XP!', body: 'Your daily quests have reset. Complete all 3 for max XP today!' },
+            { title: '⚔️ Daily Quests Available', body: 'Log food, go for a run, crush a workout — each one earns XP!' },
+            { title: '🎮 Ready Player One', body: 'A fresh day of XP grinding awaits. How much will you earn today?' },
+          ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
       await Notifications.scheduleNotificationAsync({
@@ -739,7 +792,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
     } catch (error) {
       console.error('Error scheduling morning XP reminder:', error);
     }
-  }, []);
+  }, [isSpanish]);
 
   const scheduleAllDailyReminders = useCallback(async (): Promise<void> => {
     await scheduleMorningXPReminder();
