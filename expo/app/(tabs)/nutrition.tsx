@@ -1491,38 +1491,6 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 
                     <Text style={fdStyles.detailFoodName}>{selectedFoodEntry.name}</Text>
 
-                    <Text style={fdStyles.detailSectionLabel}>{t('fuel_detail_measurement')}</Text>
-                    <View style={fdStyles.measurementRow}>
-                      {(['serving', 'g', 'tbsp', 'cup', 'oz', 'piece'] as const).map((m) => {
-                        const labels: Record<string, string> = {
-                          serving: t('fuel_detail_serving'),
-                          g: t('fuel_detail_grams'),
-                          tbsp: t('fuel_detail_tbsp'),
-                          cup: t('fuel_detail_cup'),
-                          oz: t('fuel_detail_oz'),
-                          piece: t('fuel_detail_piece'),
-                        };
-                        const isActive = detailMeasurement === m;
-                        return (
-                          <TouchableOpacity
-                            key={m}
-                            style={[fdStyles.measurementChip, isActive && fdStyles.measurementChipActive]}
-                            activeOpacity={0.7}
-                            onPress={() => {
-                              console.log('Measurement button pressed:', m);
-                              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                              setDetailMeasurement(m);
-                              setDetailServings("1");
-                            }}
-                          >
-                            <Text style={[fdStyles.measurementChipText, isActive && fdStyles.measurementChipTextActive]}>
-                              {labels[m]}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-
                     <View style={fdStyles.servingsRow}>
                       <Text style={fdStyles.servingsLabel}>{t('fuel_detail_servings')}</Text>
                       <View style={fdStyles.servingsInputWrap}>
