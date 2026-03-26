@@ -2514,10 +2514,7 @@ const styles = StyleSheet.create({
   },
   foodDetailOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    paddingBottom: 40,
+    backgroundColor: "#0D0F13",
   },
   sheetModal: {
     backgroundColor: "#141720",
@@ -3005,13 +3002,8 @@ const analyzingStyles = StyleSheet.create({
 
 const fdStyles = StyleSheet.create({
   detailModal: {
+    flex: 1,
     backgroundColor: "#0D0F13",
-    borderRadius: 28,
-    width: "94%",
-    maxWidth: 440,
-    maxHeight: "85%",
-    overflow: "hidden",
-    flexShrink: 1,
   },
   detailHeader: {
     flexDirection: "row",
