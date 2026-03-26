@@ -188,13 +188,42 @@ export default function NutritionScreen() {
   const [_capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const [showAnalyzingCard, setShowAnalyzingCard] = useState(false);
+  const [analyzingFoodName, setAnalyzingFoodName] = useState<string | null>(null);
 
   const cameraRef = React.useRef<any>(null);
   const headerFadeAnim = useRef(new Animated.Value(0)).current;
+  const analyzingProgressAnim = useRef(new Animated.Value(0)).current;
+  const analyzingPulseAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
     Animated.timing(headerFadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   }, [headerFadeAnim]);
+
+  const startAnalyzingAnimation = useCallback(() => {
+    analyzingProgressAnim.setValue(0);
+    analyzingPulseAnim.setValue(0.4);
+    Animated.timing(analyzingProgressAnim, {
+      toValue: 0.85,
+      duration: 8000,
+      useNativeDriver: false,
+    }).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(analyzingPulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+        Animated.timing(analyzingPulseAnim, { toValue: 0.4, duration: 800, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [analyzingProgressAnim, analyzingPulseAnim]);
+
+  const completeAnalyzingAnimation = useCallback(() => {
+    analyzingPulseAnim.stopAnimation();
+    Animated.timing(analyzingProgressAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
+  }, [analyzingProgressAnim, analyzingPulseAnim]);
 
   useEffect(() => {
     if (!nutrition.quizCompleted) {
@@ -515,6 +544,12 @@ Please provide a refined nutritional estimate. Return ONLY a valid JSON object (
 
   const analyzeWithAI = async (input: string, isImage: boolean = false) => {
     setIsAnalyzing(true);
+    setShowAIInput(false);
+    setShowCamera(false);
+    setCapturedImage(null);
+    setShowAnalyzingCard(true);
+    setAnalyzingFoodName(null);
+    startAnalyzingAnimation();
     try {
       let prompt;
       
@@ -524,7 +559,8 @@ Please provide a refined nutritional estimate. Return ONLY a valid JSON object (
           prompt = await callOpenAIWithVision(visionPrompt, input);
         } catch (imageError) {
           console.error('Image analysis failed:', imageError);
-          Alert.alert("Image Analysis Failed", "Unable to analyze the image. Please try describing your food instead.", [{ text: "OK", onPress: () => { setShowCamera(false); setShowAIInput(true); } }]);
+          setShowAnalyzingCard(false);
+          Alert.alert("Image Analysis Failed", "Unable to analyze the image. Please try describing your food instead.", [{ text: "OK", onPress: () => { setShowAIInput(true); } }]);
           return;
         }
       } else {
@@ -540,51 +576,73 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
       const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
       if (jsonMatch) cleanedResponse = jsonMatch[0];
       
+      let parsedName = "";
+      let parsedCals = 0;
+      let parsedProt = 0;
+      let parsedCarb = 0;
+      let parsedFatVal = 0;
+      let parsed = false;
+
       try {
         const nutritionData = JSON.parse(cleanedResponse);
-        const name = nutritionData.name || "Unknown food";
-        const cals = Number(nutritionData.calories) || 0;
-        const prot = Number(nutritionData.protein) || 0;
-        const carb = Number(nutritionData.carbs) || 0;
-        const fatVal = Number(nutritionData.fat) || 0;
-        if (!name || cals === 0) throw new Error("Invalid nutrition data");
-        
-        setFoodName(name);
-        setCalories(Math.round(cals).toString());
-        setProtein(Math.round(prot).toString());
-        setCarbs(Math.round(carb).toString());
-        setFat(Math.round(fatVal).toString());
-        setShowAIInput(false);
-        setShowCamera(false);
-        setCapturedImage(null);
-        setShowAddFood(true);
-        Alert.alert("Food Analyzed", `Detected: ${name}\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g\n\nYou can adjust the values if needed.`);
+        parsedName = nutritionData.name || "Unknown food";
+        parsedCals = Number(nutritionData.calories) || 0;
+        parsedProt = Number(nutritionData.protein) || 0;
+        parsedCarb = Number(nutritionData.carbs) || 0;
+        parsedFatVal = Number(nutritionData.fat) || 0;
+        if (parsedName && parsedCals > 0) parsed = true;
       } catch (parseError: any) {
         console.error("Failed to parse AI response:", parseError.message);
         try {
           const nameMatch = cleanedResponse.match(/"name"\s*:\s*"([^"]+)"/);
           const caloriesMatch = cleanedResponse.match(/"calories"\s*:\s*(\d+)/);
           if (nameMatch && caloriesMatch) {
-            const n = nameMatch[1]; const c = parseInt(caloriesMatch[1]);
+            parsedName = nameMatch[1];
+            parsedCals = parseInt(caloriesMatch[1]);
             const proteinMatch = cleanedResponse.match(/"protein"\s*:\s*(\d+)/);
             const carbsMatch = cleanedResponse.match(/"carbs"\s*:\s*(\d+)/);
             const fatMatch = cleanedResponse.match(/"fat"\s*:\s*(\d+)/);
-            setFoodName(n); setCalories(c.toString()); setProtein(proteinMatch ? proteinMatch[1] : "0"); setCarbs(carbsMatch ? carbsMatch[1] : "0"); setFat(fatMatch ? fatMatch[1] : "0");
-            setShowAIInput(false); setShowCamera(false); setCapturedImage(null); setShowAddFood(true);
-            Alert.alert("Food Analyzed", `Detected: ${n}\nCalories: ${c}\n\nYou can adjust the values if needed.`);
-            return;
+            parsedProt = proteinMatch ? parseInt(proteinMatch[1]) : 0;
+            parsedCarb = carbsMatch ? parseInt(carbsMatch[1]) : 0;
+            parsedFatVal = fatMatch ? parseInt(fatMatch[1]) : 0;
+            parsed = true;
           }
         } catch (fallbackError) { console.error("Fallback parsing also failed:", fallbackError); }
+      }
+
+      if (parsed) {
+        completeAnalyzingAnimation();
+        setAnalyzingFoodName(parsedName);
+        const newEntry = {
+          id: Date.now().toString(),
+          name: parsedName,
+          calories: Math.round(parsedCals),
+          protein: Math.round(parsedProt),
+          carbs: Math.round(parsedCarb),
+          fat: Math.round(parsedFatVal),
+          date: new Date().toISOString(),
+        };
+        setTimeout(() => {
+          addFoodEntry(newEntry);
+          if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setTimeout(() => {
+            setShowAnalyzingCard(false);
+            setAnalyzingFoodName(null);
+          }, 1200);
+        }, 500);
+      } else {
+        setShowAnalyzingCard(false);
         Alert.alert("Analysis Error", "Could not understand the nutritional data. Please try again or enter manually.", [
           { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
-          { text: "Enter Manually", onPress: () => { setShowCamera(false); setShowAIInput(false); setShowAddFood(true); } }
+          { text: "Enter Manually", onPress: () => { setShowAddFood(true); } }
         ]);
       }
     } catch (error: any) {
       console.error("AI analysis error:", error.message);
+      setShowAnalyzingCard(false);
       Alert.alert("Analysis Failed", "Unable to analyze the food. Please try again or enter manually.", [
         { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
-        { text: "Enter Manually", onPress: () => { setShowCamera(false); setShowAIInput(false); setShowAddFood(true); } }
+        { text: "Enter Manually", onPress: () => { setShowAddFood(true); } }
       ]);
     } finally { setIsAnalyzing(false); setAiInput(""); }
   };
@@ -1063,6 +1121,59 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               </View>
             )}
           </>
+        )}
+
+        {showAnalyzingCard && (
+          <View style={analyzingStyles.container}>
+            <View style={analyzingStyles.card}>
+              <View style={analyzingStyles.cardContent}>
+                <View style={analyzingStyles.progressCircleWrap}>
+                  <Svg width={56} height={56} style={{ transform: [{ rotate: '-90deg' }] }}>
+                    <Circle cx={28} cy={28} r={23} stroke="rgba(255,255,255,0.08)" strokeWidth={5} fill="none" />
+                  </Svg>
+                  <View style={analyzingStyles.progressFillWrap}>
+                    <Animated.View style={[analyzingStyles.progressFillCircle, {
+                      opacity: analyzingProgressAnim.interpolate({ inputRange: [0, 0.01, 1], outputRange: [0, 1, 1] }),
+                    }]}>
+                      <Svg width={56} height={56} style={{ transform: [{ rotate: '-90deg' }] }}>
+                        <Circle
+                          cx={28} cy={28} r={23}
+                          stroke="#00E5FF"
+                          strokeWidth={5}
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 23}`}
+                          strokeDashoffset="0"
+                          strokeLinecap="round"
+                        />
+                      </Svg>
+                    </Animated.View>
+                  </View>
+                  <Animated.Text style={[analyzingStyles.progressText, { opacity: analyzingPulseAnim }]}>
+                    {analyzingFoodName ? '✓' : '...'}
+                  </Animated.Text>
+                </View>
+                <View style={analyzingStyles.textWrap}>
+                  <Text style={analyzingStyles.title}>
+                    {analyzingFoodName ? 'Food Logged!' : 'Estimating Nutrition'}
+                  </Text>
+                  <View style={analyzingStyles.shimmerRow}>
+                    {analyzingFoodName ? (
+                      <Text style={analyzingStyles.foodNameText} numberOfLines={1}>{analyzingFoodName}</Text>
+                    ) : (
+                      <>
+                        <Animated.View style={[analyzingStyles.shimmerBar, { width: '55%', opacity: analyzingPulseAnim }]} />
+                        <Animated.View style={[analyzingStyles.shimmerBar, { width: '35%', opacity: analyzingPulseAnim }]} />
+                        <Animated.View style={[analyzingStyles.shimmerBar, { width: '45%', opacity: analyzingPulseAnim }]} />
+                      </>
+                    )}
+                  </View>
+                  <Text style={analyzingStyles.subtitle}>
+                    {analyzingFoodName ? 'Tap on it to edit or remove' : 'Analyzing your food...'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
         )}
 
         {nutrition.quizCompleted && (
@@ -2821,6 +2932,74 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     fontWeight: "500" as const,
+  },
+});
+
+const analyzingStyles = StyleSheet.create({
+  container: {
+    marginTop: 20,
+  },
+  card: {
+    backgroundColor: '#141720',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0,229,255,0.12)',
+  },
+  cardContent: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 16,
+  },
+  progressCircleWrap: {
+    width: 56,
+    height: 56,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  progressFillWrap: {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+  },
+  progressFillCircle: {
+    width: 56,
+    height: 56,
+  },
+  progressText: {
+    position: 'absolute' as const,
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: '#F9FAFB',
+  },
+  textWrap: {
+    flex: 1,
+    gap: 6,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: '#F9FAFB',
+  },
+  shimmerRow: {
+    flexDirection: 'row' as const,
+    gap: 8,
+    flexWrap: 'wrap' as const,
+  },
+  shimmerBar: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  foodNameText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#00E5FF',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500' as const,
   },
 });
 
