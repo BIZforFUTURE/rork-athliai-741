@@ -698,7 +698,7 @@ export default function RunScreen() {
           fullscreen={true}
         />
 
-        <View style={styles.activeRunPanel}>
+        <View style={[styles.activeRunPanel, { paddingBottom: insets.bottom + 16 }]}>
           <TouchableOpacity
             style={styles.activeRunClose}
             onPress={confirmStopRun}
@@ -1053,7 +1053,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0A0C10",
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 100,
+    paddingBottom: 16,
     justifyContent: "center" as const,
   },
   activeRunClose: {
