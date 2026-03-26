@@ -1421,10 +1421,15 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 style={fdStyles.detailBackBtn}
                 onPress={() => {
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setShowFoodDetail(false);
-                  setSelectedFoodEntry(null);
-                  setShowDetailRefineInput(false);
-                  setDetailRefineText("");
+                  if (showDetailRefineInput) {
+                    setShowDetailRefineInput(false);
+                    setDetailRefineText("");
+                  } else {
+                    setShowFoodDetail(false);
+                    setSelectedFoodEntry(null);
+                    setShowDetailRefineInput(false);
+                    setDetailRefineText("");
+                  }
                 }}
               >
                 <ArrowLeft size={20} color="#F9FAFB" />
@@ -1476,154 +1481,175 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 
             {selectedFoodEntry && (
               <ScrollView style={fdStyles.detailScroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                <View style={fdStyles.detailTimeBadge}>
-                  <Text style={fdStyles.detailTimeText}>
-                    {new Date(selectedFoodEntry.date).toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US', { hour: 'numeric', minute: '2-digit' })}
-                  </Text>
-                </View>
+                {!showDetailRefineInput && (
+                  <>
+                    <View style={fdStyles.detailTimeBadge}>
+                      <Text style={fdStyles.detailTimeText}>
+                        {new Date(selectedFoodEntry.date).toLocaleTimeString(isSpanish ? 'es-ES' : 'en-US', { hour: 'numeric', minute: '2-digit' })}
+                      </Text>
+                    </View>
 
-                <Text style={fdStyles.detailFoodName}>{selectedFoodEntry.name}</Text>
+                    <Text style={fdStyles.detailFoodName}>{selectedFoodEntry.name}</Text>
 
-                <Text style={fdStyles.detailSectionLabel}>{t('fuel_detail_measurement')}</Text>
-                <View style={fdStyles.measurementRow}>
-                  {(['serving', 'g', 'tbsp', 'cup', 'oz', 'piece'] as const).map((m) => {
-                    const labels: Record<string, string> = {
-                      serving: t('fuel_detail_serving'),
-                      g: t('fuel_detail_grams'),
-                      tbsp: t('fuel_detail_tbsp'),
-                      cup: t('fuel_detail_cup'),
-                      oz: t('fuel_detail_oz'),
-                      piece: t('fuel_detail_piece'),
-                    };
-                    const isActive = detailMeasurement === m;
-                    return (
-                      <TouchableOpacity
-                        key={m}
-                        style={[fdStyles.measurementChip, isActive && fdStyles.measurementChipActive]}
-                        activeOpacity={0.7}
-                        onPress={() => {
-                          console.log('Measurement button pressed:', m);
-                          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          setDetailMeasurement(m);
-                          setDetailServings("1");
-                        }}
-                      >
-                        <Text style={[fdStyles.measurementChipText, isActive && fdStyles.measurementChipTextActive]}>
-                          {labels[m]}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
+                    <Text style={fdStyles.detailSectionLabel}>{t('fuel_detail_measurement')}</Text>
+                    <View style={fdStyles.measurementRow}>
+                      {(['serving', 'g', 'tbsp', 'cup', 'oz', 'piece'] as const).map((m) => {
+                        const labels: Record<string, string> = {
+                          serving: t('fuel_detail_serving'),
+                          g: t('fuel_detail_grams'),
+                          tbsp: t('fuel_detail_tbsp'),
+                          cup: t('fuel_detail_cup'),
+                          oz: t('fuel_detail_oz'),
+                          piece: t('fuel_detail_piece'),
+                        };
+                        const isActive = detailMeasurement === m;
+                        return (
+                          <TouchableOpacity
+                            key={m}
+                            style={[fdStyles.measurementChip, isActive && fdStyles.measurementChipActive]}
+                            activeOpacity={0.7}
+                            onPress={() => {
+                              console.log('Measurement button pressed:', m);
+                              if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setDetailMeasurement(m);
+                              setDetailServings("1");
+                            }}
+                          >
+                            <Text style={[fdStyles.measurementChipText, isActive && fdStyles.measurementChipTextActive]}>
+                              {labels[m]}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
 
-                <View style={fdStyles.servingsRow}>
-                  <Text style={fdStyles.servingsLabel}>{t('fuel_detail_servings')}</Text>
-                  <View style={fdStyles.servingsInputWrap}>
-                    <TextInput
-                      style={fdStyles.servingsInput}
-                      value={detailServings}
-                      onChangeText={setDetailServings}
-                      keyboardType="numeric"
-                      selectTextOnFocus
-                    />
-                    <Pencil size={14} color="#6B7280" />
-                  </View>
-                </View>
-
-                {(() => {
-                  const measurementScales: Record<string, number> = {
-                    serving: 1,
-                    g: 0.01,
-                    tbsp: 0.1,
-                    cup: 2,
-                    oz: 0.25,
-                    piece: 0.5,
-                  };
-                  const scale = measurementScales[detailMeasurement] ?? 1;
-                  const servings = parseFloat(detailServings) || 1;
-                  const multiplier = scale * servings;
-                  const cal = Math.round(selectedFoodEntry.calories * multiplier);
-                  const prot = Math.round(selectedFoodEntry.protein * multiplier);
-                  const carb = Math.round(selectedFoodEntry.carbs * multiplier);
-                  const fatVal = Math.round(selectedFoodEntry.fat * multiplier);
-                  return (
-                    <>
-                      <View style={fdStyles.calorieBox}>
-                        <Flame size={22} color="#1F2937" />
-                        <View>
-                          <Text style={fdStyles.calorieBoxLabel}>{t('fuel_detail_calories')}</Text>
-                          <Text style={fdStyles.calorieBoxValue}>{cal}</Text>
-                        </View>
+                    <View style={fdStyles.servingsRow}>
+                      <Text style={fdStyles.servingsLabel}>{t('fuel_detail_servings')}</Text>
+                      <View style={fdStyles.servingsInputWrap}>
+                        <TextInput
+                          style={fdStyles.servingsInput}
+                          value={detailServings}
+                          onChangeText={setDetailServings}
+                          keyboardType="numeric"
+                          selectTextOnFocus
+                        />
+                        <Pencil size={14} color="#6B7280" />
                       </View>
+                    </View>
 
-                      <View style={fdStyles.macroRow}>
-                        <View style={fdStyles.macroBox}>
-                          <Drumstick size={16} color="#FF4FB6" />
-                          <Text style={fdStyles.macroBoxLabel}>{t('home_protein')}</Text>
-                          <Text style={fdStyles.macroBoxValue}>{prot}g</Text>
-                        </View>
-                        <View style={fdStyles.macroBox}>
-                          <Wheat size={16} color="#00FFC6" />
-                          <Text style={fdStyles.macroBoxLabel}>{t('home_carbs')}</Text>
-                          <Text style={fdStyles.macroBoxValue}>{carb}g</Text>
-                        </View>
-                        <View style={fdStyles.macroBox}>
-                          <Droplet size={16} color="#FFB400" />
-                          <Text style={fdStyles.macroBoxLabel}>{t('home_fat')}</Text>
-                          <Text style={fdStyles.macroBoxValue}>{fatVal}g</Text>
-                        </View>
-                      </View>
-                    </>
-                  );
-                })()}
-
-                {showDetailRefineInput ? (
-                  <View style={fdStyles.refineSection}>
-                    <Text style={fdStyles.refineSectionTitle}>{t('fuel_detail_refine_ai')}</Text>
-                    <TextInput
-                      style={fdStyles.refineInput}
-                      placeholder={t('fuel_detail_refine_placeholder')}
-                      placeholderTextColor="#4B5563"
-                      value={detailRefineText}
-                      onChangeText={setDetailRefineText}
-                      multiline
-                      autoFocus
-                    />
-                    <TouchableOpacity
-                      style={[fdStyles.refineSubmitBtn, (!detailRefineText || isAnalyzing) && styles.disabledButton]}
-                      onPress={() => {
-                        if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                        if (selectedFoodEntry && detailRefineText) {
-                          void refineWithAI(selectedFoodEntry, detailRefineText).then(() => {
-                            setShowFoodDetail(false);
-                          });
-                        }
-                      }}
-                      disabled={!detailRefineText || isAnalyzing}
-                    >
-                      {isAnalyzing ? (
-                        <ActivityIndicator color="#FFFFFF" />
-                      ) : (
+                    {(() => {
+                      const measurementScales: Record<string, number> = {
+                        serving: 1,
+                        g: 0.01,
+                        tbsp: 0.1,
+                        cup: 2,
+                        oz: 0.25,
+                        piece: 0.5,
+                      };
+                      const scale = measurementScales[detailMeasurement] ?? 1;
+                      const servings = parseFloat(detailServings) || 1;
+                      const multiplier = scale * servings;
+                      const cal = Math.round(selectedFoodEntry.calories * multiplier);
+                      const prot = Math.round(selectedFoodEntry.protein * multiplier);
+                      const carb = Math.round(selectedFoodEntry.carbs * multiplier);
+                      const fatVal = Math.round(selectedFoodEntry.fat * multiplier);
+                      return (
                         <>
-                          <Sparkles size={16} color="#FFFFFF" />
-                          <Text style={fdStyles.refineSubmitText}>{t('fuel_refine_btn')}</Text>
+                          <View style={fdStyles.calorieBox}>
+                            <Flame size={22} color="#1F2937" />
+                            <View>
+                              <Text style={fdStyles.calorieBoxLabel}>{t('fuel_detail_calories')}</Text>
+                              <Text style={fdStyles.calorieBoxValue}>{cal}</Text>
+                            </View>
+                          </View>
+
+                          <View style={fdStyles.macroRow}>
+                            <View style={fdStyles.macroBox}>
+                              <Drumstick size={16} color="#FF4FB6" />
+                              <Text style={fdStyles.macroBoxLabel}>{t('home_protein')}</Text>
+                              <Text style={fdStyles.macroBoxValue}>{prot}g</Text>
+                            </View>
+                            <View style={fdStyles.macroBox}>
+                              <Wheat size={16} color="#00FFC6" />
+                              <Text style={fdStyles.macroBoxLabel}>{t('home_carbs')}</Text>
+                              <Text style={fdStyles.macroBoxValue}>{carb}g</Text>
+                            </View>
+                            <View style={fdStyles.macroBox}>
+                              <Droplet size={16} color="#FFB400" />
+                              <Text style={fdStyles.macroBoxLabel}>{t('home_fat')}</Text>
+                              <Text style={fdStyles.macroBoxValue}>{fatVal}g</Text>
+                            </View>
+                          </View>
                         </>
-                      )}
+                      );
+                    })()}
+
+                    <TouchableOpacity
+                      style={fdStyles.refineAIBtn}
+                      activeOpacity={0.7}
+                      onPress={() => {
+                        if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setShowDetailRefineInput(true);
+                      }}
+                    >
+                      <Sparkles size={18} color="#00ADB5" />
+                      <Text style={fdStyles.refineAIBtnText}>{t('fuel_detail_refine_ai')}</Text>
+                      <ChevronRight size={16} color="#00ADB5" />
                     </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    style={fdStyles.refineAIBtn}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setShowDetailRefineInput(true);
-                    }}
-                  >
-                    <Sparkles size={18} color="#00ADB5" />
-                    <Text style={fdStyles.refineAIBtnText}>{t('fuel_detail_refine_ai')}</Text>
-                    <ChevronRight size={16} color="#00ADB5" />
-                  </TouchableOpacity>
+                  </>
+                )}
+
+                {showDetailRefineInput && (
+                  <>
+                    <View style={fdStyles.macroRow}>
+                      <View style={fdStyles.macroBox}>
+                        <Text style={fdStyles.macroBoxLabel}>{t('home_protein')}</Text>
+                        <Text style={fdStyles.macroBoxValue}>{selectedFoodEntry.protein}g</Text>
+                      </View>
+                      <View style={fdStyles.macroBox}>
+                        <Text style={fdStyles.macroBoxLabel}>{t('home_carbs')}</Text>
+                        <Text style={fdStyles.macroBoxValue}>{selectedFoodEntry.carbs}g</Text>
+                      </View>
+                      <View style={fdStyles.macroBox}>
+                        <Text style={fdStyles.macroBoxLabel}>{t('home_fat')}</Text>
+                        <Text style={fdStyles.macroBoxValue}>{selectedFoodEntry.fat}g</Text>
+                      </View>
+                    </View>
+
+                    <View style={fdStyles.refineSection}>
+                      <Text style={fdStyles.refineSectionTitle}>{t('fuel_detail_refine_ai')}</Text>
+                      <TextInput
+                        style={fdStyles.refineInput}
+                        placeholder={t('fuel_detail_refine_placeholder')}
+                        placeholderTextColor="#4B5563"
+                        value={detailRefineText}
+                        onChangeText={setDetailRefineText}
+                        multiline
+                        autoFocus
+                      />
+                      <TouchableOpacity
+                        style={[fdStyles.refineSubmitBtn, (!detailRefineText || isAnalyzing) && styles.disabledButton]}
+                        onPress={() => {
+                          if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                          if (selectedFoodEntry && detailRefineText) {
+                            void refineWithAI(selectedFoodEntry, detailRefineText).then(() => {
+                              setShowFoodDetail(false);
+                            });
+                          }
+                        }}
+                        disabled={!detailRefineText || isAnalyzing}
+                      >
+                        {isAnalyzing ? (
+                          <ActivityIndicator color="#FFFFFF" />
+                        ) : (
+                          <>
+                            <Sparkles size={16} color="#FFFFFF" />
+                            <Text style={fdStyles.refineSubmitText}>{t('fuel_refine_btn')}</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </>
                 )}
 
                 <View style={{ height: 40 }} />
