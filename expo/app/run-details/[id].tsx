@@ -29,13 +29,15 @@ import {
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import * as ImagePicker from "expo-image-picker";
+import * as Haptics from "expo-haptics";
 import RunMap from "@/components/RunMap";
 import colors from "@/constants/colors";
 import { useLanguage } from "@/providers/LanguageProvider";
+import { Bookmark, BookmarkCheck } from "lucide-react-native";
 
 export default function RunDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { recentRuns, updateRun } = useApp();
+  const { recentRuns, updateRun, saveRoute, isRouteSaved } = useApp();
   const insets = useSafeAreaInsets();
   const { t, isSpanish } = useLanguage();
   
@@ -45,6 +47,7 @@ export default function RunDetailsScreen() {
   const [route, setRoute] = useState(run?.route || "");
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const routeAlreadySaved = run ? isRouteSaved(run.id) : false;
 
   useEffect(() => {
     const updatedRun = recentRuns.find(r => r.id === id);
@@ -181,6 +184,31 @@ export default function RunDetailsScreen() {
     );
   };
 
+  const handleSaveRoute = () => {
+    if (!run || !run.routeCoordinates || run.routeCoordinates.length === 0) {
+      Alert.alert("No Route Data", "This run doesn't have GPS route data to save.");
+      return;
+    }
+    if (routeAlreadySaved) {
+      Alert.alert("Already Saved", "This route is already in your saved routes.");
+      return;
+    }
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    const defaultName = run.route
+      ? run.route
+      : `Run on ${new Date(run.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+    saveRoute({
+      name: defaultName,
+      distance: run.distance,
+      routeCoordinates: run.routeCoordinates,
+      runId: run.id,
+      notes: run.notes,
+    });
+    Alert.alert("Route Saved!", "You can view it anytime from Saved Routes.");
+  };
+
   const showPhotoOptions = () => {
     Alert.alert(
       t('run_add_photo'),
@@ -281,6 +309,32 @@ export default function RunDetailsScreen() {
           isHistorical={true}
           title={t('run_your_route')}
         />
+
+        {run.routeCoordinates && run.routeCoordinates.length > 0 && (
+          <TouchableOpacity
+            style={[
+              styles.saveRouteBtn,
+              routeAlreadySaved && styles.saveRouteBtnSaved,
+            ]}
+            onPress={handleSaveRoute}
+            activeOpacity={0.7}
+            testID="save-route-btn"
+          >
+            {routeAlreadySaved ? (
+              <BookmarkCheck size={18} color="#10B981" />
+            ) : (
+              <Bookmark size={18} color="#00E5FF" />
+            )}
+            <Text
+              style={[
+                styles.saveRouteBtnText,
+                routeAlreadySaved && styles.saveRouteBtnTextSaved,
+              ]}
+            >
+              {routeAlreadySaved ? "Route Saved" : "Save This Route"}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.detailsSection}>
           <Text style={styles.sectionTitle}>{t('run_route')}</Text>
@@ -675,5 +729,30 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     fontSize: 16,
     fontWeight: "500" as const,
+  },
+  saveRouteBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 8,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.2)",
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  saveRouteBtnSaved: {
+    backgroundColor: "rgba(16,185,129,0.08)",
+    borderColor: "rgba(16,185,129,0.2)",
+  },
+  saveRouteBtnText: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#00E5FF",
+  },
+  saveRouteBtnTextSaved: {
+    color: "#10B981",
   },
 });

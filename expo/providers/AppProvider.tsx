@@ -139,6 +139,16 @@ interface SavedWorkout {
   createdAt: string;
 }
 
+interface SavedRoute {
+  id: string;
+  name: string;
+  distance: number;
+  routeCoordinates: RouteCoordinate[];
+  savedAt: string;
+  runId?: string;
+  notes?: string;
+}
+
 interface CoreState {
   user: User;
   stats: Stats;
@@ -146,6 +156,7 @@ interface CoreState {
   customWorkoutPlan: CustomWorkoutPlan | null;
   savedWorkouts: SavedWorkout[];
   savedFoods: SavedFood[];
+  savedRoutes: SavedRoute[];
   personalStats: PersonalStats;
   weightHistory: WeightEntry[];
   xp: XPState;
@@ -210,6 +221,7 @@ const defaultState: AppState = {
   customWorkoutPlan: null,
   savedWorkouts: [],
   savedFoods: [],
+  savedRoutes: [],
   personalStats: {},
   weightHistory: [],
   xp: defaultXPState,
@@ -278,6 +290,7 @@ function validateState(parsed: Record<string, unknown>): AppState {
     customWorkoutPlan: (parsed.customWorkoutPlan as CustomWorkoutPlan) || null,
     savedWorkouts: Array.isArray(parsed.savedWorkouts) ? parsed.savedWorkouts : [],
     savedFoods: Array.isArray(parsed.savedFoods) ? parsed.savedFoods : [],
+    savedRoutes: Array.isArray(parsed.savedRoutes) ? parsed.savedRoutes : [],
     personalStats: (parsed.personalStats as PersonalStats) || {},
     weightHistory: Array.isArray(parsed.weightHistory) ? parsed.weightHistory : [],
     xp: parsed.xp ? {
@@ -1028,6 +1041,45 @@ export const [AppProvider, useApp] = createContextHook(() => {
     });
   }, [persistState]);
 
+  const saveRoute = useCallback((route: Omit<SavedRoute, 'id' | 'savedAt'>) => {
+    setAppState(prev => {
+      const newRoute: SavedRoute = {
+        ...route,
+        id: `route-${Date.now()}`,
+        savedAt: new Date().toISOString(),
+      };
+      const updated = { ...prev, savedRoutes: [newRoute, ...prev.savedRoutes] };
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const deleteSavedRoute = useCallback((routeId: string) => {
+    setAppState(prev => {
+      const updated = {
+        ...prev,
+        savedRoutes: prev.savedRoutes.filter(r => r.id !== routeId),
+      };
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const updateSavedRoute = useCallback((routeId: string, updates: Partial<SavedRoute>) => {
+    setAppState(prev => {
+      const updatedRoutes = prev.savedRoutes.map(r =>
+        r.id === routeId ? { ...r, ...updates } : r
+      );
+      const updated = { ...prev, savedRoutes: updatedRoutes };
+      persistState(updated);
+      return updated;
+    });
+  }, [persistState]);
+
+  const isRouteSaved = useCallback((runId: string) => {
+    return appState.savedRoutes.some(r => r.runId === runId);
+  }, [appState.savedRoutes]);
+
   const isFoodSaved = useCallback((name: string) => {
     return appState.savedFoods.some(f => f.name.toLowerCase() === name.toLowerCase());
   }, [appState.savedFoods]);
@@ -1231,6 +1283,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
     customWorkoutPlan: appState.customWorkoutPlan,
     savedWorkouts: appState.savedWorkouts,
     savedFoods: appState.savedFoods,
+    savedRoutes: appState.savedRoutes,
     personalStats: appState.personalStats,
     weightHistory: appState.weightHistory,
     hasSeenWelcome: appState.hasSeenWelcome,
@@ -1257,6 +1310,10 @@ export const [AppProvider, useApp] = createContextHook(() => {
     saveFoodItem,
     deleteSavedFood,
     isFoodSaved,
+    saveRoute,
+    deleteSavedRoute,
+    updateSavedRoute,
+    isRouteSaved,
     updatePersonalStats,
     addWeightEntry,
     deleteWeightEntry,
@@ -1270,5 +1327,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     importAllData,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.savedFoods, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, saveFoodItem, deleteSavedFood, isFoodSaved, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.savedFoods, appState.savedRoutes, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, saveFoodItem, deleteSavedFood, isFoodSaved, saveRoute, deleteSavedRoute, updateSavedRoute, isRouteSaved, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
 });

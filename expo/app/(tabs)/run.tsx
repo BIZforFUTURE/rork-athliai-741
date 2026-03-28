@@ -18,7 +18,7 @@ import {
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3, PersonStanding, Bike } from "lucide-react-native";
+import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3, PersonStanding, Bike, Navigation, ChevronRight } from "lucide-react-native";
 
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
@@ -57,7 +57,7 @@ interface RunState {
 const STORAGE_KEY = 'activeRunState';
 
 export default function RunScreen() {
-  const { addRun, deleteRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo, personalStats } = useApp();
+  const { addRun, deleteRun, recentRuns, subtractCaloriesFromRun, runStorage, xpInfo, personalStats, savedRoutes } = useApp();
   const { sendRunStartNotification, cancelRunNotification, sendRunCompletionNotification } = useNotifications();
   const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
@@ -893,6 +893,28 @@ export default function RunScreen() {
             <Zap size={10} color="#BFFF00" fill="#BFFF00" />
             <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
           </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.savedRoutesBtn}
+          onPress={() => router.push('/saved-routes')}
+          activeOpacity={0.7}
+          testID="saved-routes-btn"
+        >
+          <View style={styles.savedRoutesBtnLeft}>
+            <View style={styles.savedRoutesBtnIcon}>
+              <Navigation size={20} color="#8B5CF6" />
+            </View>
+            <View style={styles.savedRoutesBtnTextWrap}>
+              <Text style={styles.savedRoutesBtnTitle}>Saved Routes</Text>
+              <Text style={styles.savedRoutesBtnSub}>
+                {savedRoutes.length === 0
+                  ? 'Save your favorite paths'
+                  : `${savedRoutes.length} route${savedRoutes.length !== 1 ? 's' : ''} saved`}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={18} color="#4B5563" />
         </TouchableOpacity>
 
         <RunHistorySection
@@ -1912,5 +1934,45 @@ const styles = StyleSheet.create({
   },
   activityChipTextActive: {
     color: "#FFFFFF",
+  },
+  savedRoutesBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    backgroundColor: "#0E1015",
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(139,92,246,0.12)",
+    marginTop: 4,
+  },
+  savedRoutesBtnLeft: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 14,
+    flex: 1,
+  },
+  savedRoutesBtnIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "rgba(139,92,246,0.1)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  savedRoutesBtnTextWrap: {
+    flex: 1,
+    gap: 3,
+  },
+  savedRoutesBtnTitle: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.2,
+  },
+  savedRoutesBtnSub: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#6B7280",
   },
 });
