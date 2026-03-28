@@ -2023,7 +2023,7 @@ const styles = StyleSheet.create({
   weekDayCircle: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 22,
     alignItems: "center" as const,
     justifyContent: "center" as const,
     backgroundColor: "#1A1D24",
