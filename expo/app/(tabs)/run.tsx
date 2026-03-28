@@ -87,7 +87,6 @@ export default function RunScreen() {
   const { t, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [activityType, setActivityType] = useState<'run' | 'ride' | 'walk'>('run');
-  const [showHistory, setShowHistory] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -796,153 +795,114 @@ export default function RunScreen() {
     );
   }
 
-  const activityLabel = activityType === 'run' ? t('run_activity_run') : activityType === 'ride' ? t('run_activity_ride') : t('run_activity_walk');
 
-  const cycleActivityType = useCallback(() => {
-    if (Platform.OS !== 'web') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setActivityType(prev => {
-      if (prev === 'run') return 'ride';
-      if (prev === 'ride') return 'walk';
-      return 'run';
-    });
-  }, []);
-
-  if (showHistory) {
-    return (
-      <View style={styles.container}>
-        <View style={[styles.historyTopBar, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => setShowHistory(false)} style={styles.historyBackBtn}>
-            <X size={20} color="#F3F4F6" />
-          </TouchableOpacity>
-          <Text style={styles.historyTitle}>{t('run_history')}</Text>
-          <View style={{ width: 36 }} />
-        </View>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.historyScrollContent}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor="#00E5FF"
-              colors={["#00E5FF"]}
-              progressBackgroundColor="#1A1D24"
-            />
-          }
-        >
-          <RunHistorySection
-            runs={recentRuns}
-            onRunPress={(runId) => router.push(`/run-details/${runId}`)}
-            onDeleteRun={deleteRun}
-            formatTime={formatTime}
-            formatPace={formatPace}
-          />
-        </ScrollView>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.mapBackground}>
-        <RunMap
-          currentLocation={runState.currentLocation}
-          routeCoordinates={[]}
-          showMap={true}
-          isRunning={false}
-          fullscreen={true}
-        />
-        <View style={styles.mapDarkOverlay} />
-      </View>
-
-      <View style={[styles.mapTopControls, { top: insets.top + 12 }]}>
-        <TouchableOpacity
-          style={styles.mapTopBtn}
-          onPress={() => setShowHistory(true)}
-          activeOpacity={0.7}
-        >
-          <TrendingUp size={18} color="#FFFFFF" />
-        </TouchableOpacity>
+      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
+        <View>
+          <Text style={styles.screenTitle}>{t('tab_run')}</Text>
+          <Text style={styles.screenSubtitle}>{t('run_history')}</Text>
+        </View>
         <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "20", borderColor: xpInfo.rank.color + "40" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
           <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+25 XP</Text>
         </View>
       </View>
 
-      <View style={[styles.bottomPanel, { paddingBottom: insets.bottom + 12 }]}>
-        <View style={styles.statsPanel}>
-          <Text style={styles.statsPanelTitle}>{activityLabel}</Text>
-          <View style={styles.statsPanelRow}>
-            <View style={styles.statsPanelItem}>
-              <Text style={styles.statsPanelValue}>00:00</Text>
-              <Text style={styles.statsPanelLabel}>{t('run_time')}</Text>
-            </View>
-            <View style={styles.statsPanelDivider} />
-            <View style={styles.statsPanelItem}>
-              <Text style={styles.statsPanelValue}>0.0</Text>
-              <Text style={styles.statsPanelLabel}>{isSpanish ? t('run_avg_speed') : t('run_avg_speed')}</Text>
-            </View>
-            <View style={styles.statsPanelDivider} />
-            <View style={styles.statsPanelItem}>
-              <Text style={styles.statsPanelValue}>0.00</Text>
-              <Text style={styles.statsPanelLabel}>{isSpanish ? t('run_distance_mi') : t('run_distance_mi')}</Text>
-            </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#00E5FF"
+            colors={["#00E5FF"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
+      >
+        <View style={styles.activitySelector}>
+          <Text style={styles.activitySelectorLabel}>{t('run_time')}</Text>
+          <View style={styles.activityChips}>
+            {(['run', 'ride', 'walk'] as const).map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.activityChip,
+                  activityType === type && styles.activityChipActive,
+                ]}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setActivityType(type);
+                }}
+                activeOpacity={0.7}
+              >
+                {type === 'run' && <PersonStanding size={16} color={activityType === type ? '#FFFFFF' : '#6B7280'} />}
+                {type === 'ride' && <Bike size={16} color={activityType === type ? '#FFFFFF' : '#6B7280'} />}
+                {type === 'walk' && <PersonStanding size={16} color={activityType === type ? '#FFFFFF' : '#6B7280'} />}
+                <Text style={[
+                  styles.activityChipText,
+                  activityType === type && styles.activityChipTextActive,
+                ]}>
+                  {type === 'run' ? t('run_activity_run') : type === 'ride' ? t('run_activity_ride') : t('run_activity_walk')}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
-        <View style={styles.bottomGrabber} />
-
-        <View style={styles.controlsRow}>
-          <TouchableOpacity
-            style={styles.activityTypeBtn}
-            onPress={cycleActivityType}
-            activeOpacity={0.7}
-            testID="activity-type-btn"
-          >
-            <View style={[
-              styles.activityTypeIconWrap,
-              activityType === 'run' && styles.activityTypeActive,
-              activityType === 'ride' && styles.activityTypeActiveRide,
-              activityType === 'walk' && styles.activityTypeActiveWalk,
-            ]}>
-              {activityType === 'run' && <PersonStanding size={24} color="#FF6B35" />}
-              {activityType === 'ride' && <Bike size={24} color="#FF6B35" />}
-              {activityType === 'walk' && <PersonStanding size={24} color="#FF6B35" />}
-              {activityType === 'run' && <View style={styles.activityCheckBadge}><Check size={8} color="#FFFFFF" /></View>}
-              {activityType === 'ride' && <View style={styles.activityCheckBadge}><Check size={8} color="#FFFFFF" /></View>}
-              {activityType === 'walk' && <View style={styles.activityCheckBadge}><Check size={8} color="#FFFFFF" /></View>}
+        <Pressable
+          onPress={startRun}
+          onPressIn={handleButtonPressIn}
+          onPressOut={handleButtonPressOut}
+          testID="start-run-btn"
+        >
+          <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
+            <View style={styles.startBtnInner}>
+              <Play size={22} color="#FFFFFF" fill="#FFFFFF" />
+              <Text style={styles.startBtnText}>{t('run_start_label')}</Text>
             </View>
-            <Text style={styles.activityTypeLabel}>{activityLabel}</Text>
-          </TouchableOpacity>
-
-          <Pressable
-            onPress={startRun}
-            onPressIn={handleButtonPressIn}
-            onPressOut={handleButtonPressOut}
-            testID="start-run-btn"
-          >
-            <Animated.View style={[styles.startBtnCircle, { transform: [{ scale: buttonScale }] }]}>
-              <Play size={28} color="#FFFFFF" fill="#FFFFFF" style={{ marginLeft: 3 }} />
-            </Animated.View>
-            <Text style={styles.startBtnLabel}>{t('run_start_label')}</Text>
-          </Pressable>
-
-          <TouchableOpacity
-            style={styles.treadmillBtn}
-            onPress={handleTreadmillCapture}
-            activeOpacity={0.7}
-            testID="treadmill-log-btn"
-          >
-            <View style={styles.treadmillBtnIconWrap}>
-              <Camera size={22} color="#FFFFFF" />
+            <View style={styles.startBtnXp}>
+              <Zap size={12} color="#00E5FF" fill="#00E5FF" />
+              <Text style={styles.startBtnXpText}>+25 XP per run</Text>
             </View>
-            <Text style={styles.treadmillBtnLabel}>{t('run_log_treadmill_short')}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          </Animated.View>
+        </Pressable>
+
+        <TouchableOpacity
+          style={styles.treadmillLogBtn}
+          onPress={handleTreadmillCapture}
+          activeOpacity={0.7}
+          testID="treadmill-log-btn"
+        >
+          <View style={styles.treadmillLogBtnLeft}>
+            <View style={styles.treadmillLogBtnIcon}>
+              <Camera size={20} color="#00E5FF" />
+            </View>
+            <View style={styles.treadmillLogBtnTextWrap}>
+              <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill_short')}</Text>
+              <Text style={styles.treadmillLogBtnSub}>Snap your treadmill dashboard</Text>
+            </View>
+          </View>
+          <View style={styles.treadmillLogBtnXp}>
+            <Zap size={10} color="#BFFF00" fill="#BFFF00" />
+            <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
+          </View>
+        </TouchableOpacity>
+
+        <RunHistorySection
+          runs={recentRuns}
+          onRunPress={(runId) => router.push(`/run-details/${runId}`)}
+          onDeleteRun={deleteRun}
+          formatTime={formatTime}
+          formatPace={formatPace}
+        />
+      </ScrollView>
 
       <Modal
         visible={showTreadmillModal}
@@ -1913,29 +1873,44 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
     color: "#9CA3AF",
   },
-  historyTopBar: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: "#08090C",
+  activitySelector: {
+    backgroundColor: "#0E1015",
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  activitySelectorLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+    marginBottom: 10,
+  },
+  activityChips: {
+    flexDirection: "row" as const,
+    gap: 8,
+  },
+  activityChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    justifyContent: "space-between" as const,
-  },
-  historyBackBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  historyTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: "#F3F4F6",
-  },
-  historyScrollContent: {
+    gap: 6,
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  activityChipActive: {
+    backgroundColor: "#00ADB5",
+    borderColor: "#00ADB5",
+  },
+  activityChipText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+  },
+  activityChipTextActive: {
+    color: "#FFFFFF",
   },
 });
