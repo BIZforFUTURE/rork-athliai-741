@@ -32,7 +32,7 @@ import { XP_REWARDS } from "@/constants/xp";
 import { estimateRunCalories } from "@/utils/healthScore";
 import { useNotifications } from "@/providers/NotificationProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import RunMap from "@/components/RunMap";
 import RunHistorySection from "@/components/RunHistorySection";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -61,6 +61,7 @@ export default function RunScreen() {
   const { sendRunStartNotification, cancelRunNotification, sendRunCompletionNotification } = useNotifications();
   const { isPremium } = useRevenueCat();
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ guideRouteId?: string }>();
 
   const [runState, setRunState] = useState<RunState>({
     isRunning: false,
@@ -86,6 +87,9 @@ export default function RunScreen() {
   const [treadmillEditing, setTreadmillEditing] = useState(false);
   const { t, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [activeGuideRoute, setActiveGuideRoute] = useState<RouteCoordinate[] | null>(null);
+  const [activeGuideRouteName, setActiveGuideRouteName] = useState<string | null>(null);
+  const pendingGuideRouteId = useRef<string | null>(null);
 
 
   const onRefresh = useCallback(() => {
@@ -96,6 +100,22 @@ export default function RunScreen() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    if (params.guideRouteId && params.guideRouteId !== pendingGuideRouteId.current) {
+      pendingGuideRouteId.current = params.guideRouteId;
+      const route = savedRoutes.find(r => r.id === params.guideRouteId);
+      if (route && route.routeCoordinates.length > 0) {
+        console.log('Guide route loaded:', route.name, route.routeCoordinates.length, 'points');
+        setActiveGuideRoute(route.routeCoordinates);
+        setActiveGuideRouteName(route.name);
+        setTimeout(() => {
+          void startRunWithGuide(route.routeCoordinates, route.name);
+        }, 300);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.guideRouteId, savedRoutes]);
 
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(20)).current;
@@ -283,7 +303,7 @@ export default function RunScreen() {
     }
   }, []);
 
-  const startRun = async () => {
+  const initiateRun = async () => {
     if (Platform.OS !== 'web') {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -300,7 +320,6 @@ export default function RunScreen() {
         ]);
         return;
       }
-
     }
 
     const startTime = Date.now();
@@ -324,6 +343,18 @@ export default function RunScreen() {
     void startLocationTracking();
     const notificationId = await sendRunStartNotification();
     setRunNotificationId(notificationId);
+  };
+
+  const startRun = async () => {
+    setActiveGuideRoute(null);
+    setActiveGuideRouteName(null);
+    await initiateRun();
+  };
+
+  const startRunWithGuide = async (guideCoords: RouteCoordinate[], guideName: string) => {
+    setActiveGuideRoute(guideCoords);
+    setActiveGuideRouteName(guideName);
+    await initiateRun();
   };
 
   const confirmStopRun = () => {
@@ -375,6 +406,9 @@ export default function RunScreen() {
     });
     setTreadmillPhoto(null);
     setIsStopping(false);
+    setActiveGuideRoute(null);
+    setActiveGuideRouteName(null);
+    pendingGuideRouteId.current = null;
   };
 
   const pauseRun = async () => {
@@ -697,6 +731,7 @@ export default function RunScreen() {
           showMap={true}
           isRunning={!runState.isPaused}
           fullscreen={true}
+          guideRoute={activeGuideRoute ?? undefined}
         />
 
         <View style={[styles.activeRunPanel, { paddingBottom: insets.bottom + 16 }]}>
@@ -711,6 +746,12 @@ export default function RunScreen() {
           <View style={styles.activeRunTimeWrap}>
             <Text style={styles.activeRunTime}>{formatTime(runState.elapsedTime)}</Text>
             <Text style={styles.activeRunTimeLabel}>{t('run_time')}</Text>
+            {activeGuideRouteName && (
+              <View style={styles.activeRunGuideChip}>
+                <Navigation size={10} color="#8B5CF6" />
+                <Text style={styles.activeRunGuideText}>{activeGuideRouteName}</Text>
+              </View>
+            )}
             {runState.isPaused && (
               <View style={styles.activeRunPausedChip}>
                 <Pause size={10} color="#F59E0B" />
@@ -1109,6 +1150,22 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     textTransform: "uppercase" as const,
     marginTop: -4,
+  },
+  activeRunGuideChip: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    backgroundColor: "rgba(139,92,246,0.12)",
+    borderRadius: 20,
+  },
+  activeRunGuideText: {
+    fontSize: 11,
+    fontWeight: "700" as const,
+    color: "#8B5CF6",
+    letterSpacing: 0.5,
   },
   activeRunPausedChip: {
     flexDirection: "row" as const,

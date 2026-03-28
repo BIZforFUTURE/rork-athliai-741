@@ -17,6 +17,7 @@ interface RunMapProps {
   isHistorical?: boolean;
   title?: string;
   fullscreen?: boolean;
+  guideRoute?: RouteCoordinate[];
 }
 
 export default function RunMap({ 
@@ -27,6 +28,7 @@ export default function RunMap({
   isHistorical = false, 
   title,
   fullscreen = false,
+  guideRoute,
 }: RunMapProps) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const mapTitle = title || (isHistorical ? "Route Map" : "Live Route");
@@ -57,10 +59,14 @@ export default function RunMap({
 
   // Memoize map region calculation for performance with dynamic zoom
   const mapRegion = useMemo(() => {
-    if (routeCoordinates.length > 0) {
-      // Calculate bounds from route coordinates
-      const latitudes = routeCoordinates.map(coord => coord.latitude);
-      const longitudes = routeCoordinates.map(coord => coord.longitude);
+    const allCoords = [
+      ...routeCoordinates,
+      ...(guideRoute || []),
+    ];
+
+    if (allCoords.length > 0) {
+      const latitudes = allCoords.map(coord => coord.latitude);
+      const longitudes = allCoords.map(coord => coord.longitude);
       const minLat = Math.min(...latitudes);
       const maxLat = Math.max(...latitudes);
       const minLng = Math.min(...longitudes);
@@ -69,12 +75,11 @@ export default function RunMap({
       const centerLat = (minLat + maxLat) / 2;
       const centerLng = (minLng + maxLng) / 2;
       
-      // Dynamic zoom based on route distance
-      let paddingMultiplier = 1.2; // Default 20% padding
-      if (routeDistance > 5) { // More than 5km
-        paddingMultiplier = 1.5; // 50% padding for long routes
-      } else if (routeDistance > 2) { // More than 2km
-        paddingMultiplier = 1.3; // 30% padding for medium routes
+      let paddingMultiplier = 1.2;
+      if (routeDistance > 5) {
+        paddingMultiplier = 1.5;
+      } else if (routeDistance > 2) {
+        paddingMultiplier = 1.3;
       }
       
       const latDelta = Math.max((maxLat - minLat) * paddingMultiplier, 0.005);
@@ -95,7 +100,7 @@ export default function RunMap({
       };
     }
     return null;
-  }, [routeCoordinates, currentLocation, routeDistance]);
+  }, [routeCoordinates, currentLocation, routeDistance, guideRoute]);
 
   // Auto-adjust map region when route gets longer during live runs
   useEffect(() => {
@@ -201,6 +206,30 @@ export default function RunMap({
           scrollEnabled: true,
           zoomEnabled: true,
         }, [
+          guideRoute && guideRoute.length > 1 && Polyline && React.createElement(Polyline, {
+            key: "guide-polyline",
+            coordinates: guideRoute,
+            strokeColor: "rgba(139,92,246,0.45)",
+            strokeWidth: 6,
+            lineCap: "round",
+            lineJoin: "round",
+            geodesic: true,
+            lineDashPattern: [10, 6],
+          }),
+          guideRoute && guideRoute.length > 0 && Marker && React.createElement(Marker, {
+            key: "guide-start-marker",
+            coordinate: guideRoute[0],
+            title: "Route Start",
+            pinColor: "#8B5CF6",
+            identifier: "guide-start-marker",
+          }),
+          guideRoute && guideRoute.length > 1 && Marker && React.createElement(Marker, {
+            key: "guide-end-marker",
+            coordinate: guideRoute[guideRoute.length - 1],
+            title: "Route End",
+            pinColor: "#8B5CF6",
+            identifier: "guide-end-marker",
+          }),
           routeCoordinates.length > 1 && Polyline && React.createElement(Polyline, {
             key: "route-polyline",
             coordinates: routeCoordinates,
@@ -251,7 +280,30 @@ export default function RunMap({
         scrollEnabled: true,
         zoomEnabled: true,
       }, [
-        // Route polyline
+        guideRoute && guideRoute.length > 1 && Polyline && React.createElement(Polyline, {
+          key: "guide-polyline",
+          coordinates: guideRoute,
+          strokeColor: "rgba(139,92,246,0.45)",
+          strokeWidth: 6,
+          lineCap: "round",
+          lineJoin: "round",
+          geodesic: true,
+          lineDashPattern: [10, 6],
+        }),
+        guideRoute && guideRoute.length > 0 && Marker && React.createElement(Marker, {
+          key: "guide-start-marker",
+          coordinate: guideRoute[0],
+          title: "Route Start",
+          pinColor: "#8B5CF6",
+          identifier: "guide-start-marker",
+        }),
+        guideRoute && guideRoute.length > 1 && Marker && React.createElement(Marker, {
+          key: "guide-end-marker",
+          coordinate: guideRoute[guideRoute.length - 1],
+          title: "Route End",
+          pinColor: "#8B5CF6",
+          identifier: "guide-end-marker",
+        }),
         routeCoordinates.length > 1 && Polyline && React.createElement(Polyline, {
           key: "route-polyline",
           coordinates: routeCoordinates,
@@ -261,8 +313,6 @@ export default function RunMap({
           lineJoin: "round",
           geodesic: true,
         }),
-        
-        // Start marker - Green for start
         routeCoordinates.length > 0 && Marker && React.createElement(Marker, {
           key: "start-marker",
           coordinate: routeCoordinates[0],
@@ -271,8 +321,6 @@ export default function RunMap({
           pinColor: "#10B981",
           identifier: "start-marker",
         }),
-        
-        // End marker - Red for finish
         routeCoordinates.length > 1 && Marker && React.createElement(Marker, {
           key: "end-marker",
           coordinate: routeCoordinates[routeCoordinates.length - 1],

@@ -18,6 +18,7 @@ import {
   Clock,
   ChevronRight,
   Navigation,
+  Play,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useApp } from "@/providers/AppProvider";
@@ -28,6 +29,13 @@ export default function SavedRoutesScreen() {
   const insets = useSafeAreaInsets();
   const { savedRoutes, deleteSavedRoute } = useApp();
   const [expandedRoute, setExpandedRoute] = useState<string | null>(null);
+
+  const handleStartRunOnRoute = useCallback((routeId: string) => {
+    if (Platform.OS !== "web") {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    router.replace({ pathname: "/(tabs)/run", params: { guideRouteId: routeId } });
+  }, []);
 
   const handleDeleteRoute = useCallback((routeId: string, routeName: string) => {
     if (Platform.OS !== "web") {
@@ -165,6 +173,15 @@ export default function SavedRoutesScreen() {
                       isHistorical={true}
                       title={route.name}
                     />
+                    <TouchableOpacity
+                      style={styles.runRouteBtn}
+                      onPress={() => handleStartRunOnRoute(route.id)}
+                      activeOpacity={0.7}
+                      testID={`run-route-${route.id}`}
+                    >
+                      <Play size={16} color="#FFFFFF" fill="#FFFFFF" />
+                      <Text style={styles.runRouteBtnText}>Run This Route</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
 
@@ -333,5 +350,20 @@ const styles = StyleSheet.create({
   noMapText: {
     fontSize: 14,
     color: colors.text.tertiary,
+  },
+  runRouteBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 8,
+    backgroundColor: "#00ADB5",
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 12,
+  },
+  runRouteBtnText: {
+    fontSize: 15,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
   },
 });
