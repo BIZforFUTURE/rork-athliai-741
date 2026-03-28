@@ -33,7 +33,8 @@ import * as Haptics from "expo-haptics";
 import RunMap from "@/components/RunMap";
 import colors from "@/constants/colors";
 import { useLanguage } from "@/providers/LanguageProvider";
-import { Bookmark, BookmarkCheck } from "lucide-react-native";
+import { Bookmark, BookmarkCheck, Trophy } from "lucide-react-native";
+import type { RunAchievement } from "@/constants/runAchievements";
 
 export default function RunDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -334,6 +335,49 @@ export default function RunDetailsScreen() {
               {routeAlreadySaved ? "Route Saved" : "Save This Route"}
             </Text>
           </TouchableOpacity>
+        )}
+
+        {run.achievements && run.achievements.length > 0 && (
+          <View style={styles.achievementsSection}>
+            <View style={styles.achievementsSectionHeader}>
+              <Trophy size={18} color="#F59E0B" />
+              <Text style={styles.achievementsSectionTitle}>Achievements</Text>
+              <View style={styles.achievementsCount}>
+                <Text style={styles.achievementsCountText}>{run.achievements.length}</Text>
+              </View>
+            </View>
+            <View style={styles.achievementsGrid}>
+              {run.achievements.map((achievement: RunAchievement) => (
+                <View
+                  key={achievement.id}
+                  style={[
+                    styles.achievementCard,
+                    { borderColor: achievement.color + '30' },
+                  ]}
+                >
+                  <View style={[styles.achievementEmojiWrap, { backgroundColor: achievement.color + '15' }]}>
+                    <Text style={styles.achievementEmoji}>{achievement.emoji}</Text>
+                  </View>
+                  <View style={styles.achievementInfo}>
+                    <Text style={styles.achievementTitle}>{achievement.title}</Text>
+                    <Text style={styles.achievementDesc}>{achievement.description}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {(!run.achievements || run.achievements.length === 0) && (
+          <View style={styles.achievementsSection}>
+            <View style={styles.achievementsSectionHeader}>
+              <Trophy size={18} color="#4B5563" />
+              <Text style={[styles.achievementsSectionTitle, { color: colors.text.tertiary }]}>Achievements</Text>
+            </View>
+            <View style={styles.emptyAchievements}>
+              <Text style={styles.emptyAchievementsText}>No achievements earned on this run</Text>
+            </View>
+          </View>
         )}
 
         <View style={styles.detailsSection}>
@@ -754,5 +798,80 @@ const styles = StyleSheet.create({
   },
   saveRouteBtnTextSaved: {
     color: "#10B981",
+  },
+  achievementsSection: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  achievementsSectionHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    marginBottom: 14,
+  },
+  achievementsSectionTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  achievementsCount: {
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  achievementsCountText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#F59E0B",
+  },
+  achievementsGrid: {
+    gap: 10,
+  },
+  achievementCard: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 12,
+    backgroundColor: colors.background.tertiary,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+  },
+  achievementEmojiWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  achievementEmoji: {
+    fontSize: 22,
+  },
+  achievementInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  achievementTitle: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: colors.text.primary,
+  },
+  achievementDesc: {
+    fontSize: 12,
+    color: colors.text.tertiary,
+    lineHeight: 16,
+  },
+  emptyAchievements: {
+    alignItems: "center" as const,
+    paddingVertical: 20,
+  },
+  emptyAchievementsText: {
+    fontSize: 14,
+    color: colors.text.tertiary,
   },
 });

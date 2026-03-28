@@ -15,6 +15,7 @@ import {
   getXPProgress,
   getRankForLevel,
 } from "@/constants/xp";
+import { calculateRunAchievements, type RunAchievement } from "@/constants/runAchievements";
 
 interface User {
   id: string;
@@ -66,6 +67,7 @@ interface Run {
   route?: string;
   routeCoordinates?: RouteCoordinate[];
   treadmillVerified?: boolean;
+  achievements?: RunAchievement[];
 }
 
 interface FoodEntry {
@@ -675,9 +677,25 @@ export const [AppProvider, useApp] = createContextHook(() => {
         }
       }
 
+      const previousRunsData = {
+        longestDistance: prev.runs.reduce((max, r) => Math.max(max, r.distance), 0),
+        fastestPace: prev.runs.filter(r => r.pace > 0 && isFinite(r.pace) && r.distance >= 0.5).reduce((min, r) => min === 0 ? r.pace : Math.min(min, r.pace), 0),
+        longestTime: prev.runs.reduce((max, r) => Math.max(max, r.time), 0),
+        mostCalories: prev.runs.reduce((max, r) => Math.max(max, r.calories), 0),
+        totalRuns: prev.runs.length,
+      };
+
+      const achievements = calculateRunAchievements(
+        { distance: run.distance, time: run.time, pace: run.pace, calories: run.calories },
+        previousRunsData
+      );
+
+      const runWithAchievements: Run = { ...run, achievements };
+      console.log(`Run achievements earned: ${achievements.length}`, achievements.map(a => a.title));
+
       let state: AppState = {
         ...prev,
-        runs: [run, ...prev.runs],
+        runs: [runWithAchievements, ...prev.runs],
         stats: {
           ...prev.stats,
           runStreak: newRunStreak,

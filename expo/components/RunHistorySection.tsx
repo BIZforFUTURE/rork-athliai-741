@@ -30,6 +30,15 @@ interface RouteCoordinate {
   longitude: number;
 }
 
+interface RunAchievement {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  color: string;
+  category: string;
+}
+
 interface Run {
   id: string;
   date: string;
@@ -43,6 +52,7 @@ interface Run {
   route?: string;
   routeCoordinates?: RouteCoordinate[];
   treadmillVerified?: boolean;
+  achievements?: RunAchievement[];
 }
 
 interface RunHistorySectionProps {
@@ -363,6 +373,12 @@ export default function RunHistorySection({
                     <Text style={styles.treadmillBadgeText}>{t('run_treadmill_label')}</Text>
                   </View>
                 )}
+                {run.achievements && run.achievements.length > 0 && (
+                  <View style={styles.achievementBadge}>
+                    <Text style={styles.achievementBadgeEmoji}>{run.achievements[0].emoji}</Text>
+                    <Text style={styles.achievementBadgeText}>{run.achievements.length} {run.achievements.length === 1 ? 'achievement' : 'achievements'}</Text>
+                  </View>
+                )}
                 {run.weather && (
                   <Text style={styles.runWeatherText}>{run.weather}</Text>
                 )}
@@ -653,5 +669,24 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700' as const,
     color: '#00E5FF',
+  },
+  achievementBadge: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 3,
+    marginTop: 3,
+    backgroundColor: 'rgba(245,158,11,0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start' as const,
+  },
+  achievementBadgeEmoji: {
+    fontSize: 10,
+  },
+  achievementBadgeText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+    color: '#F59E0B',
   },
 });
