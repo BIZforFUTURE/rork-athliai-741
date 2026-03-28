@@ -45,7 +45,7 @@ export default function PaywallScreen() {
 
 
   const annualPackage = currentOffering?.availablePackages?.[0];
-  const priceString = annualPackage?.product?.priceString ?? "$9.99";
+  const priceString = annualPackage?.product?.priceString ?? "$19.99";
 
   const handlePurchase = async () => {
     if (isPurchasing) return;
@@ -188,6 +188,9 @@ export default function PaywallScreen() {
                 <Text style={styles.priceAmount}>{priceString}</Text>
                 <Text style={styles.pricePeriod}>{t('paywall_year')}</Text>
               </View>
+            </View>
+            <View style={styles.weeklyBreakdownRow}>
+              <Text style={styles.weeklyBreakdownLabel}>That's just $0.38/week</Text>
             </View>
           </LinearGradient>
         </View>
@@ -418,6 +421,16 @@ const styles = StyleSheet.create({
     width: 1,
     height: 14,
     backgroundColor: "rgba(255,255,255,0.15)",
+  },
+  weeklyBreakdownRow: {
+    flexDirection: "row" as const,
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  weeklyBreakdownLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: colors.accent.teal,
   },
   legalText: {
     fontSize: 11,
