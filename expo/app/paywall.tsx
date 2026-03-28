@@ -190,7 +190,7 @@ export default function PaywallScreen() {
               </View>
             </View>
             <View style={styles.weeklyBreakdownRow}>
-              <Text style={styles.weeklyBreakdownLabel}>That's just $0.38/week</Text>
+              <Text style={styles.weeklyBreakdownLabel}>$0.38/week</Text>
             </View>
           </LinearGradient>
         </View>
