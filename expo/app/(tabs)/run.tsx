@@ -18,7 +18,7 @@ import {
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3, PersonStanding, Bike, Navigation, ChevronRight } from "lucide-react-native";
+import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3, Navigation, ChevronRight } from "lucide-react-native";
 
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
@@ -86,7 +86,7 @@ export default function RunScreen() {
   const [treadmillEditing, setTreadmillEditing] = useState(false);
   const { t, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [activityType, setActivityType] = useState<'run' | 'ride' | 'walk'>('run');
+
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -802,7 +802,7 @@ export default function RunScreen() {
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <View>
           <Text style={styles.screenTitle}>{t('tab_run')}</Text>
-          <Text style={styles.screenSubtitle}>{t('run_history')}</Text>
+          <Text style={styles.screenSubtitle}>Ready to go?</Text>
         </View>
         <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "20", borderColor: xpInfo.rank.color + "40" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
@@ -824,35 +824,37 @@ export default function RunScreen() {
           />
         }
       >
-        <View style={styles.activitySelector}>
-          <Text style={styles.activitySelectorLabel}>{t('run_time')}</Text>
-          <View style={styles.activityChips}>
-            {(['run', 'ride', 'walk'] as const).map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.activityChip,
-                  activityType === type && styles.activityChipActive,
-                ]}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  setActivityType(type);
-                }}
-                activeOpacity={0.7}
-              >
-                {type === 'run' && <PersonStanding size={16} color={activityType === type ? '#FFFFFF' : '#6B7280'} />}
-                {type === 'ride' && <Bike size={16} color={activityType === type ? '#FFFFFF' : '#6B7280'} />}
-                {type === 'walk' && <PersonStanding size={16} color={activityType === type ? '#FFFFFF' : '#6B7280'} />}
-                <Text style={[
-                  styles.activityChipText,
-                  activityType === type && styles.activityChipTextActive,
-                ]}>
-                  {type === 'run' ? t('run_activity_run') : type === 'ride' ? t('run_activity_ride') : t('run_activity_walk')}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        <View style={styles.timerCard}>
+          <View style={styles.timerDialWrap}>
+            <View style={styles.timerRing} />
+            <View style={styles.timerInner}>
+              <Text style={styles.timerValue}>0:00</Text>
+              <Text style={styles.timerLabel}>TIME</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(0,173,181,0.12)" }]}>
+              <Route size={16} color="#00ADB5" />
+            </View>
+            <Text style={styles.statValue}>0.00</Text>
+            <Text style={styles.statUnit}>{t('run_miles')}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(191,255,0,0.12)" }]}>
+              <TrendingUp size={16} color="#BFFF00" />
+            </View>
+            <Text style={styles.statValue}>0:00</Text>
+            <Text style={styles.statUnit}>{t('run_min_mi')}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,107,53,0.12)" }]}>
+              <Flame size={16} color="#FF6B35" />
+            </View>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statUnit}>{t('run_cal')}</Text>
           </View>
         </View>
 
@@ -865,11 +867,11 @@ export default function RunScreen() {
           <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
             <View style={styles.startBtnInner}>
               <Play size={22} color="#FFFFFF" fill="#FFFFFF" />
-              <Text style={styles.startBtnText}>{t('run_start_label')}</Text>
+              <Text style={styles.startBtnText}>START RUN</Text>
             </View>
             <View style={styles.startBtnXp}>
               <Zap size={12} color="#00E5FF" fill="#00E5FF" />
-              <Text style={styles.startBtnXpText}>+25 XP per run</Text>
+              <Text style={styles.startBtnXpText}>+25 XP</Text>
             </View>
           </Animated.View>
         </Pressable>
@@ -886,7 +888,7 @@ export default function RunScreen() {
             </View>
             <View style={styles.treadmillLogBtnTextWrap}>
               <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill_short')}</Text>
-              <Text style={styles.treadmillLogBtnSub}>Snap your treadmill dashboard</Text>
+              <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
             </View>
           </View>
           <View style={styles.treadmillLogBtnXp}>
@@ -1231,29 +1233,38 @@ const styles = StyleSheet.create({
   timerCard: {
     backgroundColor: "#0E1015",
     borderRadius: 24,
-    padding: 28,
+    paddingVertical: 32,
+    paddingHorizontal: 28,
     alignItems: "center" as const,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
   },
   timerDialWrap: {
-    width: 140,
-    height: 140,
+    width: 160,
+    height: 160,
     alignItems: "center" as const,
     justifyContent: "center" as const,
+  },
+  timerRing: {
+    position: "absolute" as const,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    borderWidth: 4,
+    borderColor: "rgba(0,173,181,0.25)",
   },
   timerInner: {
     position: "absolute" as const,
     alignItems: "center" as const,
   },
   timerValue: {
-    fontSize: 38,
+    fontSize: 42,
     fontWeight: "900" as const,
     color: "#FFFFFF",
     letterSpacing: -2,
   },
   timerLabel: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "700" as const,
     color: "#4B5563",
     letterSpacing: 3,
@@ -1895,46 +1906,7 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
     color: "#9CA3AF",
   },
-  activitySelector: {
-    backgroundColor: "#0E1015",
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
-  },
-  activitySelectorLabel: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#6B7280",
-    marginBottom: 10,
-  },
-  activityChips: {
-    flexDirection: "row" as const,
-    gap: 8,
-  },
-  activityChip: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  activityChipActive: {
-    backgroundColor: "#00ADB5",
-    borderColor: "#00ADB5",
-  },
-  activityChipText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#6B7280",
-  },
-  activityChipTextActive: {
-    color: "#FFFFFF",
-  },
+
   savedRoutesBtn: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
