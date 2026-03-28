@@ -73,7 +73,7 @@ export default function RunHistorySection({
   formatTime, 
   formatPace 
 }: RunHistorySectionProps) {
-  const { t, isSpanish } = useLanguage();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('all');
@@ -311,7 +311,7 @@ export default function RunHistorySection({
           <View style={styles.summaryStats}>
             <View style={styles.summaryStat}>
               <MapPin size={16} color="#00ADB5" />
-              <Text style={styles.summaryStatValue}>{isSpanish ? (summaryStats.totalDistance * 1.60934).toFixed(1) : summaryStats.totalDistance.toFixed(1)}</Text>
+              <Text style={styles.summaryStatValue}>{summaryStats.totalDistance.toFixed(1)}</Text>
               <Text style={styles.summaryStatLabel}>{t('run_miles_lower')}</Text>
             </View>
             <View style={styles.summaryStat}>
@@ -321,7 +321,7 @@ export default function RunHistorySection({
             </View>
             <View style={styles.summaryStat}>
               <TrendingUp size={16} color="#00ADB5" />
-              <Text style={styles.summaryStatValue}>{isSpanish ? formatPace(summaryStats.avgPace / 1.60934) : formatPace(summaryStats.avgPace)}</Text>
+              <Text style={styles.summaryStatValue}>{formatPace(summaryStats.avgPace)}</Text>
               <Text style={styles.summaryStatLabel}>{t('run_avg_pace')}</Text>
             </View>
             <View style={styles.summaryStat}>
@@ -385,7 +385,7 @@ export default function RunHistorySection({
               </View>
               <View style={styles.runStats}>
                 <View style={styles.runStat}>
-                  <Text style={styles.runStatValue}>{isSpanish ? (run.distance * 1.60934).toFixed(2) : run.distance.toFixed(2)}</Text>
+                  <Text style={styles.runStatValue}>{run.distance.toFixed(2)}</Text>
                   <Text style={styles.runStatLabel}>{t('run_mi')}</Text>
                 </View>
                 <View style={styles.runStat}>
@@ -393,7 +393,7 @@ export default function RunHistorySection({
                   <Text style={styles.runStatLabel}>{t('run_time_lower')}</Text>
                 </View>
                 <View style={styles.runStat}>
-                  <Text style={styles.runStatValue}>{isSpanish ? formatPace(run.pace / 1.60934) : formatPace(run.pace)}</Text>
+                  <Text style={styles.runStatValue}>{formatPace(run.pace)}</Text>
                   <Text style={styles.runStatLabel}>{t('run_pace')}</Text>
                 </View>
                 <View style={styles.runStat}>

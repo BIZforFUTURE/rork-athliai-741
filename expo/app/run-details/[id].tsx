@@ -40,7 +40,7 @@ export default function RunDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { recentRuns, updateRun, saveRoute, isRouteSaved } = useApp();
   const insets = useSafeAreaInsets();
-  const { t, isSpanish } = useLanguage();
+  const { t } = useLanguage();
   
   const [run, setRun] = useState(recentRuns.find(r => r.id === id));
   const [isEditing, setIsEditing] = useState(false);
@@ -271,7 +271,7 @@ export default function RunDetailsScreen() {
         </View>
 
         <View style={styles.heroStat}>
-          <Text style={styles.heroStatValue}>{isSpanish ? (run.distance * 1.60934).toFixed(2) : run.distance.toFixed(2)}</Text>
+          <Text style={styles.heroStatValue}>{run.distance.toFixed(2)}</Text>
           <Text style={styles.heroStatUnit}>{t('run_miles_lower')}</Text>
         </View>
 
@@ -288,7 +288,7 @@ export default function RunDetailsScreen() {
             <View style={[styles.statIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
               <TrendingUp size={18} color="#F59E0B" />
             </View>
-            <Text style={styles.statValue}>{isSpanish ? formatPace(run.pace / 1.60934) : formatPace(run.pace)}</Text>
+            <Text style={styles.statValue}>{formatPace(run.pace)}</Text>
             <Text style={styles.statLabel}>{t('run_min_mi_lower')}</Text>
           </View>
           <View style={styles.statDivider} />

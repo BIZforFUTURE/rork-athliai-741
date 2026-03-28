@@ -762,12 +762,12 @@ export default function RunScreen() {
 
           <View style={styles.activeRunStats}>
             <View style={styles.activeRunStat}>
-              <Text style={styles.activeRunStatValue}>{isSpanish ? (runState.distance * 1.60934).toFixed(2) : runState.distance.toFixed(2)}</Text>
+              <Text style={styles.activeRunStatValue}>{runState.distance.toFixed(2)}</Text>
               <Text style={styles.activeRunStatLabel}>{t('run_miles')}</Text>
             </View>
             <View style={styles.activeRunStatDivider} />
             <View style={styles.activeRunStat}>
-              <Text style={styles.activeRunStatValue}>{isSpanish ? formatPace(currentPace / 1.60934) : formatPace(currentPace)}</Text>
+              <Text style={styles.activeRunStatValue}>{formatPace(currentPace)}</Text>
               <Text style={styles.activeRunStatLabel}>{t('run_min_mi')}</Text>
             </View>
             <View style={styles.activeRunStatDivider} />
@@ -1008,7 +1008,7 @@ export default function RunScreen() {
                 {treadmillEditing ? (
                   <View style={styles.treadmillEditFields}>
                     <View style={styles.treadmillEditField}>
-                      <Text style={styles.treadmillEditLabel}>{isSpanish ? 'Distancia (km)' : 'Distance (miles)'}</Text>
+                      <Text style={styles.treadmillEditLabel}>{isSpanish ? 'Distancia (millas)' : 'Distance (miles)'}</Text>
                       <TextInput
                         style={styles.treadmillEditInput}
                         value={treadmillEditDistance}
@@ -1034,7 +1034,7 @@ export default function RunScreen() {
                     <View style={styles.treadmillParsedStat}>
                       <Route size={16} color="#00E5FF" />
                       <Text style={styles.treadmillParsedValue}>{treadmillEditDistance}</Text>
-                      <Text style={styles.treadmillParsedUnit}>{isSpanish ? 'km' : 'miles'}</Text>
+                      <Text style={styles.treadmillParsedUnit}>{isSpanish ? 'millas' : 'miles'}</Text>
                     </View>
                     <View style={styles.treadmillParsedDivider} />
                     <View style={styles.treadmillParsedStat}>
