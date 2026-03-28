@@ -1570,7 +1570,7 @@ Format as JSON:
                       )}
                       <View style={styles.scanTextWrap}>
                         <Text style={styles.scanButtonTitle}>
-                          {isScanningEquipment ? (t('gym_generating' as any) || 'Analyzing...') : (t('gym_scan_equipment' as any) || 'Scan your gym')}
+                          {isScanningEquipment ? (t('gym_generating' as any) || 'Analyzing...') : 'Scan Your Gym'}
                         </Text>
                         <Text style={styles.scanButtonSubtitle}>AI detects your available equipment</Text>
                       </View>
