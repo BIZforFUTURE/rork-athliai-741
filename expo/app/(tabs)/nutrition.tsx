@@ -3311,14 +3311,16 @@ const fabStyles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   menuContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1D24',
     borderRadius: 24,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.4,
     shadowRadius: 16,
     elevation: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   menuGrid: {
     flexDirection: 'row',
@@ -3327,14 +3329,14 @@ const fabStyles = StyleSheet.create({
   },
   menuItem: {
     width: '47%' as any,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 18,
     paddingVertical: 22,
     paddingHorizontal: 16,
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   menuItemIcon: {
     width: 52,
@@ -3346,7 +3348,7 @@ const fabStyles = StyleSheet.create({
   menuItemLabel: {
     fontSize: 14,
     fontWeight: '700' as const,
-    color: '#1F2937',
+    color: '#F0F0F0',
     textAlign: 'center' as const,
   },
 });
