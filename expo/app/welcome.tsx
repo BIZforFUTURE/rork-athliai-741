@@ -14,7 +14,9 @@ import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check } from 'lucide-react-native';
+import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check, Camera } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { callOpenAIWithVision } from '@/utils/openai';
 import { useApp } from '@/providers/AppProvider';
 import { getStartingLevelFromQuiz } from '@/constants/xp';
 import { useNotifications } from '@/providers/NotificationProvider';
@@ -348,6 +350,8 @@ export default function WelcomeScreen() {
   const [selectedWorkoutDays, setSelectedWorkoutDays] = useState<string[]>([]);
   const [showDaySelector, setShowDaySelector] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [isScanningEquipment, setIsScanningEquipment] = useState(false);
+  const scanPulseAnim = useRef(new Animated.Value(0.4)).current;
   const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, updateCustomWorkoutPlan, setStartingXP } = useApp();
   const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
@@ -466,6 +470,101 @@ export default function WelcomeScreen() {
     setShowNutritionQuiz(true);
   };
 
+  const handleScanEquipment = async () => {
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        if (Platform.OS !== 'web') {
+          const { Alert } = require('react-native');
+          Alert.alert(t('gym_scan_permission'));
+        }
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.7,
+        base64: true,
+        allowsEditing: false,
+      });
+
+      if (result.canceled || !result.assets?.[0]?.base64) {
+        console.log('Camera cancelled or no base64 data');
+        return;
+      }
+
+      setIsScanningEquipment(true);
+
+      const scanPulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanPulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+          Animated.timing(scanPulseAnim, { toValue: 0.4, duration: 800, useNativeDriver: true }),
+        ])
+      );
+      scanPulse.start();
+
+      const base64Image = result.assets[0].base64;
+
+      const prompt = `You are analyzing a photo of a gym or workout space. Look at all visible equipment and surroundings.
+
+Identify the equipment available and classify the gym into ONE of these categories:
+- "Full gym with free weights and machines" (if you see barbells, squat racks, cable machines, bench press, etc.)
+- "Home gym with dumbbells and basic equipment" (if you see dumbbells, a bench, pull-up bar, kettlebells, etc.)
+- "Bodyweight only (no equipment)" (if there's no visible equipment, just open space)
+- "Limited equipment (resistance bands, light weights)" (if you see only bands, light dumbbells, yoga mats, etc.)
+
+Also provide a brief summary of the specific equipment you can see.
+
+Respond in JSON format:
+{"category": "one of the four categories above", "equipment_list": "comma-separated list of equipment spotted"}
+
+Return ONLY valid JSON.`;
+
+      console.log('Analyzing gym equipment with AI vision...');
+      const aiResponse = await callOpenAIWithVision(prompt, base64Image);
+      console.log('AI equipment analysis:', aiResponse);
+
+      scanPulse.stop();
+      scanPulseAnim.setValue(0.4);
+
+      let cleaned = aiResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+      }
+
+      const parsed = JSON.parse(cleaned);
+      const category = parsed.category || t('gym_q3_o1');
+      const equipmentList = parsed.equipment_list || '';
+
+      const answerText = equipmentList
+        ? `${category} (Detected: ${equipmentList})`
+        : category;
+
+      console.log('Equipment scan result:', answerText);
+      setIsScanningEquipment(false);
+
+      if (Platform.OS !== 'web') {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+
+      handleGymAnswer(answerText);
+    } catch (error) {
+      console.error('Error scanning equipment:', error);
+      setIsScanningEquipment(false);
+      scanPulseAnim.setValue(0.4);
+      if (Platform.OS !== 'web') {
+        const { Alert } = require('react-native');
+        Alert.alert(t('gym_error'), t('gym_scan_error'));
+      }
+    }
+  };
+
   const gymQuestions = [
     {
       question: t('gym_q1'),
@@ -487,6 +586,7 @@ export default function WelcomeScreen() {
     },
     {
       question: t('gym_q3'),
+      hasScanOption: true,
       options: [
         t('gym_q3_o1'),
         t('gym_q3_o2'),
@@ -1069,18 +1169,54 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <Text style={styles.quizQuestion}>
                     {gymQuestions[currentGymStep].question}
                   </Text>
-                  <View style={styles.optionsContainer}>
-                    {gymQuestions[currentGymStep].options.map((option, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.optionButton}
-                        onPress={() => handleGymAnswer(option)}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={styles.optionText}>{option}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+
+                  {isScanningEquipment ? (
+                    <View style={scanStyles.scanningContainer}>
+                      <Animated.View style={[scanStyles.scanningIconWrap, { opacity: scanPulseAnim }]}>
+                        <Camera size={40} color="#00ADB5" />
+                      </Animated.View>
+                      <Text style={scanStyles.scanningText}>{t('gym_scan_analyzing')}</Text>
+                      <View style={scanStyles.scanningDots}>
+                        <View style={[scanStyles.dot, scanStyles.dotActive]} />
+                        <View style={[scanStyles.dot, scanStyles.dotActive]} />
+                        <View style={[scanStyles.dot, scanStyles.dotActive]} />
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={styles.optionsContainer}>
+                      {gymQuestions[currentGymStep].options.map((option, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.optionButton}
+                          onPress={() => handleGymAnswer(option)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.optionText}>{option}</Text>
+                        </TouchableOpacity>
+                      ))}
+
+                      {gymQuestions[currentGymStep].hasScanOption && (
+                        <TouchableOpacity
+                          style={scanStyles.scanButton}
+                          onPress={handleScanEquipment}
+                          activeOpacity={0.7}
+                        >
+                          <View style={scanStyles.scanButtonInner}>
+                            <View style={scanStyles.scanIconCircle}>
+                              <Camera size={20} color="#00ADB5" />
+                            </View>
+                            <View style={scanStyles.scanTextWrap}>
+                              <Text style={scanStyles.scanButtonTitle}>{t('gym_q3_o5_scan')}</Text>
+                              <Text style={scanStyles.scanButtonSub}>
+                                {isSpanish ? 'La IA detectará tu equipo' : 'AI will detect your equipment'}
+                              </Text>
+                            </View>
+                            <ChevronRight size={18} color="#00ADB5" />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  )}
                 </>
               ) : (
                 <>
@@ -2342,5 +2478,78 @@ const onboardStyles = StyleSheet.create({
   },
   connectorDone: {
     backgroundColor: '#00ADB5',
+  },
+});
+
+const scanStyles = StyleSheet.create({
+  scanningContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 16,
+  },
+  scanningIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(0, 173, 181, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(0, 173, 181, 0.3)',
+  },
+  scanningText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#F9FAFB',
+  },
+  scanningDots: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#374151',
+  },
+  dotActive: {
+    backgroundColor: '#00ADB5',
+  },
+  scanButton: {
+    borderWidth: 2,
+    borderColor: 'rgba(0, 173, 181, 0.4)',
+    borderStyle: 'dashed',
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 173, 181, 0.06)',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    width: '100%',
+  },
+  scanButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  scanIconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(0, 173, 181, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scanTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  scanButtonTitle: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#00ADB5',
+  },
+  scanButtonSub: {
+    fontSize: 12,
+    color: '#6B7280',
   },
 });
