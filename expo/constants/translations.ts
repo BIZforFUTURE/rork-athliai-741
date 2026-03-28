@@ -843,6 +843,22 @@ export const translations = {
     onboarding_workout: 'Workout',
     onboarding_nutrition: 'Nutrition',
 
+    // Daily Challenge
+    daily_challenge_title: 'Daily Challenge',
+    daily_challenge_subtitle: 'New challenge every day',
+    daily_challenge_time_left: 'Time remaining',
+    daily_challenge_complete: 'Complete Challenge',
+    daily_challenge_completed: 'Challenge Completed!',
+    daily_challenge_completed_msg: 'Great work! Come back tomorrow for a new challenge.',
+    daily_challenge_streak: 'Challenge Streak',
+    daily_challenge_best_streak: 'Best Streak',
+    daily_challenge_total: 'Total Completed',
+    daily_challenge_how_to: 'How to perform',
+    daily_challenge_tips: 'Tips',
+    daily_challenge_ready: 'Ready?',
+    daily_challenge_go: "Let's Go!",
+    daily_challenge_already_done: 'Already completed today',
+
     // Avatar
     avatar_title: 'Choose Avatar',
     avatar_pick: 'Pick',
@@ -1688,6 +1704,22 @@ export const translations = {
     onboarding_welcome: 'Bienvenida',
     onboarding_workout: 'Ejercicio',
     onboarding_nutrition: 'Nutrición',
+
+    // Daily Challenge
+    daily_challenge_title: 'Reto Diario',
+    daily_challenge_subtitle: 'Nuevo reto cada día',
+    daily_challenge_time_left: 'Tiempo restante',
+    daily_challenge_complete: 'Completar Reto',
+    daily_challenge_completed: '¡Reto Completado!',
+    daily_challenge_completed_msg: '¡Gran trabajo! Vuelve mañana para un nuevo reto.',
+    daily_challenge_streak: 'Racha de Retos',
+    daily_challenge_best_streak: 'Mejor Racha',
+    daily_challenge_total: 'Total Completados',
+    daily_challenge_how_to: 'Cómo realizarlo',
+    daily_challenge_tips: 'Consejos',
+    daily_challenge_ready: '¿Listo?',
+    daily_challenge_go: '¡Vamos!',
+    daily_challenge_already_done: 'Ya completado hoy',
 
     // Avatar
     avatar_title: 'Elegir Avatar',

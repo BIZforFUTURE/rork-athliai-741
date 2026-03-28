@@ -34,6 +34,7 @@ import {
   RotateCcw,
   Moon,
   Sun,
+  Trophy,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -1307,32 +1308,64 @@ Format as JSON:
         )}
 
         {generatedPlan && (
-          <TouchableOpacity 
-            style={styles.buildWorkoutCTASmall}
-            activeOpacity={0.85}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              if (!isPremium) {
-                router.push('/paywall');
-                return;
-              }
-              router.push('/workout-builder');
-            }}
-          >
-            <View style={styles.buildSmallInner}>
-              <View style={styles.buildSmallIcon}>
-                <Hammer size={18} color="#6366F1" />
+          <View style={styles.smallCtaRow}>
+            <TouchableOpacity 
+              style={[styles.buildWorkoutCTASmall, { flex: 1 }]}
+              activeOpacity={0.85}
+              onPress={() => {
+                if (Platform.OS !== 'web') {
+                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                if (!isPremium) {
+                  router.push('/paywall');
+                  return;
+                }
+                router.push('/workout-builder');
+              }}
+            >
+              <View style={styles.buildSmallInner}>
+                <View style={styles.buildSmallIcon}>
+                  <Hammer size={18} color="#6366F1" />
+                </View>
+                <View style={styles.buildSmallText}>
+                  <Text style={styles.buildSmallTitle}>{t('gym_build_custom')}</Text>
+                  <Text style={styles.buildSmallSub}>{t('gym_pick_exercises')}</Text>
+                </View>
+                <ChevronRight size={18} color="#4B5563" />
               </View>
-              <View style={styles.buildSmallText}>
-                <Text style={styles.buildSmallTitle}>{t('gym_build_custom')}</Text>
-                <Text style={styles.buildSmallSub}>{t('gym_pick_exercises')}</Text>
-              </View>
-              <ChevronRight size={18} color="#4B5563" />
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         )}
+
+        <TouchableOpacity
+          style={styles.dailyChallengeButton}
+          activeOpacity={0.85}
+          onPress={() => {
+            if (Platform.OS !== 'web') {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            }
+            router.push('/daily-challenge');
+          }}
+          testID="daily-challenge-btn"
+        >
+          <LinearGradient
+            colors={['#F59E0B', '#D97706']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.dailyChallengeGradient}
+          >
+            <View style={styles.dailyChallengeIcon}>
+              <Trophy size={22} color="#FFFFFF" />
+            </View>
+            <View style={styles.dailyChallengeText}>
+              <Text style={styles.dailyChallengeTitle}>{t('daily_challenge_title' as any)}</Text>
+              <Text style={styles.dailyChallengeSub}>{t('daily_challenge_subtitle' as any)}</Text>
+            </View>
+            <View style={styles.dailyChallengeArrow}>
+              <ArrowRight size={18} color="rgba(255,255,255,0.7)" />
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
 
         <View style={styles.statsContainer}>
           <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label={t('gym_streak')} delay={0} color="#FF6B35" />
@@ -3081,5 +3114,54 @@ const styles = StyleSheet.create({
     color: '#D1D5DB',
     lineHeight: 22,
     fontWeight: '400' as const,
+  },
+
+  smallCtaRow: {
+    marginTop: 14,
+  },
+  dailyChallengeButton: {
+    marginTop: 14,
+    borderRadius: 16,
+    overflow: 'hidden' as const,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  dailyChallengeGradient: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    padding: 16,
+    gap: 12,
+  },
+  dailyChallengeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  dailyChallengeText: {
+    flex: 1,
+  },
+  dailyChallengeTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  dailyChallengeSub: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.75)',
+  },
+  dailyChallengeArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
 });

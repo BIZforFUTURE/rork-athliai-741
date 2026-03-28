@@ -60,6 +60,7 @@ function RootLayoutNav() {
         <Stack.Screen name="workout-complete" options={{ headerShown: false }} />
         <Stack.Screen name="saved-routes" options={{ headerShown: false }} />
         <Stack.Screen name="gym-calendar" options={{ headerShown: false }} />
+        <Stack.Screen name="daily-challenge" options={{ headerShown: false }} />
       </Stack>
       <LevelUpOverlay />
     </>
