@@ -1987,8 +1987,9 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     marginTop: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+    gap: 6,
   },
   weekArrowBtn: {
     width: 24,
@@ -1998,17 +1999,19 @@ const styles = StyleSheet.create({
   },
   weekDayItem: {
     alignItems: "center" as const,
-    gap: 8,
+    gap: 6,
     flex: 1,
-    paddingHorizontal: 2,
+    paddingHorizontal: 0,
   },
   weekDayItemSelected: {
     transform: [{ scale: 1.05 }],
   },
   weekDayLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#4B5563",
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
   },
   weekDayLabelSelected: {
     color: "#F9FAFB",
@@ -2018,13 +2021,14 @@ const styles = StyleSheet.create({
     color: "#2A2F3A",
   },
   weekDayCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "#1A1D24",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
   },
   weekDayCircleSelected: {
     backgroundColor: "#F9FAFB",
@@ -2033,18 +2037,21 @@ const styles = StyleSheet.create({
   weekDayCircleHit: {
     borderColor: "#10B981",
     borderStyle: "solid" as const,
+    backgroundColor: "rgba(16,185,129,0.08)",
   },
   weekDayCircleMissed: {
     borderColor: "#EF4444",
-    borderStyle: "dashed" as const,
+    borderStyle: "solid" as const,
+    backgroundColor: "rgba(239,68,68,0.06)",
   },
   weekDayCircleEmpty: {
     borderColor: "rgba(255,255,255,0.08)",
-    borderStyle: "dashed" as const,
+    borderStyle: "solid" as const,
   },
   weekDayCircleFuture: {
     borderColor: "rgba(255,255,255,0.04)",
     borderStyle: "solid" as const,
+    backgroundColor: "#13151A",
   },
   weekDayNum: {
     fontSize: 16,
@@ -2063,7 +2070,7 @@ const styles = StyleSheet.create({
     height: 5,
     borderRadius: 3,
     backgroundColor: "#00E5FF",
-    marginTop: 2,
+    marginTop: 1,
   },
   viewingPastBanner: {
     flexDirection: "row" as const,
