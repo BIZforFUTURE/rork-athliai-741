@@ -245,6 +245,13 @@ export const translations = {
     run_route_summary: 'Route Summary',
     run_tracking_msg: 'Your run is being tracked continuously. Return to the app anytime to see detailed progress.',
     run_complete_msg: 'Great job on completing your run! All data has been saved to your history.',
+    run_activity_run: 'Run',
+    run_activity_ride: 'Ride',
+    run_activity_walk: 'Walk',
+    run_avg_speed: 'Avg. speed (mph)',
+    run_distance_mi: 'Distance (mi)',
+    run_start_label: 'Start',
+    run_log_treadmill_short: 'Treadmill',
 
     // Gym screen
     gym_title: 'Gym',
@@ -1080,6 +1087,13 @@ export const translations = {
     run_route_summary: 'Resumen de Ruta',
     run_tracking_msg: 'Tu carrera se está rastreando continuamente. Regresa a la app en cualquier momento para ver tu progreso.',
     run_complete_msg: '¡Buen trabajo completando tu carrera! Todos los datos se han guardado en tu historial.',
+    run_activity_run: 'Correr',
+    run_activity_ride: 'Ciclismo',
+    run_activity_walk: 'Caminar',
+    run_avg_speed: 'Vel. prom (km/h)',
+    run_distance_mi: 'Distancia (km)',
+    run_start_label: 'Iniciar',
+    run_log_treadmill_short: 'Caminadora',
 
     // Gym screen
     gym_title: 'Gimnasio',

@@ -18,8 +18,8 @@ import {
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3 } from "lucide-react-native";
-import Svg, { Circle } from "react-native-svg";
+import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3, PersonStanding, Bike } from "lucide-react-native";
+
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -86,6 +86,8 @@ export default function RunScreen() {
   const [treadmillEditing, setTreadmillEditing] = useState(false);
   const { t, isSpanish } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [activityType, setActivityType] = useState<'run' | 'ride' | 'walk'>('run');
+  const [showHistory, setShowHistory] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -794,115 +796,153 @@ export default function RunScreen() {
     );
   }
 
+  const activityLabel = activityType === 'run' ? t('run_activity_run') : activityType === 'ride' ? t('run_activity_ride') : t('run_activity_walk');
+
+  const cycleActivityType = useCallback(() => {
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setActivityType(prev => {
+      if (prev === 'run') return 'ride';
+      if (prev === 'ride') return 'walk';
+      return 'run';
+    });
+  }, []);
+
+  if (showHistory) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.historyTopBar, { paddingTop: insets.top + 8 }]}>
+          <TouchableOpacity onPress={() => setShowHistory(false)} style={styles.historyBackBtn}>
+            <X size={20} color="#F3F4F6" />
+          </TouchableOpacity>
+          <Text style={styles.historyTitle}>{t('run_history')}</Text>
+          <View style={{ width: 36 }} />
+        </View>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.historyScrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#00E5FF"
+              colors={["#00E5FF"]}
+              progressBackgroundColor="#1A1D24"
+            />
+          }
+        >
+          <RunHistorySection
+            runs={recentRuns}
+            onRunPress={(runId) => router.push(`/run-details/${runId}`)}
+            onDeleteRun={deleteRun}
+            formatTime={formatTime}
+            formatPace={formatPace}
+          />
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <View>
-          <Text style={styles.screenTitle}>{t('run_title')}</Text>
-          <Text style={styles.screenSubtitle}>{t('run_ready')}</Text>
-        </View>
-        <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "15", borderColor: xpInfo.rank.color + "30" }]}>
+      <View style={styles.mapBackground}>
+        <RunMap
+          currentLocation={runState.currentLocation}
+          routeCoordinates={[]}
+          showMap={true}
+          isRunning={false}
+          fullscreen={true}
+        />
+        <View style={styles.mapDarkOverlay} />
+      </View>
+
+      <View style={[styles.mapTopControls, { top: insets.top + 12 }]}>
+        <TouchableOpacity
+          style={styles.mapTopBtn}
+          onPress={() => setShowHistory(true)}
+          activeOpacity={0.7}
+        >
+          <TrendingUp size={18} color="#FFFFFF" />
+        </TouchableOpacity>
+        <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "20", borderColor: xpInfo.rank.color + "40" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
           <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+25 XP</Text>
         </View>
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#00E5FF"
-            colors={["#00E5FF"]}
-            progressBackgroundColor="#1A1D24"
-          />
-        }
-      >
-        <Animated.View style={[styles.timerCard, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
-          <View style={styles.timerDialWrap}>
-            <Svg width={140} height={140}>
-              <Circle
-                cx={70} cy={70} r={67}
-                stroke="rgba(0,229,255,0.06)" strokeWidth={6} fill="none"
-              />
-            </Svg>
-            <View style={styles.timerInner}>
-              <Text style={styles.timerValue}>0:00</Text>
-              <Text style={styles.timerLabel}>{t('run_time')}</Text>
+      <View style={[styles.bottomPanel, { paddingBottom: insets.bottom + 12 }]}>
+        <View style={styles.statsPanel}>
+          <Text style={styles.statsPanelTitle}>{activityLabel}</Text>
+          <View style={styles.statsPanelRow}>
+            <View style={styles.statsPanelItem}>
+              <Text style={styles.statsPanelValue}>00:00</Text>
+              <Text style={styles.statsPanelLabel}>{t('run_time')}</Text>
+            </View>
+            <View style={styles.statsPanelDivider} />
+            <View style={styles.statsPanelItem}>
+              <Text style={styles.statsPanelValue}>0.0</Text>
+              <Text style={styles.statsPanelLabel}>{isSpanish ? t('run_avg_speed') : t('run_avg_speed')}</Text>
+            </View>
+            <View style={styles.statsPanelDivider} />
+            <View style={styles.statsPanelItem}>
+              <Text style={styles.statsPanelValue}>0.00</Text>
+              <Text style={styles.statsPanelLabel}>{isSpanish ? t('run_distance_mi') : t('run_distance_mi')}</Text>
             </View>
           </View>
-        </Animated.View>
+        </View>
 
-        <Animated.View style={[styles.statsRow, { opacity: fadeIn }]}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(0,229,255,0.08)" }]}>
-              <Route size={14} color="#00E5FF" />
-            </View>
-            <Text style={styles.statValue}>0.00</Text>
-            <Text style={styles.statUnit}>{isSpanish ? 'km' : 'miles'}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(191,255,0,0.08)" }]}>
-              <TrendingUp size={14} color="#BFFF00" />
-            </View>
-            <Text style={styles.statValue}>0:00</Text>
-            <Text style={styles.statUnit}>{isSpanish ? 'min/km' : 'min/mi'}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,107,53,0.08)" }]}>
-              <Flame size={14} color="#FF6B35" />
-            </View>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statUnit}>cal</Text>
-          </View>
-        </Animated.View>
+        <View style={styles.bottomGrabber} />
 
-        <Pressable
-          onPress={startRun}
-          onPressIn={handleButtonPressIn}
-          onPressOut={handleButtonPressOut}
-        >
-          <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
-            <View style={styles.startBtnInner}>
-              <Play size={24} color="#FFFFFF" fill="#FFFFFF" />
-              <Text style={styles.startBtnText}>{t('run_start')}</Text>
+        <View style={styles.controlsRow}>
+          <TouchableOpacity
+            style={styles.activityTypeBtn}
+            onPress={cycleActivityType}
+            activeOpacity={0.7}
+            testID="activity-type-btn"
+          >
+            <View style={[
+              styles.activityTypeIconWrap,
+              activityType === 'run' && styles.activityTypeActive,
+              activityType === 'ride' && styles.activityTypeActiveRide,
+              activityType === 'walk' && styles.activityTypeActiveWalk,
+            ]}>
+              {activityType === 'run' && <PersonStanding size={24} color="#FF6B35" />}
+              {activityType === 'ride' && <Bike size={24} color="#FF6B35" />}
+              {activityType === 'walk' && <PersonStanding size={24} color="#FF6B35" />}
+              {activityType === 'run' && <View style={styles.activityCheckBadge}><Check size={8} color="#FFFFFF" /></View>}
+              {activityType === 'ride' && <View style={styles.activityCheckBadge}><Check size={8} color="#FFFFFF" /></View>}
+              {activityType === 'walk' && <View style={styles.activityCheckBadge}><Check size={8} color="#FFFFFF" /></View>}
             </View>
-            <View style={styles.startBtnXp}>
-              <Zap size={10} color="#00E5FF" fill="#00E5FF" />
-              <Text style={styles.startBtnXpText}>+25 XP</Text>
-            </View>
-          </Animated.View>
-        </Pressable>
+            <Text style={styles.activityTypeLabel}>{activityLabel}</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.treadmillLogBtn}
-          onPress={handleTreadmillCapture}
-          activeOpacity={0.7}
-          testID="treadmill-log-btn"
-        >
-          <View style={styles.treadmillLogBtnLeft}>
-            <View style={styles.treadmillLogBtnIcon}>
-              <Camera size={20} color="#00E5FF" />
-            </View>
-            <View style={styles.treadmillLogBtnTextWrap}>
-              <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill')}</Text>
-              <Text style={styles.treadmillLogBtnSub}>{t('run_snap_dashboard')}</Text>
-            </View>
-          </View>
-          <View style={styles.treadmillLogBtnXp}>
-            <Zap size={10} color="#BFFF00" fill="#BFFF00" />
-            <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
-          </View>
-        </TouchableOpacity>
+          <Pressable
+            onPress={startRun}
+            onPressIn={handleButtonPressIn}
+            onPressOut={handleButtonPressOut}
+            testID="start-run-btn"
+          >
+            <Animated.View style={[styles.startBtnCircle, { transform: [{ scale: buttonScale }] }]}>
+              <Play size={28} color="#FFFFFF" fill="#FFFFFF" style={{ marginLeft: 3 }} />
+            </Animated.View>
+            <Text style={styles.startBtnLabel}>{t('run_start_label')}</Text>
+          </Pressable>
 
-        <RunHistorySection
-          runs={recentRuns}
-          onRunPress={(runId) => router.push(`/run-details/${runId}`)}
-          onDeleteRun={deleteRun}
-          formatTime={formatTime}
-          formatPace={formatPace}
-        />
-      </ScrollView>
+          <TouchableOpacity
+            style={styles.treadmillBtn}
+            onPress={handleTreadmillCapture}
+            activeOpacity={0.7}
+            testID="treadmill-log-btn"
+          >
+            <View style={styles.treadmillBtnIconWrap}>
+              <Camera size={22} color="#FFFFFF" />
+            </View>
+            <Text style={styles.treadmillBtnLabel}>{t('run_log_treadmill_short')}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <Modal
         visible={showTreadmillModal}
@@ -1699,5 +1739,203 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700" as const,
+  },
+  mapBackground: {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  mapDarkOverlay: {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.15)",
+  },
+  mapTopControls: {
+    position: "absolute" as const,
+    left: 16,
+    right: 16,
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    zIndex: 10,
+  },
+  mapTopBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  bottomPanel: {
+    position: "absolute" as const,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  statsPanel: {
+    backgroundColor: "rgba(20,23,32,0.92)",
+    marginHorizontal: 12,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  statsPanelTitle: {
+    fontSize: 16,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+    textAlign: "center" as const,
+    marginBottom: 14,
+  },
+  statsPanelRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+  },
+  statsPanelItem: {
+    flex: 1,
+    alignItems: "center" as const,
+  },
+  statsPanelValue: {
+    fontSize: 28,
+    fontWeight: "800" as const,
+    color: "#FFFFFF",
+    letterSpacing: -1,
+  },
+  statsPanelLabel: {
+    fontSize: 10,
+    fontWeight: "500" as const,
+    color: "#9CA3AF",
+    marginTop: 2,
+    textAlign: "center" as const,
+  },
+  statsPanelDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  bottomGrabber: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignSelf: "center" as const,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  controlsRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-around" as const,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "rgba(20,23,32,0.95)",
+  },
+  activityTypeBtn: {
+    alignItems: "center" as const,
+    gap: 6,
+  },
+  activityTypeIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,107,53,0.15)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  activityTypeActive: {
+    backgroundColor: "rgba(255,107,53,0.2)",
+    borderWidth: 2,
+    borderColor: "#FF6B35",
+  },
+  activityTypeActiveRide: {
+    backgroundColor: "rgba(255,107,53,0.2)",
+    borderWidth: 2,
+    borderColor: "#FF6B35",
+  },
+  activityTypeActiveWalk: {
+    backgroundColor: "rgba(255,107,53,0.2)",
+    borderWidth: 2,
+    borderColor: "#FF6B35",
+  },
+  activityCheckBadge: {
+    position: "absolute" as const,
+    top: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#FF6B35",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  activityTypeLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#FFFFFF",
+  },
+  startBtnCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#FF6B35",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    alignSelf: "center" as const,
+  },
+  startBtnLabel: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#FF6B35",
+    textAlign: "center" as const,
+    marginTop: 6,
+  },
+  treadmillBtn: {
+    alignItems: "center" as const,
+    gap: 6,
+  },
+  treadmillBtnIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  treadmillBtnLabel: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+  },
+  historyTopBar: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: "#08090C",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+  },
+  historyBackBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  historyTitle: {
+    fontSize: 18,
+    fontWeight: "700" as const,
+    color: "#F3F4F6",
+  },
+  historyScrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 100,
   },
 });
