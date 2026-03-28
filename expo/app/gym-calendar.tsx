@@ -158,29 +158,36 @@ export default function GymCalendarScreen() {
     }
 
     const isTodayDay = isToday(item.day);
+    const isFuture = item.status === "future";
 
     return (
       <View
         key={`day-${item.day}`}
-        style={[styles.dayCell, isTodayDay && styles.dayCellToday]}
+        style={styles.dayCell}
       >
-        <Text style={[styles.dayNumber, isTodayDay && styles.dayNumberToday]}>
-          {item.day}
-        </Text>
-        <View style={styles.statusIconWrap}>
+        <View style={[styles.dayInner, isTodayDay && styles.dayInnerToday]}>
+          <Text
+            style={[
+              styles.dayNumber,
+              isTodayDay && styles.dayNumberToday,
+              isFuture && styles.dayNumberFuture,
+            ]}
+          >
+            {item.day}
+          </Text>
           {item.status === "worked_out" && (
             <View style={styles.checkBadge}>
-              <Check size={12} color="#FFFFFF" strokeWidth={3} />
+              <Check size={10} color="#FFFFFF" strokeWidth={3} />
             </View>
           )}
           {item.status === "missed" && (
             <View style={styles.missBadge}>
-              <X size={12} color="#FFFFFF" strokeWidth={3} />
+              <X size={10} color="#FFFFFF" strokeWidth={3} />
             </View>
           )}
           {item.status === "rest" && (
             <View style={styles.restBadge}>
-              <Minus size={10} color="#6B7280" strokeWidth={3} />
+              <Minus size={8} color="#4B5563" strokeWidth={3} />
             </View>
           )}
           {item.status === "future" && <View style={styles.futureDot} />}
@@ -331,121 +338,131 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   calendarCard: {
-    backgroundColor: "#141720",
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: "#151921",
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 22,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.05)",
   },
   monthNav: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 20,
+    justifyContent: "center",
+    marginBottom: 22,
+    gap: 20,
   },
   navButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.06)",
     alignItems: "center",
     justifyContent: "center",
   },
   monthTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700" as const,
-    color: "#FFFFFF",
-    letterSpacing: -0.3,
+    color: "#F3F4F6",
+    letterSpacing: -0.2,
+    minWidth: 160,
+    textAlign: "center" as const,
   },
   weekDayHeader: {
     flexDirection: "row",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   weekDayHeaderCell: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   weekDayHeaderText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#4B5563",
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
   },
   weekRow: {
     flexDirection: "row",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   dayCell: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 8,
-    minHeight: 56,
-    borderRadius: 12,
+    paddingVertical: 3,
   },
-  dayCellToday: {
-    backgroundColor: "rgba(0, 173, 181, 0.12)",
+  dayInner: {
+    width: 42,
+    height: 54,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+  },
+  dayInnerToday: {
+    backgroundColor: "rgba(0, 173, 181, 0.10)",
     borderWidth: 1.5,
-    borderColor: "rgba(0, 173, 181, 0.35)",
+    borderColor: "rgba(0, 173, 181, 0.30)",
   },
   dayNumber: {
-    fontSize: 15,
-    fontWeight: "600" as const,
+    fontSize: 14,
+    fontWeight: "500" as const,
     color: "#9CA3AF",
-    marginBottom: 4,
   },
   dayNumberToday: {
     color: "#FFFFFF",
     fontWeight: "700" as const,
   },
-  statusIconWrap: {
-    height: 20,
-    alignItems: "center",
-    justifyContent: "center",
+  dayNumberFuture: {
+    color: "#4B5563",
   },
   checkBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: "#10B981",
     alignItems: "center",
     justifyContent: "center",
   },
   missBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: "#EF4444",
     alignItems: "center",
     justifyContent: "center",
   },
   restBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "rgba(75, 85, 99, 0.35)",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "rgba(55, 65, 81, 0.30)",
     alignItems: "center",
     justifyContent: "center",
   },
   futureDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: "rgba(255,255,255,0.06)",
   },
   legendCard: {
-    marginTop: 16,
-    backgroundColor: "#141720",
-    borderRadius: 16,
+    marginTop: 14,
+    backgroundColor: "#151921",
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.05)",
   },
   legendTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#6B7280",
     marginBottom: 12,
+    letterSpacing: 0.3,
   },
   legendItems: {
     flexDirection: "row",
@@ -454,43 +471,43 @@ const styles = StyleSheet.create({
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 7,
   },
   legendText: {
     fontSize: 13,
-    color: "#D1D5DB",
+    color: "#9CA3AF",
     fontWeight: "500" as const,
   },
   statsRow: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 16,
+    marginTop: 14,
   },
   statBox: {
     flex: 1,
-    backgroundColor: "#141720",
-    borderRadius: 16,
+    backgroundColor: "#151921",
+    borderRadius: 18,
     padding: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.05)",
   },
   statDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     marginBottom: 8,
   },
   statValue: {
     fontSize: 22,
-    fontWeight: "800" as const,
-    color: "#F9FAFB",
+    fontWeight: "700" as const,
+    color: "#F3F4F6",
     letterSpacing: -0.5,
   },
   statLabel: {
     fontSize: 11,
     color: "#6B7280",
-    marginTop: 2,
+    marginTop: 3,
     fontWeight: "500" as const,
   },
 });
