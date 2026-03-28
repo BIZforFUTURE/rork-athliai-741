@@ -15,7 +15,8 @@ import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check, Camera } from 'lucide-react-native';
+import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check, Camera, Star } from 'lucide-react-native';
+import { Linking } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { callOpenAIWithVision } from '@/utils/openai';
 import { useApp } from '@/providers/AppProvider';
@@ -329,6 +330,14 @@ const slides: WelcomeSlide[] = [
     icon: <Bell size={80} color="#00ADB5" />,
     gradient: ['#0D0F13', '#111827'],
   },
+  {
+    id: 5,
+    title: 'Enjoying AthliAI?',
+    subtitle: 'Help Us Grow',
+    description: 'A 5-star rating means the world to us and helps other athletes discover AthliAI.',
+    icon: <Star size={80} color="#FFD700" fill="#FFD700" />,
+    gradient: ['#0D0F13', '#111827'],
+  },
 ];
 
 export default function WelcomeScreen() {
@@ -359,6 +368,26 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const { t, setLanguage, isSpanish } = useLanguage();
   void setLanguage;
+
+  const handleRateApp = async () => {
+    if (Platform.OS !== 'web') {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    try {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('https://apps.apple.com/app/id6745189622?action=write-review');
+      } else if (Platform.OS === 'android') {
+        await Linking.openURL('market://details?id=com.athliai');
+      }
+    } catch (error) {
+      console.log('Could not open store for rating:', error);
+    }
+    if (currentSlide < slides.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    } else {
+      setShowGymQuiz(true);
+    }
+  };
 
   const handleNext = async () => {
     if (Platform.OS !== 'web') {
@@ -1041,7 +1070,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   };
 
   const currentSlideData = slides[currentSlide] || slides[0];
-  const isLastSlide = currentSlide === slides.length - 1;
+  const _isLastSlide = currentSlide === slides.length - 1;
 
   const _onboardingPhase: 'welcome' | 'workout' | 'nutrition' = showNutritionQuiz ? 'nutrition' : showGymQuiz ? 'workout' : 'welcome';
 
@@ -1573,17 +1602,20 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             <Text style={styles.titleDark}>{isSpanish ? (
               currentSlide === 0 ? t('welcome_slide1_title') :
               currentSlide === 1 ? t('welcome_slide2_title') :
-              currentSlide === 2 ? t('welcome_slide3_title') : t('welcome_slide4_title')
+              currentSlide === 2 ? t('welcome_slide3_title') :
+              currentSlide === 3 ? t('welcome_slide4_title') : t('welcome_slide5_title')
             ) : currentSlideData.title}</Text>
             <Text style={styles.subtitleDark}>{isSpanish ? (
               currentSlide === 0 ? t('welcome_slide1_subtitle') :
               currentSlide === 1 ? t('welcome_slide2_subtitle') :
-              currentSlide === 2 ? t('welcome_slide3_subtitle') : t('welcome_slide4_subtitle')
+              currentSlide === 2 ? t('welcome_slide3_subtitle') :
+              currentSlide === 3 ? t('welcome_slide4_subtitle') : t('welcome_slide5_subtitle')
             ) : currentSlideData.subtitle}</Text>
             <Text style={styles.descriptionDark}>{isSpanish ? (
               currentSlide === 0 ? t('welcome_slide1_description') :
               currentSlide === 1 ? t('welcome_slide2_description') :
-              currentSlide === 2 ? t('welcome_slide3_description') : t('welcome_slide4_description')
+              currentSlide === 2 ? t('welcome_slide3_description') :
+              currentSlide === 3 ? t('welcome_slide4_description') : t('welcome_slide5_description')
             ) : currentSlideData.description}</Text>
           </View>
 
@@ -1599,36 +1631,65 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             ))}
           </View>
 
-          <TouchableOpacity 
-            style={[
-              styles.actionButton,
-              isRequestingPermissions && styles.actionButtonDisabled
-            ]} 
-            onPress={handleNext}
-            disabled={isRequestingPermissions}
-          >
-            <Text style={styles.actionButtonText}>
-              {isRequestingPermissions ? t('welcome_requesting') : 
-               currentSlide === 3 ? t('welcome_allow_notifications') :
-               isLastSlide ? t('welcome_get_started') : t('welcome_next')}
-            </Text>
-            {!isRequestingPermissions && (
-              <ChevronRight size={20} color="#FFFFFF" style={styles.chevron} />
-            )}
-          </TouchableOpacity>
-          
-          {currentSlide === 3 && (
-            <TouchableOpacity 
-              style={styles.skipNotificationsButton} 
-              onPress={() => {
-                if (Platform.OS !== 'web') {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-                setCurrentSlide(currentSlide + 1);
-              }}
-            >
-              <Text style={styles.skipNotificationsText}>{t('welcome_skip_for_now')}</Text>
-            </TouchableOpacity>
+          {currentSlide === 4 ? (
+            <>
+              <View style={styles.ratingStarsRow}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} size={36} color="#FFD700" fill="#FFD700" />
+                ))}
+              </View>
+              <TouchableOpacity
+                style={styles.rateButton}
+                onPress={handleRateApp}
+              >
+                <Star size={20} color="#0D0F13" fill="#0D0F13" />
+                <Text style={styles.rateButtonText}>{t('welcome_rate_app')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.skipNotificationsButton}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setShowGymQuiz(true);
+                }}
+              >
+                <Text style={styles.skipNotificationsText}>{t('welcome_maybe_later')}</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity 
+                style={[
+                  styles.actionButton,
+                  isRequestingPermissions && styles.actionButtonDisabled
+                ]} 
+                onPress={handleNext}
+                disabled={isRequestingPermissions}
+              >
+                <Text style={styles.actionButtonText}>
+                  {isRequestingPermissions ? t('welcome_requesting') : 
+                   currentSlide === 3 ? t('welcome_allow_notifications') : t('welcome_next')}
+                </Text>
+                {!isRequestingPermissions && (
+                  <ChevronRight size={20} color="#FFFFFF" style={styles.chevron} />
+                )}
+              </TouchableOpacity>
+              
+              {currentSlide === 3 && (
+                <TouchableOpacity 
+                  style={styles.skipNotificationsButton} 
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    setCurrentSlide(currentSlide + 1);
+                  }}
+                >
+                  <Text style={styles.skipNotificationsText}>{t('welcome_skip_for_now')}</Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
         </ScrollView>
       </LinearGradient>
@@ -2430,6 +2491,29 @@ const styles = StyleSheet.create({
     color: '#00ADB5',
     fontSize: 14,
     fontWeight: '600' as const,
+  },
+  ratingStarsRow: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    marginBottom: 28,
+  },
+  rateButton: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 30,
+    backgroundColor: '#FFD700',
+    minWidth: 160,
+    gap: 8,
+  },
+  rateButtonText: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#0D0F13',
   },
 });
 
