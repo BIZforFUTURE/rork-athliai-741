@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,6 +9,8 @@ import {
   Alert,
   Platform,
   Modal,
+  Animated,
+  ActivityIndicator,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -26,6 +28,8 @@ import {
   Flame,
   Target,
   Zap,
+  Camera,
+  Sparkles,
 } from "lucide-react-native";
 import { 
   ExerciseTemplate, 
@@ -35,6 +39,8 @@ import {
 import { WorkoutPlan } from "@/constants/workouts";
 import { useApp } from "@/providers/AppProvider";
 import { useLanguage } from "@/providers/LanguageProvider";
+import * as ImagePicker from "expo-image-picker";
+import { callOpenAIWithVision } from "@/utils/openai";
 
 interface SelectedExercise extends ExerciseTemplate {
   sets: number;
@@ -73,6 +79,8 @@ export default function WorkoutBuilderScreen() {
   const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
+  const [isScanningGym, setIsScanningGym] = useState(false);
+  const scanPulseAnim = useRef(new Animated.Value(0.4)).current;
 
   const bodyParts: BodyPart[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'cardio'];
 
@@ -308,6 +316,112 @@ export default function WorkoutBuilderScreen() {
     setShowSavedWorkouts(false);
   };
 
+  const handleScanGym = async () => {
+    if (Platform.OS !== 'web') {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is needed to scan your gym equipment.');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.7,
+        base64: true,
+        allowsEditing: false,
+      });
+
+      if (result.canceled || !result.assets?.[0]?.base64) {
+        console.log('Camera cancelled or no base64 data');
+        return;
+      }
+
+      setIsScanningGym(true);
+
+      const scanPulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanPulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+          Animated.timing(scanPulseAnim, { toValue: 0.4, duration: 800, useNativeDriver: true }),
+        ])
+      );
+      scanPulse.start();
+
+      const base64Image = result.assets[0].base64;
+
+      const allExerciseNames = bodyParts.flatMap(bp => exercisesByBodyPart[bp].map(e => e.name));
+
+      const prompt = `You are analyzing a photo of a gym or workout space. Look at all visible equipment.
+
+Based on the equipment you see, recommend 4-8 exercises from this list that the user can do:
+${allExerciseNames.join(', ')}
+
+For each recommended exercise, provide sets, reps, and rest time appropriate for a general fitness workout.
+
+Respond in JSON format:
+{"exercises": [{"name": "exact exercise name from list", "sets": 3, "reps": "8-12", "restTime": 90}]}
+
+Return ONLY valid JSON. Use exact exercise names from the provided list.`;
+
+      console.log('Analyzing gym for workout builder...');
+      const aiResponse = await callOpenAIWithVision(prompt, base64Image);
+      console.log('AI workout scan result:', aiResponse);
+
+      scanPulse.stop();
+      scanPulseAnim.setValue(0.4);
+
+      let cleaned = aiResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+      }
+
+      const parsed = JSON.parse(cleaned);
+      const recommendedExercises: SelectedExercise[] = [];
+
+      if (Array.isArray(parsed.exercises)) {
+        for (const rec of parsed.exercises) {
+          const allExercises = bodyParts.flatMap(bp => exercisesByBodyPart[bp]);
+          const match = allExercises.find(
+            e => e.name.toLowerCase() === rec.name?.toLowerCase()
+          );
+          if (match) {
+            recommendedExercises.push({
+              ...match,
+              sets: typeof rec.sets === 'number' ? rec.sets : 3,
+              reps: rec.reps ?? '8-12',
+              restTime: typeof rec.restTime === 'number' ? rec.restTime : 90,
+            });
+          }
+        }
+      }
+
+      setIsScanningGym(false);
+
+      if (recommendedExercises.length > 0) {
+        setSelectedExercises(prev => [...prev, ...recommendedExercises]);
+        if (!workoutName.trim()) {
+          setWorkoutName('Scanned Workout');
+        }
+        if (Platform.OS !== 'web') {
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
+        Alert.alert('Equipment Detected', `Added ${recommendedExercises.length} exercises based on your available equipment.`);
+      } else {
+        Alert.alert('No Match', 'Could not match detected equipment to exercises. Try adding exercises manually.');
+      }
+    } catch (error) {
+      console.error('Error scanning gym:', error);
+      setIsScanningGym(false);
+      scanPulseAnim.setValue(0.4);
+      Alert.alert('Error', 'Failed to analyze image. Please try again.');
+    }
+  };
+
   const closePicker = useCallback(() => {
     if (Platform.OS !== 'web') {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -420,6 +534,36 @@ export default function WorkoutBuilderScreen() {
             onChangeText={setWorkoutName}
           />
         </View>
+
+        <TouchableOpacity
+          style={styles.scanGymButton}
+          activeOpacity={0.7}
+          onPress={() => void handleScanGym()}
+          disabled={isScanningGym}
+        >
+          {isScanningGym ? (
+            <Animated.View style={[styles.scanGymIconWrap, { opacity: scanPulseAnim }]}>
+              <Camera size={22} color="#00ADB5" />
+            </Animated.View>
+          ) : (
+            <View style={styles.scanGymIconWrap}>
+              <Camera size={22} color="#00ADB5" />
+            </View>
+          )}
+          <View style={styles.scanGymTextWrap}>
+            <Text style={styles.scanGymTitle}>
+              {isScanningGym ? 'Analyzing your gym...' : 'Scan your gym'}
+            </Text>
+            <Text style={styles.scanGymSubtitle}>
+              {isScanningGym ? 'AI is detecting equipment' : 'Auto-add exercises based on equipment'}
+            </Text>
+          </View>
+          {isScanningGym ? (
+            <ActivityIndicator size="small" color="#00ADB5" />
+          ) : (
+            <Sparkles size={20} color="#00ADB5" />
+          )}
+        </TouchableOpacity>
 
         <View style={styles.exercisesSection}>
           <View style={styles.sectionHeader}>
@@ -695,6 +839,40 @@ const styles = StyleSheet.create({
     color: "#F9FAFB",
     borderWidth: 1,
     borderColor: "#1F2329",
+  },
+  scanGymButton: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: "rgba(0, 173, 181, 0.06)",
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    borderWidth: 1.5,
+    borderColor: "rgba(0, 173, 181, 0.25)",
+    borderStyle: "dashed" as const,
+    gap: 12,
+  },
+  scanGymIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 173, 181, 0.12)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  scanGymTextWrap: {
+    flex: 1,
+  },
+  scanGymTitle: {
+    fontSize: 15,
+    fontWeight: "600" as const,
+    color: "#00ADB5",
+    marginBottom: 2,
+  },
+  scanGymSubtitle: {
+    fontSize: 12,
+    color: "#64748B",
   },
   exercisesSection: {
     paddingHorizontal: 20,
