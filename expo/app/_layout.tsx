@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AppProvider, useApp } from "@/providers/AppProvider";
+import { LeaderboardProvider } from "@/providers/LeaderboardProvider";
 import { NotificationProvider } from "@/providers/NotificationProvider";
 import { RevenueCatProvider } from "@/providers/RevenueCatProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
@@ -93,11 +94,13 @@ export default function RootLayout() {
       <LanguageProvider>
         <NotificationProvider>
           <AppProvider>
-            <RevenueCatProvider>
-              <GestureHandlerRootView style={styles.container}>
-                <RootLayoutNav />
-              </GestureHandlerRootView>
-            </RevenueCatProvider>
+            <LeaderboardProvider>
+              <RevenueCatProvider>
+                <GestureHandlerRootView style={styles.container}>
+                  <RootLayoutNav />
+                </GestureHandlerRootView>
+              </RevenueCatProvider>
+            </LeaderboardProvider>
           </AppProvider>
         </NotificationProvider>
       </LanguageProvider>

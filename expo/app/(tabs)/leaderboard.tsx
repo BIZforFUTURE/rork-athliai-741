@@ -14,6 +14,8 @@ import {
   RefreshControl,
   Alert,
   KeyboardAvoidingView,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -45,13 +47,20 @@ import {
   Check,
   Award,
   Lock,
+  Globe,
+  Crown,
+  Medal,
+  Zap,
+  RefreshCw,
 } from "lucide-react-native";
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
+import { useLeaderboard } from "@/providers/LeaderboardProvider";
 
 import { useLanguage } from "@/providers/LanguageProvider";
 import { lbsToKg, formatHeightMetric } from "@/utils/metricConversions";
 import { BADGES, AVATAR_OPTIONS, type BadgeStats } from "@/constants/badges";
+import type { LeaderboardEntry } from "@/utils/supabase";
 
 interface WeightEntry {
   date: string;
@@ -59,6 +68,7 @@ interface WeightEntry {
 }
 
 type StatPeriod = '7d' | '30d' | '90d' | '1y';
+type TabMode = 'leaderboard' | 'stats';
 
 
 
@@ -729,6 +739,185 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
   );
 }
 
+function SegmentControl({ activeTab, onTabChange }: { activeTab: TabMode; onTabChange: (tab: TabMode) => void }) {
+  const slideAnim = useRef(new Animated.Value(activeTab === 'leaderboard' ? 0 : 1)).current;
+
+  useEffect(() => {
+    Animated.spring(slideAnim, {
+      toValue: activeTab === 'leaderboard' ? 0 : 1,
+      friction: 8,
+      tension: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [activeTab, slideAnim]);
+
+  const handlePress = useCallback((tab: TabMode) => {
+    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onTabChange(tab);
+  }, [onTabChange]);
+
+  const translateX = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%' as unknown as number, '50%' as unknown as number],
+  });
+
+  return (
+    <View style={segStyles.container}>
+      <View style={segStyles.track}>
+        <Animated.View style={[segStyles.slider, { left: translateX, width: '50%' }]} />
+        <TouchableOpacity style={segStyles.tab} onPress={() => handlePress('leaderboard')} activeOpacity={0.7}>
+          <Globe size={14} color={activeTab === 'leaderboard' ? '#FFFFFF' : '#6B7280'} />
+          <Text style={[segStyles.tabText, activeTab === 'leaderboard' && segStyles.tabTextActive]}>Leaderboard</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={segStyles.tab} onPress={() => handlePress('stats')} activeOpacity={0.7}>
+          <User size={14} color={activeTab === 'stats' ? '#FFFFFF' : '#6B7280'} />
+          <Text style={[segStyles.tabText, activeTab === 'stats' && segStyles.tabTextActive]}>My Stats</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+function LeaderboardRow({ entry, index, isCurrentUser }: { entry: LeaderboardEntry; index: number; isCurrentUser: boolean }) {
+  const rank = index + 1;
+  const avatar = AVATAR_OPTIONS.find(a => a.id === entry.avatar_id) || AVATAR_OPTIONS[0];
+
+  const getRankDisplay = () => {
+    if (rank === 1) return { emoji: '🥇', color: '#FFD700' };
+    if (rank === 2) return { emoji: '🥈', color: '#C0C0C0' };
+    if (rank === 3) return { emoji: '🥉', color: '#CD7F32' };
+    return { emoji: `#${rank}`, color: '#4B5563' };
+  };
+
+  const rankDisplay = getRankDisplay();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  return (
+    <Pressable
+      onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.97, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+      onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+    >
+      <Animated.View style={[
+        lbStyles.row,
+        isCurrentUser && lbStyles.rowHighlight,
+        rank <= 3 && { borderColor: rankDisplay.color + '20' },
+        { transform: [{ scale: scaleAnim }] },
+      ]}>
+        <View style={lbStyles.rankCol}>
+          {rank <= 3 ? (
+            <Text style={lbStyles.rankEmoji}>{rankDisplay.emoji}</Text>
+          ) : (
+            <Text style={[lbStyles.rankNum, { color: rankDisplay.color }]}>{rank}</Text>
+          )}
+        </View>
+
+        <View style={[lbStyles.avatarWrap, { borderColor: entry.rank_color + '40' }]}>
+          <Text style={lbStyles.avatarEmoji}>{avatar.emoji}</Text>
+        </View>
+
+        <View style={lbStyles.infoCol}>
+          <View style={lbStyles.nameRow}>
+            <Text style={lbStyles.rankIcon}>{entry.rank_emoji}</Text>
+            <Text style={[lbStyles.rankTitle, { color: entry.rank_color }]} numberOfLines={1}>{entry.rank_title}</Text>
+            <Text style={lbStyles.levelPill}>Lv.{entry.level}</Text>
+          </View>
+          <View style={lbStyles.miniRow}>
+            <View style={lbStyles.miniStat}>
+              <Footprints size={9} color="#00E5FF" />
+              <Text style={[lbStyles.miniVal, { color: '#00E5FF' }]}>{entry.total_runs}</Text>
+            </View>
+            <View style={lbStyles.miniStat}>
+              <Dumbbell size={9} color="#FF6B35" />
+              <Text style={[lbStyles.miniVal, { color: '#FF6B35' }]}>{entry.total_workouts}</Text>
+            </View>
+            <View style={lbStyles.miniStat}>
+              <Zap size={9} color="#F59E0B" />
+              <Text style={[lbStyles.miniVal, { color: '#F59E0B' }]}>{entry.total_miles}mi</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={lbStyles.xpCol}>
+          <Text style={lbStyles.xpVal}>{entry.total_xp.toLocaleString()}</Text>
+          <Text style={lbStyles.xpLabel}>XP</Text>
+        </View>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+function GlobalLeaderboardView() {
+  const { entries, isLoading, isRefreshing, userRank, refreshLeaderboard, forceSync, isSyncing, userId } = useLeaderboard();
+  const { xpInfo } = useApp();
+  const insets = useSafeAreaInsets();
+
+  const handleRefresh = useCallback(() => {
+    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    refreshLeaderboard();
+  }, [refreshLeaderboard]);
+
+  const handleSync = useCallback(() => {
+    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    forceSync();
+  }, [forceSync]);
+
+  if (isLoading) {
+    return (
+      <View style={lbStyles.loadingWrap}>
+        <ActivityIndicator size="large" color="#00E5FF" />
+        <Text style={lbStyles.loadingText}>Loading leaderboard...</Text>
+      </View>
+    );
+  }
+
+  if (entries.length === 0) {
+    return (
+      <View style={lbStyles.emptyWrap}>
+        <Crown size={48} color="#374151" />
+        <Text style={lbStyles.emptyTitle}>No Rankings Yet</Text>
+        <Text style={lbStyles.emptyDesc}>Complete workouts, runs, and log meals to earn XP and appear on the global leaderboard.</Text>
+        <TouchableOpacity style={lbStyles.syncBtn} onPress={handleSync} activeOpacity={0.7}>
+          <RefreshCw size={16} color="#00E5FF" />
+          <Text style={lbStyles.syncBtnText}>{isSyncing ? 'Syncing...' : 'Sync My Stats'}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      {userRank && (
+        <View style={lbStyles.myRankBar}>
+          <Medal size={14} color="#F59E0B" />
+          <Text style={lbStyles.myRankText}>Your Rank: <Text style={lbStyles.myRankNum}>#{userRank}</Text></Text>
+          <Text style={lbStyles.myRankXP}>{xpInfo.totalXP.toLocaleString()} XP</Text>
+          <TouchableOpacity onPress={handleSync} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <RefreshCw size={14} color={isSyncing ? '#00E5FF' : '#4B5563'} />
+          </TouchableOpacity>
+        </View>
+      )}
+      <FlatList
+        data={entries}
+        keyExtractor={(item) => item.user_id}
+        renderItem={({ item, index }) => (
+          <LeaderboardRow entry={item} index={index} isCurrentUser={item.user_id === userId} />
+        )}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 100, gap: 6 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor="#00E5FF"
+            colors={["#00E5FF"]}
+            progressBackgroundColor="#1A1D24"
+          />
+        }
+      />
+    </View>
+  );
+}
+
 export default function PersonalStatsScreen() {
   const { personalStats, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, exportAllData, importAllData, recentRuns, foodHistory, workoutLogs, isLoading: appLoading } = useApp();
   const { t, isSpanish } = useLanguage();
@@ -753,6 +942,7 @@ export default function PersonalStatsScreen() {
   const [importError, setImportError] = useState('');
   const [exportCopied, setExportCopied] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabMode>('leaderboard');
   const { user, updateUser } = useApp();
 
   const handleAvatarSelect = useCallback((avatarId: string) => {
@@ -1120,6 +1310,8 @@ export default function PersonalStatsScreen() {
         </View>
       </View>
 
+      <SegmentControl activeTab={activeTab} onTabChange={setActiveTab} />
+
       <AvatarPickerModal
         visible={showAvatarModal}
         onClose={() => setShowAvatarModal(false)}
@@ -1128,33 +1320,37 @@ export default function PersonalStatsScreen() {
         t={t}
       />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#00E5FF"
-            colors={["#00E5FF"]}
-            progressBackgroundColor="#1A1D24"
-          />
-        }
-      >
-        <ProfileHeader onAvatarPress={() => setShowAvatarModal(true)} _t={t} />
-        <AchievementBadges t={t} />
-        <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
-            <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
-            <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} isSpanish={isSpanish} />
-            <DataBackupCard
-              onExport={handleExport}
-              onImport={() => { setShowImportModal(true); setImportText(''); setImportStatus('idle'); setImportError(''); }}
-              exportCopied={exportCopied}
-              runCount={recentRuns.length}
-              foodCount={foodHistory.length}
-              workoutCount={workoutLogs.length}
-              t={t}
+      {activeTab === 'leaderboard' ? (
+        <GlobalLeaderboardView />
+      ) : (
+        <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#00E5FF"
+              colors={["#00E5FF"]}
+              progressBackgroundColor="#1A1D24"
             />
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          }
+        >
+          <ProfileHeader onAvatarPress={() => setShowAvatarModal(true)} _t={t} />
+          <AchievementBadges t={t} />
+          <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
+          <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
+          <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} isSpanish={isSpanish} />
+          <DataBackupCard
+            onExport={handleExport}
+            onImport={() => { setShowImportModal(true); setImportText(''); setImportStatus('idle'); setImportError(''); }}
+            exportCopied={exportCopied}
+            runCount={recentRuns.length}
+            foodCount={foodHistory.length}
+            workoutCount={workoutLogs.length}
+            t={t}
+          />
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -1891,6 +2087,218 @@ const avatarModalStyles = StyleSheet.create({
     justifyContent: "center" as const,
     borderWidth: 2,
     borderColor: "#08090C",
+  },
+});
+
+const segStyles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  track: {
+    flexDirection: "row" as const,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 12,
+    padding: 3,
+    position: "relative" as const,
+  },
+  slider: {
+    position: "absolute" as const,
+    top: 3,
+    bottom: 3,
+    backgroundColor: "#00ADB5",
+    borderRadius: 10,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 6,
+    paddingVertical: 10,
+    zIndex: 1,
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: "700" as const,
+    color: "#6B7280",
+  },
+  tabTextActive: {
+    color: "#FFFFFF",
+  },
+});
+
+const lbStyles = StyleSheet.create({
+  row: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: "#0E1015",
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    gap: 10,
+  },
+  rowHighlight: {
+    backgroundColor: "rgba(0,173,181,0.08)",
+    borderColor: "rgba(0,173,181,0.2)",
+  },
+  rankCol: {
+    width: 32,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  rankEmoji: {
+    fontSize: 22,
+  },
+  rankNum: {
+    fontSize: 15,
+    fontWeight: "800" as const,
+  },
+  avatarWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  avatarEmoji: {
+    fontSize: 18,
+  },
+  infoCol: {
+    flex: 1,
+    gap: 3,
+  },
+  nameRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 5,
+  },
+  rankIcon: {
+    fontSize: 13,
+  },
+  rankTitle: {
+    fontSize: 14,
+    fontWeight: "800" as const,
+    letterSpacing: -0.3,
+  },
+  levelPill: {
+    fontSize: 10,
+    fontWeight: "700" as const,
+    color: "#6B7280",
+    backgroundColor: "rgba(255,255,255,0.04)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: "hidden" as const,
+  },
+  miniRow: {
+    flexDirection: "row" as const,
+    gap: 10,
+  },
+  miniStat: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 3,
+  },
+  miniVal: {
+    fontSize: 10,
+    fontWeight: "700" as const,
+  },
+  xpCol: {
+    alignItems: "flex-end" as const,
+    minWidth: 52,
+  },
+  xpVal: {
+    fontSize: 15,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.3,
+  },
+  xpLabel: {
+    fontSize: 9,
+    fontWeight: "700" as const,
+    color: "#4B5563",
+    textTransform: "uppercase" as const,
+    letterSpacing: 0.5,
+  },
+  loadingWrap: {
+    flex: 1,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#4B5563",
+  },
+  emptyWrap: {
+    flex: 1,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    paddingHorizontal: 40,
+    gap: 12,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "800" as const,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  emptyDesc: {
+    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#374151",
+    textAlign: "center" as const,
+    lineHeight: 20,
+  },
+  syncBtn: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    backgroundColor: "rgba(0,229,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(0,229,255,0.15)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 8,
+  },
+  syncBtnText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#00E5FF",
+  },
+  myRankBar: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    backgroundColor: "rgba(245,158,11,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(245,158,11,0.12)",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+  },
+  myRankText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+    flex: 1,
+  },
+  myRankNum: {
+    fontWeight: "800" as const,
+    color: "#F59E0B",
+  },
+  myRankXP: {
+    fontSize: 12,
+    fontWeight: "700" as const,
+    color: "#6B7280",
   },
 });
 
