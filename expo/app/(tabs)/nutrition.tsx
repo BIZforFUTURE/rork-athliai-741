@@ -168,7 +168,9 @@ export default function NutritionScreen() {
   const [showDetailRefineInput, setShowDetailRefineInput] = useState(false);
   const [detailRefineText, setDetailRefineText] = useState("");
   const [showSavedFoods, setShowSavedFoods] = useState(false);
+  const [showFABMenu, setShowFABMenu] = useState(false);
   const [showWeeklyReview, setShowWeeklyReview] = useState(false);
+  const fabRotateAnim = useRef(new Animated.Value(0)).current;
   const [weeklyReviewData, setWeeklyReviewData] = useState<string>("");
   const [_isGeneratingReview, _setIsGeneratingReview] = useState(false);
   const [showEditGoals, setShowEditGoals] = useState(false);
@@ -199,6 +201,18 @@ export default function NutritionScreen() {
   useEffect(() => {
     Animated.timing(headerFadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
   }, [headerFadeAnim]);
+
+  const toggleFABMenu = useCallback(() => {
+    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const opening = !showFABMenu;
+    setShowFABMenu(opening);
+    Animated.spring(fabRotateAnim, {
+      toValue: opening ? 1 : 0,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 8,
+    }).start();
+  }, [showFABMenu, fabRotateAnim]);
 
   const startAnalyzingAnimation = useCallback(() => {
     analyzingProgressAnim.setValue(0);
@@ -1008,7 +1022,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           </View>
         ) : (
           <>
-            {!nutrition.quizCompleted ? (
+            {!nutrition.quizCompleted && (
               <View style={styles.quizRequiredCard}>
                 <View style={styles.quizRequiredIconWrap}>
                   <Brain size={40} color="#00ADB5" />
@@ -1018,105 +1032,6 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 <TouchableOpacity style={styles.startQuizButton} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowQuiz(true); }}>
                   <Brain size={18} color="#FFFFFF" />
                   <Text style={styles.startQuizButtonText}>{t('fuel_start_setup')}</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles.quickActions}>
-                <Text style={styles.quickActionsTitle}>{t('fuel_log_food')}</Text>
-                <View style={styles.actionRow}>
-                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={async () => {
-                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    if (!isPremium) { router.push('/paywall'); return; }
-                    if (!permission.granted) { const result = await requestPermission(); if (result.granted) setShowCamera(true); } else setShowCamera(true);
-                  }}>
-                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(0,229,255,0.12)' }]}>
-                      <ScanLine size={20} color="#00E5FF" />
-                    </View>
-                    <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>{t('fuel_scan')}</Text>
-                      <Text style={styles.actionChipSub}>{t('fuel_camera')}</Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={() => {
-                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    if (!isPremium) { router.push('/paywall'); return; }
-                    setShowAIInput(true);
-                  }}>
-                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(191,255,0,0.12)' }]}>
-                      <Brain size={20} color="#BFFF00" />
-                    </View>
-                    <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>{t('fuel_describe')}</Text>
-                      <Text style={styles.actionChipSub}>{t('fuel_ai_text')}</Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={() => {
-                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    if (!isPremium) { router.push('/paywall'); return; }
-                    setShowFoodSearch(true);
-                  }}>
-                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(255,107,53,0.12)' }]}>
-                      <Search size={20} color="#FF6B35" />
-                    </View>
-                    <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>{t('fuel_search')}</Text>
-                      <Text style={styles.actionChipSub}>USDA</Text>
-                    </View>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity style={styles.actionChip} activeOpacity={0.7} onPress={() => {
-                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setShowAddFood(true);
-                  }}>
-                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
-                      <Plus size={20} color="#F59E0B" />
-                    </View>
-                    <View style={styles.actionChipText}>
-                      <Text style={styles.actionChipLabel}>{t('fuel_manual')}</Text>
-                      <Text style={styles.actionChipSub}>{t('fuel_enter_manually')}</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                {savedFoods.length > 0 && (
-                  <TouchableOpacity
-                    style={styles.exerciseChip}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setShowSavedFoods(true);
-                    }}
-                  >
-                    <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
-                      <Bookmark size={20} color="#EF4444" fill="#EF4444" />
-                    </View>
-                    <View style={styles.exerciseChipTextWrap}>
-                      <Text style={styles.actionChipLabel}>{t('fuel_saved_foods')}</Text>
-                      <Text style={styles.exerciseChipSub}>{savedFoods.length} {t('fuel_saved').toLowerCase()}</Text>
-                    </View>
-                    <ChevronRight size={16} color="#4B5563" />
-                  </TouchableOpacity>
-                )}
-
-                <TouchableOpacity
-                  style={styles.exerciseChip}
-                  activeOpacity={0.7}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    if (!isPremium) { router.push('/paywall'); return; }
-                    setShowExerciseInput(true);
-                  }}
-                >
-                  <View style={[styles.actionChipIcon, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
-                    <Dumbbell size={20} color="#8B5CF6" />
-                  </View>
-                  <View style={styles.exerciseChipTextWrap}>
-                    <Text style={styles.actionChipLabel}>{t('fuel_log_exercise')}</Text>
-                    <Text style={styles.exerciseChipSub}>{t('fuel_exercise_desc')}</Text>
-                  </View>
-                  <ChevronRight size={16} color="#4B5563" />
                 </TouchableOpacity>
               </View>
             )}
@@ -1856,6 +1771,126 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </ScrollView>
           </View>
         </View>
+      </Modal>
+
+      {nutrition.quizCompleted && (
+        <TouchableOpacity
+          style={fabStyles.fab}
+          activeOpacity={0.85}
+          onPress={toggleFABMenu}
+          testID="nutrition-fab"
+        >
+          <Animated.View style={{
+            transform: [{
+              rotate: fabRotateAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0deg', '45deg'],
+              }),
+            }],
+          }}>
+            <Plus size={28} color="#FFFFFF" strokeWidth={2.5} />
+          </Animated.View>
+        </TouchableOpacity>
+      )}
+
+      <Modal visible={showFABMenu} animationType="fade" transparent>
+        <TouchableOpacity
+          style={fabStyles.overlay}
+          activeOpacity={1}
+          onPress={toggleFABMenu}
+        >
+          <View style={fabStyles.menuContainer}>
+            <View style={fabStyles.menuGrid}>
+              <TouchableOpacity
+                style={fabStyles.menuItem}
+                activeOpacity={0.7}
+                onPress={async () => {
+                  toggleFABMenu();
+                  if (!isPremium) { router.push('/paywall'); return; }
+                  if (!permission?.granted) { const result = await requestPermission(); if (result.granted) setShowCamera(true); } else setShowCamera(true);
+                }}
+              >
+                <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(0,229,255,0.12)' }]}>
+                  <ScanLine size={24} color="#00E5FF" />
+                </View>
+                <Text style={fabStyles.menuItemLabel}>{t('fuel_scan')} food</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={fabStyles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  toggleFABMenu();
+                  if (!isPremium) { router.push('/paywall'); return; }
+                  setShowAIInput(true);
+                }}
+              >
+                <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(191,255,0,0.12)' }]}>
+                  <Brain size={24} color="#BFFF00" />
+                </View>
+                <Text style={fabStyles.menuItemLabel}>{t('fuel_describe')} food</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={fabStyles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  toggleFABMenu();
+                  if (!isPremium) { router.push('/paywall'); return; }
+                  setShowFoodSearch(true);
+                }}
+              >
+                <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(255,107,53,0.12)' }]}>
+                  <Search size={24} color="#FF6B35" />
+                </View>
+                <Text style={fabStyles.menuItemLabel}>Food Database</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={fabStyles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  toggleFABMenu();
+                  setShowSavedFoods(true);
+                }}
+              >
+                <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
+                  <Bookmark size={24} color="#EF4444" fill="#EF4444" />
+                </View>
+                <Text style={fabStyles.menuItemLabel}>{t('fuel_saved_foods')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={fabStyles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  toggleFABMenu();
+                  if (!isPremium) { router.push('/paywall'); return; }
+                  setShowExerciseInput(true);
+                }}
+              >
+                <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
+                  <Dumbbell size={24} color="#8B5CF6" />
+                </View>
+                <Text style={fabStyles.menuItemLabel}>{t('fuel_log_exercise')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={fabStyles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  toggleFABMenu();
+                  setShowAddFood(true);
+                }}
+              >
+                <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
+                  <Plus size={24} color="#F59E0B" />
+                </View>
+                <Text style={fabStyles.menuItemLabel}>{t('fuel_manual')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
       </Modal>
 
       <Modal visible={showWeeklyReview} animationType="slide" transparent>
@@ -3245,5 +3280,73 @@ const fdStyles = StyleSheet.create({
   },
   detailBookmarkBtnActive: {
     backgroundColor: "rgba(239,68,68,0.12)",
+  },
+});
+
+const fabStyles = StyleSheet.create({
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#1A1D24',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    zIndex: 100,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'flex-end',
+    paddingBottom: 100,
+    paddingHorizontal: 20,
+  },
+  menuContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  menuGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  menuItem: {
+    width: '47%' as any,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 18,
+    paddingVertical: 22,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  menuItemIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuItemLabel: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#1F2937',
+    textAlign: 'center' as const,
   },
 });
