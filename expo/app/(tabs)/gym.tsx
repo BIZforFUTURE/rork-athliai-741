@@ -1036,6 +1036,18 @@ Format as JSON:
                   <Text style={styles.timerText}>{timeRemaining}</Text>
                 </View>
               )}
+              <TouchableOpacity
+                style={styles.calendarButton}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  router.push('/gym-calendar');
+                }}
+                testID="gym-calendar-btn"
+              >
+                <Calendar size={20} color="#00ADB5" />
+              </TouchableOpacity>
               {generatedPlan && (
                 <TouchableOpacity
                   style={styles.settingsButton}
@@ -1865,6 +1877,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700" as const,
     color: "#00E5FF",
+  },
+  calendarButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 173, 181, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(0, 173, 181, 0.2)",
   },
   settingsButton: {
     padding: 8,

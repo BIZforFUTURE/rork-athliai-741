@@ -59,6 +59,7 @@ function RootLayoutNav() {
         <Stack.Screen name="notification-settings" options={{ headerShown: false }} />
         <Stack.Screen name="workout-complete" options={{ headerShown: false }} />
         <Stack.Screen name="saved-routes" options={{ headerShown: false }} />
+        <Stack.Screen name="gym-calendar" options={{ headerShown: false }} />
       </Stack>
       <LevelUpOverlay />
     </>
