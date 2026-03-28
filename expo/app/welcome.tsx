@@ -34,6 +34,40 @@ interface WelcomeSlide {
   gradient: string[];
 }
 
+function OnboardingSteps({ activePhase, isSpanish }: { activePhase: 'welcome' | 'workout' | 'nutrition'; isSpanish: boolean }) {
+  const phases = [
+    { key: 'welcome' as const, label: isSpanish ? 'Bienvenida' : 'Welcome', num: '1' },
+    { key: 'workout' as const, label: isSpanish ? 'Ejercicio' : 'Workout', num: '2' },
+    { key: 'nutrition' as const, label: isSpanish ? 'Nutrición' : 'Nutrition', num: '3' },
+  ];
+  const activeIdx = phases.findIndex(p => p.key === activePhase);
+
+  return (
+    <View style={onboardStyles.container}>
+      {phases.map((phase, idx) => {
+        const isActive = idx === activeIdx;
+        const isDone = idx < activeIdx;
+        return (
+          <React.Fragment key={phase.key}>
+            {idx > 0 && (
+              <View style={[onboardStyles.connector, isDone && onboardStyles.connectorDone]} />
+            )}
+            <View style={[onboardStyles.step, isActive && onboardStyles.stepActive, isDone && onboardStyles.stepDone]}>
+              <Text style={[
+                onboardStyles.stepNum,
+                isActive && onboardStyles.stepNumActive,
+                isDone && onboardStyles.stepNumDone,
+              ]}>
+                {isDone ? '✓' : phase.num}
+              </Text>
+            </View>
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+}
+
 const LOADING_STEPS_EN = [
   { label: 'Analyzing your goals', icon: Target },
   { label: 'Selecting exercises', icon: Dumbbell },
@@ -910,6 +944,8 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   const currentSlideData = slides[currentSlide] || slides[0];
   const isLastSlide = currentSlide === slides.length - 1;
 
+  const _onboardingPhase: 'welcome' | 'workout' | 'nutrition' = showNutritionQuiz ? 'nutrition' : showGymQuiz ? 'workout' : 'welcome';
+
 
 
   if (isGeneratingPlan) {
@@ -931,6 +967,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         >
+          <View style={{ paddingHorizontal: 32, paddingTop: 16, paddingBottom: 8 }}>
+            <OnboardingSteps activePhase="workout" isSpanish={isSpanish} />
+          </View>
           <TouchableOpacity style={styles.skipButton} onPress={handleSkipGym}>
             <Text style={styles.skipText}>{t('welcome_skip')}</Text>
           </TouchableOpacity>
@@ -1105,6 +1144,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         >
+          <View style={{ paddingHorizontal: 32, paddingTop: 16, paddingBottom: 8 }}>
+            <OnboardingSteps activePhase="nutrition" isSpanish={isSpanish} />
+          </View>
           <TouchableOpacity style={styles.skipButton} onPress={handleSkipNutrition}>
             <Text style={styles.skipText}>{t('welcome_skip')}</Text>
           </TouchableOpacity>
@@ -1366,6 +1408,10 @@ Return ONLY valid JSON, no markdown or code blocks.`;
         >
           <Text style={styles.langButtonText}>{isSpanish ? 'English' : 'Español'}</Text>
         </TouchableOpacity>
+
+        <View style={{ paddingHorizontal: 32, paddingTop: 16 }}>
+          <OnboardingSteps activePhase="welcome" isSpanish={isSpanish} />
+        </View>
 
         <TouchableOpacity style={styles.skipButtonMain} onPress={handleSkip}>
           <Text style={styles.skipTextMain}>{t('welcome_skip')}</Text>
@@ -2249,5 +2295,52 @@ const styles = StyleSheet.create({
     color: '#00ADB5',
     fontSize: 14,
     fontWeight: '600' as const,
+  },
+});
+
+const onboardStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 0,
+  },
+  step: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#1F2937',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    borderWidth: 2,
+    borderColor: '#1F2937',
+  },
+  stepActive: {
+    backgroundColor: 'rgba(0,173,181,0.2)',
+    borderColor: '#00ADB5',
+  },
+  stepDone: {
+    backgroundColor: '#00ADB5',
+    borderColor: '#00ADB5',
+  },
+  stepNum: {
+    fontSize: 12,
+    fontWeight: '700' as const,
+    color: '#4B5563',
+  },
+  stepNumActive: {
+    color: '#00ADB5',
+  },
+  stepNumDone: {
+    color: '#FFFFFF',
+  },
+  connector: {
+    width: 40,
+    height: 2,
+    backgroundColor: '#1F2937',
+    borderRadius: 1,
+  },
+  connectorDone: {
+    backgroundColor: '#00ADB5',
   },
 });

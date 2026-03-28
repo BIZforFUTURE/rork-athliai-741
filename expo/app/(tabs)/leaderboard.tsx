@@ -43,12 +43,15 @@ import {
   ClipboardPaste,
   Shield,
   Check,
+  Award,
+  Lock,
 } from "lucide-react-native";
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from "@/providers/AppProvider";
 
 import { useLanguage } from "@/providers/LanguageProvider";
 import { lbsToKg, formatHeightMetric } from "@/utils/metricConversions";
+import { BADGES, AVATAR_OPTIONS, type BadgeStats } from "@/constants/badges";
 
 interface WeightEntry {
   date: string;
@@ -63,6 +66,162 @@ type StatPeriod = '7d' | '30d' | '90d' | '1y';
 
 
 
+
+function AvatarPickerModal({ visible, onClose, onSelect, currentAvatar, t }: {
+  visible: boolean;
+  onClose: () => void;
+  onSelect: (id: string) => void;
+  currentAvatar: string;
+  t: (key: any, params?: Record<string, string | number>) => string;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <View style={[avatarModalStyles.container, { paddingTop: insets.top }]}>
+        <View style={avatarModalStyles.header}>
+          <Text style={avatarModalStyles.title}>{t('avatar_title')}</Text>
+          <TouchableOpacity onPress={onClose} style={avatarModalStyles.closeBtn}>
+            <Text style={avatarModalStyles.closeText}>{t('common_cancel')}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={avatarModalStyles.grid}>
+          {AVATAR_OPTIONS.map((avatar) => {
+            const isSelected = avatar.id === currentAvatar;
+            return (
+              <TouchableOpacity
+                key={avatar.id}
+                style={[
+                  avatarModalStyles.avatarOption,
+                  isSelected && { borderColor: avatar.color, backgroundColor: avatar.color + '15' },
+                ]}
+                onPress={() => onSelect(avatar.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={avatarModalStyles.avatarEmoji}>{avatar.emoji}</Text>
+                {isSelected && (
+                  <View style={[avatarModalStyles.checkBadge, { backgroundColor: avatar.color }]}>
+                    <Check size={10} color="#FFFFFF" strokeWidth={3} />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ProfileHeader({ onAvatarPress, _t }: { onAvatarPress: () => void; _t: (key: any, params?: Record<string, string | number>) => string }) {
+  const { user, xpInfo, stats, recentRuns } = useApp();
+  const fadeIn = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+  }, [fadeIn]);
+
+  const selectedAvatar = AVATAR_OPTIONS.find(a => a.id === user.profileImage) || AVATAR_OPTIONS[0];
+
+  return (
+    <Animated.View style={[profileStyles.card, { opacity: fadeIn }]}>
+      <Pressable
+        onPress={onAvatarPress}
+        onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.92, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+        onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+      >
+        <Animated.View style={[profileStyles.avatarWrap, { transform: [{ scale: scaleAnim }], borderColor: selectedAvatar.color + '60' }]}>
+          <View style={[profileStyles.avatarInner, { backgroundColor: selectedAvatar.color + '18' }]}>
+            <Text style={profileStyles.avatarEmoji}>{selectedAvatar.emoji}</Text>
+          </View>
+          <View style={profileStyles.avatarEditBadge}>
+            <Edit3 size={10} color="#FFFFFF" />
+          </View>
+        </Animated.View>
+      </Pressable>
+      <View style={profileStyles.infoCol}>
+        <View style={profileStyles.nameRow}>
+          <Text style={profileStyles.rankEmoji}>{xpInfo.rank.emoji}</Text>
+          <Text style={[profileStyles.rankLabel, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
+        </View>
+        <Text style={profileStyles.levelText}>Level {xpInfo.level}</Text>
+        <View style={profileStyles.miniStats}>
+          <View style={profileStyles.miniStat}>
+            <Footprints size={11} color="#00E5FF" />
+            <Text style={profileStyles.miniStatVal}>{recentRuns.length}</Text>
+          </View>
+          <View style={profileStyles.miniStat}>
+            <Dumbbell size={11} color="#FF6B35" />
+            <Text style={profileStyles.miniStatVal}>{stats.totalWorkouts}</Text>
+          </View>
+          <View style={profileStyles.miniStat}>
+            <Activity size={11} color="#BFFF00" />
+            <Text style={profileStyles.miniStatVal}>{xpInfo.totalXP.toLocaleString()}</Text>
+          </View>
+        </View>
+      </View>
+    </Animated.View>
+  );
+}
+
+function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
+  const { stats, recentRuns, workoutLogs, foodHistory, xpInfo } = useApp();
+  const fadeIn = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeIn, { toValue: 1, duration: 500, delay: 100, useNativeDriver: true }).start();
+  }, [fadeIn]);
+
+  const badgeStats: BadgeStats = useMemo(() => ({
+    totalRuns: recentRuns.length,
+    totalWorkouts: workoutLogs.length,
+    totalFoodEntries: foodHistory.length,
+    runStreak: stats.runStreak,
+    workoutStreak: stats.workoutStreak,
+    foodStreak: stats.foodStreak,
+    totalXP: xpInfo.totalXP,
+    level: xpInfo.level,
+    totalMiles: recentRuns.reduce((sum, r) => sum + r.distance, 0),
+  }), [recentRuns, workoutLogs, foodHistory, stats, xpInfo]);
+
+  const earnedCount = BADGES.filter(b => b.requirement(badgeStats)).length;
+
+  return (
+    <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
+      <View style={cardStyles.cardHeader}>
+        <Award size={13} color="#F59E0B" />
+        <Text style={cardStyles.cardHeading}>{t('badges_title')}</Text>
+        <View style={badgeStyles.countPill}>
+          <Text style={badgeStyles.countText}>{earnedCount}/{BADGES.length} {t('badges_earned')}</Text>
+        </View>
+      </View>
+      <View style={badgeStyles.grid}>
+        {BADGES.map((badge) => {
+          const earned = badge.requirement(badgeStats);
+          return (
+            <View key={badge.id} style={[badgeStyles.cell, earned && { borderColor: badge.color + '25' }]}>
+              <View style={[
+                badgeStyles.emojiWrap,
+                { backgroundColor: earned ? badge.color + '15' : 'rgba(255,255,255,0.03)' },
+              ]}>
+                {earned ? (
+                  <Text style={badgeStyles.emoji}>{badge.emoji}</Text>
+                ) : (
+                  <Lock size={16} color="#374151" />
+                )}
+              </View>
+              <Text style={[badgeStyles.title, earned && { color: '#E5E7EB' }]} numberOfLines={1}>{t(badge.titleKey)}</Text>
+              <Text style={[badgeStyles.desc, earned && { color: badge.color + 'AA' }]} numberOfLines={1}>{t(badge.descKey)}</Text>
+            </View>
+          );
+        })}
+      </View>
+      {earnedCount === 0 && (
+        <Text style={badgeStyles.lockedHint}>{t('badges_locked')}</Text>
+      )}
+    </Animated.View>
+  );
+}
 
 function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void; t: (key: any, params?: Record<string, string | number>) => string; isSpanish: boolean }) {
   const { personalStats, getWeightHistory } = useApp();
@@ -593,6 +752,14 @@ export default function PersonalStatsScreen() {
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [importError, setImportError] = useState('');
   const [exportCopied, setExportCopied] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const { user, updateUser } = useApp();
+
+  const handleAvatarSelect = useCallback((avatarId: string) => {
+    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    updateUser({ profileImage: avatarId });
+    setShowAvatarModal(false);
+  }, [updateUser]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -953,6 +1120,14 @@ export default function PersonalStatsScreen() {
         </View>
       </View>
 
+      <AvatarPickerModal
+        visible={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        onSelect={handleAvatarSelect}
+        currentAvatar={user.profileImage || 'default'}
+        t={t}
+      />
+
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
@@ -964,6 +1139,8 @@ export default function PersonalStatsScreen() {
           />
         }
       >
+        <ProfileHeader onAvatarPress={() => setShowAvatarModal(true)} _t={t} />
+        <AchievementBadges t={t} />
         <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
             <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
             <WeightProgressCard onAddWeight={() => setShowWeightModal(true)} onEditWeight={handleEditWeight} onDeleteWeight={handleDeleteWeight} selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} t={t} isSpanish={isSpanish} />
@@ -1507,6 +1684,213 @@ const bkStyles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700" as const,
     color: "#F59E0B",
+  },
+});
+
+const profileStyles = StyleSheet.create({
+  card: {
+    backgroundColor: "#0E1015",
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 16,
+  },
+  avatarWrap: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 2.5,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    position: "relative" as const,
+  },
+  avatarInner: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  avatarEmoji: {
+    fontSize: 30,
+  },
+  avatarEditBadge: {
+    position: "absolute" as const,
+    bottom: -2,
+    right: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#00ADB5",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderWidth: 2,
+    borderColor: "#0E1015",
+  },
+  infoCol: {
+    flex: 1,
+    gap: 4,
+  },
+  nameRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 6,
+  },
+  rankEmoji: {
+    fontSize: 16,
+  },
+  rankLabel: {
+    fontSize: 16,
+    fontWeight: "800" as const,
+    letterSpacing: -0.3,
+  },
+  levelText: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+  },
+  miniStats: {
+    flexDirection: "row" as const,
+    gap: 12,
+    marginTop: 4,
+  },
+  miniStat: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+  },
+  miniStatVal: {
+    fontSize: 12,
+    fontWeight: "700" as const,
+    color: "#9CA3AF",
+  },
+});
+
+const badgeStyles = StyleSheet.create({
+  countPill: {
+    backgroundColor: "rgba(245,158,11,0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  countText: {
+    fontSize: 11,
+    fontWeight: "800" as const,
+    color: "#F59E0B",
+  },
+  grid: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 8,
+  },
+  cell: {
+    width: "30%" as unknown as number,
+    flexGrow: 1,
+    flexBasis: "28%" as unknown as number,
+    alignItems: "center" as const,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    backgroundColor: "rgba(255,255,255,0.02)",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.04)",
+    gap: 5,
+  },
+  emojiWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  emoji: {
+    fontSize: 20,
+  },
+  title: {
+    fontSize: 10,
+    fontWeight: "700" as const,
+    color: "#6B7280",
+    textAlign: "center" as const,
+  },
+  desc: {
+    fontSize: 9,
+    fontWeight: "500" as const,
+    color: "#374151",
+    textAlign: "center" as const,
+  },
+  lockedHint: {
+    fontSize: 12,
+    fontWeight: "500" as const,
+    color: "#374151",
+    textAlign: "center" as const,
+    marginTop: 10,
+  },
+});
+
+const avatarModalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#08090C",
+  },
+  header: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.04)",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "800" as const,
+    color: "#F3F4F6",
+    letterSpacing: -0.3,
+  },
+  closeBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  closeText: {
+    fontSize: 14,
+    fontWeight: "600" as const,
+    color: "#6B7280",
+  },
+  grid: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 14,
+    padding: 20,
+    justifyContent: "center" as const,
+  },
+  avatarOption: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.06)",
+    position: "relative" as const,
+  },
+  avatarEmoji: {
+    fontSize: 32,
+  },
+  checkBadge: {
+    position: "absolute" as const,
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    borderWidth: 2,
+    borderColor: "#08090C",
   },
 });
 
