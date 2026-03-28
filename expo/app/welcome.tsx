@@ -9,6 +9,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   Animated,
+  Alert,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -479,7 +480,6 @@ export default function WelcomeScreen() {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         if (Platform.OS !== 'web') {
-          const { Alert } = require('react-native');
           Alert.alert(t('gym_scan_permission'));
         }
         return;
@@ -559,7 +559,6 @@ Return ONLY valid JSON.`;
       setIsScanningEquipment(false);
       scanPulseAnim.setValue(0.4);
       if (Platform.OS !== 'web') {
-        const { Alert } = require('react-native');
         Alert.alert(t('gym_error'), t('gym_scan_error'));
       }
     }
