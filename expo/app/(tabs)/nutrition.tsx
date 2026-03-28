@@ -1988,8 +1988,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between" as const,
     marginTop: 20,
     paddingVertical: 4,
-    paddingHorizontal: 2,
-    gap: 6,
+    paddingHorizontal: 4,
+    gap: 2,
   },
   weekArrowBtn: {
     width: 24,
@@ -2001,7 +2001,7 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 6,
     flex: 1,
-    paddingHorizontal: 0,
+    paddingHorizontal: 4,
   },
   weekDayItemSelected: {
     transform: [{ scale: 1.05 }],
