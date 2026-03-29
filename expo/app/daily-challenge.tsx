@@ -385,16 +385,28 @@ export default function DailyChallengeScreen() {
       useNativeDriver: false,
     }).start();
 
+    let lastHapticAt = 0;
     holdTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - holdStartRef.current;
       const progress = Math.min(elapsed / HOLD_DURATION, 1);
       setHoldProgress(progress);
+
+      if (Platform.OS !== 'web') {
+        const hapticInterval = progress < 0.5 ? 500 : progress < 0.8 ? 300 : 150;
+        if (elapsed - lastHapticAt >= hapticInterval) {
+          lastHapticAt = elapsed;
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+      }
 
       if (progress >= 1) {
         if (holdTimerRef.current) clearInterval(holdTimerRef.current);
         setIsHolding(false);
         setHoldProgress(0);
         holdProgressAnim.setValue(0);
+        if (Platform.OS !== 'web') {
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
         void completeChallenge();
       }
     }, 50);
