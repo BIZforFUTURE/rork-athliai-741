@@ -1162,18 +1162,18 @@ export default function PersonalStatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#08090C",
+    backgroundColor: "#0D0D0D",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#08090C",
+    backgroundColor: "#0D0D0D",
   },
   pageTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
-    letterSpacing: -0.8,
+    color: "#F5F5F5",
+    letterSpacing: -0.5,
   },
   pageSubtitle: {
     fontSize: 13,
@@ -1194,11 +1194,12 @@ const styles = StyleSheet.create({
 
 const cardStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -1515,7 +1516,7 @@ const wpStyles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#08090C",
+    backgroundColor: "#0D0D0D",
   },
   header: {
     flexDirection: "row" as const,
@@ -1689,14 +1690,15 @@ const bkStyles = StyleSheet.create({
 
 const profileStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#0E1015",
-    borderRadius: 20,
+    backgroundColor: "#161616",
+    borderRadius: 24,
     padding: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 16,
+    overflow: "hidden" as const,
   },
   avatarWrap: {
     width: 68,
@@ -1745,7 +1747,8 @@ const profileStyles = StyleSheet.create({
   rankLabel: {
     fontSize: 16,
     fontWeight: "800" as const,
-    letterSpacing: -0.3,
+    letterSpacing: 3,
+    textTransform: "uppercase" as const,
   },
   levelText: {
     fontSize: 13,
@@ -1771,15 +1774,17 @@ const profileStyles = StyleSheet.create({
 
 const badgeStyles = StyleSheet.create({
   countPill: {
-    backgroundColor: "rgba(245,158,11,0.1)",
+    backgroundColor: "rgba(249,115,22,0.2)",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(249,115,22,0.6)",
   },
   countText: {
     fontSize: 11,
     fontWeight: "800" as const,
-    color: "#F59E0B",
+    color: "#F97316",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1793,11 +1798,12 @@ const badgeStyles = StyleSheet.create({
     alignItems: "center" as const,
     paddingVertical: 14,
     paddingHorizontal: 6,
-    backgroundColor: "rgba(255,255,255,0.02)",
-    borderRadius: 14,
+    backgroundColor: "#1E1E1E",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
     gap: 5,
+    overflow: "hidden" as const,
   },
   emojiWrap: {
     width: 40,
@@ -1833,7 +1839,7 @@ const badgeStyles = StyleSheet.create({
 const avatarModalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#08090C",
+    backgroundColor: "#0D0D0D",
   },
   header: {
     flexDirection: "row" as const,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
-import Svg, { Circle } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 
 interface CircularProgressProps {
   value: number;
@@ -54,11 +54,17 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
     <View style={styles.progressContainer}>
       <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
         <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
+          <Defs>
+            <LinearGradient id={`circGrad-${label}`} x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor={exceeds ? "#EF4444" : "#4ECDC4"} stopOpacity="1" />
+              <Stop offset="1" stopColor={exceeds ? "#EF4444" : "#22C55E"} stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
           <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={`${color}15`}
+            stroke="rgba(255,255,255,0.06)"
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -66,7 +72,7 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke={exceeds ? "#EF4444" : color}
+            stroke={`url(#circGrad-${label})`}
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={`${circumference}`}

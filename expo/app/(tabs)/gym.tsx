@@ -1984,8 +1984,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#FFFFFF",
-    letterSpacing: -1,
+    color: "#F5F5F5",
+    letterSpacing: -0.5,
   },
   subtitleRow: {
     flexDirection: "row" as const,
@@ -2149,10 +2149,11 @@ const styles = StyleSheet.create({
 
   buildWorkoutCTASmall: {
     marginTop: 14,
-    backgroundColor: "#171B22",
-    borderRadius: 14,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   buildSmallInner: {
     flexDirection: "row" as const,
@@ -2186,11 +2187,11 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   todaysWorkoutCard: {
-    borderRadius: 20,
-    overflow: "hidden",
-    shadowColor: "#00ADB5",
+    borderRadius: 24,
+    overflow: "hidden" as const,
+    shadowColor: "#4ECDC4",
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 16,
     elevation: 8,
   },
@@ -2242,10 +2243,12 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255,255,255,0.7)",
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.7)",
   },
   todayStartText: {
     fontSize: 14,
@@ -2254,7 +2257,7 @@ const styles = StyleSheet.create({
   },
 
   restDayCard: {
-    borderRadius: 20,
+    borderRadius: 24,
     overflow: "hidden" as const,
     borderWidth: 1,
     borderColor: "rgba(56, 189, 248, 0.15)",
@@ -2340,12 +2343,13 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#171B22",
-    borderRadius: 16,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 16,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   statIconWrap: {
     width: 36,
@@ -2356,9 +2360,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   statNumber: {
-    fontSize: 22,
-    fontWeight: "800" as const,
-    color: "#F9FAFB",
+    fontSize: 32,
+    fontWeight: "900" as const,
+    color: "#F5F5F5",
     letterSpacing: -0.5,
   },
   statLabel: {
@@ -2396,12 +2400,13 @@ const styles = StyleSheet.create({
   },
 
   emptyState: {
-    backgroundColor: "#171B22",
-    borderRadius: 16,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 36,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   emptyIconWrap: {
     width: 64,
@@ -2428,14 +2433,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recentWorkoutCard: {
-    backgroundColor: "#171B22",
-    borderRadius: 14,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 14,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   recentWorkoutLeft: {
     flexDirection: "row" as const,

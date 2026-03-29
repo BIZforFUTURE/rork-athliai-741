@@ -84,7 +84,7 @@ MacroCard.displayName = "MacroCard";
 const macroCardStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#141720',
+    backgroundColor: '#161616',
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
@@ -1921,7 +1921,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
   },
   content: {
     flex: 1,
@@ -2106,7 +2106,7 @@ const styles = StyleSheet.create({
   },
 
   calorieCard: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 20,
     marginTop: 16,
@@ -2158,7 +2158,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   healthScoreCard: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 20,
     marginTop: 8,
@@ -2213,7 +2213,7 @@ const styles = StyleSheet.create({
   },
   actionChip: {
     flex: 1,
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -2246,7 +2246,7 @@ const styles = StyleSheet.create({
   exerciseChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -2288,7 +2288,7 @@ const styles = StyleSheet.create({
     fontWeight: "500" as const,
   },
   emptyMeals: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 40,
     alignItems: "center",
@@ -2307,7 +2307,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   mealCard: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
@@ -2404,7 +2404,7 @@ const styles = StyleSheet.create({
   },
 
   addFoodCard: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
@@ -2434,7 +2434,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
@@ -2451,7 +2451,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nutritionInput: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
@@ -2508,7 +2508,7 @@ const styles = StyleSheet.create({
   },
 
   quizRequiredCard: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 32,
     marginTop: 20,
@@ -2564,10 +2564,10 @@ const styles = StyleSheet.create({
   },
   foodDetailOverlay: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
   },
   sheetModal: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 24,
     width: "90%",
@@ -2596,7 +2596,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sheetTextInput: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
     borderRadius: 14,
     padding: 16,
     fontSize: 16,
@@ -2639,7 +2639,7 @@ const styles = StyleSheet.create({
   },
 
   firstTimeModal: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 28,
     width: "90%",
@@ -2729,7 +2729,7 @@ const styles = StyleSheet.create({
   },
 
   quizModal: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 28,
     width: "90%",
@@ -2756,7 +2756,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   quizInput: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
@@ -2768,7 +2768,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   choiceButton: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 15,
     borderWidth: 2,
@@ -2846,7 +2846,7 @@ const styles = StyleSheet.create({
   analyzingText: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, marginTop: 20 },
 
   foodSearchModal: {
-    backgroundColor: "#141720",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 24,
     width: "92%",
@@ -2863,7 +2863,7 @@ const styles = StyleSheet.create({
   },
   foodSearchInput: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -2987,7 +2987,7 @@ const analyzingStyles = StyleSheet.create({
     marginTop: 20,
   },
   card: {
-    backgroundColor: '#141720',
+    backgroundColor: '#161616',
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
@@ -3053,7 +3053,7 @@ const analyzingStyles = StyleSheet.create({
 const fdStyles = StyleSheet.create({
   detailModal: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0D0D0D",
   },
   detailHeader: {
     flexDirection: "row",

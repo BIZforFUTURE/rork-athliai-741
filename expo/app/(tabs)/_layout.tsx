@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet, Animated } from "react-native";
 import { useLanguage } from "@/providers/LanguageProvider";
+import { LinearGradient } from "expo-linear-gradient";
 
 function AnimatedTabIcon({
   children,
@@ -62,23 +63,31 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#00E5FF",
+        tabBarActiveTintColor: "#4ECDC4",
         tabBarInactiveTintColor: "#374151",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#0A0C10",
-          borderTopWidth: 1,
-          borderTopColor: "rgba(0,229,255,0.08)",
+          backgroundColor: "#141414",
+          borderTopWidth: 0,
           position: "absolute" as const,
           elevation: 0,
         },
         tabBarLabelStyle: {
-          fontWeight: "700" as const,
+          fontWeight: "600" as const,
           fontSize: 10,
-          letterSpacing: 0.8,
+          letterSpacing: 1,
           textTransform: "uppercase" as const,
           marginTop: 2,
         },
+        tabBarBackground: () => (
+          <View style={{ flex: 1 }}>
+            <LinearGradient
+              colors={['rgba(0,0,0,0)', '#1A1A1A']}
+              style={{ position: 'absolute', top: -24, left: 0, right: 0, height: 24 }}
+            />
+            <View style={{ flex: 1, backgroundColor: '#141414' }} />
+          </View>
+        ),
       }}
     >
       <Tabs.Screen
@@ -189,9 +198,9 @@ const styles = StyleSheet.create({
   glowDot: {
     position: "absolute" as const,
     bottom: -6,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#00E5FF",
+    width: 6,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "#4ECDC4",
   },
 });

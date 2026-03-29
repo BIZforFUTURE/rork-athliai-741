@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Dumbbell,
@@ -591,22 +592,22 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#08090C",
+    backgroundColor: "#0D0D0D",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#08090C",
+    backgroundColor: "#0D0D0D",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
     gap: 10,
   },
   greetingText: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
-    letterSpacing: -0.8,
+    color: "#F5F5F5",
+    letterSpacing: -0.5,
     flexShrink: 1,
   },
   subGreeting: {
@@ -663,14 +664,15 @@ const styles = StyleSheet.create({
 
 const heroStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0E1015",
-    borderRadius: 22,
+    backgroundColor: "#161616",
+    borderRadius: 24,
     paddingTop: 24,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
     alignItems: "center" as const,
+    overflow: "hidden" as const,
   },
   ringCol: {
     alignItems: "center" as const,
@@ -702,6 +704,9 @@ const heroStyles = StyleSheet.create({
     fontWeight: "900" as const,
     letterSpacing: -2,
     lineHeight: 56,
+    textShadowColor: 'rgba(34,197,94,0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
   levelLabel: {
     fontSize: 10,
@@ -720,7 +725,7 @@ const heroStyles = StyleSheet.create({
   rankTagText: {
     fontSize: 12,
     fontWeight: "800" as const,
-    letterSpacing: 1,
+    letterSpacing: 3,
     textTransform: "uppercase" as const,
   },
   xpRow: {
@@ -748,6 +753,7 @@ const heroStyles = StyleSheet.create({
   progressFill: {
     height: "100%" as const,
     borderRadius: 3,
+    backgroundColor: "#4ECDC4",
   },
   progressShimmer: {
     position: "absolute" as const,
@@ -796,17 +802,21 @@ const heroStyles = StyleSheet.create({
 
 const questStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   header: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     marginBottom: 14,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(78,205,196,0.2)",
+    paddingTop: 4,
   },
   headerLeft: {
     flexDirection: "row" as const,
@@ -834,6 +844,7 @@ const questStyles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 10,
     paddingVertical: 8,
+    position: "relative" as const,
   },
   iconWrap: {
     width: 32,
@@ -869,6 +880,9 @@ const questStyles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800" as const,
     letterSpacing: -0.3,
+    textShadowColor: 'rgba(34,197,94,0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   checkMark: {
     width: 18,
@@ -883,13 +897,14 @@ const streakStyles = StyleSheet.create({
   strip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#0E1015",
-    borderRadius: 16,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 14,
     gap: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   flameWrap: {
     position: "relative" as const,
@@ -947,11 +962,12 @@ const streakStyles = StyleSheet.create({
 
 const nutStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,107,53,0.1)",
+    borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -1007,7 +1023,7 @@ const nutStyles = StyleSheet.create({
   calNum: {
     fontSize: 26,
     fontWeight: "900" as const,
-    color: "#FFFFFF",
+    color: "#F5F5F5",
     letterSpacing: -1,
     lineHeight: 30,
   },
@@ -1079,11 +1095,12 @@ const nutStyles = StyleSheet.create({
 
 const weekStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0E1015",
-    borderRadius: 22,
+    backgroundColor: "#161616",
+    borderRadius: 24,
     padding: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   headerRow: {
     flexDirection: "row" as const,
@@ -1105,13 +1122,14 @@ const weekStyles = StyleSheet.create({
     width: "47%" as unknown as number,
     flexGrow: 1,
     flexBasis: "44%" as unknown as number,
-    backgroundColor: "rgba(255,255,255,0.025)",
-    borderRadius: 16,
+    backgroundColor: "#1E1E1E",
+    borderRadius: 20,
     padding: 14,
     borderWidth: 1,
     overflow: "hidden" as const,
     position: "relative" as const,
     minHeight: 110,
+    borderColor: "rgba(255,255,255,0.06)",
   },
   cellTop: {
     flexDirection: "row" as const,
@@ -1128,9 +1146,9 @@ const weekStyles = StyleSheet.create({
     justifyContent: "center" as const,
   },
   cellValue: {
-    fontSize: 28,
-    fontWeight: "800" as const,
-    color: "#F3F4F6",
+    fontSize: 32,
+    fontWeight: "900" as const,
+    color: "#F5F5F5",
     letterSpacing: -1,
   },
   cellUnit: {
@@ -1158,11 +1176,12 @@ const weekStyles = StyleSheet.create({
 
 const feedStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
+    overflow: "hidden" as const,
   },
   header: {
     flexDirection: "row" as const,
