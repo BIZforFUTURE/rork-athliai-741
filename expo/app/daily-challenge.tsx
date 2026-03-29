@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Animated,
+  TextInput,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -252,6 +253,19 @@ export default function DailyChallengeScreen() {
   });
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [isHolding, setIsHolding] = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const holdStartRef = useRef<number>(0);
+  const holdProgressAnim = useRef(new Animated.Value(0)).current;
+
+  const REQUIRED_TEXT = "I fully completed my daily challenge today";
+  const REQUIRED_TEXT_ES = "Completé mi desafío diario hoy";
+  const HOLD_DURATION = 5000;
+
+  const requiredText = isSpanish ? REQUIRED_TEXT_ES : REQUIRED_TEXT;
+  const textMatches = confirmText.trim().toLowerCase() === requiredText.toLowerCase();
 
   const heroScale = useRef(new Animated.Value(0.9)).current;
   const heroOpacity = useRef(new Animated.Value(0)).current;
@@ -354,6 +368,54 @@ export default function DailyChallengeScreen() {
       }, 2000);
     });
   }, [isCompleted, challengeData, todayStr, completeBtnScale, confettiOpacity, checkScale]);
+
+  const startHold = useCallback(() => {
+    if (!textMatches || isCompleted) return;
+    setIsHolding(true);
+    holdStartRef.current = Date.now();
+    holdProgressAnim.setValue(0);
+
+    if (Platform.OS !== "web") {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    Animated.timing(holdProgressAnim, {
+      toValue: 1,
+      duration: HOLD_DURATION,
+      useNativeDriver: false,
+    }).start();
+
+    holdTimerRef.current = setInterval(() => {
+      const elapsed = Date.now() - holdStartRef.current;
+      const progress = Math.min(elapsed / HOLD_DURATION, 1);
+      setHoldProgress(progress);
+
+      if (progress >= 1) {
+        if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+        setIsHolding(false);
+        setHoldProgress(0);
+        holdProgressAnim.setValue(0);
+        void completeChallenge();
+      }
+    }, 50);
+  }, [textMatches, isCompleted, completeChallenge, holdProgressAnim]);
+
+  const cancelHold = useCallback(() => {
+    if (holdTimerRef.current) {
+      clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    setIsHolding(false);
+    setHoldProgress(0);
+    holdProgressAnim.stopAnimation();
+    holdProgressAnim.setValue(0);
+  }, [holdProgressAnim]);
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+    };
+  }, []);
 
   const challengeName = isSpanish ? todayChallenge.nameEs : todayChallenge.name;
   const challengeDesc = isSpanish ? todayChallenge.descriptionEs : todayChallenge.description;
@@ -494,17 +556,78 @@ export default function DailyChallengeScreen() {
             <Text style={styles.completedBarText}>{t("daily_challenge_completed" as any)}</Text>
           </View>
         ) : (
-          <Animated.View style={{ transform: [{ scale: completeBtnScale }], width: "100%" as const }}>
-            <TouchableOpacity
-              style={[styles.completeButton, { backgroundColor: todayChallenge.color }]}
-              activeOpacity={0.85}
-              onPress={completeChallenge}
-              testID="complete-challenge-btn"
-            >
-              <Trophy size={20} color="#FFFFFF" />
-              <Text style={styles.completeButtonText}>{t("daily_challenge_complete" as any)}</Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <View style={styles.confirmSection}>
+            <Text style={styles.confirmLabel}>
+              {isSpanish ? "Escribe para confirmar:" : "Type to confirm:"}
+            </Text>
+            <Text style={styles.confirmRequired}>
+              "{requiredText}"
+            </Text>
+            <TextInput
+              style={[
+                styles.confirmInput,
+                textMatches && styles.confirmInputValid,
+              ]}
+              value={confirmText}
+              onChangeText={setConfirmText}
+              placeholder={isSpanish ? "Escribe aquí..." : "Type here..."}
+              placeholderTextColor="#4B5563"
+              autoCapitalize="none"
+              autoCorrect={false}
+              testID="confirm-text-input"
+            />
+            {textMatches && (
+              <Text style={styles.holdInstructionText}>
+                {isSpanish ? "Mantén presionado 5 segundos para confirmar" : "Hold for 5 seconds to confirm"}
+              </Text>
+            )}
+            <Animated.View style={{ transform: [{ scale: completeBtnScale }], width: "100%" as const }}>
+              <View
+                style={[
+                  styles.holdButtonOuter,
+                  !textMatches && styles.holdButtonDisabled,
+                ]}
+              >
+                {isHolding && (
+                  <Animated.View
+                    style={[
+                      styles.holdProgressFill,
+                      {
+                        backgroundColor: todayChallenge.color,
+                        width: holdProgressAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ["0%", "100%"],
+                        }),
+                      },
+                    ]}
+                  />
+                )}
+                <TouchableOpacity
+                  style={[
+                    styles.holdButtonInner,
+                    textMatches && { borderColor: todayChallenge.color },
+                  ]}
+                  activeOpacity={1}
+                  onPressIn={startHold}
+                  onPressOut={cancelHold}
+                  disabled={!textMatches}
+                  testID="hold-confirm-btn"
+                >
+                  <Trophy size={20} color={textMatches ? "#FFFFFF" : "#4B5563"} />
+                  <Text style={[
+                    styles.holdButtonText,
+                    !textMatches && styles.holdButtonTextDisabled,
+                  ]}>
+                    {isHolding
+                      ? `${Math.ceil((1 - holdProgress) * 5)}s...`
+                      : isSpanish
+                        ? "Mantener para completar"
+                        : "Hold to Complete"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </View>
         )}
       </View>
     </View>
@@ -798,5 +921,77 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700" as const,
     color: "#10B981",
+  },
+  confirmSection: {
+    width: "100%",
+    gap: 8,
+  },
+  confirmLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: "#9CA3AF",
+    textAlign: "center",
+  },
+  confirmRequired: {
+    fontSize: 12,
+    color: "#6B7280",
+    textAlign: "center",
+    fontStyle: "italic",
+    marginBottom: 4,
+  },
+  confirmInput: {
+    backgroundColor: "#171B22",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
+    color: "#F9FAFB",
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.06)",
+  },
+  confirmInputValid: {
+    borderColor: "#10B981",
+    backgroundColor: "rgba(16, 185, 129, 0.06)",
+  },
+  holdInstructionText: {
+    fontSize: 12,
+    color: "#10B981",
+    textAlign: "center",
+    fontWeight: "600" as const,
+  },
+  holdButtonOuter: {
+    borderRadius: 16,
+    overflow: "hidden",
+    position: "relative",
+  },
+  holdButtonDisabled: {
+    opacity: 0.4,
+  },
+  holdProgressFill: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    borderRadius: 16,
+    opacity: 0.3,
+  },
+  holdButtonInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 10,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255,255,255,0.04)",
+  },
+  holdButtonText: {
+    fontSize: 17,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+  },
+  holdButtonTextDisabled: {
+    color: "#4B5563",
   },
 });
