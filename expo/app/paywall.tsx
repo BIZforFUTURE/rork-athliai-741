@@ -45,7 +45,7 @@ export default function PaywallScreen() {
 
 
   const annualPackage = currentOffering?.availablePackages?.[0];
-  const priceString = annualPackage?.product?.priceString ?? "$19.99";
+  const priceString = "$19.99";
 
   const handlePurchase = async () => {
     if (isPurchasing) return;
