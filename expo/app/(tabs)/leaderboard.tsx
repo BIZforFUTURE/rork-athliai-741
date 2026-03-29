@@ -112,47 +112,6 @@ function AvatarPickerModal({ visible, onClose, onSelect, currentAvatar, t }: {
   );
 }
 
-function FitnessStatsCard({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
-  const { stats, recentRuns } = useApp();
-  const fadeIn = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }).start();
-  }, [fadeIn]);
-
-  const totalMiles = useMemo(() => recentRuns.reduce((sum, r) => sum + r.distance, 0), [recentRuns]);
-
-  const items = [
-    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: "THIS WEEK", color: "#00E5FF", icon: <Footprints size={20} color="#00E5FF" /> },
-    { value: totalMiles.toFixed(1), unit: "mi", label: "ALL TIME", color: "#8B5CF6", icon: <TrendingUp size={20} color="#8B5CF6" /> },
-    { value: `${stats.weeklyRuns}`, unit: "", label: "RUNS/WK", color: "#BFFF00", icon: <BarChart3 size={20} color="#BFFF00" /> },
-    { value: `${recentRuns.length}`, unit: "", label: "TOTAL RUNS", color: "#F59E0B", icon: <Target size={20} color="#F59E0B" /> },
-  ];
-
-  return (
-    <Animated.View style={[fitnessStatsStyles.card, { opacity: fadeIn }]}>
-      <View style={fitnessStatsStyles.headerRow}>
-        <TrendingUp size={16} color="#9CA3AF" />
-        <Text style={fitnessStatsStyles.heading}>{t('tab_stats') === 'Stats' ? 'Fitness Stats' : 'Estadísticas'}</Text>
-      </View>
-      <View style={fitnessStatsStyles.grid}>
-        {items.map((item) => (
-          <View key={item.label} style={fitnessStatsStyles.cell}>
-            <View style={[fitnessStatsStyles.cellIcon, { backgroundColor: item.color + "14" }]}>
-              {item.icon}
-            </View>
-            <Text style={fitnessStatsStyles.cellValue}>
-              {item.value}
-              {item.unit ? <Text style={fitnessStatsStyles.cellUnit}> {item.unit}</Text> : null}
-            </Text>
-            <Text style={[fitnessStatsStyles.cellLabel, { color: item.color }]}>{item.label}</Text>
-          </View>
-        ))}
-      </View>
-    </Animated.View>
-  );
-}
-
 function ProfileHeader({ onAvatarPress, _t }: { onAvatarPress: () => void; _t: (key: any, params?: Record<string, string | number>) => string }) {
   const { user, xpInfo, stats, recentRuns } = useApp();
   const fadeIn = useRef(new Animated.Value(0)).current;
@@ -1180,7 +1139,6 @@ export default function PersonalStatsScreen() {
           />
         }
       >
-        <FitnessStatsCard t={t} />
         <ProfileHeader onAvatarPress={() => setShowAvatarModal(true)} _t={t} />
         <AchievementBadges t={t} />
         <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
@@ -1200,69 +1158,6 @@ export default function PersonalStatsScreen() {
     </View>
   );
 }
-
-const fitnessStatsStyles = StyleSheet.create({
-  card: {
-    backgroundColor: "#0E1015",
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  headerRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 8,
-    marginBottom: 16,
-  },
-  heading: {
-    fontSize: 16,
-    fontWeight: "800" as const,
-    color: "#E5E7EB",
-    letterSpacing: -0.3,
-  },
-  grid: {
-    flexDirection: "row" as const,
-    flexWrap: "wrap" as const,
-    gap: 10,
-  },
-  cell: {
-    width: "47%" as unknown as number,
-    flexGrow: 1,
-    flexBasis: "44%" as unknown as number,
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderRadius: 16,
-    padding: 16,
-    overflow: "hidden" as const,
-    minHeight: 110,
-    gap: 6,
-  },
-  cellIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    marginBottom: 4,
-  },
-  cellValue: {
-    fontSize: 28,
-    fontWeight: "800" as const,
-    color: "#F3F4F6",
-    letterSpacing: -1,
-  },
-  cellUnit: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#6B7280",
-  },
-  cellLabel: {
-    fontSize: 11,
-    fontWeight: "700" as const,
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.8,
-  },
-});
 
 const styles = StyleSheet.create({
   container: {
