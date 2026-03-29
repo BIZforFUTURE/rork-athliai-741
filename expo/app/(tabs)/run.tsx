@@ -18,7 +18,7 @@ import {
   type AppStateStatus,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Pause, TrendingUp, Flame, X, Zap, Route, Camera, ScanLine, Check, Edit3, Navigation, ChevronRight } from "lucide-react-native";
+import { Play, Pause, TrendingUp, Flame, X, Zap, Route, ScanLine, Check, Edit3, Navigation, ChevronRight } from "lucide-react-native";
 
 import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
@@ -925,17 +925,14 @@ export default function RunScreen() {
         >
           <View style={styles.treadmillLogBtnLeft}>
             <View style={styles.treadmillLogBtnIcon}>
-              <Camera size={20} color="#00E5FF" />
+              <Route size={20} color="#8B5CF6" />
             </View>
             <View style={styles.treadmillLogBtnTextWrap}>
               <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill_short')}</Text>
-              <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
+              <Text style={styles.treadmillLogBtnSub}>Enter distance & time manually</Text>
             </View>
           </View>
-          <View style={styles.treadmillLogBtnXp}>
-            <Zap size={10} color="#BFFF00" fill="#BFFF00" />
-            <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
-          </View>
+          <ChevronRight size={18} color="#4B5563" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -1469,13 +1466,13 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    gap: 4,
-    paddingVertical: 8,
+    gap: 5,
+    paddingVertical: 10,
   },
   startBtnXpText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700" as const,
-    color: "#00E5FF",
+    color: "#4B5563",
   },
   modalOverlay: {
     flex: 1,
@@ -1564,7 +1561,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(0,229,255,0.12)",
+    borderColor: "rgba(255,255,255,0.06)",
     marginTop: 4,
   },
   treadmillLogBtnLeft: {
@@ -1577,7 +1574,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "rgba(0,229,255,0.1)",
+    backgroundColor: "rgba(139,92,246,0.12)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
