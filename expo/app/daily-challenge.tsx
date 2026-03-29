@@ -8,6 +8,7 @@ import {
   Platform,
   Animated,
   TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -303,6 +304,7 @@ export default function DailyChallengeScreen() {
     ]).start();
   }, [loadChallengeData, heroScale, heroOpacity, contentSlide, contentOpacity]);
 
+  const scrollViewRef = useRef<ScrollView>(null);
   const [timeRemaining, setTimeRemaining] = useState("");
 
   useEffect(() => {
@@ -457,7 +459,23 @@ export default function DailyChallengeScreen() {
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        style={styles.content}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={insets.top + 56}
+      >
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={() => {
+          if (confirmText.length > 0) {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }
+        }}
+      >
         <Animated.View style={[styles.heroSection, { transform: [{ scale: heroScale }], opacity: heroOpacity }]}>
           <LinearGradient
             colors={[todayChallenge.color, `${todayChallenge.color}CC`]}
@@ -558,90 +576,95 @@ export default function DailyChallengeScreen() {
           </View>
         </Animated.View>
 
-        <View style={{ height: 120 }} />
-      </ScrollView>
-
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
-        {isCompleted ? (
-          <View style={styles.completedBar}>
-            <Check size={22} color="#10B981" strokeWidth={3} />
-            <Text style={styles.completedBarText}>{t("daily_challenge_completed" as any)}</Text>
-          </View>
-        ) : (
-          <View style={styles.confirmSection}>
-            <Text style={styles.confirmLabel}>
-              {isSpanish ? "Escribe para confirmar:" : "Type to confirm:"}
-            </Text>
-            <Text style={styles.confirmRequired}>
-              "{requiredText}"
-            </Text>
-            <TextInput
-              style={[
-                styles.confirmInput,
-                textMatches && styles.confirmInputValid,
-              ]}
-              value={confirmText}
-              onChangeText={setConfirmText}
-              placeholder={isSpanish ? "Escribe aquí..." : "Type here..."}
-              placeholderTextColor="#4B5563"
-              autoCapitalize="none"
-              autoCorrect={false}
-              testID="confirm-text-input"
-            />
-            {textMatches && (
-              <Text style={styles.holdInstructionText}>
-                {isSpanish ? "Mantén presionado 5 segundos para confirmar" : "Hold for 5 seconds to confirm"}
+        <View style={[styles.bottomSection, { paddingBottom: insets.bottom + 20 }]}>
+          {isCompleted ? (
+            <View style={styles.completedBar}>
+              <Check size={22} color="#10B981" strokeWidth={3} />
+              <Text style={styles.completedBarText}>{t("daily_challenge_completed" as any)}</Text>
+            </View>
+          ) : (
+            <View style={styles.confirmSection}>
+              <Text style={styles.confirmLabel}>
+                {isSpanish ? "Escribe para confirmar:" : "Type to confirm:"}
               </Text>
-            )}
-            <Animated.View style={{ transform: [{ scale: completeBtnScale }], width: "100%" as const }}>
-              <View
+              <Text style={styles.confirmRequired}>
+                "{requiredText}"
+              </Text>
+              <TextInput
                 style={[
-                  styles.holdButtonOuter,
-                  !textMatches && styles.holdButtonDisabled,
+                  styles.confirmInput,
+                  textMatches && styles.confirmInputValid,
                 ]}
-              >
-                {isHolding && (
-                  <Animated.View
-                    style={[
-                      styles.holdProgressFill,
-                      {
-                        backgroundColor: todayChallenge.color,
-                        width: holdProgressAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ["0%", "100%"],
-                        }),
-                      },
-                    ]}
-                  />
-                )}
-                <TouchableOpacity
+                value={confirmText}
+                onChangeText={(text) => {
+                  setConfirmText(text);
+                  setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+                }}
+                placeholder={isSpanish ? "Escribe aquí..." : "Type here..."}
+                placeholderTextColor="#4B5563"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onFocus={() => {
+                  setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300);
+                }}
+                testID="confirm-text-input"
+              />
+              {textMatches && (
+                <Text style={styles.holdInstructionText}>
+                  {isSpanish ? "Mantén presionado 5 segundos para confirmar" : "Hold for 5 seconds to confirm"}
+                </Text>
+              )}
+              <Animated.View style={{ transform: [{ scale: completeBtnScale }], width: "100%" as const }}>
+                <View
                   style={[
-                    styles.holdButtonInner,
-                    textMatches && { borderColor: todayChallenge.color },
+                    styles.holdButtonOuter,
+                    !textMatches && styles.holdButtonDisabled,
                   ]}
-                  activeOpacity={1}
-                  onPressIn={startHold}
-                  onPressOut={cancelHold}
-                  disabled={!textMatches}
-                  testID="hold-confirm-btn"
                 >
-                  <Trophy size={20} color={textMatches ? "#FFFFFF" : "#4B5563"} />
-                  <Text style={[
-                    styles.holdButtonText,
-                    !textMatches && styles.holdButtonTextDisabled,
-                  ]}>
-                    {isHolding
-                      ? `${Math.ceil((1 - holdProgress) * 5)}s...`
-                      : isSpanish
-                        ? "Mantener para completar"
-                        : "Hold to Complete"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </Animated.View>
-          </View>
-        )}
-      </View>
+                  {isHolding && (
+                    <Animated.View
+                      style={[
+                        styles.holdProgressFill,
+                        {
+                          backgroundColor: todayChallenge.color,
+                          width: holdProgressAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ["0%", "100%"],
+                          }),
+                        },
+                      ]}
+                    />
+                  )}
+                  <TouchableOpacity
+                    style={[
+                      styles.holdButtonInner,
+                      textMatches && { borderColor: todayChallenge.color },
+                    ]}
+                    activeOpacity={1}
+                    onPressIn={startHold}
+                    onPressOut={cancelHold}
+                    disabled={!textMatches}
+                    testID="hold-confirm-btn"
+                  >
+                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#4B5563"} />
+                    <Text style={[
+                      styles.holdButtonText,
+                      !textMatches && styles.holdButtonTextDisabled,
+                    ]}>
+                      {isHolding
+                        ? `${Math.ceil((1 - holdProgress) * 5)}s...`
+                        : isSpanish
+                          ? "Mantener para completar"
+                          : "Hold to Complete"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </Animated.View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -684,8 +707,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   heroSection: {
     marginTop: 8,
@@ -893,14 +920,9 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 20,
   },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    backgroundColor: "rgba(13, 15, 19, 0.95)",
+  bottomSection: {
+    marginTop: 20,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.04)",
   },
