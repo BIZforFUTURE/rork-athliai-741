@@ -782,7 +782,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   header: {
     flexDirection: "row",
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: "#171B22",
     borderBottomWidth: 1,
-    borderBottomColor: "#0D0F13",
+    borderBottomColor: "#091517",
   },
   closeButton: {
     padding: 5,
@@ -981,7 +981,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
     borderRadius: 8,
     padding: 5,
     gap: 10,
@@ -1007,7 +1007,7 @@ const styles = StyleSheet.create({
     textAlign: "center" as const,
   },
   repsInput: {
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
@@ -1016,7 +1016,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   pickerHeader: {
     flexDirection: "row",

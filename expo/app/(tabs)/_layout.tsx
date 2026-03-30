@@ -67,7 +67,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "#374151",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#141414",
+          backgroundColor: "#0B1A1C",
           borderTopWidth: 0,
           position: "absolute" as const,
           elevation: 0,
@@ -82,10 +82,10 @@ export default function TabLayout() {
         tabBarBackground: () => (
           <View style={{ flex: 1 }}>
             <LinearGradient
-              colors={['rgba(0,0,0,0)', '#1A1A1A']}
+              colors={['rgba(9,21,23,0)', '#0B1A1C']}
               style={{ position: 'absolute', top: -24, left: 0, right: 0, height: 24 }}
             />
-            <View style={{ flex: 1, backgroundColor: '#141414' }} />
+            <View style={{ flex: 1, backgroundColor: '#0B1A1C' }} />
           </View>
         ),
       }}

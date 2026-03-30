@@ -1112,10 +1112,10 @@ export default function RunScreen() {
 const styles = StyleSheet.create({
   activeRunContainer: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   activeRunPanel: {
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 16,
@@ -1242,12 +1242,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 12,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -1288,7 +1288,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   timerCard: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 24,
     paddingVertical: 32,
     paddingHorizontal: 28,
@@ -1354,7 +1354,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 14,
     alignItems: "center" as const,
@@ -1417,22 +1417,22 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
   },
   controlBtnPause: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderWidth: 1,
     borderColor: "rgba(245,158,11,0.3)",
   },
   controlBtnResume: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderWidth: 1,
     borderColor: "rgba(0,173,181,0.3)",
   },
   controlBtnStop: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderWidth: 1,
     borderColor: "rgba(239,68,68,0.3)",
   },
   controlBtnDisabled: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderColor: "rgba(55,65,81,0.3)",
     opacity: 0.5,
   },
@@ -1449,7 +1449,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EF4444",
   },
   startBtn: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 24,
     padding: 4,
     borderWidth: 1,
@@ -1496,7 +1496,7 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
   },
   modalContent: {
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#152C2E",
     borderRadius: 24,
     padding: 28,
     width: "85%",
@@ -1572,7 +1572,7 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
@@ -1624,7 +1624,7 @@ const styles = StyleSheet.create({
     color: "#BFFF00",
   },
   treadmillModalContent: {
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#152C2E",
     borderRadius: 28,
     padding: 24,
     width: "90%",
@@ -1981,7 +1981,7 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,

@@ -114,7 +114,7 @@ export default function PaywallScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#0D0F13", "#111827", "#0D0F13"]}
+        colors={["#091517", "#0C1E1F", "#091517"]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -174,7 +174,7 @@ export default function PaywallScreen() {
 
         <View style={styles.priceCard}>
           <LinearGradient
-            colors={["#1F2937", "#111827"]}
+            colors={["#1F2937", "#0C1E1F"]}
             style={styles.priceCardGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}

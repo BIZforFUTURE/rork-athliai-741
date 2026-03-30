@@ -603,14 +603,14 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
               yAxisInterval={1}
               fromZero={false}
               chartConfig={{
-                backgroundColor: '#0E1015',
-                backgroundGradientFrom: '#0E1015',
-                backgroundGradientTo: '#0E1015',
+                backgroundColor: '#0C1C1E',
+                backgroundGradientFrom: '#0C1C1E',
+                backgroundGradientTo: '#0C1C1E',
                 decimalPlaces: 1,
                 color: (opacity = 1) => `rgba(0, 173, 181, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(75, 85, 99, ${opacity})`,
                 style: { borderRadius: 12 },
-                propsForDots: { r: '3', strokeWidth: '1.5', stroke: '#00ADB5', fill: '#0E1015' },
+                propsForDots: { r: '3', strokeWidth: '1.5', stroke: '#00ADB5', fill: '#0C1C1E' },
                 propsForBackgroundLines: { strokeDasharray: '', stroke: 'rgba(255,255,255,0.03)', strokeWidth: 1 },
                 propsForLabels: { fontSize: 10 },
               }}
@@ -1162,12 +1162,12 @@ export default function PersonalStatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   pageTitle: {
     fontSize: 32,
@@ -1194,7 +1194,7 @@ const styles = StyleSheet.create({
 
 const cardStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
@@ -1516,7 +1516,7 @@ const wpStyles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   header: {
     flexDirection: "row" as const,
@@ -1559,7 +1559,7 @@ const modalStyles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -1592,7 +1592,7 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center" as const,
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
@@ -1690,7 +1690,7 @@ const bkStyles = StyleSheet.create({
 
 const profileStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
@@ -1730,7 +1730,7 @@ const profileStyles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
-    borderColor: "#0E1015",
+    borderColor: "#0C1C1E",
   },
   infoCol: {
     flex: 1,
@@ -1798,7 +1798,7 @@ const badgeStyles = StyleSheet.create({
     alignItems: "center" as const,
     paddingVertical: 14,
     paddingHorizontal: 6,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#152C2E",
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
@@ -1839,7 +1839,7 @@ const badgeStyles = StyleSheet.create({
 const avatarModalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   header: {
     flexDirection: "row" as const,
@@ -1938,7 +1938,7 @@ const backupModalStyles = StyleSheet.create({
     color: "#00E5FF",
   },
   textArea: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0C1C1E",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,

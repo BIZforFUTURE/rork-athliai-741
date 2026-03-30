@@ -304,7 +304,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Your AI Fitness Companion',
     description: 'Track runs, workouts, and nutrition with intelligent insights that adapt to your goals.',
     icon: null,
-    gradient: ['#0D0F13', '#111827'],
+    gradient: ['#091517', '#111827'],
   },
   {
     id: 2,
@@ -312,7 +312,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Runs • Workouts • Nutrition',
     description: 'Monitor your complete fitness journey in one place. Every rep, every mile, every meal counts.',
     icon: <Activity size={80} color="#00ADB5" />,
-    gradient: ['#0D0F13', '#111827'],
+    gradient: ['#091517', '#111827'],
   },
   {
     id: 3,
@@ -320,7 +320,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Built for You',
     description: 'AI-generated workout and nutrition plans that match your fitness level, goals, and lifestyle.',
     icon: <Dumbbell size={80} color="#00ADB5" />,
-    gradient: ['#0D0F13', '#111827'],
+    gradient: ['#091517', '#111827'],
   },
   {
     id: 4,
@@ -328,7 +328,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Build Lasting Habits',
     description: 'Smart reminders and streak tracking keep you motivated and on track every single day.',
     icon: <Bell size={80} color="#00ADB5" />,
-    gradient: ['#0D0F13', '#111827'],
+    gradient: ['#091517', '#111827'],
   },
   {
     id: 5,
@@ -336,7 +336,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Help Us Grow',
     description: 'A 5-star rating means the world to us and helps other athletes discover AthliAI.',
     icon: <Star size={80} color="#FFD700" fill="#FFD700" />,
-    gradient: ['#0D0F13', '#111827'],
+    gradient: ['#091517', '#111827'],
   },
 ];
 
@@ -1088,9 +1088,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
         : ((currentGymStep + 1) / (gymQuestions.length + 2)) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0F13' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#091517' }]}>
         <LinearGradient
-          colors={['#0D0F13', '#111827', '#0D0F13']}
+          colors={['#091517', '#111827', '#091517']}
           style={styles.gradient}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -1301,9 +1301,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
     const nutritionProgressPercent = (currentNutritionStep / totalNutritionSteps) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0F13' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#091517' }]}>
         <LinearGradient
-          colors={['#0D0F13', '#111827', '#0D0F13']}
+          colors={['#091517', '#111827', '#091517']}
           style={styles.gradient}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -1554,9 +1554,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   const _isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#0D0F13' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#091517' }]}>
       <LinearGradient
-        colors={['#0D0F13', '#111827', '#0D0F13']}
+        colors={['#091517', '#111827', '#091517']}
         style={styles.darkBackground}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -1642,7 +1642,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                 style={styles.rateButton}
                 onPress={handleRateApp}
               >
-                <Star size={20} color="#0D0F13" fill="#0D0F13" />
+                <Star size={20} color="#091517" fill="#091517" />
                 <Text style={styles.rateButtonText}>{t('welcome_rate_app')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -2108,7 +2108,7 @@ const styles = StyleSheet.create({
   },
   loadingBackground: {
     flex: 1,
-    backgroundColor: '#0D0F13',
+    backgroundColor: '#091517',
   },
   loadingScrollContent: {
     flexGrow: 1,
@@ -2327,7 +2327,7 @@ const styles = StyleSheet.create({
   },
   paywallContainer: {
     flex: 1,
-    backgroundColor: '#0D0F13',
+    backgroundColor: '#091517',
   },
   paywallCloseBtn: {
     position: 'absolute' as const,
@@ -2513,7 +2513,7 @@ const styles = StyleSheet.create({
   rateButtonText: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: '#0D0F13',
+    color: '#091517',
   },
 });
 

@@ -592,12 +592,12 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#091517",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
 
 const heroStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 24,
     paddingTop: 24,
     paddingBottom: 16,
@@ -802,7 +802,7 @@ const heroStyles = StyleSheet.create({
 
 const questStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
@@ -897,7 +897,7 @@ const streakStyles = StyleSheet.create({
   strip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 14,
@@ -962,7 +962,7 @@ const streakStyles = StyleSheet.create({
 
 const nutStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
@@ -1095,7 +1095,7 @@ const nutStyles = StyleSheet.create({
 
 const weekStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
@@ -1122,7 +1122,7 @@ const weekStyles = StyleSheet.create({
     width: "47%" as unknown as number,
     flexGrow: 1,
     flexBasis: "44%" as unknown as number,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#152C2E",
     borderRadius: 20,
     padding: 14,
     borderWidth: 1,
@@ -1176,7 +1176,7 @@ const weekStyles = StyleSheet.create({
 
 const feedStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,

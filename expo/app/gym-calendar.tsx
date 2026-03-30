@@ -199,7 +199,7 @@ export default function GymCalendarScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <LinearGradient
-        colors={["#0D0F13", "#111520", "#0D0F13"]}
+        colors={["#091517", "#0C1E1F", "#091517"]}
         style={styles.headerGradient}
       >
         <View style={styles.header}>
@@ -304,7 +304,7 @@ export default function GymCalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   headerGradient: {
     paddingBottom: 16,

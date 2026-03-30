@@ -2,10 +2,10 @@ import { Platform } from 'react-native';
 
 export const THEME = {
   bg: {
-    base: '#0D0D0D',
-    card: '#161616',
-    inner: '#1E1E1E',
-    elevated: '#242424',
+    base: '#091517',
+    card: '#0F2224',
+    inner: '#152C2E',
+    elevated: '#1A3335',
   },
   border: {
     subtle: 'rgba(255,255,255,0.06)',

@@ -672,7 +672,7 @@ export default function DailyChallengeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   header: {
     flexDirection: "row",

@@ -1,9 +1,9 @@
 export default {
   // Clean dark mode color palette
   background: {
-    primary: "#0D0F13",
-    secondary: "#171B22",
-    tertiary: "#1F2329",
+    primary: "#091517",
+    secondary: "#0F2224",
+    tertiary: "#152C2E",
   },
   text: {
     primary: "#F9FAFB",
@@ -24,10 +24,10 @@ export default {
   info: "#00ADB5",
   light: {
     text: "#F9FAFB",
-    background: "#0D0F13",
+    background: "#091517",
     tint: "#00ADB5",
     tabIconDefault: "#9CA3AF",
     tabIconSelected: "#00ADB5",
-    border: "#171B22",
+    border: "#0F2224",
   },
 };

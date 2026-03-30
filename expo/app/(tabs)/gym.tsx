@@ -1096,7 +1096,7 @@ Format as JSON:
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <LinearGradient
-        colors={['#0D0F13', '#111520', '#0D0F13']}
+        colors={['#091517', '#0C1E1F', '#091517']}
         style={styles.header}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -1968,7 +1968,7 @@ Format as JSON:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   header: {
     paddingHorizontal: 20,
@@ -2149,7 +2149,7 @@ const styles = StyleSheet.create({
 
   buildWorkoutCTASmall: {
     marginTop: 14,
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
@@ -2343,7 +2343,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 16,
     alignItems: "center" as const,
@@ -2400,7 +2400,7 @@ const styles = StyleSheet.create({
   },
 
   emptyState: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 36,
     alignItems: "center" as const,
@@ -2433,7 +2433,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recentWorkoutCard: {
-    backgroundColor: "#161616",
+    backgroundColor: "#0F2224",
     borderRadius: 20,
     padding: 14,
     flexDirection: "row" as const,
@@ -2494,7 +2494,7 @@ const styles = StyleSheet.create({
 
   quizContainer: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   quizHeader: {
     flexDirection: "row" as const,
@@ -2688,7 +2688,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#091517",
   },
   modalHeader: {
     flexDirection: "row" as const,
@@ -2975,7 +2975,7 @@ const styles = StyleSheet.create({
 
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#0D0F13',
+    backgroundColor: '#091517',
   },
   loadingScrollContent: {
     flexGrow: 1,
