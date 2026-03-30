@@ -51,7 +51,7 @@ import { useApp } from "@/providers/AppProvider";
 
 import { useLanguage } from "@/providers/LanguageProvider";
 import { lbsToKg, formatHeightMetric } from "@/utils/metricConversions";
-import { BADGES, AVATAR_OPTIONS, type BadgeStats } from "@/constants/badges";
+import { BADGES, type BadgeStats } from "@/constants/badges";
 
 interface WeightEntry {
   date: string;
@@ -67,102 +67,7 @@ type StatPeriod = '7d' | '30d' | '90d' | '1y';
 
 
 
-function AvatarPickerModal({ visible, onClose, onSelect, currentAvatar, t }: {
-  visible: boolean;
-  onClose: () => void;
-  onSelect: (id: string) => void;
-  currentAvatar: string;
-  t: (key: any, params?: Record<string, string | number>) => string;
-}) {
-  const insets = useSafeAreaInsets();
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={[avatarModalStyles.container, { paddingTop: insets.top }]}>
-        <View style={avatarModalStyles.header}>
-          <Text style={avatarModalStyles.title}>{t('avatar_title')}</Text>
-          <TouchableOpacity onPress={onClose} style={avatarModalStyles.closeBtn}>
-            <Text style={avatarModalStyles.closeText}>{t('common_cancel')}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={avatarModalStyles.grid}>
-          {AVATAR_OPTIONS.map((avatar) => {
-            const isSelected = avatar.id === currentAvatar;
-            return (
-              <TouchableOpacity
-                key={avatar.id}
-                style={[
-                  avatarModalStyles.avatarOption,
-                  isSelected && { borderColor: avatar.color, backgroundColor: avatar.color + '15' },
-                ]}
-                onPress={() => onSelect(avatar.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={avatarModalStyles.avatarEmoji}>{avatar.emoji}</Text>
-                {isSelected && (
-                  <View style={[avatarModalStyles.checkBadge, { backgroundColor: avatar.color }]}>
-                    <Check size={10} color="#FFFFFF" strokeWidth={3} />
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
-    </Modal>
-  );
-}
 
-function ProfileHeader({ onAvatarPress, _t }: { onAvatarPress: () => void; _t: (key: any, params?: Record<string, string | number>) => string }) {
-  const { user, xpInfo, stats, recentRuns } = useApp();
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }).start();
-  }, [fadeIn]);
-
-  const selectedAvatar = AVATAR_OPTIONS.find(a => a.id === user.profileImage) || AVATAR_OPTIONS[0];
-
-  return (
-    <Animated.View style={[profileStyles.card, { opacity: fadeIn }]}>
-      <Pressable
-        onPress={onAvatarPress}
-        onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.92, useNativeDriver: true, tension: 300, friction: 10 }).start()}
-        onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start()}
-      >
-        <Animated.View style={[profileStyles.avatarWrap, { transform: [{ scale: scaleAnim }], borderColor: selectedAvatar.color + '60' }]}>
-          <View style={[profileStyles.avatarInner, { backgroundColor: selectedAvatar.color + '18' }]}>
-            <Text style={profileStyles.avatarEmoji}>{selectedAvatar.emoji}</Text>
-          </View>
-          <View style={profileStyles.avatarEditBadge}>
-            <Edit3 size={10} color="#FFFFFF" />
-          </View>
-        </Animated.View>
-      </Pressable>
-      <View style={profileStyles.infoCol}>
-        <View style={profileStyles.nameRow}>
-          <Text style={profileStyles.rankEmoji}>{xpInfo.rank.emoji}</Text>
-          <Text style={[profileStyles.rankLabel, { color: xpInfo.rank.color }]}>{xpInfo.rank.title}</Text>
-        </View>
-        <Text style={profileStyles.levelText}>Level {xpInfo.level}</Text>
-        <View style={profileStyles.miniStats}>
-          <View style={profileStyles.miniStat}>
-            <Footprints size={11} color="#4A7C59" />
-            <Text style={profileStyles.miniStatVal}>{recentRuns.length}</Text>
-          </View>
-          <View style={profileStyles.miniStat}>
-            <Dumbbell size={11} color="#FF6B35" />
-            <Text style={profileStyles.miniStatVal}>{stats.totalWorkouts}</Text>
-          </View>
-          <View style={profileStyles.miniStat}>
-            <Activity size={11} color="#C4654E" />
-            <Text style={profileStyles.miniStatVal}>{xpInfo.totalXP.toLocaleString()}</Text>
-          </View>
-        </View>
-      </View>
-    </Animated.View>
-  );
-}
 
 function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string | number>) => string }) {
   const { stats, recentRuns, workoutLogs, foodHistory, xpInfo } = useApp();
@@ -752,14 +657,7 @@ export default function PersonalStatsScreen() {
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [importError, setImportError] = useState('');
   const [exportCopied, setExportCopied] = useState(false);
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
-  const { user, updateUser } = useApp();
 
-  const handleAvatarSelect = useCallback((avatarId: string) => {
-    if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    updateUser({ profileImage: avatarId });
-    setShowAvatarModal(false);
-  }, [updateUser]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -1120,14 +1018,6 @@ export default function PersonalStatsScreen() {
         </View>
       </View>
 
-      <AvatarPickerModal
-        visible={showAvatarModal}
-        onClose={() => setShowAvatarModal(false)}
-        onSelect={handleAvatarSelect}
-        currentAvatar={user.profileImage || 'default'}
-        t={t}
-      />
-
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
@@ -1139,7 +1029,6 @@ export default function PersonalStatsScreen() {
           />
         }
       >
-        <ProfileHeader onAvatarPress={() => setShowAvatarModal(true)} _t={t} />
         <AchievementBadges t={t} />
         <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
             <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
@@ -1689,93 +1578,7 @@ const bkStyles = StyleSheet.create({
   },
 });
 
-const profileStyles = StyleSheet.create({
-  card: {
-    backgroundColor: "#FEFCF9",
-    borderRadius: 24,
-    padding: 18,
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 16,
-    overflow: "hidden" as const,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.04)",
-    shadowRadius: 20,
-  },
-  avatarWrap: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 2.5,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    position: "relative" as const,
-  },
-  avatarInner: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  avatarEmoji: {
-    fontSize: 30,
-  },
-  avatarEditBadge: {
-    position: "absolute" as const,
-    bottom: -2,
-    right: -2,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#4A7C59",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    borderWidth: 2,
-    borderColor: "#FEFCF9",
-  },
-  infoCol: {
-    flex: 1,
-    gap: 4,
-  },
-  nameRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 6,
-  },
-  rankEmoji: {
-    fontSize: 16,
-  },
-  rankLabel: {
-    fontSize: 16,
-    fontWeight: "800" as const,
-    letterSpacing: 3,
-    textTransform: "uppercase" as const,
-  },
-  levelText: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#5A5A5E",
-  },
-  miniStats: {
-    flexDirection: "row" as const,
-    gap: 12,
-    marginTop: 4,
-  },
-  miniStat: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 4,
-  },
-  miniStatVal: {
-    fontSize: 12,
-    fontWeight: "700" as const,
-    color: "#8E8E93",
-  },
-});
+
 
 const badgeStyles = StyleSheet.create({
   countPill: {
@@ -1841,69 +1644,7 @@ const badgeStyles = StyleSheet.create({
   },
 });
 
-const avatarModalStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FEFCF9",
-  },
-  header: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "space-between" as const,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.06)",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "800" as const,
-    color: "#2C2C2C",
-    letterSpacing: -0.3,
-  },
-  closeBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  closeText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#5A5A5E",
-  },
-  grid: {
-    flexDirection: "row" as const,
-    flexWrap: "wrap" as const,
-    gap: 14,
-    padding: 20,
-    justifyContent: "center" as const,
-  },
-  avatarOption: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "rgba(0,0,0,0.06)",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    borderWidth: 2,
-    borderColor: "rgba(0,0,0,0.06)",
-    position: "relative" as const,
-  },
-  avatarEmoji: {
-    fontSize: 32,
-  },
-  checkBadge: {
-    position: "absolute" as const,
-    bottom: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    borderWidth: 2,
-    borderColor: "#FEFCF9",
-  },
-});
+
 
 const backupModalStyles = StyleSheet.create({
   infoBox: {
