@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Animated,
   ScrollView,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     marginBottom: 8,
     textAlign: "center",
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   completedText: {
     fontSize: 20,
@@ -273,6 +275,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1F2937",
     marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   statLabel: {
     fontSize: 14,
@@ -303,6 +306,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1F2937",
     marginBottom: 8,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   achievementDescription: {
     fontSize: 16,

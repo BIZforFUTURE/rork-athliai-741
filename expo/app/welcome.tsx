@@ -1728,6 +1728,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#1A1A2E',
     letterSpacing: -0.5,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   subtitle: {
     fontSize: 17,
@@ -1842,6 +1843,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#1A1A2E',
     letterSpacing: -0.5,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   subtitleDark: {
     fontSize: 17,
@@ -2044,6 +2046,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   pricingSubtext: {
     fontSize: 14,
@@ -2133,6 +2136,7 @@ const styles = StyleSheet.create({
     color: '#1A1A2E',
     textAlign: 'center' as const,
     marginBottom: 8,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   loadingPercent: {
     fontSize: 40,
@@ -2140,6 +2144,7 @@ const styles = StyleSheet.create({
     color: '#00ADB5',
     textAlign: 'center',
     marginBottom: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   loadingSubtitle: {
     fontSize: 18,
@@ -2350,6 +2355,7 @@ const styles = StyleSheet.create({
     textAlign: 'center' as const,
     marginBottom: 8,
     letterSpacing: -0.5,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   paywallSubtitle: {
     fontSize: 16,
@@ -2424,6 +2430,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800' as const,
     color: '#F9FAFB',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   paywallPricePeriod: {
     fontSize: 14,
