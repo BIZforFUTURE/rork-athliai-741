@@ -7,6 +7,7 @@ import {
   Animated,
   Pressable,
   RefreshControl,
+  Platform,
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 
@@ -563,28 +564,29 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F3EDE4",
   },
   topBar: {
     paddingHorizontal: 24,
     paddingBottom: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F3EDE4",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
     gap: 10,
   },
   greetingText: {
-    fontSize: 32,
-    fontWeight: "800" as const,
-    color: "#1A1A1A",
-    letterSpacing: -0.5,
+    fontSize: 30,
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
+    letterSpacing: -0.3,
     flexShrink: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   subGreeting: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     marginTop: 2,
   },
   levelChip: {
@@ -592,7 +594,7 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 5,
     borderWidth: 1,
-    borderColor: "rgba(74,124,89,0.2)",
+    borderColor: "rgba(74,124,89,0.15)",
     backgroundColor: "rgba(74,124,89,0.06)",
     borderRadius: 12,
     paddingHorizontal: 14,
@@ -602,7 +604,7 @@ const styles = StyleSheet.create({
   },
   levelChipText: {
     fontSize: 14,
-    fontWeight: "700" as const,
+    fontWeight: "600" as const,
     letterSpacing: -0.3,
     color: "#4A7C59",
   },
@@ -621,21 +623,21 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: "rgba(0,0,0,0.03)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     alignSelf: "center" as const,
     marginTop: 4,
   },
   langToggleText: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     letterSpacing: 0.2,
   },
 });
 
 const heroStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     paddingTop: 28,
     paddingBottom: 18,
@@ -646,6 +648,8 @@ const heroStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
   ringCol: {
     alignItems: "center" as const,
@@ -663,16 +667,17 @@ const heroStyles = StyleSheet.create({
     justifyContent: "center" as const,
   },
   ringLevel: {
-    fontSize: 48,
-    fontWeight: "900" as const,
+    fontSize: 44,
+    fontWeight: "300" as const,
     letterSpacing: -2,
-    lineHeight: 52,
-    color: "#1A1A1A",
+    lineHeight: 48,
+    color: "#2C2C2C",
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   levelLabel: {
     fontSize: 10,
-    fontWeight: "700" as const,
-    color: "#A1A1A6",
+    fontWeight: "600" as const,
+    color: "#A8A8A0",
     letterSpacing: 2,
     marginTop: 6,
   },
@@ -686,7 +691,7 @@ const heroStyles = StyleSheet.create({
   },
   rankTagText: {
     fontSize: 12,
-    fontWeight: "700" as const,
+    fontWeight: "600" as const,
     letterSpacing: 2,
     textTransform: "uppercase" as const,
     color: "#4A7C59",
@@ -741,20 +746,20 @@ const heroStyles = StyleSheet.create({
   },
   statChipValue: {
     fontSize: 13,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
+    fontWeight: "600" as const,
+    color: "#2C2C2C",
     letterSpacing: -0.3,
   },
   statChipLabel: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
   },
 });
 
 const questStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 18,
     overflow: "hidden" as const,
@@ -762,6 +767,8 @@ const questStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
   header: {
     flexDirection: "row" as const,
@@ -775,9 +782,10 @@ const questStyles = StyleSheet.create({
     gap: 6,
   },
   heading: {
-    fontSize: 15,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
+    fontSize: 16,
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   completedBadge: {
     backgroundColor: "rgba(212,160,83,0.1)",
@@ -818,11 +826,11 @@ const questStyles = StyleSheet.create({
   },
   questLabel: {
     fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#1A1A1A",
+    fontWeight: "500" as const,
+    color: "#2C2C2C",
   },
   questDone: {
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     textDecorationLine: "line-through" as const,
   },
   questTrack: {
@@ -837,7 +845,7 @@ const questStyles = StyleSheet.create({
   },
   xpTag: {
     fontSize: 12,
-    fontWeight: "700" as const,
+    fontWeight: "600" as const,
     letterSpacing: -0.3,
   },
   checkMark: {
@@ -853,7 +861,7 @@ const streakStyles = StyleSheet.create({
   strip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -884,14 +892,14 @@ const streakStyles = StyleSheet.create({
   },
   val: {
     fontSize: 17,
-    fontWeight: "800" as const,
-    color: "#C7C7CC",
+    fontWeight: "700" as const,
+    color: "#C2BDB4",
     letterSpacing: -0.5,
   },
   lbl: {
     fontSize: 10,
-    fontWeight: "600" as const,
-    color: "#C7C7CC",
+    fontWeight: "500" as const,
+    color: "#C2BDB4",
   },
   bonusTag: {
     flexDirection: "row" as const,
@@ -911,7 +919,7 @@ const streakStyles = StyleSheet.create({
 
 const nutStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 20,
     overflow: "hidden" as const,
@@ -919,6 +927,8 @@ const nutStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -940,14 +950,15 @@ const nutStyles = StyleSheet.create({
   },
   heading: {
     fontSize: 17,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
     letterSpacing: -0.3,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   headerSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
   },
   headerArrow: {
     width: 28,
@@ -973,21 +984,22 @@ const nutStyles = StyleSheet.create({
   },
   calNum: {
     fontSize: 24,
-    fontWeight: "900" as const,
-    color: "#1A1A1A",
+    fontWeight: "300" as const,
+    color: "#2C2C2C",
     letterSpacing: -1,
     lineHeight: 28,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   calDivider: {
     fontSize: 10,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     marginTop: 1,
   },
   calUnit: {
     fontSize: 9,
-    fontWeight: "600" as const,
-    color: "#C7C7CC",
+    fontWeight: "500" as const,
+    color: "#C2BDB4",
     marginTop: -1,
   },
   macroSection: {
@@ -996,7 +1008,7 @@ const nutStyles = StyleSheet.create({
   },
   macroCard: {
     flex: 1,
-    backgroundColor: "#F8F8FA",
+    backgroundColor: "#F0EBE3",
     borderRadius: 14,
     padding: 12,
     gap: 8,
@@ -1013,8 +1025,8 @@ const nutStyles = StyleSheet.create({
   },
   macroLabel: {
     fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#6E6E73",
+    fontWeight: "500" as const,
+    color: "#7A7A7A",
   },
   macroValues: {
     flexDirection: "row" as const,
@@ -1023,14 +1035,14 @@ const nutStyles = StyleSheet.create({
   },
   macroVal: {
     fontSize: 18,
-    fontWeight: "800" as const,
-    color: "#1A1A1A",
+    fontWeight: "600" as const,
+    color: "#2C2C2C",
     letterSpacing: -0.5,
   },
   macroGoalText: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
   },
   macroTrack: {
     height: 3,
@@ -1046,7 +1058,7 @@ const nutStyles = StyleSheet.create({
 
 const weekStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 20,
     overflow: "hidden" as const,
@@ -1054,6 +1066,8 @@ const weekStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
   headerRow: {
     flexDirection: "row" as const,
@@ -1063,8 +1077,9 @@ const weekStyles = StyleSheet.create({
   },
   heading: {
     fontSize: 16,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   grid: {
     flexDirection: "row" as const,
@@ -1075,7 +1090,7 @@ const weekStyles = StyleSheet.create({
     width: "47%" as unknown as number,
     flexGrow: 1,
     flexBasis: "44%" as unknown as number,
-    backgroundColor: "#F8F8FA",
+    backgroundColor: "#F0EBE3",
     borderRadius: 18,
     padding: 14,
     overflow: "hidden" as const,
@@ -1098,8 +1113,9 @@ const weekStyles = StyleSheet.create({
   },
   cellValue: {
     fontSize: 28,
-    fontWeight: "900" as const,
-    color: "#1A1A1A",
+    fontWeight: "300" as const,
+    color: "#2C2C2C",
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     letterSpacing: -1,
   },
   cellUnit: {
@@ -1108,18 +1124,18 @@ const weekStyles = StyleSheet.create({
   },
   cellLabel: {
     fontSize: 11,
-    fontWeight: "600" as const,
+    fontWeight: "500" as const,
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
     flexShrink: 1,
-    color: "#6E6E73",
+    color: "#7A7A7A",
   },
 });
 
 
 const feedStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 18,
     overflow: "hidden" as const,
@@ -1127,6 +1143,8 @@ const feedStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
   header: {
     flexDirection: "row" as const,
@@ -1135,15 +1153,16 @@ const feedStyles = StyleSheet.create({
     marginBottom: 14,
   },
   heading: {
-    fontSize: 15,
-    fontWeight: "700" as const,
-    color: "#1A1A1A",
+    fontSize: 16,
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
     flex: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   total: {
     fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#A1A1A6",
+    fontWeight: "500" as const,
+    color: "#A8A8A0",
   },
   timeline: {
     gap: 0,
@@ -1183,18 +1202,18 @@ const feedStyles = StyleSheet.create({
   desc: {
     flex: 1,
     fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#1A1A1A",
+    fontWeight: "500" as const,
+    color: "#2C2C2C",
     marginRight: 8,
   },
   time: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#C7C7CC",
+    color: "#C2BDB4",
   },
   amount: {
     fontSize: 14,
-    fontWeight: "700" as const,
+    fontWeight: "600" as const,
     letterSpacing: -0.3,
   },
 });

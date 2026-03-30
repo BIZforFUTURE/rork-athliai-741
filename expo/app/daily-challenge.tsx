@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
   },
   heroCircle: {
     position: "absolute",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
   },
   heroContent: {
     zIndex: 1,

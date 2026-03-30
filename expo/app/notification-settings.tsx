@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     marginTop: -20,
   },
   statusCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 20,
     marginTop: 30,
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   scheduleCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   settingsCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   infoCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 20,
     marginTop: 20,

@@ -84,7 +84,7 @@ MacroCard.displayName = "MacroCard";
 const macroCardStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 16,
     shadowColor: '#000000',
@@ -1923,7 +1923,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F3EDE4",
   },
   content: {
     flex: 1,
@@ -1948,10 +1948,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTitle: {
-    fontSize: 34,
-    fontWeight: "800" as const,
-    color: "#1A1A1A",
-    letterSpacing: -0.5,
+    fontSize: 30,
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
+    letterSpacing: -0.3,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   headerActions: {
     flexDirection: "row" as const,
@@ -2104,7 +2105,7 @@ const styles = StyleSheet.create({
   },
 
   calorieCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 20,
     marginTop: 16,
@@ -2158,7 +2159,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   healthScoreCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 20,
     marginTop: 8,
@@ -2215,7 +2216,7 @@ const styles = StyleSheet.create({
   },
   actionChip: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -2250,7 +2251,7 @@ const styles = StyleSheet.create({
   exerciseChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,

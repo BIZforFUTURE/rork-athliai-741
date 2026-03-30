@@ -164,11 +164,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#FEFCF9',
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#FEFCF9',
     opacity: 0.9,
     marginTop: 4,
   },
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   statCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 15,
     padding: 20,
     alignItems: 'center',
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   statusSection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 15,
     padding: 20,
     marginBottom: 20,

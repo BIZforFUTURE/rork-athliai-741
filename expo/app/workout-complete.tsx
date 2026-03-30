@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   continueButton: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

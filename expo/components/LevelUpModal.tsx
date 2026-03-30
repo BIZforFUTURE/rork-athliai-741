@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: SCREEN_WIDTH * 0.82,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 28,
     padding: 36,
     alignItems: 'center',
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   levelUpLabel: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#A1A1A6',
+    color: '#A8A8A0',
     letterSpacing: 4,
     marginBottom: 16,
   },
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#6E6E73',
+    color: '#7A7A7A',
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 22,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   continueText: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#FEFCF9',
     letterSpacing: 0.3,
   },
 });

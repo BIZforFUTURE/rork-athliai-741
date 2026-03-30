@@ -1162,23 +1162,24 @@ export default function PersonalStatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F3EDE4",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F3EDE4",
   },
   pageTitle: {
-    fontSize: 32,
-    fontWeight: "800" as const,
-    color: "#1A1A1A",
-    letterSpacing: -0.5,
+    fontSize: 30,
+    fontWeight: "400" as const,
+    color: "#2C2C2C",
+    letterSpacing: -0.3,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   pageSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     marginTop: 2,
   },
   scroll: {
@@ -1194,7 +1195,7 @@ const styles = StyleSheet.create({
 
 const cardStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 16,
     overflow: "hidden" as const,
@@ -1202,6 +1203,8 @@ const cardStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -1212,7 +1215,7 @@ const cardStyles = StyleSheet.create({
   cardHeading: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#1A1A1A",
+    color: "#2C2C2C",
     flex: 1,
   },
 });
@@ -1234,20 +1237,20 @@ const goalStyles = StyleSheet.create({
   statLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
   statValue: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#1A1A1A",
+    color: "#2C2C2C",
     letterSpacing: -0.3,
   },
   statUnit: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
   },
   divider: {
     width: 1,
@@ -1268,7 +1271,7 @@ const goalStyles = StyleSheet.create({
   barLabel: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     textAlign: "center" as const,
     marginBottom: 8,
   },
@@ -1282,7 +1285,7 @@ const goalStyles = StyleSheet.create({
   dateText: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
   },
   paceTag: {
     flexDirection: "row" as const,
@@ -1326,7 +1329,7 @@ const physStyles = StyleSheet.create({
   editText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#6E6E73",
+    color: "#7A7A7A",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1338,7 +1341,7 @@ const physStyles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 6,
     paddingVertical: 14,
-    backgroundColor: "#F8F8FA",
+    backgroundColor: "#F0EBE3",
     borderRadius: 14,
   },
   cellIcon: {
@@ -1351,13 +1354,13 @@ const physStyles = StyleSheet.create({
   cellValue: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#1A1A1A",
+    color: "#2C2C2C",
     letterSpacing: -0.3,
   },
   cellLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     textTransform: "uppercase" as const,
     letterSpacing: 0.3,
   },
@@ -1648,7 +1651,7 @@ const bkStyles = StyleSheet.create({
   desc: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#A1A1A6",
+    color: "#A8A8A0",
     lineHeight: 18,
     marginBottom: 14,
   },
@@ -1688,7 +1691,7 @@ const bkStyles = StyleSheet.create({
 
 const profileStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 18,
     flexDirection: "row" as const,
@@ -1698,6 +1701,8 @@ const profileStyles = StyleSheet.create({
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
     shadowRadius: 20,
   },
   avatarWrap: {

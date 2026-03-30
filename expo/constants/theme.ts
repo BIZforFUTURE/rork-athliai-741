@@ -2,30 +2,30 @@ import { Platform } from 'react-native';
 
 export const THEME = {
   bg: {
-    base: '#FFFFFF',
-    card: '#FFFFFF',
-    inner: '#F8F8FA',
-    elevated: '#F0F0F2',
+    base: '#F3EDE4',
+    card: '#FEFCF9',
+    inner: '#F0EBE3',
+    elevated: '#E8E2D9',
   },
   border: {
-    subtle: 'rgba(0,0,0,0.04)',
+    subtle: 'rgba(0,0,0,0.05)',
     accent: 'rgba(74,124,89,0.15)',
   },
   accent: {
     sage: '#4A7C59',
     sageDark: '#3A6247',
-    coral: '#E8725A',
-    coralPrimary: '#E8725A',
+    coral: '#C4654E',
+    coralPrimary: '#C4654E',
     teal: '#4A7C59',
     tealDark: '#3A6247',
-    green: '#34A853',
-    greenPrimary: '#34A853',
+    green: '#4A7C59',
+    greenPrimary: '#4A7C59',
   },
   text: {
-    primary: '#1A1A1A',
-    secondary: '#6E6E73',
-    tertiary: '#A1A1A6',
-    muted: '#C7C7CC',
+    primary: '#2C2C2C',
+    secondary: '#7A7A7A',
+    tertiary: '#A8A8A0',
+    muted: '#C2BDB4',
   },
   radius: {
     card: 20,

@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 32,
     fontWeight: '800' as const,
-    color: '#1A1A1A',
+    color: '#2C2C2C',
     letterSpacing: -0.5,
   },
   filterButton: {
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     color: '#4A7C59',
   },
   filtersContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    backgroundColor: '#F8F8FA',
+    backgroundColor: '#F0EBE3',
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1A1A1A',
+    color: '#2C2C2C',
   },
   filterRow: {
     gap: 16,
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6E6E73',
+    color: '#7A7A7A',
   },
   filterOptions: {
     flexDirection: 'row',
@@ -526,13 +526,13 @@ const styles = StyleSheet.create({
   filterOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6E6E73',
+    color: '#7A7A7A',
   },
   filterOptionTextActive: {
-    color: '#FFFFFF',
+    color: '#FEFCF9',
   },
   summaryContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: '#2C2C2C',
     marginBottom: 12,
   },
   summaryStats: {
@@ -559,14 +559,14 @@ const styles = StyleSheet.create({
   summaryStatValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A1A',
+    color: '#2C2C2C',
   },
   summaryStatLabel: {
     fontSize: 12,
-    color: '#A1A1A6',
+    color: '#A8A8A0',
   },
   emptyState: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 30,
     alignItems: 'center' as const,
@@ -577,17 +577,17 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6E6E73',
+    color: '#7A7A7A',
     textAlign: 'center',
   },
   deleteHint: {
     fontSize: 12,
-    color: '#C7C7CC',
+    color: '#C2BDB4',
     textAlign: 'center',
     marginBottom: 8,
   },
   runCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 15,
     flexDirection: 'row' as const,
@@ -607,15 +607,15 @@ const styles = StyleSheet.create({
   runDateText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: '#2C2C2C',
   },
   runTimeText: {
     fontSize: 14,
-    color: '#A1A1A6',
+    color: '#A8A8A0',
   },
   runWeatherText: {
     fontSize: 12,
-    color: '#6E6E73',
+    color: '#7A7A7A',
   },
   runStats: {
     flexDirection: 'row',
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   },
   runStatLabel: {
     fontSize: 12,
-    color: '#A1A1A6',
+    color: '#A8A8A0',
   },
   runCardActions: {
     alignItems: 'center',

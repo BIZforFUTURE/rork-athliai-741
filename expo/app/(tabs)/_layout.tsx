@@ -47,25 +47,25 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#1A1A1A",
-        tabBarInactiveTintColor: "#A1A1A6",
+        tabBarActiveTintColor: "#2C2C2C",
+        tabBarInactiveTintColor: "#A8A8A0",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: "#FAF7F2",
           borderTopWidth: 0,
           position: "absolute" as const,
           elevation: 0,
           shadowColor: "#000000",
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.03,
-          shadowRadius: 8,
+          shadowOpacity: 0.05,
+          shadowRadius: 12,
         },
         tabBarLabelStyle: {
-          fontWeight: "600" as const,
-          fontSize: 10,
+          fontWeight: "500" as const,
+          fontSize: 9,
           letterSpacing: 0.5,
           textTransform: "uppercase" as const,
-          marginTop: 2,
+          marginTop: 0,
         },
       }}
     >
@@ -176,10 +176,10 @@ const styles = StyleSheet.create({
   },
   activeIndicator: {
     position: "absolute" as const,
-    bottom: -4,
-    width: 6,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "#4A7C59",
+    bottom: -2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: "#2C2C2C",
   },
 });

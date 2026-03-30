@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     overflow: "hidden" as const,
   },
   mapContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     marginTop: 20,
     shadowColor: "#000",
