@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -516,7 +515,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold" as const,
     color: "#2C2C2C",
     flex: 1,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
 
   exerciseDetails: {

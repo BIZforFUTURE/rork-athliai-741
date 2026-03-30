@@ -262,7 +262,7 @@ export default function RunDetailsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.dateCard}>
           <View style={styles.dateIconWrap}>
-            <Calendar size={18} color={colors.accent.sage} />
+            <Calendar size={18} color={colors.accent.lime} />
           </View>
           <View style={styles.dateInfo}>
             <Text style={styles.dateText}>{formatDate(run.date)}</Text>
@@ -425,7 +425,7 @@ export default function RunDetailsScreen() {
               onPress={showPhotoOptions}
               testID="add-photo-button"
             >
-              <Plus size={20} color={colors.accent.sage} />
+              <Plus size={20} color={colors.accent.lime} />
               <Text style={styles.addPhotoText}>{t('run_add_photo')}</Text>
             </TouchableOpacity>
           </View>
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   editButtonActive: {
-    backgroundColor: colors.accent.sage,
+    backgroundColor: colors.accent.lime,
   },
   content: {
     flex: 1,
@@ -637,7 +637,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700" as const,
     color: colors.text.primary,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   statUnit: {
     fontSize: 12,
@@ -696,7 +695,7 @@ const styles = StyleSheet.create({
   },
   addPhotoText: {
     fontSize: 13,
-    color: colors.accent.sage,
+    color: colors.accent.lime,
     fontWeight: "500" as const,
   },
   photosGrid: {

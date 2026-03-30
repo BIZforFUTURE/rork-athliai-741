@@ -48,15 +48,9 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       return;
     }
 
-    try {
-      void Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-      Purchases.configure({ apiKey });
-      console.log("[RevenueCat] Configured with platform:", Platform.OS);
-    } catch (error) {
-      console.error("[RevenueCat] Configuration error:", error);
-      setIsLoading(false);
-      return;
-    }
+    void Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey });
+    console.log("[RevenueCat] Configured with platform:", Platform.OS);
 
     const init = async () => {
       try {
@@ -84,14 +78,10 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
 
     void init();
 
-    try {
-      Purchases.addCustomerInfoUpdateListener((info) => {
-        console.log("[RevenueCat] Customer info updated");
-        checkPremiumStatus(info);
-      });
-    } catch (error) {
-      console.error("[RevenueCat] Listener error:", error);
-    }
+    Purchases.addCustomerInfoUpdateListener((info) => {
+      console.log("[RevenueCat] Customer info updated");
+      checkPremiumStatus(info);
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

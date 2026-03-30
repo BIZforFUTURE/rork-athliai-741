@@ -792,7 +792,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     letterSpacing: -0.5,
     marginBottom: 8,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   heroDescription: {
     fontSize: 15,
@@ -840,7 +839,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800" as const,
     color: "#FFFFFF",
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   statsRow: {
     flexDirection: "row",
@@ -862,7 +860,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800" as const,
     color: "#2C2C2C",
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   statLabel: {
     fontSize: 11,

@@ -7,19 +7,15 @@ import { getRankForLevel, getXPProgress, RANK_TRANSLATION_KEYS, type RankInfo } 
 import { useLanguage } from '@/providers/LanguageProvider';
 import { estimateRunCalories } from '@/utils/healthScore';
 
-try {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
-} catch (error) {
-  console.error('Failed to set notification handler:', error);
-}
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export const [NotificationProvider, useNotifications] = createContextHook(() => {
   const { t, isSpanish } = useLanguage();

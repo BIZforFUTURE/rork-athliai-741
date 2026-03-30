@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: colors.text.primary,
     marginBottom: 10,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   emptySubtext: {
     fontSize: 15,

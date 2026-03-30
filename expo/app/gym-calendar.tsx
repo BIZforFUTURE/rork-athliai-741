@@ -500,7 +500,6 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
     color: colors.text.primary,
     letterSpacing: -0.5,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   statLabel: {
     fontSize: 11,

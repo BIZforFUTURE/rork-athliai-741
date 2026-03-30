@@ -578,7 +578,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold' as const,
     color: '#FFFFFF',
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   headerSubtitle: {
     fontSize: 16,

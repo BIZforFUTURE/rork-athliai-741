@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
     textAlign: "center" as const,
     marginBottom: 8,
     letterSpacing: -0.5,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   subtitle: {
     fontSize: 16,
@@ -354,7 +353,6 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "800" as const,
     color: colors.text.primary,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   pricePeriod: {
     fontSize: 14,
