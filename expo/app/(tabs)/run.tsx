@@ -911,7 +911,7 @@ export default function RunScreen() {
               <Text style={styles.startBtnText}>START RUN</Text>
             </View>
             <View style={styles.startBtnXp}>
-              <Zap size={12} color="#00E5FF" fill="#00E5FF" />
+              <Zap size={12} color="#A8A8A0" />
               <Text style={styles.startBtnXpText}>+25 XP</Text>
             </View>
           </Animated.View>
@@ -1463,13 +1463,13 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 4,
     marginTop: 6,
-    shadowColor: "#4A7C59",
+    shadowColor: "#2C2C2C",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
   },
   startBtnInner: {
-    backgroundColor: "#4A7C59",
+    backgroundColor: "#2C2C2C",
     borderRadius: 20,
     flexDirection: "row" as const,
     alignItems: "center" as const,

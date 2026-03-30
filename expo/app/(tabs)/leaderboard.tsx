@@ -207,11 +207,11 @@ function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string
                 {earned ? (
                   <Text style={badgeStyles.emoji}>{badge.emoji}</Text>
                 ) : (
-                  <Lock size={16} color="#2C2C2E" />
+                  <Lock size={16} color="#C2BDB4" />
                 )}
               </View>
-              <Text style={[badgeStyles.title, earned && { color: '#E5E7EB' }]} numberOfLines={1}>{t(badge.titleKey)}</Text>
-              <Text style={[badgeStyles.desc, earned && { color: badge.color + 'AA' }]} numberOfLines={1}>{t(badge.descKey)}</Text>
+              <Text style={[badgeStyles.title, earned && { color: '#2C2C2C' }]} numberOfLines={1}>{t(badge.titleKey)}</Text>
+              <Text style={[badgeStyles.desc, earned && { color: badge.color }]} numberOfLines={1}>{t(badge.descKey)}</Text>
             </View>
           );
         })}
@@ -461,7 +461,7 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
         </View>
       ) : (
         <View style={physStyles.empty}>
-          <Scale size={36} color="#2C2C2E" />
+          <Scale size={36} color="#C2BDB4" />
           <Text style={physStyles.emptyTitle}>{t('stats_no_stats')}</Text>
           <Text style={physStyles.emptyDesc}>{t('stats_add_stats_desc')}</Text>
           <TouchableOpacity
@@ -560,7 +560,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
 
       {filteredHistory.length === 0 && (
         <View style={wpStyles.emptyChart}>
-          <Calendar size={24} color="#2C2C2E" />
+          <Calendar size={24} color="#C2BDB4" />
           <Text style={wpStyles.emptyText}>{t('stats_no_entries')}</Text>
         </View>
       )}
@@ -978,7 +978,7 @@ export default function PersonalStatsScreen() {
             <TextInput
               style={backupModalStyles.textArea}
               placeholder={t('stats_paste_backup')}
-              placeholderTextColor="#2C2C2E"
+              placeholderTextColor="#A8A8A0"
               value={importText}
               onChangeText={(t) => { setImportText(t); setImportStatus('idle'); setImportError(''); }}
               multiline
@@ -1372,12 +1372,12 @@ const physStyles = StyleSheet.create({
   emptyTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#5A5A5E",
+    color: "#2C2C2C",
   },
   emptyDesc: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#2C2C2E",
+    color: "#7A7A7A",
     textAlign: "center" as const,
     marginBottom: 8,
   },
@@ -1447,12 +1447,12 @@ const wpStyles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 13,
-    color: "#2C2C2E",
+    color: "#7A7A7A",
     fontWeight: "500" as const,
   },
   emptyTextSub: {
     fontSize: 12,
-    color: "#2C2C2E",
+    color: "#7A7A7A",
     fontWeight: "500" as const,
   },
   singleEntry: {
@@ -1823,19 +1823,19 @@ const badgeStyles = StyleSheet.create({
   title: {
     fontSize: 10,
     fontWeight: "700" as const,
-    color: "#5A5A5E",
+    color: "#A8A8A0",
     textAlign: "center" as const,
   },
   desc: {
     fontSize: 9,
     fontWeight: "500" as const,
-    color: "#2C2C2E",
+    color: "#C2BDB4",
     textAlign: "center" as const,
   },
   lockedHint: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#2C2C2E",
+    color: "#A8A8A0",
     textAlign: "center" as const,
     marginTop: 10,
   },
