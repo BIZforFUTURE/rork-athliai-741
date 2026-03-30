@@ -62,7 +62,7 @@ function OnboardingSteps({ activePhase, isSpanish }: { activePhase: 'welcome' | 
                 isActive && onboardStyles.stepNumActive,
                 isDone && onboardStyles.stepNumDone,
               ]}>
-                {isDone ? '✓' : phase.num}
+                {isDone ? 'OK' : phase.num}
               </Text>
             </View>
           </React.Fragment>

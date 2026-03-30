@@ -159,16 +159,16 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       const xpText = xpEarned ? (isSpanish ? ` +${xpEarned} XP ganado!` : ` +${xpEarned} XP earned!`) : '';
       const titles = isSpanish
         ? [
-            '⚔️ ¡Victoria! ¡Entrenamiento Conquistado!',
-            '🏆 ¡Misión Completa!',
-            '💪 ¡Jefe Derrotado!',
-            '🎯 ¡Misión Cumplida!',
+            'Victoria! Entrenamiento Conquistado!',
+            'Mision Completa!',
+            'Jefe Derrotado!',
+            'Mision Cumplida!',
           ]
         : [
-            '⚔️ Victory! Workout Conquered!',
-            '🏆 Quest Complete!',
-            '💪 Boss Defeated!',
-            '🎯 Mission Accomplished!',
+            'Victory! Workout Conquered!',
+            'Quest Complete!',
+            'Boss Defeated!',
+            'Mission Accomplished!',
           ];
       const title = titles[Math.floor(Math.random() * titles.length)];
 
@@ -202,16 +202,16 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       const xpText = xpEarned ? ` +${xpEarned} XP!` : '';
       const titles = isSpanish
         ? [
-            '🏃 ¡Misión de Carrera Completa!',
-            '⚡ ¡Distancia Conquistada!',
-            '🔥 ¡Camino Recorrido!',
-            '🎯 ¡Misión de Carrera Cumplida!',
+            'Mision de Carrera Completa!',
+            'Distancia Conquistada!',
+            'Camino Recorrido!',
+            'Mision de Carrera Cumplida!',
           ]
         : [
-            '🏃 Run Quest Complete!',
-            '⚡ Distance Conquered!',
-            '🔥 Trail Blazed!',
-            '🎯 Run Mission Done!',
+            'Run Quest Complete!',
+            'Distance Conquered!',
+            'Trail Blazed!',
+            'Run Mission Done!',
           ];
       const title = titles[Math.floor(Math.random() * titles.length)];
 
@@ -339,14 +339,14 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const messages = isSpanish
         ? [
-            { title: '🍳 Misión Diaria: ¡A Comer!', body: 'Registra tu desayuno para ganar +15 XP. ¡Cada comida registrada te sube de nivel!' },
-            { title: '⚡ XP Matutino Te Espera', body: 'Escanea tu desayuno y acumula XP. ¡Rachas de nutrición = XP extra!' },
-            { title: '🎯 Misión Secundaria: Desayuno', body: '¡Alcanza tu meta de calorías hoy para un bono de +50 XP. Empieza con el desayuno!' },
+            { title: 'Mision Diaria: A Comer!', body: 'Registra tu desayuno para ganar +15 XP. Cada comida registrada te sube de nivel!' },
+            { title: 'XP Matutino Te Espera', body: 'Escanea tu desayuno y acumula XP. Rachas de nutricion = XP extra!' },
+            { title: 'Mision Secundaria: Desayuno', body: 'Alcanza tu meta de calorias hoy para un bono de +50 XP. Empieza con el desayuno!' },
           ]
         : [
-            { title: '🍳 Daily Quest: Fuel Up!', body: 'Log your breakfast to earn +15 XP. Every meal tracked levels you up!' },
-            { title: '⚡ Morning XP Awaits', body: 'Scan your breakfast and stack that XP. Nutrition streaks = bonus XP!' },
-            { title: '🎯 Side Quest: Breakfast', body: 'Hit your calorie goal today for a +50 XP bonus. Start with breakfast!' },
+            { title: 'Daily Quest: Fuel Up!', body: 'Log your breakfast to earn +15 XP. Every meal tracked levels you up!' },
+            { title: 'Morning XP Awaits', body: 'Scan your breakfast and stack that XP. Nutrition streaks = bonus XP!' },
+            { title: 'Side Quest: Breakfast', body: 'Hit your calorie goal today for a +50 XP bonus. Start with breakfast!' },
           ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
@@ -385,14 +385,14 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const messages = isSpanish
         ? [
-            { title: '🏃 Batalla de Jefe: El Camino Abierto', body: '¡Gana 25+ XP por carrera. Cuanto más lejos vayas, más XP colectas!' },
-            { title: '⚔️ Misión Disponible: Sal a Correr', body: '¡Cada 0.25 mi = +15 XP. Ponte las zapatillas y sube de nivel!' },
-            { title: '🔥 Tu Racha de Carrera Te Llama', body: '¡Mantén la racha viva para XP extra masivo. No dejes que se reinicie!' },
+            { title: 'Batalla de Jefe: El Camino Abierto', body: 'Gana 25+ XP por carrera. Cuanto mas lejos vayas, mas XP colectas!' },
+            { title: 'Mision Disponible: Sal a Correr', body: 'Cada 0.25 mi = +15 XP. Ponte las zapatillas y sube de nivel!' },
+            { title: 'Tu Racha de Carrera Te Llama', body: 'Manten la racha viva para XP extra masivo. No dejes que se reinicie!' },
           ]
         : [
-            { title: '🏃 Boss Battle: The Open Road', body: 'Earn 25+ XP per run. The further you go, the more XP you collect!' },
-            { title: '⚔️ Quest Available: Go for a Run', body: 'Every 0.25 mi = +15 XP. Lace up and grind those levels!' },
-            { title: '🔥 Your Run Streak is Calling', body: 'Keep the streak alive for massive bonus XP. Don\'t let it reset!' },
+            { title: 'Boss Battle: The Open Road', body: 'Earn 25+ XP per run. The further you go, the more XP you collect!' },
+            { title: 'Quest Available: Go for a Run', body: 'Every 0.25 mi = +15 XP. Lace up and grind those levels!' },
+            { title: 'Your Run Streak is Calling', body: 'Keep the streak alive for massive bonus XP. Don\'t let it reset!' },
           ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
@@ -431,14 +431,14 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const messages = isSpanish
         ? [
-            { title: '💪 Jefe Final: Entrenamiento Nocturno', body: '¡Gana +75 XP por completar el entrenamiento de hoy. Es hora de subir de nivel!' },
-            { title: '🛡️ Última Misión del Día', body: '¡Un entrenamiento = 75 XP más cerca de tu próximo rango. No te la saltes!' },
-            { title: '⚡ Hora de Poder: Hora de Entrenar', body: '¡El gimnasio es tu arena. Destrúyelo y recoge tu recompensa de XP!' },
+            { title: 'Jefe Final: Entrenamiento Nocturno', body: 'Gana +75 XP por completar el entrenamiento de hoy. Es hora de subir de nivel!' },
+            { title: 'Ultima Mision del Dia', body: 'Un entrenamiento = 75 XP mas cerca de tu proximo rango. No te la saltes!' },
+            { title: 'Hora de Poder: Hora de Entrenar', body: 'El gimnasio es tu arena. Destruyelo y recoge tu recompensa de XP!' },
           ]
         : [
-            { title: '💪 Raid Boss: Evening Workout', body: 'Earn +75 XP for completing today\'s workout. Time to level up!' },
-            { title: '🛡️ Final Quest of the Day', body: 'One workout = 75 XP closer to your next rank. Don\'t skip this one!' },
-            { title: '⚡ Power Hour: Workout Time', body: 'The gym is your arena. Crush it and collect your XP reward!' },
+            { title: 'Raid Boss: Evening Workout', body: 'Earn +75 XP for completing today\'s workout. Time to level up!' },
+            { title: 'Final Quest of the Day', body: 'One workout = 75 XP closer to your next rank. Don\'t skip this one!' },
+            { title: 'Power Hour: Workout Time', body: 'The gym is your arena. Crush it and collect your XP reward!' },
           ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 
@@ -613,7 +613,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: isSpanish ? `🎉 ¡SUBISTE DE NIVEL! ¡Ahora eres Nivel ${newLevel}!` : `🎉 LEVEL UP! You're now Level ${newLevel}!`,
+          title: isSpanish ? `SUBISTE DE NIVEL! Ahora eres Nivel ${newLevel}!` : `LEVEL UP! You're now Level ${newLevel}!`,
           body: `${rankInfo.emoji} ${isSpanish ? 'Nuevo rango' : 'New rank'}: ${RANK_TRANSLATION_KEYS[rankInfo.title] ? t(RANK_TRANSLATION_KEYS[rankInfo.title]) : rankInfo.title}! ${isSpanish ? '¡Sigue avanzando para desbloquear el siguiente nivel!' : 'Keep grinding to unlock the next tier!'}`,
           sound: 'default',
           data: { type: 'level-up', level: newLevel, rank: rankInfo.title, timestamp: Date.now() },
@@ -661,13 +661,13 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
       const hasPermission = await requestPermissions();
       if (!hasPermission) return null;
 
-      const milestoneEmoji = days >= 30 ? '👑' : days >= 14 ? '🔥' : days >= 7 ? '⚡' : '🎯';
+      const milestoneLabel = days >= 30 ? 'EPIC' : days >= 14 ? 'FIRE' : days >= 7 ? 'POWER' : 'GOAL';
       const bonusXP = streakType === 'food' ? days * 5 : days * 10;
       const streakTypeEs = streakType === 'food' ? 'comida' : streakType === 'run' ? 'carrera' : 'entrenamiento';
 
       const identifier = await Notifications.scheduleNotificationAsync({
         content: {
-          title: isSpanish ? `${milestoneEmoji} ¡Racha de ${days} Días de ${streakTypeEs}!` : `${milestoneEmoji} ${days}-Day ${streakType} Streak!`,
+          title: isSpanish ? `${milestoneLabel} Racha de ${days} Dias de ${streakTypeEs}!` : `${milestoneLabel} ${days}-Day ${streakType} Streak!`,
           body: isSpanish
             ? `¡Imparable! Tu racha de ${streakTypeEs} te da +${bonusXP} XP extra diario. ¡No rompas la cadena!`
             : `Unstoppable! Your ${streakType} streak earns +${bonusXP} bonus XP daily. Don't break the chain!`,
@@ -727,7 +727,7 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: isSpanish ? '⚠️ ¡Racha en Peligro!' : '⚠️ Streak in Danger!',
+          title: isSpanish ? 'Racha en Peligro!' : 'Streak in Danger!',
           body: isSpanish
             ? '¡Tus rachas se reinician a medianoche! Registra una comida, carrera o entrenamiento para proteger tu XP extra.'
             : 'Your streaks reset at midnight! Log a meal, run, or workout to protect your bonus XP.',
@@ -762,14 +762,14 @@ export const [NotificationProvider, useNotifications] = createContextHook(() => 
 
       const messages = isSpanish
         ? [
-            { title: '🌅 ¡Nuevo Día, Nuevo XP!', body: '¡Tus misiones diarias se han reiniciado. Completa las 3 para máximo XP hoy!' },
-            { title: '⚔️ Misiones Diarias Disponibles', body: '¡Registra comida, sal a correr, destroza un entrenamiento — cada uno te da XP!' },
-            { title: '🎮 Jugador Listo', body: '¡Un nuevo día de XP te espera. ¿Cuánto ganarás hoy?' },
+            { title: 'Nuevo Dia, Nuevo XP!', body: 'Tus misiones diarias se han reiniciado. Completa las 3 para maximo XP hoy!' },
+            { title: 'Misiones Diarias Disponibles', body: 'Registra comida, sal a correr, destroza un entrenamiento — cada uno te da XP!' },
+            { title: 'Jugador Listo', body: 'Un nuevo dia de XP te espera. Cuanto ganaras hoy?' },
           ]
         : [
-            { title: '🌅 New Day, New XP!', body: 'Your daily quests have reset. Complete all 3 for max XP today!' },
-            { title: '⚔️ Daily Quests Available', body: 'Log food, go for a run, crush a workout — each one earns XP!' },
-            { title: '🎮 Ready Player One', body: 'A fresh day of XP grinding awaits. How much will you earn today?' },
+            { title: 'New Day, New XP!', body: 'Your daily quests have reset. Complete all 3 for max XP today!' },
+            { title: 'Daily Quests Available', body: 'Log food, go for a run, crush a workout — each one earns XP!' },
+            { title: 'Ready Player One', body: 'A fresh day of XP grinding awaits. How much will you earn today?' },
           ];
       const msg = messages[Math.floor(Math.random() * messages.length)];
 

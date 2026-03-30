@@ -65,7 +65,7 @@ export const translations = {
     gym_q3_o2: 'Home gym with dumbbells and basic equipment',
     gym_q3_o3: 'Bodyweight only (no equipment)',
     gym_q3_o4: 'Limited equipment (resistance bands, light weights)',
-    gym_q3_o5_scan: '📸 Scan my gym equipment',
+    gym_q3_o5_scan: 'Scan my gym equipment',
     gym_scan_analyzing: 'Analyzing your gym equipment...',
     gym_scan_error: 'Could not analyze the image. Please try again or select an option manually.',
     gym_scan_permission: 'Camera permission is needed to scan your equipment.',
@@ -116,7 +116,7 @@ export const translations = {
     day_sunday: 'Sunday',
 
     // Home screen
-    home_night_owl: 'Night owl mode 🦉',
+    home_night_owl: 'Night owl mode',
     home_good_morning: 'Good morning',
     home_good_afternoon: 'Good afternoon',
     home_good_evening: 'Good evening',
@@ -364,7 +364,7 @@ export const translations = {
     stats_on_pace: 'On Pace',
     stats_ahead: 'Ahead of Schedule',
     stats_behind: 'Behind Schedule',
-    stats_almost_there: '🎯 Almost there!',
+    stats_almost_there: 'Almost there!',
     stats_height: 'Height',
     stats_weight: 'Weight',
     stats_no_stats: 'No stats yet',
@@ -553,7 +553,7 @@ export const translations = {
 
     // Workout complete
     workout_complete_title: 'Workout Complete!',
-    workout_complete_great: 'Great work! 💪',
+    workout_complete_great: 'Great work!',
     workout_complete_exercises: 'Exercises',
     workout_complete_duration: 'Duration',
     workout_complete_calories: 'Calories',
@@ -932,7 +932,7 @@ export const translations = {
     gym_q3_o2: 'Gimnasio en casa con mancuernas y equipo básico',
     gym_q3_o3: 'Solo peso corporal (sin equipo)',
     gym_q3_o4: 'Equipo limitado (bandas de resistencia, pesas ligeras)',
-    gym_q3_o5_scan: '📸 Escanear mi equipo de gimnasio',
+    gym_q3_o5_scan: 'Escanear mi equipo de gimnasio',
     gym_scan_analyzing: 'Analizando tu equipo de gimnasio...',
     gym_scan_error: 'No se pudo analizar la imagen. Inténtalo de nuevo o selecciona una opción manualmente.',
     gym_scan_permission: 'Se necesita permiso de cámara para escanear tu equipo.',
@@ -983,7 +983,7 @@ export const translations = {
     day_sunday: 'Domingo',
 
     // Home screen
-    home_night_owl: 'Modo búho nocturno 🦉',
+    home_night_owl: 'Modo nocturno',
     home_good_morning: 'Buenos días',
     home_good_afternoon: 'Buenas tardes',
     home_good_evening: 'Buenas noches',
@@ -1231,7 +1231,7 @@ export const translations = {
     stats_on_pace: 'En Ritmo',
     stats_ahead: 'Adelantado',
     stats_behind: 'Atrasado',
-    stats_almost_there: '🎯 ¡Casi llegas!',
+    stats_almost_there: 'Casi llegas!',
     stats_height: 'Altura',
     stats_weight: 'Peso',
     stats_no_stats: 'Sin estadísticas aún',
@@ -1420,7 +1420,7 @@ export const translations = {
 
     // Workout complete
     workout_complete_title: '¡Entrenamiento Completo!',
-    workout_complete_great: '¡Gran trabajo! 💪',
+    workout_complete_great: 'Gran trabajo!',
     workout_complete_exercises: 'Ejercicios',
     workout_complete_duration: 'Duración',
     workout_complete_calories: 'Calorías',

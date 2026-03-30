@@ -65,7 +65,7 @@ export default function WorkoutCompleteScreen() {
       tomorrow.setHours(9, 0, 0, 0); // 9 AM tomorrow
       
       await scheduleWorkoutReminder(
-        '🎉 Yesterday\'s Victory!',
+        'Yesterday\'s Victory!',
         `Great job completing ${workoutName || 'your workout'} yesterday! Ready for another amazing session today?`,
         tomorrow
       );

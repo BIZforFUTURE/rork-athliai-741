@@ -24,7 +24,7 @@ export interface BadgeStats {
 export const BADGES: Badge[] = [
   {
     id: 'first_run',
-    emoji: '🏃',
+    emoji: '',
     titleKey: 'badge_first_run',
     descKey: 'badge_first_run_desc',
     color: '#00E5FF',
@@ -32,7 +32,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'first_workout',
-    emoji: '💪',
+    emoji: '',
     titleKey: 'badge_first_workout',
     descKey: 'badge_first_workout_desc',
     color: '#FF6B35',
@@ -40,7 +40,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'first_meal',
-    emoji: '🍽️',
+    emoji: '',
     titleKey: 'badge_first_meal',
     descKey: 'badge_first_meal_desc',
     color: '#BFFF00',
@@ -48,7 +48,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'run_streak_3',
-    emoji: '🔥',
+    emoji: '',
     titleKey: 'badge_run_streak_3',
     descKey: 'badge_run_streak_3_desc',
     color: '#F59E0B',
@@ -56,7 +56,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'run_streak_7',
-    emoji: '⚡',
+    emoji: '',
     titleKey: 'badge_run_streak_7',
     descKey: 'badge_run_streak_7_desc',
     color: '#F97316',
@@ -64,7 +64,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'workout_streak_7',
-    emoji: '🏋️',
+    emoji: '',
     titleKey: 'badge_workout_streak_7',
     descKey: 'badge_workout_streak_7_desc',
     color: '#8B5CF6',
@@ -72,7 +72,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'food_streak_7',
-    emoji: '🥗',
+    emoji: '',
     titleKey: 'badge_food_streak_7',
     descKey: 'badge_food_streak_7_desc',
     color: '#10B981',
@@ -80,7 +80,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: '10_runs',
-    emoji: '🎯',
+    emoji: '',
     titleKey: 'badge_10_runs',
     descKey: 'badge_10_runs_desc',
     color: '#00ADB5',
@@ -88,7 +88,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: '50_runs',
-    emoji: '🏅',
+    emoji: '',
     titleKey: 'badge_50_runs',
     descKey: 'badge_50_runs_desc',
     color: '#E879F9',
@@ -96,7 +96,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: '100_workouts',
-    emoji: '🏆',
+    emoji: '',
     titleKey: 'badge_100_workouts',
     descKey: 'badge_100_workouts_desc',
     color: '#F59E0B',
@@ -104,7 +104,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'level_10',
-    emoji: '⭐',
+    emoji: '',
     titleKey: 'badge_level_10',
     descKey: 'badge_level_10_desc',
     color: '#3B82F6',
@@ -112,7 +112,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: 'level_20',
-    emoji: '🌟',
+    emoji: '',
     titleKey: 'badge_level_20',
     descKey: 'badge_level_20_desc',
     color: '#F97316',
@@ -120,7 +120,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: '1000_xp',
-    emoji: '💎',
+    emoji: '',
     titleKey: 'badge_1000_xp',
     descKey: 'badge_1000_xp_desc',
     color: '#00E5FF',
@@ -128,7 +128,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: '10_miles',
-    emoji: '🛤️',
+    emoji: '',
     titleKey: 'badge_10_miles',
     descKey: 'badge_10_miles_desc',
     color: '#22C55E',
@@ -136,7 +136,7 @@ export const BADGES: Badge[] = [
   },
   {
     id: '50_miles',
-    emoji: '🗺️',
+    emoji: '',
     titleKey: 'badge_50_miles',
     descKey: 'badge_50_miles_desc',
     color: '#EF4444',
@@ -145,16 +145,16 @@ export const BADGES: Badge[] = [
 ];
 
 export const AVATAR_OPTIONS = [
-  { id: 'default', emoji: '👤', color: '#4B5563' },
-  { id: 'runner', emoji: '🏃', color: '#00E5FF' },
-  { id: 'lifter', emoji: '🏋️', color: '#FF6B35' },
-  { id: 'athlete', emoji: '⚡', color: '#F59E0B' },
-  { id: 'ninja', emoji: '🥷', color: '#8B5CF6' },
-  { id: 'fire', emoji: '🔥', color: '#EF4444' },
-  { id: 'star', emoji: '⭐', color: '#F59E0B' },
-  { id: 'crown', emoji: '👑', color: '#E879F9' },
-  { id: 'tiger', emoji: '🐯', color: '#F97316' },
-  { id: 'eagle', emoji: '🦅', color: '#3B82F6' },
-  { id: 'shark', emoji: '🦈', color: '#00ADB5' },
-  { id: 'dragon', emoji: '🐉', color: '#22C55E' },
+  { id: 'default', emoji: '', color: '#4B5563' },
+  { id: 'runner', emoji: '', color: '#00E5FF' },
+  { id: 'lifter', emoji: '', color: '#FF6B35' },
+  { id: 'athlete', emoji: '', color: '#F59E0B' },
+  { id: 'ninja', emoji: '', color: '#8B5CF6' },
+  { id: 'fire', emoji: '', color: '#EF4444' },
+  { id: 'star', emoji: '', color: '#F59E0B' },
+  { id: 'crown', emoji: '', color: '#E879F9' },
+  { id: 'tiger', emoji: '', color: '#F97316' },
+  { id: 'eagle', emoji: '', color: '#3B82F6' },
+  { id: 'shark', emoji: '', color: '#00ADB5' },
+  { id: 'dragon', emoji: '', color: '#22C55E' },
 ];

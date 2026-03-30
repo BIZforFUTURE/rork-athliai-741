@@ -225,7 +225,7 @@ export default function NotificationSettingsScreen() {
         style={styles.header}
       >
         <View style={styles.headerContent}>
-          <Text style={styles.headerEmoji}>⚔️</Text>
+          <Swords size={32} color="#FFFFFF" />
           <Text style={styles.headerTitle}>Quest Alerts</Text>
         </View>
         <Text style={styles.headerSubtitle}>
@@ -263,7 +263,7 @@ export default function NotificationSettingsScreen() {
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>7:30 AM</Text>
-                <Text style={styles.timelineLabel}>⚔️ Daily Quests Available</Text>
+                <Text style={styles.timelineLabel}>Daily Quests Available</Text>
                 <Text style={styles.timelineDesc}>New day, new XP to earn!</Text>
               </View>
             </View>
@@ -272,7 +272,7 @@ export default function NotificationSettingsScreen() {
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>8:00 AM</Text>
-                <Text style={styles.timelineLabel}>🍳 Nutrition Quest (+15 XP)</Text>
+                <Text style={styles.timelineLabel}>Nutrition Quest (+15 XP)</Text>
                 <Text style={styles.timelineDesc}>Log food to earn XP</Text>
               </View>
             </View>
@@ -281,7 +281,7 @@ export default function NotificationSettingsScreen() {
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>12:30 PM</Text>
-                <Text style={styles.timelineLabel}>🏃 Run Quest (+25 XP)</Text>
+                <Text style={styles.timelineLabel}>Run Quest (+25 XP)</Text>
                 <Text style={styles.timelineDesc}>Every mile = +10 bonus XP</Text>
               </View>
             </View>
@@ -290,7 +290,7 @@ export default function NotificationSettingsScreen() {
               <View style={styles.timelineLine} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>6:00 PM</Text>
-                <Text style={styles.timelineLabel}>💪 Workout Raid (+75 XP)</Text>
+                <Text style={styles.timelineLabel}>Workout Raid (+75 XP)</Text>
                 <Text style={styles.timelineDesc}>Crush the final quest of the day</Text>
               </View>
             </View>
@@ -298,7 +298,7 @@ export default function NotificationSettingsScreen() {
               <View style={[styles.timelineDot, { backgroundColor: '#EF4444' }]} />
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineTime}>9:00 PM</Text>
-                <Text style={styles.timelineLabel}>⚠️ Streak Warning</Text>
+                <Text style={styles.timelineLabel}>Streak Warning</Text>
                 <Text style={styles.timelineDesc}>Don't lose your bonus XP!</Text>
               </View>
             </View>
@@ -306,7 +306,7 @@ export default function NotificationSettingsScreen() {
         </View>
 
         <View style={styles.settingsCard}>
-          <Text style={styles.cardTitle}>⚔️ Daily Quest Alerts</Text>
+          <Text style={styles.cardTitle}>Daily Quest Alerts</Text>
 
           <View style={styles.settingsList}>
             <View style={styles.settingItem}>
@@ -412,7 +412,7 @@ export default function NotificationSettingsScreen() {
         </View>
 
         <View style={styles.settingsCard}>
-          <Text style={styles.cardTitle}>⚡ XP & Achievement Alerts</Text>
+          <Text style={styles.cardTitle}>XP & Achievement Alerts</Text>
 
           <View style={styles.settingsList}>
             <View style={styles.settingItem}>

@@ -491,7 +491,7 @@ Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"nam
 
       const newEntry = {
         id: Date.now().toString(),
-        name: `🏋️ ${name}`,
+        name: `${name}`,
         calories: -Math.round(burned),
         protein: 0,
         carbs: 0,
@@ -785,7 +785,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <View style={styles.headerActions}>
               {stats.foodStreak > 0 && (
                 <View style={styles.streakBadge}>
-                  <Text style={styles.streakEmoji}>🔥</Text>
+                  <Flame size={14} color="#F59E0B" />
                   <Text style={styles.streakCount}>{stats.foodStreak}</Text>
                 </View>
               )}
@@ -1065,7 +1065,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     </Animated.View>
                   </View>
                   <Animated.Text style={[analyzingStyles.progressText, { opacity: analyzingPulseAnim }]}>
-                    {analyzingFoodName ? '✓' : '...'}
+                    {analyzingFoodName ? 'Done' : '...'}
                   </Animated.Text>
                 </View>
                 <View style={analyzingStyles.textWrap}>

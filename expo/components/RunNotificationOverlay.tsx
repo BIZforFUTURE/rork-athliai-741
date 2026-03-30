@@ -78,7 +78,7 @@ export default function RunNotificationOverlay({
           <View style={styles.headerContent}>
             <View>
               <Text style={styles.headerTitle}>
-                {isRunning ? `🏃‍♂️ ${t('run_active')}` : `🏃‍♂️ ${t('run_complete')}`}
+                {isRunning ? t('run_active') : t('run_complete')}
               </Text>
               <Text style={styles.headerSubtitle}>
                 {isRunning ? t('run_live_tracking') : t('run_summary_label')}

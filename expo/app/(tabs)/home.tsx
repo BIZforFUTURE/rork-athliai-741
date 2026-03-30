@@ -223,7 +223,7 @@ function DailyQuests() {
           <Text style={[questStyles.xpTag, { color: quest.done ? quest.color : "#374151" }]}>{quest.xp}</Text>
           {quest.done && (
             <View style={[questStyles.checkMark, { backgroundColor: quest.color + "20" }]}>
-              <Text style={{ fontSize: 10 }}>✓</Text>
+              <Text style={{ fontSize: 10, color: '#F5F5F5' }}>✓</Text>
             </View>
           )}
         </View>
