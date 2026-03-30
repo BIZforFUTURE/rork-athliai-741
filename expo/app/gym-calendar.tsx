@@ -304,7 +304,7 @@ export default function GymCalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
   },
   headerGradient: {
     paddingBottom: 16,

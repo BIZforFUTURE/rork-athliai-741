@@ -672,7 +672,7 @@ export default function DailyChallengeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
   },
   header: {
     flexDirection: "row",
@@ -981,7 +981,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#F9FAFB",
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   confirmInputValid: {
     borderColor: "#10B981",

@@ -1096,7 +1096,7 @@ Format as JSON:
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <LinearGradient
-        colors={['#0D0F13', '#111520', '#0D0F13']}
+        colors={['#0A0E1A', '#0E1424', '#0A0E1A']}
         style={styles.header}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -1968,7 +1968,7 @@ Format as JSON:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
   },
   header: {
     paddingHorizontal: 20,
@@ -1984,7 +1984,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F5F5F5",
+    color: "#F0F4FF",
     letterSpacing: -0.5,
   },
   subtitleRow: {
@@ -2149,10 +2149,10 @@ const styles = StyleSheet.create({
 
   buildWorkoutCTASmall: {
     marginTop: 14,
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   buildSmallInner: {
@@ -2343,12 +2343,12 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 20,
     padding: 16,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   statIconWrap: {
@@ -2400,12 +2400,12 @@ const styles = StyleSheet.create({
   },
 
   emptyState: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 20,
     padding: 36,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   emptyIconWrap: {
@@ -2433,14 +2433,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recentWorkoutCard: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 20,
     padding: 14,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   recentWorkoutLeft: {
@@ -2494,7 +2494,7 @@ const styles = StyleSheet.create({
 
   quizContainer: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
   },
   quizHeader: {
     flexDirection: "row" as const,
@@ -2652,7 +2652,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     minWidth: 105,
     alignItems: "center" as const,
     flexDirection: "row" as const,
@@ -2688,7 +2688,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
   },
   modalHeader: {
     flexDirection: "row" as const,

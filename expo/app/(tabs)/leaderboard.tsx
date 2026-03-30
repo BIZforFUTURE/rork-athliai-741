@@ -1162,17 +1162,17 @@ export default function PersonalStatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   pageTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F5F5F5",
+    color: "#F0F4FF",
     letterSpacing: -0.5,
   },
   pageSubtitle: {
@@ -1194,11 +1194,11 @@ const styles = StyleSheet.create({
 
 const cardStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#161616",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   cardHeader: {
@@ -1516,7 +1516,7 @@ const wpStyles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   header: {
     flexDirection: "row" as const,
@@ -1559,7 +1559,7 @@ const modalStyles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -1592,7 +1592,7 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center" as const,
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
@@ -1690,11 +1690,11 @@ const bkStyles = StyleSheet.create({
 
 const profileStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 16,
@@ -1798,10 +1798,10 @@ const badgeStyles = StyleSheet.create({
     alignItems: "center" as const,
     paddingVertical: 14,
     paddingHorizontal: 6,
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     gap: 5,
     overflow: "hidden" as const,
   },
@@ -1839,7 +1839,7 @@ const badgeStyles = StyleSheet.create({
 const avatarModalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   header: {
     flexDirection: "row" as const,
@@ -1880,7 +1880,7 @@ const avatarModalStyles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     position: "relative" as const,
   },
   avatarEmoji: {
@@ -1938,7 +1938,7 @@ const backupModalStyles = StyleSheet.create({
     color: "#00E5FF",
   },
   textArea: {
-    backgroundColor: "#0E1015",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,

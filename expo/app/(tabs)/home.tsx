@@ -592,12 +592,12 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -606,14 +606,14 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F5F5F5",
+    color: "#F0F4FF",
     letterSpacing: -0.5,
     flexShrink: 1,
   },
   subGreeting: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#5A6480",
     marginTop: 2,
   },
   levelChip: {
@@ -664,13 +664,13 @@ const styles = StyleSheet.create({
 
 const heroStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
-    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 28,
     paddingTop: 24,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     alignItems: "center" as const,
     overflow: "hidden" as const,
   },
@@ -802,11 +802,11 @@ const heroStyles = StyleSheet.create({
 
 const questStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   header: {
@@ -815,7 +815,7 @@ const questStyles = StyleSheet.create({
     justifyContent: "space-between" as const,
     marginBottom: 14,
     borderTopWidth: 1,
-    borderTopColor: "rgba(78,205,196,0.2)",
+    borderTopColor: "rgba(0,229,255,0.15)",
     paddingTop: 4,
   },
   headerLeft: {
@@ -897,13 +897,13 @@ const streakStyles = StyleSheet.create({
   strip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#161616",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 24,
     paddingVertical: 14,
     paddingHorizontal: 14,
     gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   flameWrap: {
@@ -962,11 +962,11 @@ const streakStyles = StyleSheet.create({
 
 const nutStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#161616",
-    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 28,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   cardHeader: {
@@ -1095,11 +1095,11 @@ const nutStyles = StyleSheet.create({
 
 const weekStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
-    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 28,
     padding: 18,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   headerRow: {
@@ -1122,14 +1122,14 @@ const weekStyles = StyleSheet.create({
     width: "47%" as unknown as number,
     flexGrow: 1,
     flexBasis: "44%" as unknown as number,
-    backgroundColor: "#1E1E1E",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 22,
     padding: 14,
     borderWidth: 1,
     overflow: "hidden" as const,
     position: "relative" as const,
     minHeight: 110,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.08)",
   },
   cellTop: {
     flexDirection: "row" as const,
@@ -1176,11 +1176,11 @@ const weekStyles = StyleSheet.create({
 
 const feedStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#161616",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   header: {

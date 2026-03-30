@@ -425,7 +425,7 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
   },
   header: {
     flexDirection: "row",
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     textAlign: "center" as const,
-    backgroundColor: "#0D0F13",
+    backgroundColor: "#0A0E1A",
     color: "#F9FAFB",
   },
   inputLabel: {

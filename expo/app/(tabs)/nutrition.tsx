@@ -84,11 +84,11 @@ MacroCard.displayName = "MacroCard";
 const macroCardStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#161616',
-    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 24,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   value: {
     fontSize: 26,
@@ -1921,7 +1921,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   content: {
     flex: 1,
@@ -2060,7 +2060,7 @@ const styles = StyleSheet.create({
     borderStyle: "dashed" as const,
   },
   weekDayCircleFuture: {
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     borderStyle: "solid" as const,
     backgroundColor: "transparent",
   },
@@ -2106,12 +2106,12 @@ const styles = StyleSheet.create({
   },
 
   calorieCard: {
-    backgroundColor: "#161616",
-    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 28,
     padding: 20,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   calorieCardInner: {
     flexDirection: "row",
@@ -2158,12 +2158,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   healthScoreCard: {
-    backgroundColor: "#161616",
-    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 24,
     padding: 20,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   healthScoreHeader: {
     flexDirection: "row",
@@ -2213,7 +2213,7 @@ const styles = StyleSheet.create({
   },
   actionChip: {
     flex: 1,
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -2246,7 +2246,7 @@ const styles = StyleSheet.create({
   exerciseChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -2288,7 +2288,7 @@ const styles = StyleSheet.create({
     fontWeight: "500" as const,
   },
   emptyMeals: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 20,
     padding: 40,
     alignItems: "center",
@@ -2307,7 +2307,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   mealCard: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
@@ -2404,7 +2404,7 @@ const styles = StyleSheet.create({
   },
 
   addFoodCard: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
@@ -2434,12 +2434,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     color: "#F9FAFB",
   },
   nutritionInputRow: {
@@ -2451,12 +2451,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nutritionInput: {
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     color: "#F9FAFB",
   },
   addFoodButtons: {
@@ -2508,7 +2508,7 @@ const styles = StyleSheet.create({
   },
 
   quizRequiredCard: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 24,
     padding: 32,
     marginTop: 20,
@@ -2564,16 +2564,16 @@ const styles = StyleSheet.create({
   },
   foodDetailOverlay: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   sheetModal: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 24,
     padding: 24,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   sheetClose: {
     position: "absolute",
@@ -2596,12 +2596,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sheetTextInput: {
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     borderRadius: 14,
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     minHeight: 100,
     textAlignVertical: "top",
     color: "#F3F4F6",
@@ -2639,13 +2639,13 @@ const styles = StyleSheet.create({
   },
 
   firstTimeModal: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 24,
     padding: 28,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     alignItems: "center",
   },
   firstTimeIconWrap: {
@@ -2703,7 +2703,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   firstTimeSkipText: {
     color: "#9CA3AF",
@@ -2729,13 +2729,13 @@ const styles = StyleSheet.create({
   },
 
   quizModal: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 24,
     padding: 28,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   quizTitle: {
     fontSize: 22,
@@ -2756,23 +2756,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   quizInput: {
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     color: "#F3F4F6",
   },
   choicesContainer: {
     gap: 10,
   },
   choiceButton: {
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     padding: 15,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   choiceButtonActive: {
     backgroundColor: "rgba(0,173,181,0.15)",
@@ -2805,7 +2805,7 @@ const styles = StyleSheet.create({
   quizButtonSecondary: {
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   quizButtonTextPrimary: {
     color: "#FFFFFF",
@@ -2846,14 +2846,14 @@ const styles = StyleSheet.create({
   analyzingText: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, marginTop: 20 },
 
   foodSearchModal: {
-    backgroundColor: "#161616",
+    backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 24,
     padding: 24,
     width: "92%",
     maxWidth: 420,
     maxHeight: "85%",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   foodSearchInputRow: {
     flexDirection: "row",
@@ -2863,14 +2863,14 @@ const styles = StyleSheet.create({
   },
   foodSearchInput: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     color: "#F3F4F6",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   foodSearchBtn: {
     backgroundColor: "#00ADB5",
@@ -3053,7 +3053,7 @@ const analyzingStyles = StyleSheet.create({
 const fdStyles = StyleSheet.create({
   detailModal: {
     flex: 1,
-    backgroundColor: "#0D0D0D",
+    backgroundColor: "#0A0E1A",
   },
   detailHeader: {
     flexDirection: "row",
@@ -3201,7 +3201,7 @@ const fdStyles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   macroBoxLabel: {
     fontSize: 12,
@@ -3245,7 +3245,7 @@ const fdStyles = StyleSheet.create({
     fontSize: 15,
     color: "#F3F4F6",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     minHeight: 80,
     textAlignVertical: "top" as const,
   },

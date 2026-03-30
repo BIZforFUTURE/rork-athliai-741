@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet, Animated } from "react-native";
 import { useLanguage } from "@/providers/LanguageProvider";
-import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 
 function AnimatedTabIcon({
   children,
@@ -58,16 +58,56 @@ function AnimatedTabIcon({
   );
 }
 
+function GlassTabBackground() {
+  if (Platform.OS === 'web') {
+    return (
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: 'rgba(10,14,26,0.85)',
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(255,255,255,0.08)',
+            // @ts-ignore
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
+          },
+        ]}
+      />
+    );
+  }
+
+  return (
+    <View style={StyleSheet.absoluteFill}>
+      <BlurView
+        intensity={60}
+        tint="dark"
+        style={StyleSheet.absoluteFill}
+      />
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: 'rgba(10,14,26,0.5)',
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(255,255,255,0.08)',
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
 export default function TabLayout() {
   const { t } = useLanguage();
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#4ECDC4",
-        tabBarInactiveTintColor: "#374151",
+        tabBarActiveTintColor: "#00E5FF",
+        tabBarInactiveTintColor: "#3D4560",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#141414",
+          backgroundColor: "transparent",
           borderTopWidth: 0,
           position: "absolute" as const,
           elevation: 0,
@@ -79,15 +119,7 @@ export default function TabLayout() {
           textTransform: "uppercase" as const,
           marginTop: 2,
         },
-        tabBarBackground: () => (
-          <View style={{ flex: 1 }}>
-            <LinearGradient
-              colors={['rgba(0,0,0,0)', '#1A1A1A']}
-              style={{ position: 'absolute', top: -24, left: 0, right: 0, height: 24 }}
-            />
-            <View style={{ flex: 1, backgroundColor: '#141414' }} />
-          </View>
-        ),
+        tabBarBackground: () => <GlassTabBackground />,
       }}
     >
       <Tabs.Screen
@@ -201,6 +233,6 @@ const styles = StyleSheet.create({
     width: 6,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#4ECDC4",
+    backgroundColor: "#00E5FF",
   },
 });
