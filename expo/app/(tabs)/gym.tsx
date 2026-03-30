@@ -205,7 +205,7 @@ function GymLoadingScreen({ t }: { t: (key: any, params?: Record<string, string 
             </Animated.View>
             <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
               <View style={styles.loadingIconCircle}>
-                <Dumbbell size={44} color="#00ADB5" strokeWidth={2.5} />
+                <Dumbbell size={44} color="#4A7C59" strokeWidth={2.5} />
               </View>
             </Animated.View>
           </View>
@@ -247,7 +247,7 @@ function GymLoadingScreen({ t }: { t: (key: any, params?: Record<string, string 
                   {isComplete ? (
                     <Check size={14} color="#FFFFFF" strokeWidth={3} />
                   ) : (
-                    <IconComponent size={14} color={isActive ? '#00ADB5' : '#6B7280'} />
+                    <IconComponent size={14} color={isActive ? '#4A7C59' : '#A8A8A0'} />
                   )}
                 </View>
                 <Text style={[
@@ -267,7 +267,7 @@ function GymLoadingScreen({ t }: { t: (key: any, params?: Record<string, string 
 
         <View style={styles.loadingTipCard}>
           <View style={styles.loadingTipHeader}>
-            <Sparkles size={14} color="#00ADB5" />
+            <Sparkles size={14} color="#4A7C59" />
             <Text style={styles.loadingTipHeaderText}>{t('gym_did_you_know')}</Text>
           </View>
           <Animated.Text
@@ -365,7 +365,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
   return (
     <View style={styles.restDayCard}>
       <LinearGradient
-        colors={['rgba(15, 23, 42, 0.95)', 'rgba(15, 30, 50, 0.98)']}
+        colors={['#FEFCF9', '#F5F0E8']}
         style={styles.restDayGradient}
       >
         <View style={styles.restDayStars}>
@@ -389,8 +389,8 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
         <View style={styles.restDayInner}>
           <View style={styles.restDayIconWrap}>
             {hasCompletedToday ? (
-              <View style={[styles.restDayIconCircle, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-                <Check size={28} color="#10B981" strokeWidth={2.5} />
+              <View style={[styles.restDayIconCircle, { backgroundColor: 'rgba(74,124,89,0.12)' }]}>
+                <Check size={28} color="#4A7C59" strokeWidth={2.5} />
               </View>
             ) : (
               <Animated.View
@@ -399,7 +399,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
                   { transform: [{ scale: pulseAnim }] },
                 ]}
               >
-                <Moon size={28} color="#7DD3FC" />
+                <Moon size={28} color="#4A7C59" />
               </Animated.View>
             )}
           </View>
@@ -413,7 +413,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
                 : `"${RECOVERY_QUOTES[quoteIndex]}"`}
             </Text>
             <View style={styles.restDayNextRow}>
-              <Calendar size={13} color="#38BDF8" />
+              <Calendar size={13} color="#4A7C59" />
               <Text style={styles.nextWorkoutText}>
                 {t('gym_next_workout', { day: nextWorkoutDay })}
               </Text>
@@ -427,7 +427,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
         onPress={onViewPlan}
       >
         <Text style={styles.viewPlanButtonText}>{t('gym_view_full_plan')}</Text>
-        <ChevronRight size={16} color="#38BDF8" />
+        <ChevronRight size={16} color="#4A7C59" />
       </TouchableOpacity>
     </View>
   );
@@ -1096,7 +1096,7 @@ Format as JSON:
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <LinearGradient
-        colors={['#091517', '#0C1E1F', '#091517']}
+        colors={['#F3EDE4', '#EDE7DE', '#F3EDE4']}
         style={styles.header}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -1108,7 +1108,7 @@ Format as JSON:
               <View style={styles.subtitleRow}>
                 {todaysWorkout ? (
                   <View style={styles.statusBadge}>
-                    <Flame size={12} color="#FF6B35" />
+                    <Flame size={12} color="#C4654E" />
                     <Text style={styles.statusBadgeText}>{t('gym_ready_train')}</Text>
                   </View>
                 ) : generatedPlan ? (
@@ -1118,7 +1118,7 @@ Format as JSON:
                       <Text style={[styles.statusBadgeText, { color: '#10B981' }]}>{t('gym_done_today')}</Text>
                     </View>
                   ) : (
-                    <View style={[styles.statusBadge, { backgroundColor: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.2)' }]}>
+                    <View style={[styles.statusBadge, { backgroundColor: 'rgba(168,168,160,0.1)', borderColor: 'rgba(168,168,160,0.2)' }]}>
                       <Moon size={12} color="#94A3B8" />
                       <Text style={[styles.statusBadgeText, { color: '#94A3B8' }]}>{t('gym_rest_day')}</Text>
                     </View>
@@ -1131,7 +1131,7 @@ Format as JSON:
             <View style={styles.headerRight}>
               {generatedPlan && (
                 <View style={styles.timerPill}>
-                  <Clock size={11} color="#00E5FF" />
+                  <Clock size={11} color="#4A7C59" />
                   <Text style={styles.timerText}>{timeRemaining}</Text>
                 </View>
               )}
@@ -1145,7 +1145,7 @@ Format as JSON:
                 }}
                 testID="gym-calendar-btn"
               >
-                <Calendar size={20} color="#00ADB5" />
+                <Calendar size={20} color="#4A7C59" />
               </TouchableOpacity>
               {generatedPlan && (
                 <TouchableOpacity
@@ -1177,9 +1177,9 @@ Format as JSON:
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#00ADB5"
-            colors={["#00ADB5"]}
-            progressBackgroundColor="#1A1D24"
+            tintColor="#4A7C59"
+            colors={["#4A7C59"]}
+            progressBackgroundColor="#F3EDE4"
           />
         }
       >
@@ -1196,7 +1196,7 @@ Format as JSON:
               }}
             >
               <LinearGradient
-                colors={['#00ADB5', '#0891B2']}
+                colors={['#4A7C59', '#3A6247']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.ctaGradientBg}
@@ -1229,7 +1229,7 @@ Format as JSON:
               }}
             >
               <LinearGradient
-                colors={['#6366F1', '#4F46E5']}
+                colors={['#8B6F47', '#7A5F3A']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.ctaGradientBg}
@@ -1263,7 +1263,7 @@ Format as JSON:
                 }}
               >
                 <LinearGradient
-                  colors={['#00ADB5', '#0E7490']}
+                  colors={['#4A7C59', '#3A6247']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.todaysWorkoutGradient}
@@ -1285,7 +1285,7 @@ Format as JSON:
                   </View>
                   <View style={styles.todayStartRow}>
                     <View style={styles.todayStartBtn}>
-                      <Play size={16} color="#0E7490" fill="#0E7490" />
+                      <Play size={16} color="#3A6247" fill="#3A6247" />
                       <Text style={styles.todayStartText}>{t('gym_start_workout')}</Text>
                     </View>
                   </View>
@@ -1349,7 +1349,7 @@ Format as JSON:
           testID="daily-challenge-btn"
         >
           <LinearGradient
-            colors={['#F59E0B', '#D97706']}
+            colors={['#C4654E', '#A8503D']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.dailyChallengeGradient}
@@ -1368,9 +1368,9 @@ Format as JSON:
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
-          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label={t('gym_streak')} delay={0} color="#FF6B35" />
+          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label={t('gym_streak')} delay={0} color="#C4654E" />
           <AnimatedStatCard icon={Calendar} value={stats.weeklyWorkouts} label={t('gym_this_week')} delay={80} color="#00ADB5" />
-          <AnimatedStatCard icon={TrendingUp} value={stats.totalWorkouts} label={t('gym_total')} delay={160} color="#8B5CF6" />
+          <AnimatedStatCard icon={TrendingUp} value={stats.totalWorkouts} label={t('gym_total')} delay={160} color="#8B6F47" />
         </View>
 
         <View style={styles.section}>
@@ -1436,7 +1436,7 @@ Format as JSON:
                         <View style={styles.recentWorkoutLeft}>
                           <View style={[
                             styles.recentWorkoutIndicator,
-                            { backgroundColor: log.completed ? '#00ADB5' : '#F59E0B' }
+                            { backgroundColor: log.completed ? '#4A7C59' : '#C4654E' }
                           ]} />
                           <View style={styles.recentWorkoutInfo}>
                             <Text style={styles.recentWorkoutName} numberOfLines={1}>{workoutName}</Text>
@@ -1811,7 +1811,7 @@ Format as JSON:
                   handleDayAdjustment();
                 }}
               >
-                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(0, 173, 181, 0.12)' }]}>
+                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(74,124,89,0.12)' }]}>
                   <Calendar size={20} color="#00ADB5" />
                 </View>
                 <View style={styles.settingsOptionText}>
@@ -1834,8 +1834,8 @@ Format as JSON:
                   setShowCustomPlan(true);
                 }}
               >
-                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(99, 102, 241, 0.12)' }]}>
-                  <Dumbbell size={20} color="#6366F1" />
+                <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(139,111,71,0.12)' }]}>
+                  <Dumbbell size={20} color="#8B6F47" />
                 </View>
                 <View style={styles.settingsOptionText}>
                   <Text style={styles.settingsOptionTitle}>{t('gym_view_full_plan')}</Text>
@@ -2570,13 +2570,13 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   scanEquipmentButton: {
-    backgroundColor: "rgba(0, 173, 181, 0.08)",
+    backgroundColor: "rgba(74,124,89,0.08)",
     borderRadius: 14,
     padding: 16,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     borderWidth: 1.5,
-    borderColor: "rgba(0, 173, 181, 0.3)",
+    borderColor: "rgba(74,124,89,0.3)",
     borderStyle: "dashed" as const,
     gap: 12,
     marginBottom: 6,
@@ -2585,7 +2585,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "rgba(0, 173, 181, 0.12)",
+    backgroundColor: "rgba(74,124,89,0.12)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -3000,7 +3000,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(0, 173, 181, 0.12)',
+    backgroundColor: 'rgba(74,124,89,0.12)',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
@@ -3073,7 +3073,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00ADB5',
   },
   loadingStepDotActive: {
-    backgroundColor: 'rgba(0, 173, 181, 0.2)',
+    backgroundColor: 'rgba(74,124,89,0.2)',
     borderWidth: 2,
     borderColor: '#00ADB5',
   },

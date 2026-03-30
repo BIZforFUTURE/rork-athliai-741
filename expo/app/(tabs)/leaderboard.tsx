@@ -147,7 +147,7 @@ function ProfileHeader({ onAvatarPress, _t }: { onAvatarPress: () => void; _t: (
         <Text style={profileStyles.levelText}>Level {xpInfo.level}</Text>
         <View style={profileStyles.miniStats}>
           <View style={profileStyles.miniStat}>
-            <Footprints size={11} color="#00E5FF" />
+            <Footprints size={11} color="#4A7C59" />
             <Text style={profileStyles.miniStatVal}>{recentRuns.length}</Text>
           </View>
           <View style={profileStyles.miniStat}>
@@ -155,7 +155,7 @@ function ProfileHeader({ onAvatarPress, _t }: { onAvatarPress: () => void; _t: (
             <Text style={profileStyles.miniStatVal}>{stats.totalWorkouts}</Text>
           </View>
           <View style={profileStyles.miniStat}>
-            <Activity size={11} color="#BFFF00" />
+            <Activity size={11} color="#C4654E" />
             <Text style={profileStyles.miniStatVal}>{xpInfo.totalXP.toLocaleString()}</Text>
           </View>
         </View>
@@ -202,7 +202,7 @@ function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string
             <View key={badge.id} style={[badgeStyles.cell, earned && { borderColor: badge.color + '25' }]}>
               <View style={[
                 badgeStyles.emojiWrap,
-                { backgroundColor: earned ? badge.color + '15' : 'rgba(255,255,255,0.05)' },
+                { backgroundColor: earned ? badge.color + '15' : 'rgba(0,0,0,0.03)' },
               ]}>
                 {earned ? (
                   <Text style={badgeStyles.emoji}>{badge.emoji}</Text>
@@ -303,7 +303,7 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
               ) : (
                 <TrendingDown size={12} color={remaining < 0 ? "#10B981" : "#EF4444"} />
               )}
-              <Text style={[goalStyles.statValue, { color: Math.abs(remaining) < 5 ? "#10B981" : "#D0D0D0" }]}>
+              <Text style={[goalStyles.statValue, { color: Math.abs(remaining) < 5 ? "#10B981" : "#2C2C2C" }]}>
                 {isSpanish ? lbsToKg(Math.abs(remaining)).toFixed(1) : Math.abs(remaining).toFixed(1)}<Text style={goalStyles.statUnit}> {isSpanish ? 'kg' : 'lbs'}</Text>
               </Text>
             </View>
@@ -313,7 +313,7 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
         <View style={goalStyles.barOuter}>
           <View style={[goalStyles.barFill, {
             width: `${Math.min(Math.max(progress, 0), 100)}%`,
-            backgroundColor: progress >= 100 ? "#10B981" : "#00ADB5"
+            backgroundColor: progress >= 100 ? "#10B981" : "#4A7C59"
           }]} />
         </View>
         <Text style={goalStyles.barLabel}>
@@ -337,12 +337,12 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
             onPaceStatus === 'behind' && { backgroundColor: "rgba(245,158,11,0.1)" },
           ]}>
             {onPaceStatus === 'on-pace' && <CheckCircle size={12} color="#10B981" />}
-            {onPaceStatus === 'ahead' && <TrendingUp size={12} color="#00ADB5" />}
+            {onPaceStatus === 'ahead' && <TrendingUp size={12} color="#4A7C59" />}
             {onPaceStatus === 'behind' && <AlertCircle size={12} color="#F59E0B" />}
             <Text style={[
               goalStyles.paceText,
               onPaceStatus === 'on-pace' && { color: "#10B981" },
-              onPaceStatus === 'ahead' && { color: "#00ADB5" },
+              onPaceStatus === 'ahead' && { color: "#4A7C59" },
               onPaceStatus === 'behind' && { color: "#F59E0B" },
             ]}>
               {onPaceStatus === 'on-pace' && t('stats_on_pace')}
@@ -384,7 +384,7 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
     ? calculateBMI(personalStats.weight, personalStats.height) : null;
 
   const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { category: 'Underweight', color: '#00ADB5' };
+    if (bmi < 18.5) return { category: 'Underweight', color: '#4A7C59' };
     if (bmi < 25) return { category: 'Normal', color: '#10B981' };
     if (bmi < 30) return { category: 'Overweight', color: '#F59E0B' };
     return { category: 'Obese', color: '#EF4444' };
@@ -396,10 +396,10 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
     if (!hasStats) return [];
     const result = [
       {
-        icon: <Ruler size={16} color="#00ADB5" />,
+        icon: <Ruler size={16} color="#4A7C59" />,
         value: isSpanish ? formatHeightMetric(personalStats.height!) : (() => { const { feet, inches } = inchesToFeetAndInches(personalStats.height!); return `${feet}'${inches}"`; })(),
         label: t('stats_height'),
-        color: "#00ADB5",
+        color: "#4A7C59",
       },
       {
         icon: <Scale size={16} color="#10B981" />,
@@ -567,7 +567,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
 
       {filteredHistory.length === 1 && (
         <View style={wpStyles.emptyChart}>
-          <BarChart3 size={24} color="#00ADB5" />
+          <BarChart3 size={24} color="#4A7C59" />
           <Text style={wpStyles.emptyTextSub}>{t('stats_add_more')}</Text>
           <View style={wpStyles.singleEntry}>
             <Text style={wpStyles.singleDate}>{new Date(filteredHistory[0].date + 'T00:00:00').toLocaleDateString()}</Text>
@@ -593,7 +593,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
                 labels: labels.length > 6 ? labels.filter((_, i) => i % Math.ceil(labels.length / 6) === 0) : labels,
                 datasets: [{
                   data: weights,
-                  color: (opacity = 1) => `rgba(0, 173, 181, ${opacity})`,
+                  color: (opacity = 1) => `rgba(74, 124, 89, ${opacity})`,
                   strokeWidth: 2,
                 }]
               }}
@@ -603,15 +603,15 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
               yAxisInterval={1}
               fromZero={false}
               chartConfig={{
-                backgroundColor: '#0C1C1E',
-                backgroundGradientFrom: '#0C1C1E',
-                backgroundGradientTo: '#0C1C1E',
+                backgroundColor: '#FEFCF9',
+                backgroundGradientFrom: '#FEFCF9',
+                backgroundGradientTo: '#FEFCF9',
                 decimalPlaces: 1,
-                color: (opacity = 1) => `rgba(0, 173, 181, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(75, 85, 99, ${opacity})`,
+                color: (opacity = 1) => `rgba(74, 124, 89, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(122, 122, 122, ${opacity})`,
                 style: { borderRadius: 12 },
-                propsForDots: { r: '3', strokeWidth: '1.5', stroke: '#00ADB5', fill: '#0C1C1E' },
-                propsForBackgroundLines: { strokeDasharray: '', stroke: 'rgba(255,255,255,0.05)', strokeWidth: 1 },
+                propsForDots: { r: '3', strokeWidth: '1.5', stroke: '#4A7C59', fill: '#FEFCF9' },
+                propsForBackgroundLines: { strokeDasharray: '', stroke: 'rgba(0,0,0,0.05)', strokeWidth: 1 },
                 propsForLabels: { fontSize: 10 },
               }}
               bezier
@@ -680,12 +680,12 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
 
       <View style={bkStyles.statsRow}>
         <View style={bkStyles.statPill}>
-          <Footprints size={10} color="#00E5FF" />
-          <Text style={[bkStyles.statText, { color: '#00E5FF' }]}>{runCount} {t('stats_runs_label')}</Text>
+          <Footprints size={10} color="#4A7C59" />
+          <Text style={[bkStyles.statText, { color: '#4A7C59' }]}>{runCount} {t('stats_runs_label')}</Text>
         </View>
         <View style={bkStyles.statPill}>
-          <UtensilsCrossed size={10} color="#BFFF00" />
-          <Text style={[bkStyles.statText, { color: '#BFFF00' }]}>{foodCount} {t('stats_meals')}</Text>
+          <UtensilsCrossed size={10} color="#C4654E" />
+          <Text style={[bkStyles.statText, { color: '#C4654E' }]}>{foodCount} {t('stats_meals')}</Text>
         </View>
         <View style={bkStyles.statPill}>
           <Dumbbell size={10} color="#FF6B35" />
@@ -707,7 +707,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
           style={{ flex: 1 }}
         >
           <Animated.View style={[bkStyles.exportBtn, { transform: [{ scale: exportScale }] }]}>
-            {exportCopied ? <Check size={16} color="#10B981" /> : <Download size={16} color="#00E5FF" />}
+            {exportCopied ? <Check size={16} color="#10B981" /> : <Download size={16} color="#4A7C59" />}
             <Text style={[bkStyles.exportText, exportCopied && { color: '#10B981' }]}>
               {exportCopied ? t('stats_copied') : t('stats_export')}
             </Text>
@@ -972,7 +972,7 @@ export default function PersonalStatsScreen() {
               <Text style={backupModalStyles.infoText}>{t('stats_restore_info')}</Text>
             </View>
             <TouchableOpacity style={backupModalStyles.pasteBtn} onPress={handlePasteFromClipboard} activeOpacity={0.7}>
-              <ClipboardPaste size={16} color="#00E5FF" />
+              <ClipboardPaste size={16} color="#4A7C59" />
               <Text style={backupModalStyles.pasteBtnText}>{t('stats_paste_clipboard')}</Text>
             </TouchableOpacity>
             <TextInput
@@ -1133,9 +1133,9 @@ export default function PersonalStatsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#00E5FF"
-            colors={["#00E5FF"]}
-            progressBackgroundColor="#1A1D24"
+            tintColor="#4A7C59"
+            colors={["#4A7C59"]}
+            progressBackgroundColor="#F3EDE4"
           />
         }
       >
@@ -1385,7 +1385,7 @@ const physStyles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 6,
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
@@ -1402,7 +1402,7 @@ const wpStyles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 8,
-    backgroundColor: "rgba(255,255,255,0.02)",
+    backgroundColor: "rgba(0,0,0,0.02)",
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
@@ -1427,10 +1427,10 @@ const wpStyles = StyleSheet.create({
     paddingVertical: 7,
     alignItems: "center" as const,
     borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
   periodBtnActive: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
   },
   periodText: {
     fontSize: 12,
@@ -1459,7 +1459,7 @@ const wpStyles = StyleSheet.create({
     flexDirection: "row" as const,
     justifyContent: "space-between" as const,
     alignItems: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 14,
@@ -1474,7 +1474,7 @@ const wpStyles = StyleSheet.create({
   singleWeight: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D0D0D0",
+    color: "#2C2C2C",
   },
   recentHeader: {
     marginTop: 10,
@@ -1493,7 +1493,7 @@ const wpStyles = StyleSheet.create({
     alignItems: "center" as const,
     paddingVertical: 8,
     paddingHorizontal: 10,
-    backgroundColor: "rgba(255,255,255,0.02)",
+    backgroundColor: "rgba(0,0,0,0.02)",
     borderRadius: 8,
     marginBottom: 4,
   },
@@ -1505,7 +1505,7 @@ const wpStyles = StyleSheet.create({
   historyWeight: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D0D0D0",
+    color: "#2C2C2C",
   },
   historyActions: {
     flexDirection: "row" as const,
@@ -1521,7 +1521,7 @@ const wpStyles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FEFCF9",
   },
   header: {
     flexDirection: "row" as const,
@@ -1530,12 +1530,12 @@ const modalStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: "rgba(0,0,0,0.06)",
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     letterSpacing: -0.3,
   },
   closeBtn: {
@@ -1564,14 +1564,14 @@ const modalStyles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    borderColor: "rgba(0,0,0,0.06)",
   },
   heightRow: {
     flexDirection: "row" as const,
@@ -1597,14 +1597,14 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center" as const,
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    borderColor: "rgba(0,0,0,0.06)",
   },
   genderBtnActive: {
-    backgroundColor: "#00ADB5",
-    borderColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
+    borderColor: "#4A7C59",
   },
   genderText: {
     fontSize: 14,
@@ -1735,7 +1735,7 @@ const profileStyles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
-    borderColor: "#0A0A0C",
+    borderColor: "#FEFCF9",
   },
   infoCol: {
     flex: 1,
@@ -1803,10 +1803,10 @@ const badgeStyles = StyleSheet.create({
     alignItems: "center" as const,
     paddingVertical: 14,
     paddingHorizontal: 6,
-    backgroundColor: "#1A1A1C",
+    backgroundColor: "#F0EBE3",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
     gap: 5,
     overflow: "hidden" as const,
   },
@@ -1844,7 +1844,7 @@ const badgeStyles = StyleSheet.create({
 const avatarModalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FEFCF9",
   },
   header: {
     flexDirection: "row" as const,
@@ -1853,12 +1853,12 @@ const avatarModalStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: "rgba(0,0,0,0.06)",
   },
   title: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     letterSpacing: -0.3,
   },
   closeBtn: {
@@ -1881,11 +1881,11 @@ const avatarModalStyles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.06)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
     position: "relative" as const,
   },
   avatarEmoji: {
@@ -1901,7 +1901,7 @@ const avatarModalStyles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
-    borderColor: "#08090C",
+    borderColor: "#FEFCF9",
   },
 });
 
@@ -1930,9 +1930,9 @@ const backupModalStyles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
     gap: 8,
-    backgroundColor: "rgba(0,229,255,0.06)",
+    backgroundColor: "rgba(74,124,89,0.06)",
     borderWidth: 1,
-    borderColor: "rgba(0,229,255,0.12)",
+    borderColor: "rgba(74,124,89,0.12)",
     borderRadius: 12,
     paddingVertical: 12,
     marginBottom: 12,
@@ -1940,17 +1940,17 @@ const backupModalStyles = StyleSheet.create({
   pasteBtnText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
   },
   textArea: {
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 13,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    borderColor: "rgba(0,0,0,0.06)",
     minHeight: 160,
     maxHeight: 300,
   },
