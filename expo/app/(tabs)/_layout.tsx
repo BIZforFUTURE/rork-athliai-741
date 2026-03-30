@@ -37,7 +37,6 @@ function AnimatedTabIcon({
       <Animated.View style={[styles.iconWrap, { transform: [{ scale }] }]}>
         {children}
       </Animated.View>
-      {focused && <View style={styles.activeIndicator} />}
     </View>
   );
 }
@@ -174,12 +173,5 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  activeIndicator: {
-    position: "absolute" as const,
-    bottom: -2,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: "#2C2C2C",
-  },
+
 });
