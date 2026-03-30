@@ -258,7 +258,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
                     {isComplete ? (
                       <Check size={14} color="#FFFFFF" strokeWidth={3} />
                     ) : (
-                      <IconComponent size={14} color={isActive ? '#00ADB5' : '#6B7280'} />
+                      <IconComponent size={14} color={isActive ? '#00ADB5' : '#5A5A5E'} />
                     )}
                   </View>
                   <Text style={[
@@ -304,7 +304,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Your AI Fitness Companion',
     description: 'Track runs, workouts, and nutrition with intelligent insights that adapt to your goals.',
     icon: null,
-    gradient: ['#091517', '#111827'],
+    gradient: ['#050505', '#111827'],
   },
   {
     id: 2,
@@ -312,7 +312,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Runs • Workouts • Nutrition',
     description: 'Monitor your complete fitness journey in one place. Every rep, every mile, every meal counts.',
     icon: <Activity size={80} color="#00ADB5" />,
-    gradient: ['#091517', '#111827'],
+    gradient: ['#050505', '#111827'],
   },
   {
     id: 3,
@@ -320,7 +320,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Built for You',
     description: 'AI-generated workout and nutrition plans that match your fitness level, goals, and lifestyle.',
     icon: <Dumbbell size={80} color="#00ADB5" />,
-    gradient: ['#091517', '#111827'],
+    gradient: ['#050505', '#111827'],
   },
   {
     id: 4,
@@ -328,7 +328,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Build Lasting Habits',
     description: 'Smart reminders and streak tracking keep you motivated and on track every single day.',
     icon: <Bell size={80} color="#00ADB5" />,
-    gradient: ['#091517', '#111827'],
+    gradient: ['#050505', '#111827'],
   },
   {
     id: 5,
@@ -336,7 +336,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Help Us Grow',
     description: 'A 5-star rating means the world to us and helps other athletes discover AthliAI.',
     icon: <Star size={80} color="#FFD700" fill="#FFD700" />,
-    gradient: ['#091517', '#111827'],
+    gradient: ['#050505', '#111827'],
   },
 ];
 
@@ -1088,9 +1088,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
         : ((currentGymStep + 1) / (gymQuestions.length + 2)) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#091517' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#050505' }]}>
         <LinearGradient
-          colors={['#091517', '#111827', '#091517']}
+          colors={['#050505', '#111827', '#050505']}
           style={styles.gradient}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -1259,7 +1259,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     multiline
                     numberOfLines={4}
                     placeholder={isSpanish ? 'ej., Quiero construir brazos y pecho más grandes, mejorar mi postura...' : 'e.g., I want to build bigger arms and chest, improve my posture...'}
-                    placeholderTextColor="#6B7280"
+                    placeholderTextColor="#5A5A5E"
                     value={customGoals}
                     onChangeText={setCustomGoals}
                     textAlignVertical="top"
@@ -1301,9 +1301,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
     const nutritionProgressPercent = (currentNutritionStep / totalNutritionSteps) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#091517' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#050505' }]}>
         <LinearGradient
-          colors={['#091517', '#111827', '#091517']}
+          colors={['#050505', '#111827', '#050505']}
           style={styles.gradient}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -1421,7 +1421,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <TextInput
                     style={styles.weightInput}
                     placeholder={isSpanish ? 'ej., 80 kg' : 'e.g., 180'}
-                    placeholderTextColor="#6B7280"
+                    placeholderTextColor="#5A5A5E"
                     keyboardType="numeric"
                     value={currentWeight}
                     onChangeText={setCurrentWeight}
@@ -1438,7 +1438,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                         <TextInput
                           style={styles.heightInput}
                           placeholder="170"
-                          placeholderTextColor="#6B7280"
+                          placeholderTextColor="#5A5A5E"
                           keyboardType="numeric"
                           value={heightFeet}
                           onChangeText={(text) => { setHeightFeet(text); setHeightInches('0'); }}
@@ -1451,7 +1451,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                           <TextInput
                             style={styles.heightInput}
                             placeholder="Feet"
-                            placeholderTextColor="#6B7280"
+                            placeholderTextColor="#5A5A5E"
                             keyboardType="numeric"
                             value={heightFeet}
                             onChangeText={setHeightFeet}
@@ -1462,7 +1462,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                           <TextInput
                             style={styles.heightInput}
                             placeholder="Inches"
-                            placeholderTextColor="#6B7280"
+                            placeholderTextColor="#5A5A5E"
                             keyboardType="numeric"
                             value={heightInches}
                             onChangeText={setHeightInches}
@@ -1481,7 +1481,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <TextInput
                     style={styles.weightInput}
                     placeholder={isSpanish ? 'ej., 75 kg' : 'e.g., 165'}
-                    placeholderTextColor="#6B7280"
+                    placeholderTextColor="#5A5A5E"
                     keyboardType="numeric"
                     value={targetWeight}
                     onChangeText={setTargetWeight}
@@ -1554,9 +1554,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   const _isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#091517' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#050505' }]}>
       <LinearGradient
-        colors={['#091517', '#111827', '#091517']}
+        colors={['#050505', '#111827', '#050505']}
         style={styles.darkBackground}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -1642,7 +1642,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                 style={styles.rateButton}
                 onPress={handleRateApp}
               >
-                <Star size={20} color="#091517" fill="#091517" />
+                <Star size={20} color="#050505" fill="#050505" />
                 <Text style={styles.rateButtonText}>{t('welcome_rate_app')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1716,7 +1716,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    color: '#9CA3AF',
+    color: '#8E8E93',
     fontSize: 16,
     fontWeight: '500',
     opacity: 0.8,
@@ -1757,7 +1757,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   pagination: {
     flexDirection: 'row',
@@ -1838,7 +1838,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipTextMain: {
-    color: '#9CA3AF',
+    color: '#8E8E93',
     fontSize: 16,
     fontWeight: '500' as const,
     opacity: 0.8,
@@ -1867,7 +1867,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   dotDark: {
     width: 8,
@@ -1875,7 +1875,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     opacity: 0.3,
     marginHorizontal: 4,
-    backgroundColor: '#9CA3AF',
+    backgroundColor: '#8E8E93',
   },
   activeDotDark: {
     opacity: 1,
@@ -1895,7 +1895,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     opacity: 0.7,
     textAlign: 'center',
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   quizContainer: {
     width: '100%',
@@ -1949,7 +1949,7 @@ const styles = StyleSheet.create({
   },
   daySelectionSubtext: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     opacity: 0.8,
     marginBottom: 15,
     textAlign: 'center',
@@ -1976,7 +1976,7 @@ const styles = StyleSheet.create({
     borderColor: '#00ADB5',
   },
   dayButtonText: {
-    color: '#9CA3AF',
+    color: '#8E8E93',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -1986,7 +1986,7 @@ const styles = StyleSheet.create({
   },
   goalsSubtext: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     opacity: 0.8,
     marginBottom: 15,
     textAlign: 'center',
@@ -2108,7 +2108,7 @@ const styles = StyleSheet.create({
   },
   loadingBackground: {
     flex: 1,
-    backgroundColor: '#091517',
+    backgroundColor: '#050505',
   },
   loadingScrollContent: {
     flexGrow: 1,
@@ -2157,7 +2157,7 @@ const styles = StyleSheet.create({
   },
   loadingSubtitle: {
     fontSize: 18,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     textAlign: 'center',
     marginBottom: 20,
     opacity: 0.7,
@@ -2165,7 +2165,7 @@ const styles = StyleSheet.create({
   },
   loadingDescription: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#5A5A5E',
     textAlign: 'center',
     lineHeight: 24,
     opacity: 0.6,
@@ -2216,7 +2216,7 @@ const styles = StyleSheet.create({
   },
   loadingStepLabel: {
     fontSize: 15,
-    color: '#6B7280',
+    color: '#5A5A5E',
     fontWeight: '500' as const,
     flex: 1,
   },
@@ -2225,7 +2225,7 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
   },
   loadingStepLabelComplete: {
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   loadingStepPulse: {
     width: 8,
@@ -2255,7 +2255,7 @@ const styles = StyleSheet.create({
   },
   loadingTipText: {
     fontSize: 14,
-    color: '#D1D5DB',
+    color: '#D0D0D0',
     lineHeight: 22,
     fontWeight: '400' as const,
   },
@@ -2302,7 +2302,7 @@ const styles = StyleSheet.create({
   heightLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   quizStepIndicator: {
     fontSize: 14,
@@ -2310,7 +2310,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center' as const,
     opacity: 0.7,
-    color: '#6B7280',
+    color: '#5A5A5E',
   },
   quizProgressBarInline: {
     width: '100%',
@@ -2327,7 +2327,7 @@ const styles = StyleSheet.create({
   },
   paywallContainer: {
     flex: 1,
-    backgroundColor: '#091517',
+    backgroundColor: '#050505',
   },
   paywallCloseBtn: {
     position: 'absolute' as const,
@@ -2364,7 +2364,7 @@ const styles = StyleSheet.create({
   },
   paywallSubtitle: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     textAlign: 'center' as const,
     marginBottom: 32,
   },
@@ -2397,7 +2397,7 @@ const styles = StyleSheet.create({
   },
   paywallFeatureDesc: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#5A5A5E',
   },
   paywallPriceCard: {
     width: '100%',
@@ -2438,7 +2438,7 @@ const styles = StyleSheet.create({
   },
   paywallPricePeriod: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     marginLeft: 2,
   },
   paywallCTA: {
@@ -2465,12 +2465,12 @@ const styles = StyleSheet.create({
   },
   paywallSkipText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     textDecorationLine: 'underline' as const,
   },
   paywallLegal: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#5A5A5E',
     textAlign: 'center' as const,
     lineHeight: 16,
     paddingHorizontal: 12,
@@ -2513,7 +2513,7 @@ const styles = StyleSheet.create({
   rateButtonText: {
     fontSize: 18,
     fontWeight: '700' as const,
-    color: '#091517',
+    color: '#050505',
   },
 });
 
@@ -2545,7 +2545,7 @@ const onboardStyles = StyleSheet.create({
   stepNum: {
     fontSize: 12,
     fontWeight: '700' as const,
-    color: '#4B5563',
+    color: '#3A3A3C',
   },
   stepNumActive: {
     color: '#00ADB5',
@@ -2594,7 +2594,7 @@ const scanStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#374151',
+    backgroundColor: '#2C2C2E',
   },
   dotActive: {
     backgroundColor: '#00ADB5',
@@ -2633,6 +2633,6 @@ const scanStyles = StyleSheet.create({
   },
   scanButtonSub: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#5A5A5E',
   },
 });

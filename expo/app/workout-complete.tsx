@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#5A5A5E",
     fontWeight: "600",
   },
   achievementContainer: {
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   achievementDescription: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#5A5A5E",
     lineHeight: 24,
   },
   buttonContainer: {

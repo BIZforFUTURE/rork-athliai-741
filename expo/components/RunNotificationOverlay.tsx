@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#5A5A5E',
     letterSpacing: 1,
     marginTop: 4,
   },
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#5A5A5E',
     textAlign: 'center',
     lineHeight: 24,
   },

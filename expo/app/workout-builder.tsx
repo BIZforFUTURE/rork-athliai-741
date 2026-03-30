@@ -49,13 +49,13 @@ interface SelectedExercise extends ExerciseTemplate {
 }
 
 const BODY_PART_ICONS: Record<BodyPart, React.ReactNode> = {
-  chest: <PersonStanding size={20} color="#9CA3AF" />,
-  back: <PersonStanding size={20} color="#9CA3AF" />,
-  legs: <PersonStanding size={20} color="#9CA3AF" />,
-  shoulders: <PersonStanding size={20} color="#9CA3AF" />,
-  arms: <Zap size={20} color="#9CA3AF" />,
-  core: <Target size={20} color="#9CA3AF" />,
-  cardio: <Footprints size={20} color="#9CA3AF" />,
+  chest: <PersonStanding size={20} color="#8E8E93" />,
+  back: <PersonStanding size={20} color="#8E8E93" />,
+  legs: <PersonStanding size={20} color="#8E8E93" />,
+  shoulders: <PersonStanding size={20} color="#8E8E93" />,
+  arms: <Zap size={20} color="#8E8E93" />,
+  core: <Target size={20} color="#8E8E93" />,
+  cardio: <Footprints size={20} color="#8E8E93" />,
 };
 
 const CARDIO_EXERCISES = ['treadmill', 'elliptical', 'rowing-machine', 'jump-rope', 'stair-climber'];
@@ -529,7 +529,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
           <TextInput
             style={styles.nameInput}
             placeholder={t('builder_name_placeholder')}
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="#5A5A5E"
             value={workoutName}
             onChangeText={setWorkoutName}
           />
@@ -579,7 +579,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
 
           {selectedExercises.length === 0 ? (
             <View style={styles.emptyState}>
-              <Dumbbell size={40} color="#374151" />
+              <Dumbbell size={40} color="#2C2C2E" />
               <Text style={styles.emptyStateText}>{t('builder_no_exercises')}</Text>
               <Text style={styles.emptyStateSubtext}>{t('builder_add_to_start')}</Text>
             </View>
@@ -594,7 +594,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
                         disabled={index === 0}
                         style={[styles.reorderButton, index === 0 && styles.reorderButtonDisabled]}
                       >
-                        <GripVertical size={20} color={index === 0 ? "#4B5563" : "#9CA3AF"} />
+                        <GripVertical size={20} color={index === 0 ? "#3A3A3C" : "#8E8E93"} />
                       </TouchableOpacity>
                       <Text style={styles.exerciseNumber}>{index + 1}</Text>
                       <TouchableOpacity 
@@ -602,7 +602,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
                         disabled={index === selectedExercises.length - 1}
                         style={[styles.reorderButton, index === selectedExercises.length - 1 && styles.reorderButtonDisabled]}
                       >
-                        <GripVertical size={20} color={index === selectedExercises.length - 1 ? "#4B5563" : "#9CA3AF"} />
+                        <GripVertical size={20} color={index === selectedExercises.length - 1 ? "#3A3A3C" : "#8E8E93"} />
                       </TouchableOpacity>
                     </View>
                     
@@ -656,7 +656,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
                         value={exercise.reps}
                         onChangeText={(value) => updateExercise(index, 'reps', value)}
                         placeholder="8-12"
-                        placeholderTextColor="#6B7280"
+                        placeholderTextColor="#5A5A5E"
                       />
                     </View>
 
@@ -782,7 +782,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   header: {
     flexDirection: "row",
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: "#171B22",
     borderBottomWidth: 1,
-    borderBottomColor: "#091517",
+    borderBottomColor: "#050505",
   },
   closeButton: {
     padding: 5,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   exercisesList: {
     gap: 15,
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
   },
   exerciseEquipment: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   deleteButton: {
     padding: 5,
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
   },
   paramLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginBottom: 8,
     textAlign: "center" as const,
   },
@@ -981,7 +981,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
     borderRadius: 8,
     padding: 5,
     gap: 10,
@@ -1007,7 +1007,7 @@ const styles = StyleSheet.create({
     textAlign: "center" as const,
   },
   repsInput: {
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
@@ -1016,7 +1016,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   pickerHeader: {
     flexDirection: "row",
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontWeight: "500" as const,
     backgroundColor: "#1F2329",
     paddingHorizontal: 14,
@@ -1066,7 +1066,7 @@ const styles = StyleSheet.create({
   bodyPartTitle: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
   },
   exerciseGroupCard: {
     backgroundColor: "#171B22",
@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
   },
   exercisePickerTarget: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   selectedBadge: {
     backgroundColor: "rgba(0, 173, 181, 0.15)",
@@ -1170,7 +1170,7 @@ const styles = StyleSheet.create({
   },
   savedWorkoutMeta: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   savedWorkoutActions: {
     flexDirection: "row",

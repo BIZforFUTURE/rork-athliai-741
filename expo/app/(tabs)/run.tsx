@@ -813,7 +813,7 @@ export default function RunScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
-                <X size={20} color="#4B5563" />
+                <X size={20} color="#3A3A3C" />
               </TouchableOpacity>
               <View style={styles.modalIconWrap}>
                 <Flame size={40} color="#FF6B35" />
@@ -957,7 +957,7 @@ export default function RunScreen() {
               </Text>
             </View>
           </View>
-          <ChevronRight size={18} color="#4B5563" />
+          <ChevronRight size={18} color="#3A3A3C" />
         </TouchableOpacity>
 
         <RunHistorySection
@@ -978,7 +978,7 @@ export default function RunScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.treadmillModalContent}>
             <TouchableOpacity style={styles.modalClose} onPress={closeTreadmillModal}>
-              <X size={20} color="#4B5563" />
+              <X size={20} color="#3A3A3C" />
             </TouchableOpacity>
 
             <View style={styles.treadmillModalHeader}>
@@ -1014,7 +1014,7 @@ export default function RunScreen() {
                         value={treadmillEditDistance}
                         onChangeText={setTreadmillEditDistance}
                         keyboardType="decimal-pad"
-                        placeholderTextColor="#4B5563"
+                        placeholderTextColor="#3A3A3C"
                         placeholder="0.00"
                       />
                     </View>
@@ -1024,7 +1024,7 @@ export default function RunScreen() {
                         style={styles.treadmillEditInput}
                         value={treadmillEditTime}
                         onChangeText={setTreadmillEditTime}
-                        placeholderTextColor="#4B5563"
+                        placeholderTextColor="#3A3A3C"
                         placeholder="0:00"
                       />
                     </View>
@@ -1049,7 +1049,7 @@ export default function RunScreen() {
                   style={styles.treadmillEditToggle}
                   onPress={() => setTreadmillEditing(!treadmillEditing)}
                 >
-                  <Edit3 size={14} color="#6B7280" />
+                  <Edit3 size={14} color="#5A5A5E" />
                   <Text style={styles.treadmillEditToggleText}>
                     {treadmillEditing ? t('run_done_editing') : t('run_edit_values')}
                   </Text>
@@ -1086,7 +1086,7 @@ export default function RunScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
-              <X size={20} color="#4B5563" />
+              <X size={20} color="#3A3A3C" />
             </TouchableOpacity>
             <View style={styles.modalIconWrap}>
               <Flame size={40} color="#FF6B35" />
@@ -1112,10 +1112,10 @@ export default function RunScreen() {
 const styles = StyleSheet.create({
   activeRunContainer: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   activeRunPanel: {
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 16,
@@ -1146,7 +1146,7 @@ const styles = StyleSheet.create({
   activeRunTimeLabel: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     letterSpacing: 3,
     textTransform: "uppercase" as const,
     marginTop: -4,
@@ -1203,7 +1203,7 @@ const styles = StyleSheet.create({
   activeRunStatLabel: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     letterSpacing: 1,
     marginTop: 2,
   },
@@ -1242,12 +1242,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 12,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -1255,13 +1255,13 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   screenSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
     marginTop: 1,
   },
   xpChip: {
@@ -1288,13 +1288,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   timerCard: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 24,
     paddingVertical: 32,
     paddingHorizontal: 28,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   timerDialWrap: {
@@ -1309,8 +1309,8 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 80,
     borderWidth: 4,
-    borderColor: "rgba(78,205,196,0.2)",
-    shadowColor: "#4ECDC4",
+    borderColor: "rgba(204,255,0,0.2)",
+    shadowColor: "#CCFF00",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -1322,13 +1322,13 @@ const styles = StyleSheet.create({
   timerValue: {
     fontSize: 42,
     fontWeight: "900" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -2,
   },
   timerLabel: {
     fontSize: 10,
     fontWeight: "700" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
     letterSpacing: 3,
     marginTop: -2,
   },
@@ -1354,12 +1354,12 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 14,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     gap: 6,
     overflow: "hidden" as const,
   },
@@ -1373,13 +1373,13 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   statUnit: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
@@ -1417,27 +1417,27 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
   },
   controlBtnPause: {
-    backgroundColor: "#0C1C1E",
+    backgroundColor: "#0A0A0C",
     borderWidth: 1,
     borderColor: "rgba(245,158,11,0.3)",
   },
   controlBtnResume: {
-    backgroundColor: "#0C1C1E",
+    backgroundColor: "#0A0A0C",
     borderWidth: 1,
     borderColor: "rgba(0,173,181,0.3)",
   },
   controlBtnStop: {
-    backgroundColor: "#0C1C1E",
+    backgroundColor: "#0A0A0C",
     borderWidth: 1,
     borderColor: "rgba(239,68,68,0.3)",
   },
   controlBtnDisabled: {
-    backgroundColor: "#0C1C1E",
+    backgroundColor: "#0A0A0C",
     borderColor: "rgba(55,65,81,0.3)",
     opacity: 0.5,
   },
   controlBtnText: {
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontSize: 11,
     fontWeight: "700" as const,
     letterSpacing: 1.5,
@@ -1449,19 +1449,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#EF4444",
   },
   startBtn: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 24,
     padding: 4,
     borderWidth: 1,
-    borderColor: "rgba(78,205,196,0.15)",
+    borderColor: "rgba(204,255,0,0.15)",
     marginTop: 6,
-    shadowColor: "rgba(78,205,196,0.35)",
+    shadowColor: "rgba(204,255,0,0.35)",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 16,
   },
   startBtnInner: {
-    backgroundColor: "#4ECDC4",
+    backgroundColor: "#CCFF00",
     borderRadius: 20,
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -1472,7 +1472,7 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.15)",
   },
   startBtnText: {
-    color: "#F5F5F5",
+    color: "#050505",
     fontSize: 18,
     fontWeight: "800" as const,
     letterSpacing: 2,
@@ -1496,13 +1496,13 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
   },
   modalContent: {
-    backgroundColor: "#152C2E",
+    backgroundColor: "#1A1A1C",
     borderRadius: 24,
     padding: 28,
     width: "85%",
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   modalClose: {
     position: "absolute" as const,
@@ -1522,7 +1522,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     marginBottom: 6,
   },
   modalCalText: {
@@ -1533,7 +1533,7 @@ const styles = StyleSheet.create({
   },
   modalSubtext: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#5A5A5E",
     textAlign: "center" as const,
     marginBottom: 24,
   },
@@ -1547,9 +1547,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255,255,255,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   modalBtnPrimary: {
     flex: 1,
@@ -1559,7 +1559,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#00ADB5",
   },
   modalBtnSecondaryText: {
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontSize: 15,
     fontWeight: "700" as const,
   },
@@ -1572,11 +1572,11 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     marginTop: 4,
     overflow: "hidden" as const,
   },
@@ -1601,13 +1601,13 @@ const styles = StyleSheet.create({
   treadmillLogBtnTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.2,
   },
   treadmillLogBtnSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   treadmillLogBtnXp: {
     flexDirection: "row" as const,
@@ -1624,13 +1624,13 @@ const styles = StyleSheet.create({
     color: "#BFFF00",
   },
   treadmillModalContent: {
-    backgroundColor: "#152C2E",
+    backgroundColor: "#1A1A1C",
     borderRadius: 28,
     padding: 24,
     width: "90%",
     maxHeight: "85%",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   treadmillModalHeader: {
     alignItems: "center" as const,
@@ -1648,13 +1648,13 @@ const styles = StyleSheet.create({
   treadmillModalTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   treadmillModalSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginTop: 4,
   },
   treadmillModalPhotoWrap: {
@@ -1692,7 +1692,7 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 16,
     padding: 20,
     gap: 24,
@@ -1710,7 +1710,7 @@ const styles = StyleSheet.create({
   treadmillParsedUnit: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     textTransform: "uppercase" as const,
     letterSpacing: 1,
   },
@@ -1729,7 +1729,7 @@ const styles = StyleSheet.create({
   treadmillEditToggleText: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   treadmillEditFields: {
     flexDirection: "row" as const,
@@ -1742,10 +1742,10 @@ const styles = StyleSheet.create({
   treadmillEditLabel: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   treadmillEditInput: {
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.10)",
     borderRadius: 12,
     padding: 14,
     fontSize: 20,
@@ -1779,12 +1779,12 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255,255,255,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   treadmillModalBtnCancelText: {
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontSize: 15,
     fontWeight: "700" as const,
   },
@@ -1874,7 +1874,7 @@ const styles = StyleSheet.create({
   statsPanelLabel: {
     fontSize: 10,
     fontWeight: "500" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     marginTop: 2,
     textAlign: "center" as const,
   },
@@ -1974,18 +1974,18 @@ const styles = StyleSheet.create({
   treadmillBtnLabel: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
   },
 
   savedRoutesBtn: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     marginTop: 4,
     overflow: "hidden" as const,
   },
@@ -2010,12 +2010,12 @@ const styles = StyleSheet.create({
   savedRoutesBtnTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.2,
   },
   savedRoutesBtnSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
 });

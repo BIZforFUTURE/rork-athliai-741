@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   levelUpLabel: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#6B7280',
+    color: '#5A5A5E',
     letterSpacing: 4,
     marginBottom: 16,
   },
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#9CA3AF',
+    color: '#8E8E93',
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 22,

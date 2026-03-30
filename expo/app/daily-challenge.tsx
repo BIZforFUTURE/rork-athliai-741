@@ -601,7 +601,7 @@ export default function DailyChallengeScreen() {
                   setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
                 }}
                 placeholder={isSpanish ? "Escribe aquí..." : "Type here..."}
-                placeholderTextColor="#4B5563"
+                placeholderTextColor="#3A3A3C"
                 autoCapitalize="none"
                 autoCorrect={false}
                 onFocus={() => {
@@ -646,7 +646,7 @@ export default function DailyChallengeScreen() {
                     disabled={!textMatches}
                     testID="hold-confirm-btn"
                   >
-                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#4B5563"} />
+                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#3A3A3C"} />
                     <Text style={[
                       styles.holdButtonText,
                       !textMatches && styles.holdButtonTextDisabled,
@@ -672,7 +672,7 @@ export default function DailyChallengeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   header: {
     flexDirection: "row",
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 11,
-    color: "#6B7280",
+    color: "#5A5A5E",
     fontWeight: "500" as const,
     textAlign: "center",
   },
@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
   instructionTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     marginBottom: 10,
   },
   instructionText: {
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
   tipsTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     marginBottom: 14,
   },
   tipRow: {
@@ -963,12 +963,12 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     textAlign: "center",
   },
   confirmRequired: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
     textAlign: "center",
     fontStyle: "italic",
     marginBottom: 4,
@@ -1026,6 +1026,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   holdButtonTextDisabled: {
-    color: "#4B5563",
+    color: "#3A3A3C",
   },
 });

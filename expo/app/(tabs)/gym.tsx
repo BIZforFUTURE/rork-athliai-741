@@ -1157,7 +1157,7 @@ Format as JSON:
                     setShowSettings(true);
                   }}
                 >
-                  <Settings size={20} color="#6B7280" />
+                  <Settings size={20} color="#5A5A5E" />
                 </TouchableOpacity>
               )}
             </View>
@@ -1331,7 +1331,7 @@ Format as JSON:
                   <Text style={styles.buildSmallTitle}>{t('gym_build_custom')}</Text>
                   <Text style={styles.buildSmallSub}>{t('gym_pick_exercises')}</Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#3A3A3C" />
               </View>
             </TouchableOpacity>
           </View>
@@ -1397,7 +1397,7 @@ Format as JSON:
               {workoutLogs.length === 0 ? (
                 <View style={styles.emptyState}>
                   <View style={styles.emptyIconWrap}>
-                    <Dumbbell size={36} color="#4B5563" />
+                    <Dumbbell size={36} color="#3A3A3C" />
                   </View>
                   <Text style={styles.emptyStateText}>{t('gym_no_workouts')}</Text>
                   <Text style={styles.emptyStateSubtext}>
@@ -1496,7 +1496,7 @@ Format as JSON:
                 resetQuiz();
               }}
             >
-              <X size={24} color="#9CA3AF" />
+              <X size={24} color="#8E8E93" />
             </TouchableOpacity>
             <Text style={styles.quizTitle}>{t('gym_fitness_assessment')}</Text>
             <View style={styles.quizProgress}>
@@ -1618,7 +1618,7 @@ Format as JSON:
                       onPress={() => handleQuizAnswer(option)}
                     >
                       <Text style={styles.optionText}>{option}</Text>
-                      <ChevronRight size={20} color="#4B5563" />
+                      <ChevronRight size={20} color="#3A3A3C" />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -1636,7 +1636,7 @@ Format as JSON:
                   multiline
                   numberOfLines={6}
                   placeholder={t('gym_goals_placeholder')}
-                  placeholderTextColor="#4B5563"
+                  placeholderTextColor="#3A3A3C"
                   value={customGoals}
                   onChangeText={setCustomGoals}
                   textAlignVertical="top"
@@ -1691,7 +1691,7 @@ Format as JSON:
                   setShowCustomPlan(false);
                 }}
               >
-                <X size={24} color="#9CA3AF" />
+                <X size={24} color="#8E8E93" />
               </TouchableOpacity>
             </View>
 
@@ -1768,7 +1768,7 @@ Format as JSON:
                   setShowQuiz(true);
                 }}
               >
-                <RotateCcw size={18} color="#9CA3AF" />
+                <RotateCcw size={18} color="#8E8E93" />
                 <Text style={styles.newPlanButtonText}>{t('gym_create_new_plan')}</Text>
               </TouchableOpacity>
             </View>
@@ -1796,7 +1796,7 @@ Format as JSON:
                   setShowSettings(false);
                 }}
               >
-                <X size={22} color="#6B7280" />
+                <X size={22} color="#5A5A5E" />
               </TouchableOpacity>
             </View>
 
@@ -1820,7 +1820,7 @@ Format as JSON:
                     {t('gym_change_days')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#3A3A3C" />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1843,7 +1843,7 @@ Format as JSON:
                     {t('gym_browse_days')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#3A3A3C" />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1865,7 +1865,7 @@ Format as JSON:
                     {t('gym_generate_new')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#3A3A3C" />
               </TouchableOpacity>
             </View>
           </View>
@@ -1889,7 +1889,7 @@ Format as JSON:
                 setShowDayAdjustment(false);
               }}
             >
-              <X size={24} color="#9CA3AF" />
+              <X size={24} color="#8E8E93" />
             </TouchableOpacity>
           </View>
 
@@ -1968,7 +1968,7 @@ Format as JSON:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   header: {
     paddingHorizontal: 20,
@@ -1984,7 +1984,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   subtitleRow: {
@@ -2010,7 +2010,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#5A5A5E",
     fontWeight: "500" as const,
   },
   headerRight: {
@@ -2044,7 +2044,7 @@ const styles = StyleSheet.create({
   settingsButton: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
   },
   weekDayRow: {
     flexDirection: "row" as const,
@@ -2058,7 +2058,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
   weekDayDotActive: {
     backgroundColor: "rgba(0, 173, 181, 0.15)",
@@ -2072,7 +2072,7 @@ const styles = StyleSheet.create({
   weekDayLetter: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
   },
   weekDayLetterActive: {
     color: "#00ADB5",
@@ -2149,10 +2149,10 @@ const styles = StyleSheet.create({
 
   buildWorkoutCTASmall: {
     marginTop: 14,
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   buildSmallInner: {
@@ -2175,11 +2175,11 @@ const styles = StyleSheet.create({
   buildSmallTitle: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
   },
   buildSmallSub: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginTop: 1,
   },
 
@@ -2343,12 +2343,12 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 16,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   statIconWrap: {
@@ -2362,12 +2362,12 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 32,
     fontWeight: "900" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   statLabel: {
     fontSize: 11,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginTop: 2,
     fontWeight: "500" as const,
   },
@@ -2384,28 +2384,28 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     letterSpacing: -0.3,
   },
   toggleButton: {
     paddingHorizontal: 12,
     paddingVertical: 5,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
     borderRadius: 12,
   },
   toggleButtonText: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
     fontWeight: "600" as const,
   },
 
   emptyState: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 36,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   emptyIconWrap: {
@@ -2420,11 +2420,11 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
   },
   emptyStateSubtext: {
     fontSize: 13,
-    color: "#4B5563",
+    color: "#3A3A3C",
     marginTop: 4,
     textAlign: "center" as const,
   },
@@ -2433,14 +2433,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recentWorkoutCard: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 14,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   recentWorkoutLeft: {
@@ -2460,12 +2460,12 @@ const styles = StyleSheet.create({
   recentWorkoutName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     marginBottom: 2,
   },
   recentWorkoutDate: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   recentWorkoutMetrics: {
     flexDirection: "row" as const,
@@ -2479,22 +2479,22 @@ const styles = StyleSheet.create({
   recentMetricValue: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D1D5DB",
+    color: "#D0D0D0",
   },
   recentMetricLabel: {
     fontSize: 10,
-    color: "#4B5563",
+    color: "#3A3A3C",
     marginTop: 1,
   },
   recentMetricDivider: {
     width: 1,
     height: 20,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.10)",
   },
 
   quizContainer: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   quizHeader: {
     flexDirection: "row" as const,
@@ -2506,22 +2506,22 @@ const styles = StyleSheet.create({
   quizTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
   },
   quizProgress: {
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.10)",
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 12,
   },
   progressText: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontWeight: "600" as const,
   },
   quizProgressBar: {
     height: 3,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
     marginHorizontal: 20,
     borderRadius: 2,
     marginBottom: 8,
@@ -2561,7 +2561,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 15,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     fontWeight: "500" as const,
     flex: 1,
     lineHeight: 22,
@@ -2613,7 +2613,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 18,
     fontSize: 15,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     minHeight: 120,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
@@ -2652,7 +2652,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     minWidth: 105,
     alignItems: "center" as const,
     flexDirection: "row" as const,
@@ -2666,7 +2666,7 @@ const styles = StyleSheet.create({
   daySelectionText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   daySelectionTextSelected: {
     color: "#FFFFFF",
@@ -2688,7 +2688,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   modalHeader: {
     flexDirection: "row" as const,
@@ -2697,7 +2697,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.04)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
   modalTitle: {
     fontSize: 20,
@@ -2713,7 +2713,7 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 6,
     borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
   },
   modalContent: {
     flex: 1,
@@ -2726,7 +2726,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.07)",
   },
   planOverviewText: {
     fontSize: 14,
@@ -2739,7 +2739,7 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.07)",
   },
   dayHeader: {
     flexDirection: "row" as const,
@@ -2748,7 +2748,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.04)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
   dayNumberBadge: {
     width: 36,
@@ -2769,7 +2769,7 @@ const styles = StyleSheet.create({
   dayTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     marginBottom: 2,
   },
   exerciseCount: {
@@ -2785,7 +2785,7 @@ const styles = StyleSheet.create({
     justifyContent: "center" as const,
   },
   customExerciseCard: {
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
@@ -2800,14 +2800,14 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 6,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.10)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
   exerciseIndexText: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   exerciseHeader: {
     flexDirection: "row" as const,
@@ -2818,7 +2818,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#D1D5DB",
+    color: "#D0D0D0",
     flex: 1,
   },
   exerciseMetaRow: {
@@ -2840,7 +2840,7 @@ const styles = StyleSheet.create({
   },
   exerciseDescription: {
     fontSize: 12,
-    color: "#4B5563",
+    color: "#3A3A3C",
     marginTop: 6,
     lineHeight: 18,
   },
@@ -2860,7 +2860,7 @@ const styles = StyleSheet.create({
   modalFooter: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.04)",
+    borderTopColor: "rgba(255,255,255,0.07)",
   },
   newPlanButton: {
     flexDirection: "row" as const,
@@ -2873,7 +2873,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.08)",
   },
   newPlanButtonText: {
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontSize: 15,
     fontWeight: "600" as const,
   },
@@ -2904,12 +2904,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.04)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
   settingsModalTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
   },
   settingsContent: {
     paddingHorizontal: 20,
@@ -2921,7 +2921,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.04)",
+    borderBottomColor: "rgba(255,255,255,0.07)",
   },
   settingsIconWrap: {
     width: 40,
@@ -2936,7 +2936,7 @@ const styles = StyleSheet.create({
   settingsOptionTitle: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     marginBottom: 2,
   },
   settingsOptionSubtitle: {

@@ -239,13 +239,13 @@ export default function RunHistorySection({
       {showFilters && (
         <View style={styles.filtersContainer}>
           <View style={styles.searchContainer}>
-            <Search size={20} color="#6B7280" />
+            <Search size={20} color="#5A5A5E" />
             <TextInput
               style={styles.searchInput}
               placeholder={t('run_search')}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor="#8E8E93"
             />
           </View>
 
@@ -409,10 +409,10 @@ export default function RunHistorySection({
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     testID={`delete-run-${run.id}`}
                   >
-                    <Trash2 size={16} color="#6B7280" />
+                    <Trash2 size={16} color="#5A5A5E" />
                   </TouchableOpacity>
                 )}
-                <ChevronRight size={20} color="#9CA3AF" />
+                <ChevronRight size={20} color="#8E8E93" />
               </View>
             </TouchableOpacity>
           ))}
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 32,
     fontWeight: '800' as const,
-    color: '#F5F5F5',
+    color: '#E8E8E8',
     letterSpacing: -0.5,
   },
   filterButton: {
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   filterOptions: {
     flexDirection: 'row',
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
   filterOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   filterOptionTextActive: {
     color: '#FFFFFF',
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   },
   summaryStatLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#5A5A5E',
   },
   emptyState: {
     backgroundColor: '#161616',
@@ -573,12 +573,12 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: '#8E8E93',
     textAlign: 'center',
   },
   deleteHint: {
     fontSize: 12,
-    color: '#4B5563',
+    color: '#3A3A3C',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -605,11 +605,11 @@ const styles = StyleSheet.create({
   },
   runTimeText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#5A5A5E',
   },
   runWeatherText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#8E8E93',
   },
   runStats: {
     flexDirection: 'row',
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
   },
   runStatLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: '#5A5A5E',
   },
   runCardActions: {
     alignItems: 'center',

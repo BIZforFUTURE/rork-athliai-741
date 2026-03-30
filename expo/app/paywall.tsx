@@ -106,7 +106,7 @@ export default function PaywallScreen() {
   if (isLoading) {
     return (
       <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={colors.accent.teal} />
+        <ActivityIndicator size="large" color={colors.accent.lime} />
       </View>
     );
   }
@@ -114,7 +114,7 @@ export default function PaywallScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#091517", "#0C1E1F", "#091517"]}
+        colors={["#050505", "#0C1E1F", "#050505"]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -162,7 +162,7 @@ export default function PaywallScreen() {
           {FEATURES_EN.map((feature, index) => (
             <View key={index} style={styles.featureRow}>
               <View style={styles.featureIconWrap}>
-                <feature.icon size={20} color={colors.accent.teal} />
+                <feature.icon size={20} color={colors.accent.lime} />
               </View>
               <View style={styles.featureTextWrap}>
                 <Text style={styles.featureTitle}>{t(feature.titleKey)}</Text>
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   trialText: {
     fontSize: 13,
-    color: colors.accent.teal,
+    color: colors.accent.lime,
     marginTop: 2,
     fontWeight: "500" as const,
   },
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   weeklyBreakdownLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: colors.accent.teal,
+    color: colors.accent.lime,
   },
   legalText: {
     fontSize: 11,

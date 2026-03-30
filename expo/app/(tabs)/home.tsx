@@ -92,7 +92,7 @@ function HeroSection() {
             </Defs>
             <Circle
               cx={bigRingSize / 2} cy={bigRingSize / 2} r={bigRingRadius}
-              stroke="rgba(255,255,255,0.06)" strokeWidth={3} fill="none"
+              stroke="rgba(255,255,255,0.10)" strokeWidth={3} fill="none"
             />
             <Circle
               cx={bigRingSize / 2} cy={bigRingSize / 2} r={bigRingRadius}
@@ -116,7 +116,7 @@ function HeroSection() {
       <View style={heroStyles.xpRow}>
         <Text style={heroStyles.xpLabel}>
           <Text style={{ color: xpInfo.rank.color, fontWeight: "700" as const }}>{xpInfo.currentXP}</Text>
-          <Text style={{ color: "#4B5563" }}> /{xpInfo.neededXP}</Text>
+          <Text style={{ color: "#3A3A3C" }}> /{xpInfo.neededXP}</Text>
         </Text>
         <Text style={heroStyles.xpToGo}>{xpRemaining} to go</Text>
       </View>
@@ -220,7 +220,7 @@ function DailyQuests() {
               <View style={[questStyles.questFill, { width: `${quest.progress * 100}%`, backgroundColor: quest.done ? quest.color : quest.color + "80" }]} />
             </View>
           </View>
-          <Text style={[questStyles.xpTag, { color: quest.done ? quest.color : "#374151" }]}>{quest.xp}</Text>
+          <Text style={[questStyles.xpTag, { color: quest.done ? quest.color : "#2C2C2E" }]}>{quest.xp}</Text>
           {quest.done && (
             <View style={[questStyles.checkMark, { backgroundColor: quest.color + "20" }]}>
               <Text style={{ fontSize: 10, color: '#F5F5F5' }}>✓</Text>
@@ -242,9 +242,9 @@ function StreakStrip() {
   }, [enterAnim]);
 
   const streaks = [
-    { label: t('home_run'), value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#4B5563"} /> },
-    { label: t('home_food'), value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#4B5563"} /> },
-    { label: t('home_gym'), value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#4B5563"} /> },
+    { label: t('home_run'), value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#3A3A3C"} /> },
+    { label: t('home_food'), value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#3A3A3C"} /> },
+    { label: t('home_gym'), value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#3A3A3C"} /> },
   ];
 
   const totalStreak = streaks.reduce((a, s) => a + s.value, 0);
@@ -259,7 +259,7 @@ function StreakStrip() {
         {streaks.map((s) => (
           <View key={s.label} style={[streakStyles.item, s.value > 0 && { backgroundColor: s.color + "08" }]}>
             {s.icon}
-            <Text style={[streakStyles.val, s.value > 0 && { color: "#F3F4F6" }]}>{s.value}</Text>
+            <Text style={[streakStyles.val, s.value > 0 && { color: "#E8E8E8" }]}>{s.value}</Text>
             <Text style={[streakStyles.lbl, s.value > 0 && { color: s.color + "99" }]}>{s.label}</Text>
           </View>
         ))}
@@ -322,7 +322,7 @@ function TodayNutrition() {
             </Text>
           </View>
           <View style={nutStyles.headerArrow}>
-            <ChevronRight size={16} color="#4B5563" />
+            <ChevronRight size={16} color="#3A3A3C" />
           </View>
         </View>
 
@@ -403,7 +403,7 @@ function WeeklyStats() {
   return (
     <Animated.View style={[weekStyles.container, { opacity: fadeIn }]}>
       <View style={weekStyles.headerRow}>
-        <TrendingUp size={15} color="#9CA3AF" />
+        <TrendingUp size={15} color="#8E8E93" />
         <Text style={weekStyles.heading}>{t('home_this_week')}</Text>
       </View>
       <View style={weekStyles.grid}>
@@ -446,7 +446,7 @@ function XPFeed() {
       case "food": return <UtensilsCrossed size={12} color="#BFFF00" />;
       case "nutrition_goal": return <Award size={12} color="#F59E0B" />;
       case "streak": return <Flame size={12} color="#F59E0B" />;
-      default: return <Zap size={12} color="#9CA3AF" />;
+      default: return <Zap size={12} color="#8E8E93" />;
     }
   };
 
@@ -457,7 +457,7 @@ function XPFeed() {
       case "food": return "#BFFF00";
       case "nutrition_goal": return "#F59E0B";
       case "streak": return "#F59E0B";
-      default: return "#9CA3AF";
+      default: return "#8E8E93";
     }
   };
 
@@ -492,7 +492,7 @@ function XPFeed() {
   return (
     <View style={feedStyles.container}>
       <View style={feedStyles.header}>
-        <Zap size={13} color="#6B7280" />
+        <Zap size={13} color="#5A5A5E" />
         <Text style={feedStyles.heading}>{t('home_xp_activity')}</Text>
         <Text style={feedStyles.total}>{t('home_total').replace('{xp}', xpInfo.totalXP.toLocaleString())}</Text>
       </View>
@@ -580,7 +580,7 @@ export default function DashboardScreen() {
           onPress={() => setLanguage(isSpanish ? 'en' : 'es')}
           style={styles.langToggle}
         >
-          <Globe size={13} color="#374151" />
+          <Globe size={13} color="#2C2C2E" />
           <Text style={styles.langToggleText}>{isSpanish ? 'English' : 'Español'}</Text>
         </Pressable>
         <View style={{ height: 20 }} />
@@ -592,12 +592,12 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -606,14 +606,14 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
     flexShrink: 1,
   },
   subGreeting: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginTop: 2,
   },
   levelChip: {
@@ -650,27 +650,27 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "rgba(255,255,255,0.05)",
     alignSelf: "center" as const,
     marginTop: 4,
   },
   langToggleText: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#374151",
+    color: "#2C2C2E",
     letterSpacing: 0.2,
   },
 });
 
 const heroStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 24,
     paddingTop: 24,
     paddingBottom: 16,
     paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     alignItems: "center" as const,
     overflow: "hidden" as const,
   },
@@ -704,14 +704,14 @@ const heroStyles = StyleSheet.create({
     fontWeight: "900" as const,
     letterSpacing: -2,
     lineHeight: 56,
-    textShadowColor: 'rgba(34,197,94,0.6)',
+    textShadowColor: 'rgba(204,255,0,0.5)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 20,
   },
   levelLabel: {
     fontSize: 10,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     letterSpacing: 2,
     marginTop: 4,
   },
@@ -743,7 +743,7 @@ const heroStyles = StyleSheet.create({
     height: 5,
     borderRadius: 3,
     overflow: "hidden" as const,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(255,255,255,0.10)",
     width: "100%" as const,
   },
   progressTrack: {
@@ -753,7 +753,7 @@ const heroStyles = StyleSheet.create({
   progressFill: {
     height: "100%" as const,
     borderRadius: 3,
-    backgroundColor: "#4ECDC4",
+    backgroundColor: "#CCFF00",
   },
   progressShimmer: {
     position: "absolute" as const,
@@ -766,7 +766,7 @@ const heroStyles = StyleSheet.create({
   xpToGo: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
   },
   bottomStrip: {
     flexDirection: "row" as const,
@@ -775,7 +775,7 @@ const heroStyles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
+    borderTopColor: "rgba(255,255,255,0.08)",
     gap: 24,
     width: "100%" as const,
   },
@@ -787,13 +787,13 @@ const heroStyles = StyleSheet.create({
   statChipValue: {
     fontSize: 13,
     fontWeight: "800" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     letterSpacing: -0.3,
   },
   statChipLabel: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
   },
   nextRankEmoji: {
     fontSize: 13,
@@ -802,11 +802,11 @@ const heroStyles = StyleSheet.create({
 
 const questStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   header: {
@@ -815,7 +815,7 @@ const questStyles = StyleSheet.create({
     justifyContent: "space-between" as const,
     marginBottom: 14,
     borderTopWidth: 1,
-    borderTopColor: "rgba(78,205,196,0.2)",
+    borderTopColor: "rgba(204,255,0,0.2)",
     paddingTop: 4,
   },
   headerLeft: {
@@ -826,7 +826,7 @@ const questStyles = StyleSheet.create({
   heading: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
   },
   completedBadge: {
     backgroundColor: "rgba(245,158,11,0.1)",
@@ -860,15 +860,15 @@ const questStyles = StyleSheet.create({
   questLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#D1D5DB",
+    color: "#D0D0D0",
   },
   questDone: {
-    color: "#6B7280",
+    color: "#5A5A5E",
     textDecorationLine: "line-through" as const,
   },
   questTrack: {
     height: 3,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
     borderRadius: 2,
     overflow: "hidden" as const,
   },
@@ -880,7 +880,7 @@ const questStyles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800" as const,
     letterSpacing: -0.3,
-    textShadowColor: 'rgba(34,197,94,0.4)',
+    textShadowColor: 'rgba(204,255,0,0.35)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
@@ -897,13 +897,13 @@ const streakStyles = StyleSheet.create({
   strip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 14,
     gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   flameWrap: {
@@ -936,13 +936,13 @@ const streakStyles = StyleSheet.create({
   val: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     letterSpacing: -0.5,
   },
   lbl: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
   },
   bonusTag: {
     flexDirection: "row" as const,
@@ -962,11 +962,11 @@ const streakStyles = StyleSheet.create({
 
 const nutStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   cardHeader: {
@@ -990,19 +990,19 @@ const nutStyles = StyleSheet.create({
   heading: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.3,
   },
   headerSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   headerArrow: {
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -1023,20 +1023,20 @@ const nutStyles = StyleSheet.create({
   calNum: {
     fontSize: 26,
     fontWeight: "900" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -1,
     lineHeight: 30,
   },
   calDivider: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
     marginTop: 1,
   },
   calUnit: {
     fontSize: 9,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginTop: -1,
   },
   macroSection: {
@@ -1045,7 +1045,7 @@ const nutStyles = StyleSheet.create({
   },
   macroCard: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: 14,
     padding: 12,
     gap: 8,
@@ -1063,7 +1063,7 @@ const nutStyles = StyleSheet.create({
   macroLabel: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   macroValues: {
     flexDirection: "row" as const,
@@ -1073,17 +1073,17 @@ const nutStyles = StyleSheet.create({
   macroVal: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E5E7EB",
+    color: "#E0E0E0",
     letterSpacing: -0.5,
   },
   macroGoalText: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#4B5563",
+    color: "#3A3A3C",
   },
   macroTrack: {
     height: 4,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: 2,
     overflow: "hidden" as const,
   },
@@ -1095,11 +1095,11 @@ const nutStyles = StyleSheet.create({
 
 const weekStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 24,
     padding: 18,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   headerRow: {
@@ -1111,7 +1111,7 @@ const weekStyles = StyleSheet.create({
   heading: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#D1D5DB",
+    color: "#D0D0D0",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1122,14 +1122,14 @@ const weekStyles = StyleSheet.create({
     width: "47%" as unknown as number,
     flexGrow: 1,
     flexBasis: "44%" as unknown as number,
-    backgroundColor: "#152C2E",
+    backgroundColor: "#1A1A1C",
     borderRadius: 20,
     padding: 14,
     borderWidth: 1,
     overflow: "hidden" as const,
     position: "relative" as const,
     minHeight: 110,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
   },
   cellTop: {
     flexDirection: "row" as const,
@@ -1148,7 +1148,7 @@ const weekStyles = StyleSheet.create({
   cellValue: {
     fontSize: 32,
     fontWeight: "900" as const,
-    color: "#F5F5F5",
+    color: "#E8E8E8",
     letterSpacing: -1,
   },
   cellUnit: {
@@ -1176,11 +1176,11 @@ const weekStyles = StyleSheet.create({
 
 const feedStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#0F2224",
+    backgroundColor: "#121214",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
   },
   header: {
@@ -1192,13 +1192,13 @@ const feedStyles = StyleSheet.create({
   heading: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     flex: 1,
   },
   total: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   timeline: {
     gap: 0,
@@ -1222,7 +1222,7 @@ const feedStyles = StyleSheet.create({
   timelineLine: {
     width: 1.5,
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.07)",
     marginVertical: 2,
   },
   rowContent: {
@@ -1239,13 +1239,13 @@ const feedStyles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#D1D5DB",
+    color: "#D0D0D0",
     marginRight: 8,
   },
   time: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#374151",
+    color: "#2C2C2E",
   },
   amount: {
     fontSize: 14,

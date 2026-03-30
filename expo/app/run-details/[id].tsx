@@ -262,7 +262,7 @@ export default function RunDetailsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.dateCard}>
           <View style={styles.dateIconWrap}>
-            <Calendar size={18} color={colors.accent.teal} />
+            <Calendar size={18} color={colors.accent.lime} />
           </View>
           <View style={styles.dateInfo}>
             <Text style={styles.dateText}>{formatDate(run.date)}</Text>
@@ -371,7 +371,7 @@ export default function RunDetailsScreen() {
         {(!run.achievements || run.achievements.length === 0) && (
           <View style={styles.achievementsSection}>
             <View style={styles.achievementsSectionHeader}>
-              <Trophy size={18} color="#4B5563" />
+              <Trophy size={18} color="#3A3A3C" />
               <Text style={[styles.achievementsSectionTitle, { color: colors.text.tertiary }]}>Achievements</Text>
             </View>
             <View style={styles.emptyAchievements}>
@@ -425,7 +425,7 @@ export default function RunDetailsScreen() {
               onPress={showPhotoOptions}
               testID="add-photo-button"
             >
-              <Plus size={20} color={colors.accent.teal} />
+              <Plus size={20} color={colors.accent.lime} />
               <Text style={styles.addPhotoText}>{t('run_add_photo')}</Text>
             </TouchableOpacity>
           </View>
@@ -446,7 +446,7 @@ export default function RunDetailsScreen() {
                     <Image source={{ uri: photo }} style={styles.photo} />
                   ) : (
                     <View style={[styles.photo, styles.placeholderPhoto]}>
-                      <Camera size={24} color="#9CA3AF" />
+                      <Camera size={24} color="#8E8E93" />
                     </View>
                   )}
                   <TouchableOpacity
@@ -461,7 +461,7 @@ export default function RunDetailsScreen() {
             </View>
           ) : (
             <View style={styles.emptyPhotos}>
-              <Camera size={48} color="#9CA3AF" />
+              <Camera size={48} color="#8E8E93" />
               <Text style={styles.emptyPhotosText}>
                 {t('run_no_photos')}
               </Text>
@@ -493,7 +493,7 @@ export default function RunDetailsScreen() {
             />
           ) : (
             <View style={styles.fullScreenImagePlaceholder}>
-              <Camera size={48} color="#9CA3AF" />
+              <Camera size={48} color="#8E8E93" />
               <Text style={styles.placeholderText}>{t('run_image_not_available')}</Text>
             </View>
           )}
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   editButtonActive: {
-    backgroundColor: colors.accent.teal,
+    backgroundColor: colors.accent.lime,
   },
   content: {
     flex: 1,
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
   },
   addPhotoText: {
     fontSize: 13,
-    color: colors.accent.teal,
+    color: colors.accent.lime,
     fontWeight: "500" as const,
   },
   photosGrid: {

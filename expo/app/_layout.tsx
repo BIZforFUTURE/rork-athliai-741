@@ -49,7 +49,7 @@ function LevelUpOverlay() {
 function RootLayoutNav() {
   return (
     <>
-      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#091517" } }}>
+      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#050505" } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
@@ -70,7 +70,7 @@ function RootLayoutNav() {
 function LoadingScreen() {
   return (
     <View style={[styles.container, styles.loadingContainer]}>
-      <ActivityIndicator size="large" color="#4F46E5" />
+      <ActivityIndicator size="large" color="#CCFF00" />
     </View>
   );
 }
@@ -115,6 +115,6 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0A0A0A",
+    backgroundColor: "#050505",
   },
 });

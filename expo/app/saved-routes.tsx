@@ -102,7 +102,7 @@ export default function SavedRoutesScreen() {
         {savedRoutes.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconWrap}>
-              <Navigation size={48} color="#374151" />
+              <Navigation size={48} color="#2C2C2E" />
             </View>
             <Text style={styles.emptyTitle}>No Saved Routes</Text>
             <Text style={styles.emptySubtext}>
@@ -151,11 +151,11 @@ export default function SavedRoutesScreen() {
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       testID={`delete-route-${route.id}`}
                     >
-                      <Trash2 size={16} color="#6B7280" />
+                      <Trash2 size={16} color="#5A5A5E" />
                     </TouchableOpacity>
                     <ChevronRight
                       size={18}
-                      color="#4B5563"
+                      color="#3A3A3C"
                       style={{
                         transform: [{ rotate: isExpanded ? "90deg" : "0deg" }],
                       }}
@@ -187,7 +187,7 @@ export default function SavedRoutesScreen() {
 
                 {isExpanded && route.routeCoordinates.length === 0 && (
                   <View style={styles.noMapWrap}>
-                    <Navigation size={24} color="#374151" />
+                    <Navigation size={24} color="#2C2C2E" />
                     <Text style={styles.noMapText}>
                       No GPS data for this route
                     </Text>
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     width: 3,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#374151",
+    backgroundColor: "#2C2C2E",
   },
   routeNotes: {
     fontSize: 13,

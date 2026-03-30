@@ -56,15 +56,15 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
         <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
           <Defs>
             <LinearGradient id={`circGrad-${label}`} x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={exceeds ? "#EF4444" : "#4ECDC4"} stopOpacity="1" />
-              <Stop offset="1" stopColor={exceeds ? "#EF4444" : "#22C55E"} stopOpacity="1" />
+              <Stop offset="0" stopColor={exceeds ? "#EF4444" : "#CCFF00"} stopOpacity="1" />
+              <Stop offset="1" stopColor={exceeds ? "#EF4444" : "#34D058"} stopOpacity="1" />
             </LinearGradient>
           </Defs>
           <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="rgba(255,255,255,0.06)"
+            stroke="rgba(255,255,255,0.10)"
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   progressValue: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     marginTop: 8,
     fontWeight: "500" as const,
   },

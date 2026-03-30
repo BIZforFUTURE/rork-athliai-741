@@ -262,7 +262,7 @@ export default function WorkoutScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <X size={24} color="#9CA3AF" />
+            <X size={24} color="#8E8E93" />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.workoutTitle}>{translateWorkoutName(workout.name)}</Text>
@@ -425,7 +425,7 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
   },
   header: {
     flexDirection: "row",
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   exerciseCounter: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     marginTop: 2,
   },
   finishButton: {
@@ -515,17 +515,17 @@ const styles = StyleSheet.create({
 
   exerciseDetails: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     marginBottom: 8,
   },
   exerciseEquipment: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#5A5A5E",
     marginBottom: 8,
   },
   exerciseDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#5A5A5E",
     lineHeight: 20,
   },
   autoFillContainer: {
@@ -604,12 +604,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     textAlign: "center" as const,
-    backgroundColor: "#091517",
+    backgroundColor: "#050505",
     color: "#F9FAFB",
   },
   inputLabel: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#8E8E93",
     minWidth: 30,
   },
   setActions: {
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   autoFillButtonText: {
-    color: "#9CA3AF",
+    color: "#8E8E93",
     fontSize: 12,
     fontWeight: "600" as const,
   },
@@ -685,10 +685,10 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#8E8E93",
   },
   navButtonTextDisabled: {
-    color: "#6B7280",
+    color: "#5A5A5E",
   },
   nextButton: {
     backgroundColor: "#00ADB5",
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   restButtonDisabled: {
-    backgroundColor: "#9CA3AF",
+    backgroundColor: "#8E8E93",
     opacity: 0.6,
   },
 
