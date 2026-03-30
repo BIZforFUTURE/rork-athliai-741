@@ -67,21 +67,18 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute" as const,
     alignSelf: "center" as const,
-    backgroundColor: "rgba(204,255,0,0.12)",
+    backgroundColor: "rgba(74,124,89,0.1)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(204,255,0,0.25)",
+    borderColor: "rgba(74,124,89,0.2)",
     zIndex: 999,
   },
   text: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#CCFF00",
-    textShadowColor: "rgba(204,255,0,0.4)",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    color: "#4A7C59",
   },
 });
 

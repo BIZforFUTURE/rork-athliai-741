@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet, Animated } from "react-native";
 import { useLanguage } from "@/providers/LanguageProvider";
-import { LinearGradient } from "expo-linear-gradient";
 
 function AnimatedTabIcon({
   children,
@@ -14,46 +13,31 @@ function AnimatedTabIcon({
   focused: boolean;
 }) {
   const scale = useRef(new Animated.Value(1)).current;
-  const glowOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (focused) {
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1.15,
-          friction: 5,
-          tension: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowOpacity, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.spring(scale, {
+        toValue: 1.1,
+        friction: 5,
+        tension: 300,
+        useNativeDriver: true,
+      }).start();
     } else {
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1,
-          friction: 5,
-          tension: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.spring(scale, {
+        toValue: 1,
+        friction: 5,
+        tension: 300,
+        useNativeDriver: true,
+      }).start();
     }
-  }, [focused, scale, glowOpacity]);
+  }, [focused, scale]);
 
   return (
     <View style={styles.iconOuter}>
-      <Animated.View style={[styles.glowDot, { opacity: glowOpacity }]} />
       <Animated.View style={[styles.iconWrap, { transform: [{ scale }] }]}>
         {children}
       </Animated.View>
+      {focused && <View style={styles.activeIndicator} />}
     </View>
   );
 }
@@ -63,31 +47,26 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#CCFF00",
-        tabBarInactiveTintColor: "#3A3A3C",
+        tabBarActiveTintColor: "#1A1A1A",
+        tabBarInactiveTintColor: "#A1A1A6",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#0A0A0A",
+          backgroundColor: "#FFFFFF",
           borderTopWidth: 0,
           position: "absolute" as const,
           elevation: 0,
+          shadowColor: "#000000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.03,
+          shadowRadius: 8,
         },
         tabBarLabelStyle: {
           fontWeight: "600" as const,
           fontSize: 10,
-          letterSpacing: 1,
+          letterSpacing: 0.5,
           textTransform: "uppercase" as const,
           marginTop: 2,
         },
-        tabBarBackground: () => (
-          <View style={{ flex: 1 }}>
-            <LinearGradient
-              colors={['rgba(5,5,5,0)', '#0A0A0A']}
-              style={{ position: 'absolute', top: -24, left: 0, right: 0, height: 24 }}
-            />
-            <View style={{ flex: 1, backgroundColor: '#0B1A1C' }} />
-          </View>
-        ),
       }}
     >
       <Tabs.Screen
@@ -96,7 +75,7 @@ export default function TabLayout() {
           title: t('tab_home'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Home size={22} color={color} />
+              <Home size={22} color={color} strokeWidth={focused ? 2 : 1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -114,7 +93,7 @@ export default function TabLayout() {
           title: t('tab_run'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Route size={22} color={color} />
+              <Route size={22} color={color} strokeWidth={focused ? 2 : 1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -132,7 +111,7 @@ export default function TabLayout() {
           title: t('tab_fuel'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Utensils size={22} color={color} />
+              <Utensils size={22} color={color} strokeWidth={focused ? 2 : 1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -150,7 +129,7 @@ export default function TabLayout() {
           title: t('tab_gym'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Dumbbell size={22} color={color} />
+              <Dumbbell size={22} color={color} strokeWidth={focused ? 2 : 1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -168,7 +147,7 @@ export default function TabLayout() {
           title: t('tab_stats'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Trophy size={22} color={color} />
+              <Trophy size={22} color={color} strokeWidth={focused ? 2 : 1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -195,12 +174,12 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  glowDot: {
+  activeIndicator: {
     position: "absolute" as const,
-    bottom: -6,
+    bottom: -4,
     width: 6,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#4A7C59",
   },
 });

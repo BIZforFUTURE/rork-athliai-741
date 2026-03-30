@@ -38,7 +38,7 @@ const MiniRing = React.memo(({ percentage, color, size, strokeWidth }: { percent
 
   return (
     <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
-      <Circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.10)" strokeWidth={strokeWidth} fill="none" />
+      <Circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(0,0,0,0.04)" strokeWidth={strokeWidth} fill="none" />
       <Circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={strokeWidth} fill="none" strokeDasharray={`${circumference}`} strokeDashoffset={`${offset}`} strokeLinecap="round" />
     </Svg>
   );
@@ -54,11 +54,11 @@ const CalorieRing = React.memo(({ percentage, color, size }: { percentage: numbe
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
-        <Circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.10)" strokeWidth={strokeWidth} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(0,0,0,0.04)" strokeWidth={strokeWidth} fill="none" />
         <Circle cx={size / 2} cy={size / 2} r={radius} stroke={color} strokeWidth={strokeWidth} fill="none" strokeDasharray={`${circumference}`} strokeDashoffset={`${offset}`} strokeLinecap="round" />
       </Svg>
       <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
-        <Flame size={28} color="#E8E8E8" />
+        <Flame size={28} color="#1A1A1A" />
       </View>
     </View>
   );
@@ -84,21 +84,23 @@ MacroCard.displayName = "MacroCard";
 const macroCardStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F2224',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   value: {
     fontSize: 26,
     fontWeight: '800' as const,
-    color: '#F9FAFB',
+    color: '#1A1A1A',
     letterSpacing: -0.5,
   },
   label: {
     fontSize: 13,
-    color: '#6B7280',
+    color: '#6E6E73',
     fontWeight: '500' as const,
     marginTop: 2,
   },
@@ -1921,7 +1923,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   content: {
     flex: 1,
@@ -1948,7 +1950,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 34,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -0.5,
   },
   headerActions: {
@@ -1959,13 +1961,11 @@ const styles = StyleSheet.create({
   streakBadge: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "rgba(255,180,0,0.1)",
+    backgroundColor: "rgba(212,160,83,0.08)",
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 20,
     gap: 4,
-    borderWidth: 1,
-    borderColor: "rgba(255,180,0,0.15)",
   },
   streakEmoji: {
     fontSize: 16,
@@ -1973,13 +1973,13 @@ const styles = StyleSheet.create({
   streakCount: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#FFB400",
+    color: "#D4A053",
   },
   headerIconBtn: {
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -2005,22 +2005,22 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   weekDayItemSelected: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(74,124,89,0.06)",
     borderRadius: 18,
     paddingVertical: 6,
   },
   weekDayLabel: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     letterSpacing: 0.3,
   },
   weekDayLabelSelected: {
-    color: "#E5E7EB",
+    color: "#1A1A1A",
     fontWeight: "700" as const,
   },
   weekDayLabelFuture: {
-    color: "#3B3F4A",
+    color: "#C7C7CC",
   },
   weekDayCircle: {
     width: 36,
@@ -2030,12 +2030,12 @@ const styles = StyleSheet.create({
     justifyContent: "center" as const,
     backgroundColor: "transparent",
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(0,0,0,0.08)",
     borderStyle: "dashed" as const,
   },
   weekDayCircleSelected: {
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderColor: "#8E8E93",
+    backgroundColor: "rgba(74,124,89,0.08)",
+    borderColor: "#4A7C59",
     borderStyle: "solid" as const,
     borderWidth: 2,
   },
@@ -2067,10 +2067,10 @@ const styles = StyleSheet.create({
   weekDayNum: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#8E8E93",
+    color: "#6E6E73",
   },
   weekDayNumSelected: {
-    color: "#E5E7EB",
+    color: "#1A1A1A",
     fontWeight: "700" as const,
   },
   weekDayNumToday: {
@@ -2078,40 +2078,40 @@ const styles = StyleSheet.create({
     fontWeight: "700" as const,
   },
   weekDayNumFuture: {
-    color: "#3B3F4A",
+    color: "#C7C7CC",
   },
   viewingPastBanner: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "rgba(0,229,255,0.08)",
+    backgroundColor: "rgba(74,124,89,0.06)",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginTop: 14,
-    borderWidth: 1,
-    borderColor: "rgba(0,229,255,0.12)",
   },
   viewingPastText: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
     flex: 1,
   },
   viewingPastBack: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
     marginLeft: 8,
   },
 
   calorieCard: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 20,
     marginTop: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
   },
   calorieCardInner: {
     flexDirection: "row",
@@ -2124,12 +2124,12 @@ const styles = StyleSheet.create({
   calorieMainNumber: {
     fontSize: 48,
     fontWeight: "900" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -2,
   },
   calorieLeftLabel: {
     fontSize: 15,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     fontWeight: "500" as const,
     marginTop: 2,
   },
@@ -2137,7 +2137,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
@@ -2146,7 +2146,7 @@ const styles = StyleSheet.create({
   },
   exerciseBadgeText: {
     fontSize: 13,
-    color: "#8E8E93",
+    color: "#6E6E73",
     fontWeight: "600" as const,
   },
   calorieCardRight: {
@@ -2158,12 +2158,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   healthScoreCard: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 20,
     marginTop: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   healthScoreHeader: {
     flexDirection: "row",
@@ -2174,16 +2176,16 @@ const styles = StyleSheet.create({
   healthScoreTitle: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
   },
   healthScoreValue: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
   },
   healthScoreBarTrack: {
     height: 6,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 3,
     overflow: "hidden",
     marginBottom: 12,
@@ -2194,7 +2196,7 @@ const styles = StyleSheet.create({
   },
   healthScoreDesc: {
     fontSize: 14,
-    color: "#5A5A5E",
+    color: "#6E6E73",
     lineHeight: 20,
   },
 
@@ -2204,7 +2206,7 @@ const styles = StyleSheet.create({
   quickActionsTitle: {
     fontSize: 17,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     marginBottom: 14,
   },
   actionRow: {
@@ -2213,14 +2215,16 @@ const styles = StyleSheet.create({
   },
   actionChip: {
     flex: 1,
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
     gap: 8,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
   },
   actionChipIcon: {
     width: 42,
@@ -2235,24 +2239,26 @@ const styles = StyleSheet.create({
   actionChipLabel: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
   },
   actionChipSub: {
     fontSize: 10,
     fontWeight: "500" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     marginTop: 2,
   },
   exerciseChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
     marginTop: 10,
-    borderWidth: 1,
-    borderColor: "rgba(139,92,246,0.12)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
     gap: 12,
   },
   exerciseChipTextWrap: {
@@ -2260,7 +2266,7 @@ const styles = StyleSheet.create({
   },
   exerciseChipSub: {
     fontSize: 12,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     marginTop: 2,
   },
   exercisePrimaryBtn: {

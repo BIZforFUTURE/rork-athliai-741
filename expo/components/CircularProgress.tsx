@@ -44,7 +44,7 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
   }, [percentage, animatedPercentage, pulseAnim]);
 
   const size = 110;
-  const strokeWidth = 8;
+  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
@@ -56,15 +56,15 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
         <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
           <Defs>
             <LinearGradient id={`circGrad-${label}`} x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={exceeds ? "#EF4444" : "#CCFF00"} stopOpacity="1" />
-              <Stop offset="1" stopColor={exceeds ? "#EF4444" : "#34D058"} stopOpacity="1" />
+              <Stop offset="0" stopColor={exceeds ? "#DC3545" : "#4A7C59"} stopOpacity="1" />
+              <Stop offset="1" stopColor={exceeds ? "#DC3545" : "#34A853"} stopOpacity="1" />
             </LinearGradient>
           </Defs>
           <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="rgba(255,255,255,0.10)"
+            stroke="rgba(0,0,0,0.04)"
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -81,7 +81,7 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
           />
         </Svg>
         <View style={styles.progressRingCenter}>
-          <Text style={[styles.progressPercentage, { color: exceeds ? "#EF4444" : color }]}>
+          <Text style={[styles.progressPercentage, { color: exceeds ? "#DC3545" : color }]}>
             {Math.round(percentage)}%
           </Text>
         </View>
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   progressValue: {
     fontSize: 12,
-    color: "#8E8E93",
+    color: "#6E6E73",
     marginTop: 8,
     fontWeight: "500" as const,
   },

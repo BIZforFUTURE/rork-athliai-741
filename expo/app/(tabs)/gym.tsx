@@ -1968,7 +1968,7 @@ Format as JSON:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     paddingHorizontal: 20,
@@ -1984,7 +1984,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -0.5,
   },
   subtitleRow: {
@@ -2010,7 +2010,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     fontWeight: "500" as const,
   },
   headerRight: {
@@ -2022,29 +2022,25 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 4,
-    backgroundColor: "rgba(0, 229, 255, 0.08)",
+    backgroundColor: "rgba(74,124,89,0.06)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(0, 229, 255, 0.15)",
   },
   timerText: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
   },
   calendarButton: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: "rgba(0, 173, 181, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(0, 173, 181, 0.2)",
+    backgroundColor: "rgba(74,124,89,0.06)",
   },
   settingsButton: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
   weekDayRow: {
     flexDirection: "row" as const,
@@ -2058,27 +2054,27 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.03)",
   },
   weekDayDotActive: {
-    backgroundColor: "rgba(0, 173, 181, 0.15)",
+    backgroundColor: "rgba(74,124,89,0.1)",
     borderWidth: 1.5,
-    borderColor: "rgba(0, 173, 181, 0.3)",
+    borderColor: "rgba(74,124,89,0.25)",
   },
   weekDayDotToday: {
     borderWidth: 2,
-    borderColor: "#00ADB5",
+    borderColor: "#4A7C59",
   },
   weekDayLetter: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#3A3A3C",
+    color: "#C7C7CC",
   },
   weekDayLetterActive: {
-    color: "#00ADB5",
+    color: "#4A7C59",
   },
   weekDayLetterToday: {
-    color: "#FFFFFF",
+    color: "#1A1A1A",
     fontWeight: "700" as const,
   },
   content: {
@@ -2149,11 +2145,13 @@ const styles = StyleSheet.create({
 
   buildWorkoutCTASmall: {
     marginTop: 14,
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   buildSmallInner: {
     flexDirection: "row" as const,
@@ -2175,11 +2173,11 @@ const styles = StyleSheet.create({
   buildSmallTitle: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
   },
   buildSmallSub: {
     fontSize: 12,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     marginTop: 1,
   },
 
@@ -2343,13 +2341,15 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 16,
     alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   statIconWrap: {
     width: 36,
@@ -2362,12 +2362,12 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 32,
     fontWeight: "900" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -0.5,
   },
   statLabel: {
     fontSize: 11,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     marginTop: 2,
     fontWeight: "500" as const,
   },
@@ -2384,29 +2384,31 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   toggleButton: {
     paddingHorizontal: 12,
     paddingVertical: 5,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 12,
   },
   toggleButtonText: {
     fontSize: 12,
-    color: "#5A5A5E",
+    color: "#6E6E73",
     fontWeight: "600" as const,
   },
 
   emptyState: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 36,
     alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   emptyIconWrap: {
     width: 64,
@@ -2420,11 +2422,11 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#8E8E93",
+    color: "#6E6E73",
   },
   emptyStateSubtext: {
     fontSize: 13,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     marginTop: 4,
     textAlign: "center" as const,
   },
@@ -2433,15 +2435,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recentWorkoutCard: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 14,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
   },
   recentWorkoutLeft: {
     flexDirection: "row" as const,
@@ -2460,12 +2464,12 @@ const styles = StyleSheet.create({
   recentWorkoutName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     marginBottom: 2,
   },
   recentWorkoutDate: {
     fontSize: 12,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
   },
   recentWorkoutMetrics: {
     flexDirection: "row" as const,
@@ -2479,22 +2483,22 @@ const styles = StyleSheet.create({
   recentMetricValue: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D0D0D0",
+    color: "#1A1A1A",
   },
   recentMetricLabel: {
     fontSize: 10,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     marginTop: 1,
   },
   recentMetricDivider: {
     width: 1,
     height: 20,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.06)",
   },
 
   quizContainer: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   quizHeader: {
     flexDirection: "row" as const,
@@ -2506,29 +2510,29 @@ const styles = StyleSheet.create({
   quizTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
   },
   quizProgress: {
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 12,
   },
   progressText: {
     fontSize: 12,
-    color: "#8E8E93",
+    color: "#6E6E73",
     fontWeight: "600" as const,
   },
   quizProgressBar: {
     height: 3,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     marginHorizontal: 20,
     borderRadius: 2,
     marginBottom: 8,
   },
   quizProgressFill: {
     height: "100%",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     borderRadius: 2,
   },
   quizContent: {
@@ -2541,7 +2545,7 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 24,
     fontWeight: "800" as const,
-    color: "#F1F5F9",
+    color: "#1A1A1A",
     marginBottom: 24,
     lineHeight: 32,
     letterSpacing: -0.5,
@@ -2550,18 +2554,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   optionButton: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#F8F8FA",
     borderRadius: 14,
     padding: 18,
     flexDirection: "row" as const,
     justifyContent: "space-between" as const,
     alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
   },
   optionText: {
     fontSize: 15,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     fontWeight: "500" as const,
     flex: 1,
     lineHeight: 22,
@@ -2609,19 +2611,17 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   goalsInput: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#F8F8FA",
     borderRadius: 14,
     padding: 18,
     fontSize: 15,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     minHeight: 120,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
     marginBottom: 24,
     lineHeight: 22,
   },
   generateButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -2647,12 +2647,12 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   daySelectionButton: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#F8F8FA",
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
     minWidth: 105,
     alignItems: "center" as const,
     flexDirection: "row" as const,
@@ -2660,19 +2660,19 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   daySelectionButtonSelected: {
-    backgroundColor: "#00ADB5",
-    borderColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
+    borderColor: "#4A7C59",
   },
   daySelectionText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#5A5A5E",
+    color: "#6E6E73",
   },
   daySelectionTextSelected: {
     color: "#FFFFFF",
   },
   continueButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -2688,7 +2688,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   modalHeader: {
     flexDirection: "row" as const,
@@ -2697,12 +2697,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: "rgba(0,0,0,0.06)",
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "800" as const,
-    color: "#F1F5F9",
+    color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   modalSubtitle: {
@@ -2713,33 +2713,33 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 6,
     borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
   modalContent: {
     flex: 1,
     paddingHorizontal: 20,
   },
   planOverview: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#F8F8FA",
     borderRadius: 16,
     padding: 18,
     marginTop: 16,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
   },
   planOverviewText: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#6E6E73",
     lineHeight: 22,
   },
   dayCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 18,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
   },
   dayHeader: {
     flexDirection: "row" as const,
@@ -2748,20 +2748,20 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.07)",
+    borderBottomColor: "rgba(0,0,0,0.06)",
   },
   dayNumberBadge: {
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: "rgba(0, 173, 181, 0.12)",
+    backgroundColor: "rgba(74,124,89,0.08)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
   dayNumberText: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#00ADB5",
+    color: "#4A7C59",
   },
   dayTitleBlock: {
     flex: 1,
@@ -2769,7 +2769,7 @@ const styles = StyleSheet.create({
   dayTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     marginBottom: 2,
   },
   exerciseCount: {
@@ -2780,12 +2780,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
   customExerciseCard: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#F8F8FA",
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
@@ -2818,7 +2818,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#D0D0D0",
+    color: "#1A1A1A",
     flex: 1,
   },
   exerciseMetaRow: {
@@ -2880,11 +2880,11 @@ const styles = StyleSheet.create({
 
   settingsModalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     justifyContent: "flex-end" as const,
   },
   settingsModalContainer: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 8,
@@ -2893,7 +2893,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "rgba(0,0,0,0.1)",
     alignSelf: "center" as const,
     marginBottom: 12,
   },
@@ -2909,7 +2909,7 @@ const styles = StyleSheet.create({
   settingsModalTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
   },
   settingsContent: {
     paddingHorizontal: 20,
@@ -2936,7 +2936,7 @@ const styles = StyleSheet.create({
   settingsOptionTitle: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     marginBottom: 2,
   },
   settingsOptionSubtitle: {
@@ -2961,7 +2961,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   saveDaysButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     paddingVertical: 16,
@@ -2975,7 +2975,7 @@ const styles = StyleSheet.create({
 
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#091517',
+    backgroundColor: '#FFFFFF',
   },
   loadingScrollContent: {
     flexGrow: 1,
@@ -3020,14 +3020,14 @@ const styles = StyleSheet.create({
   loadingTitle: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
+    color: '#1A1A1A',
     textAlign: 'center' as const,
     marginBottom: 8,
   },
   loadingPercent: {
     fontSize: 40,
     fontWeight: '800' as const,
-    color: '#00ADB5',
+    color: '#4A7C59',
     textAlign: 'center' as const,
     marginBottom: 16,
   },

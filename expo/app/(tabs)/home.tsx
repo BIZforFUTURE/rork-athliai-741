@@ -38,42 +38,21 @@ function HeroSection() {
   const { t } = useLanguage();
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(20)).current;
-  const shimmer = useRef(new Animated.Value(0)).current;
-  const ringGlow = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeIn, { toValue: 1, duration: 500, useNativeDriver: true }),
       Animated.spring(slideUp, { toValue: 0, tension: 60, friction: 12, useNativeDriver: true }),
     ]).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(shimmer, { toValue: 1, duration: 3000, useNativeDriver: true }),
-        Animated.timing(shimmer, { toValue: 0, duration: 3000, useNativeDriver: true }),
-      ])
-    ).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(ringGlow, { toValue: 0.6, duration: 2000, useNativeDriver: true }),
-        Animated.timing(ringGlow, { toValue: 0.3, duration: 2000, useNativeDriver: true }),
-      ])
-    ).start();
-  }, [fadeIn, slideUp, shimmer, ringGlow]);
+  }, [fadeIn, slideUp]);
 
   const xpRemaining = xpInfo.neededXP - xpInfo.currentXP;
   const currentIdx = RANKS.findIndex(r => r.title === xpInfo.rank.title);
   const nextRank = currentIdx < RANKS.length - 1 ? RANKS[currentIdx + 1] : null;
   const progressPct = Math.min(Math.max(xpInfo.progress, 0), 1);
 
-  const shimmerOpacity = shimmer.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.4, 0.8, 0.4],
-  });
-
-  const bigRingSize = 160;
-  const bigRingStroke = 8;
+  const bigRingSize = 150;
+  const bigRingStroke = 6;
   const bigRingRadius = (bigRingSize - bigRingStroke) / 2;
   const bigRingCircumference = 2 * Math.PI * bigRingRadius;
   const bigRingOffset = bigRingCircumference * (1 - progressPct);
@@ -82,17 +61,16 @@ function HeroSection() {
     <Animated.View style={[heroStyles.container, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
       <View style={heroStyles.ringCol}>
         <View style={heroStyles.ringWrap}>
-          <Animated.View style={[heroStyles.ringGlowBg, { opacity: ringGlow, backgroundColor: xpInfo.rank.color + "15" }]} />
           <Svg width={bigRingSize} height={bigRingSize}>
             <Defs>
               <SvgGradient id="heroRingGrad" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor={xpInfo.rank.color} stopOpacity="1" />
-                <Stop offset="1" stopColor={xpInfo.rank.color} stopOpacity="0.4" />
+                <Stop offset="0" stopColor="#4A7C59" stopOpacity="1" />
+                <Stop offset="1" stopColor="#4A7C59" stopOpacity="0.4" />
               </SvgGradient>
             </Defs>
             <Circle
               cx={bigRingSize / 2} cy={bigRingSize / 2} r={bigRingRadius}
-              stroke="rgba(255,255,255,0.10)" strokeWidth={3} fill="none"
+              stroke="rgba(0,0,0,0.04)" strokeWidth={3} fill="none"
             />
             <Circle
               cx={bigRingSize / 2} cy={bigRingSize / 2} r={bigRingRadius}
@@ -102,41 +80,38 @@ function HeroSection() {
             />
           </Svg>
           <View style={heroStyles.ringCenter}>
-            <Text style={heroStyles.ringEmoji}>{xpInfo.rank.emoji}</Text>
-            <Text style={[heroStyles.ringLevel, { color: xpInfo.rank.color }]}>{xpInfo.level}</Text>
+            <Text style={heroStyles.ringLevel}>{xpInfo.level}</Text>
           </View>
         </View>
         <Text style={heroStyles.levelLabel}>LEVEL</Text>
       </View>
 
-      <View style={[heroStyles.rankTag, { backgroundColor: xpInfo.rank.color + "18" }]}>
-        <Text style={[heroStyles.rankTagText, { color: xpInfo.rank.color }]}>{RANK_TRANSLATION_KEYS[xpInfo.rank.title] ? t(RANK_TRANSLATION_KEYS[xpInfo.rank.title]) : xpInfo.rank.title}</Text>
+      <View style={heroStyles.rankTag}>
+        <Text style={heroStyles.rankTagText}>{RANK_TRANSLATION_KEYS[xpInfo.rank.title] ? t(RANK_TRANSLATION_KEYS[xpInfo.rank.title]) : xpInfo.rank.title}</Text>
       </View>
 
       <View style={heroStyles.xpRow}>
         <Text style={heroStyles.xpLabel}>
-          <Text style={{ color: xpInfo.rank.color, fontWeight: "700" as const }}>{xpInfo.currentXP}</Text>
-          <Text style={{ color: "#3A3A3C" }}> /{xpInfo.neededXP}</Text>
+          <Text style={{ color: "#4A7C59", fontWeight: "700" as const }}>{xpInfo.currentXP}</Text>
+          <Text style={{ color: "#C7C7CC" }}> /{xpInfo.neededXP}</Text>
         </Text>
         <Text style={heroStyles.xpToGo}>{xpRemaining} to go</Text>
       </View>
       <View style={heroStyles.progressBar}>
         <View style={heroStyles.progressTrack}>
-          <View style={[heroStyles.progressFill, { width: `${progressPct * 100}%`, backgroundColor: xpInfo.rank.color }]} />
-          <Animated.View style={[heroStyles.progressShimmer, { width: `${progressPct * 100}%`, opacity: shimmerOpacity }]} />
+          <View style={[heroStyles.progressFill, { width: `${progressPct * 100}%` }]} />
         </View>
       </View>
 
       <View style={heroStyles.bottomStrip}>
         <View style={heroStyles.statChip}>
-          <Zap size={11} color={xpInfo.rank.color} fill={xpInfo.rank.color} />
-          <Text style={[heroStyles.statChipValue, { color: xpInfo.rank.color }]}>{xpInfo.totalXP.toLocaleString()}</Text>
+          <Zap size={11} color="#4A7C59" />
+          <Text style={heroStyles.statChipValue}>{xpInfo.totalXP.toLocaleString()}</Text>
           <Text style={heroStyles.statChipLabel}>{t('home_total_xp')}</Text>
         </View>
         {nextRank && (
           <View style={heroStyles.statChip}>
-            <Text style={heroStyles.nextRankEmoji}>{nextRank.emoji}</Text>
-            <Text style={[heroStyles.statChipValue, { color: nextRank.color + "CC" }]}>{RANK_TRANSLATION_KEYS[nextRank.title] ? t(RANK_TRANSLATION_KEYS[nextRank.title]) : nextRank.title}</Text>
+            <Text style={heroStyles.statChipValue}>{RANK_TRANSLATION_KEYS[nextRank.title] ? t(RANK_TRANSLATION_KEYS[nextRank.title]) : nextRank.title}</Text>
             <Text style={heroStyles.statChipLabel}>Lv {nextRank.minLevel}</Text>
           </View>
         )}
@@ -162,8 +137,8 @@ function DailyQuests() {
       id: "run",
       label: t('home_complete_run'),
       xp: "+25 XP",
-      icon: <Footprints size={16} color="#00E5FF" />,
-      color: "#00E5FF",
+      icon: <Footprints size={16} color="#4A7C59" strokeWidth={1.5} />,
+      color: "#4A7C59",
       done: todaysRuns.length > 0,
       progress: todaysRuns.length > 0 ? 1 : 0,
     },
@@ -171,8 +146,8 @@ function DailyQuests() {
       id: "lift",
       label: t('home_finish_workout'),
       xp: "+75 XP",
-      icon: <Dumbbell size={16} color="#FF6B35" />,
-      color: "#FF6B35",
+      icon: <Dumbbell size={16} color="#E8725A" strokeWidth={1.5} />,
+      color: "#E8725A",
       done: todaysWorkouts.length > 0,
       progress: todaysWorkouts.length > 0 ? 1 : 0,
     },
@@ -180,8 +155,8 @@ function DailyQuests() {
       id: "cal",
       label: t('home_hit_calorie'),
       xp: "+50 XP",
-      icon: <Target size={16} color="#BFFF00" />,
-      color: "#BFFF00",
+      icon: <Target size={16} color="#4A7C59" strokeWidth={1.5} />,
+      color: "#4A7C59",
       done: calProgress >= 0.95,
       progress: calProgress,
     },
@@ -189,8 +164,8 @@ function DailyQuests() {
       id: "protein",
       label: t('home_hit_protein'),
       xp: "+30 XP",
-      icon: <Award size={16} color="#F59E0B" />,
-      color: "#F59E0B",
+      icon: <Award size={16} color="#D4A053" strokeWidth={1.5} />,
+      color: "#D4A053",
       done: proteinProgress >= 0.95,
       progress: proteinProgress,
     },
@@ -202,7 +177,7 @@ function DailyQuests() {
     <Animated.View style={[questStyles.container, { opacity: fadeIn }]}>
       <View style={questStyles.header}>
         <View style={questStyles.headerLeft}>
-          <Crown size={14} color="#F59E0B" />
+          <Crown size={14} color="#D4A053" strokeWidth={1.5} />
           <Text style={questStyles.heading}>{t('home_daily_quests')}</Text>
         </View>
         <View style={questStyles.completedBadge}>
@@ -211,19 +186,20 @@ function DailyQuests() {
       </View>
       {quests.map((quest) => (
         <View key={quest.id} style={questStyles.row}>
-          <View style={[questStyles.iconWrap, { backgroundColor: quest.color + "12" }]}>
+          {quest.done && <View style={[questStyles.leftAccent, { backgroundColor: quest.color }]} />}
+          <View style={[questStyles.iconWrap, { backgroundColor: quest.color + "10" }]}>
             {quest.icon}
           </View>
           <View style={questStyles.info}>
             <Text style={[questStyles.questLabel, quest.done && questStyles.questDone]}>{quest.label}</Text>
             <View style={questStyles.questTrack}>
-              <View style={[questStyles.questFill, { width: `${quest.progress * 100}%`, backgroundColor: quest.done ? quest.color : quest.color + "80" }]} />
+              <View style={[questStyles.questFill, { width: `${quest.progress * 100}%`, backgroundColor: quest.done ? quest.color : quest.color + "60" }]} />
             </View>
           </View>
-          <Text style={[questStyles.xpTag, { color: quest.done ? quest.color : "#2C2C2E" }]}>{quest.xp}</Text>
+          <Text style={[questStyles.xpTag, { color: quest.done ? quest.color : "#C7C7CC" }]}>{quest.xp}</Text>
           {quest.done && (
-            <View style={[questStyles.checkMark, { backgroundColor: quest.color + "20" }]}>
-              <Text style={{ fontSize: 10, color: '#F5F5F5' }}>✓</Text>
+            <View style={[questStyles.checkMark, { backgroundColor: quest.color + "15" }]}>
+              <Text style={{ fontSize: 10, color: quest.color }}>✓</Text>
             </View>
           )}
         </View>
@@ -242,9 +218,9 @@ function StreakStrip() {
   }, [enterAnim]);
 
   const streaks = [
-    { label: t('home_run'), value: stats.runStreak, color: "#00E5FF", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#00E5FF" : "#3A3A3C"} /> },
-    { label: t('home_food'), value: stats.foodStreak, color: "#BFFF00", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#BFFF00" : "#3A3A3C"} /> },
-    { label: t('home_gym'), value: stats.workoutStreak, color: "#FF6B35", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#FF6B35" : "#3A3A3C"} /> },
+    { label: t('home_run'), value: stats.runStreak, color: "#4A7C59", icon: <Footprints size={14} color={stats.runStreak > 0 ? "#4A7C59" : "#C7C7CC"} strokeWidth={1.5} /> },
+    { label: t('home_food'), value: stats.foodStreak, color: "#D4A053", icon: <UtensilsCrossed size={14} color={stats.foodStreak > 0 ? "#D4A053" : "#C7C7CC"} strokeWidth={1.5} /> },
+    { label: t('home_gym'), value: stats.workoutStreak, color: "#E8725A", icon: <Dumbbell size={14} color={stats.workoutStreak > 0 ? "#E8725A" : "#C7C7CC"} strokeWidth={1.5} /> },
   ];
 
   const totalStreak = streaks.reduce((a, s) => a + s.value, 0);
@@ -252,21 +228,20 @@ function StreakStrip() {
   return (
     <Animated.View style={[streakStyles.strip, { opacity: enterAnim }]}>
       <View style={streakStyles.flameWrap}>
-        <Flame size={18} color={totalStreak > 0 ? "#F59E0B" : "#2A2E35"} fill={totalStreak > 0 ? "#F59E0B" : "none"} />
-        {totalStreak > 0 && <View style={streakStyles.flameGlow} />}
+        <Flame size={18} color={totalStreak > 0 ? "#E8725A" : "#C7C7CC"} fill={totalStreak > 0 ? "#E8725A" : "none"} strokeWidth={1.5} />
       </View>
       <View style={streakStyles.items}>
         {streaks.map((s) => (
           <View key={s.label} style={[streakStyles.item, s.value > 0 && { backgroundColor: s.color + "08" }]}>
             {s.icon}
-            <Text style={[streakStyles.val, s.value > 0 && { color: "#E8E8E8" }]}>{s.value}</Text>
-            <Text style={[streakStyles.lbl, s.value > 0 && { color: s.color + "99" }]}>{s.label}</Text>
+            <Text style={[streakStyles.val, s.value > 0 && { color: "#1A1A1A" }]}>{s.value}</Text>
+            <Text style={[streakStyles.lbl, s.value > 0 && { color: s.color }]}>{s.label}</Text>
           </View>
         ))}
       </View>
       {totalStreak >= 3 && (
         <View style={streakStyles.bonusTag}>
-          <Zap size={9} color="#F59E0B" fill="#F59E0B" />
+          <Zap size={9} color="#D4A053" fill="#D4A053" />
           <Text style={streakStyles.bonusText}>+XP</Text>
         </View>
       )}
@@ -284,16 +259,16 @@ function TodayNutrition() {
   const calRemaining = Math.max(nutrition.calorieGoal - nutrition.calories, 0);
   const isGoalHit = calPct >= 0.95;
 
-  const dialSize = 110;
-  const stroke = 8;
+  const dialSize = 100;
+  const stroke = 6;
   const r = (dialSize - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - calPct);
 
   const macros = [
-    { label: t('home_protein'), value: nutrition.protein, goal: nutrition.proteinGoal, color: "#00E5FF", short: "P" },
-    { label: t('home_carbs'), value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#BFFF00", short: "C" },
-    { label: t('home_fat'), value: nutrition.fat, goal: nutrition.fatGoal, color: "#F59E0B", short: "F" },
+    { label: t('home_protein'), value: nutrition.protein, goal: nutrition.proteinGoal, color: "#E8725A", short: "P" },
+    { label: t('home_carbs'), value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#4A7C59", short: "C" },
+    { label: t('home_fat'), value: nutrition.fat, goal: nutrition.fatGoal, color: "#D4A053", short: "F" },
   ];
 
   const handlePressIn = useCallback(() => {
@@ -313,7 +288,7 @@ function TodayNutrition() {
       <Animated.View style={[nutStyles.card, { transform: [{ scale: scaleAnim }] }]}>
         <View style={nutStyles.cardHeader}>
           <View style={nutStyles.headerIconWrap}>
-            <UtensilsCrossed size={15} color="#FF6B35" />
+            <UtensilsCrossed size={15} color="#E8725A" strokeWidth={1.5} />
           </View>
           <View style={nutStyles.headerTitleArea}>
             <Text style={nutStyles.heading}>{t('home_todays_fuel')}</Text>
@@ -322,7 +297,7 @@ function TodayNutrition() {
             </Text>
           </View>
           <View style={nutStyles.headerArrow}>
-            <ChevronRight size={16} color="#3A3A3C" />
+            <ChevronRight size={16} color="#C7C7CC" strokeWidth={1.5} />
           </View>
         </View>
 
@@ -331,11 +306,11 @@ function TodayNutrition() {
             <Svg width={dialSize} height={dialSize}>
               <Defs>
                 <SvgGradient id="fuelRingGrad" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0" stopColor={isGoalHit ? "#10B981" : "#FF6B35"} stopOpacity="1" />
-                  <Stop offset="1" stopColor={isGoalHit ? "#34D399" : "#FF8F65"} stopOpacity="0.6" />
+                  <Stop offset="0" stopColor={isGoalHit ? "#34A853" : "#4A7C59"} stopOpacity="1" />
+                  <Stop offset="1" stopColor={isGoalHit ? "#34A853" : "#4A7C59"} stopOpacity="0.4" />
                 </SvgGradient>
               </Defs>
-              <Circle cx={dialSize / 2} cy={dialSize / 2} r={r} stroke="rgba(255,107,53,0.06)" strokeWidth={stroke} fill="none" />
+              <Circle cx={dialSize / 2} cy={dialSize / 2} r={r} stroke="rgba(0,0,0,0.04)" strokeWidth={stroke} fill="none" />
               <Circle
                 cx={dialSize / 2} cy={dialSize / 2} r={r}
                 stroke="url(#fuelRingGrad)" strokeWidth={stroke} fill="none"
@@ -366,7 +341,7 @@ function TodayNutrition() {
                   <Text style={nutStyles.macroGoalText}>/ {m.goal}g</Text>
                 </View>
                 <View style={nutStyles.macroTrack}>
-                  <View style={[nutStyles.macroFill, { width: `${pct * 100}%`, backgroundColor: macroHit ? m.color : m.color + "80" }]} />
+                  <View style={[nutStyles.macroFill, { width: `${pct * 100}%`, backgroundColor: macroHit ? m.color : m.color + "50" }]} />
                 </View>
               </View>
             );
@@ -394,34 +369,31 @@ function WeeklyStats() {
   };
 
   const items = [
-    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: t('home_distance'), color: "#00E5FF", icon: <Route size={20} color="#00E5FF" /> },
-    { value: `${stats.weeklyRuns}`, unit: "", label: t('home_runs'), color: "#BFFF00", icon: <Footprints size={20} color="#BFFF00" /> },
-    { value: formatTime(stats.weeklyTime), unit: "", label: t('home_active_time'), color: "#FF6B35", icon: <Timer size={20} color="#FF6B35" /> },
-    { value: `${stats.weeklyWorkouts}`, unit: "", label: t('home_workouts'), color: "#00ADB5", icon: <Dumbbell size={20} color="#00ADB5" /> },
+    { value: stats.weeklyMiles.toFixed(1), unit: "mi", label: t('home_distance'), color: "#4A7C59", icon: <Route size={20} color="#4A7C59" strokeWidth={1.5} /> },
+    { value: `${stats.weeklyRuns}`, unit: "", label: t('home_runs'), color: "#6E6E73", icon: <Footprints size={20} color="#6E6E73" strokeWidth={1.5} /> },
+    { value: formatTime(stats.weeklyTime), unit: "", label: t('home_active_time'), color: "#E8725A", icon: <Timer size={20} color="#E8725A" strokeWidth={1.5} /> },
+    { value: `${stats.weeklyWorkouts}`, unit: "", label: t('home_workouts'), color: "#D4A053", icon: <Dumbbell size={20} color="#D4A053" strokeWidth={1.5} /> },
   ];
 
   return (
     <Animated.View style={[weekStyles.container, { opacity: fadeIn }]}>
       <View style={weekStyles.headerRow}>
-        <TrendingUp size={15} color="#8E8E93" />
+        <TrendingUp size={15} color="#6E6E73" strokeWidth={1.5} />
         <Text style={weekStyles.heading}>{t('home_this_week')}</Text>
       </View>
       <View style={weekStyles.grid}>
-        {items.map((item, idx) => (
-          <View key={item.label} style={[weekStyles.cell, { borderColor: item.color + "12" }]}>
+        {items.map((item) => (
+          <View key={item.label} style={weekStyles.cell}>
             <View style={weekStyles.cellTop}>
-              <View style={[weekStyles.cellIcon, { backgroundColor: item.color + "14" }]}>
+              <View style={[weekStyles.cellIcon, { backgroundColor: item.color + "0A" }]}>
                 {item.icon}
               </View>
-              <Text style={[weekStyles.cellLabel, { color: item.color + "AA" }]}>{item.label}</Text>
+              <Text style={weekStyles.cellLabel}>{item.label}</Text>
             </View>
             <Text style={weekStyles.cellValue}>
               {item.value}
               {item.unit ? <Text style={[weekStyles.cellUnit, { color: item.color }]}> {item.unit}</Text> : null}
             </Text>
-            {idx < 2 && (
-              <View style={[weekStyles.cellAccent, { backgroundColor: item.color + "18" }]} />
-            )}
           </View>
         ))}
       </View>
@@ -441,23 +413,23 @@ function XPFeed() {
 
   const getIcon = (source: string) => {
     switch (source) {
-      case "run": return <Footprints size={12} color="#00E5FF" />;
-      case "workout": return <Dumbbell size={12} color="#FF6B35" />;
-      case "food": return <UtensilsCrossed size={12} color="#BFFF00" />;
-      case "nutrition_goal": return <Award size={12} color="#F59E0B" />;
-      case "streak": return <Flame size={12} color="#F59E0B" />;
-      default: return <Zap size={12} color="#8E8E93" />;
+      case "run": return <Footprints size={12} color="#4A7C59" strokeWidth={1.5} />;
+      case "workout": return <Dumbbell size={12} color="#E8725A" strokeWidth={1.5} />;
+      case "food": return <UtensilsCrossed size={12} color="#D4A053" strokeWidth={1.5} />;
+      case "nutrition_goal": return <Award size={12} color="#D4A053" strokeWidth={1.5} />;
+      case "streak": return <Flame size={12} color="#E8725A" strokeWidth={1.5} />;
+      default: return <Zap size={12} color="#6E6E73" strokeWidth={1.5} />;
     }
   };
 
   const getColor = (source: string) => {
     switch (source) {
-      case "run": return "#00E5FF";
-      case "workout": return "#FF6B35";
-      case "food": return "#BFFF00";
-      case "nutrition_goal": return "#F59E0B";
-      case "streak": return "#F59E0B";
-      default: return "#8E8E93";
+      case "run": return "#4A7C59";
+      case "workout": return "#E8725A";
+      case "food": return "#D4A053";
+      case "nutrition_goal": return "#D4A053";
+      case "streak": return "#E8725A";
+      default: return "#6E6E73";
     }
   };
 
@@ -492,7 +464,7 @@ function XPFeed() {
   return (
     <View style={feedStyles.container}>
       <View style={feedStyles.header}>
-        <Zap size={13} color="#5A5A5E" />
+        <Zap size={13} color="#A1A1A6" strokeWidth={1.5} />
         <Text style={feedStyles.heading}>{t('home_xp_activity')}</Text>
         <Text style={feedStyles.total}>{t('home_total').replace('{xp}', xpInfo.totalXP.toLocaleString())}</Text>
       </View>
@@ -500,7 +472,7 @@ function XPFeed() {
         {recentEvents.map((event, index) => (
           <View key={event.id} style={feedStyles.row}>
             <View style={feedStyles.timelineLeft}>
-              <View style={[feedStyles.timelineDot, { backgroundColor: getColor(event.source) + "30", borderColor: getColor(event.source) + "60" }]}>
+              <View style={[feedStyles.timelineDot, { backgroundColor: getColor(event.source) + "10", borderColor: getColor(event.source) + "30" }]}>
                 {getIcon(event.source)}
               </View>
               {index < recentEvents.length - 1 && <View style={feedStyles.timelineLine} />}
@@ -551,9 +523,8 @@ export default function DashboardScreen() {
           <Text style={styles.greetingText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{greeting}</Text>
           <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
         </View>
-        <View style={[styles.levelChip, { borderColor: xpInfo.rank.color + "40", backgroundColor: xpInfo.rank.color + "10" }]}>
-          <Text style={[styles.levelChipEmoji, { fontSize: 13 }]}>{xpInfo.rank.emoji}</Text>
-          <Text style={[styles.levelChipText, { color: xpInfo.rank.color }]}>Lv {xpInfo.level}</Text>
+        <View style={styles.levelChip}>
+          <Text style={styles.levelChipText}>Lv {xpInfo.level}</Text>
         </View>
       </View>
       <ScrollView
@@ -564,9 +535,9 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#00E5FF"
-            colors={["#00E5FF"]}
-            progressBackgroundColor="#1A1D24"
+            tintColor="#4A7C59"
+            colors={["#4A7C59"]}
+            progressBackgroundColor="#FFFFFF"
           />
         }
       >
@@ -580,8 +551,8 @@ export default function DashboardScreen() {
           onPress={() => setLanguage(isSpanish ? 'en' : 'es')}
           style={styles.langToggle}
         >
-          <Globe size={13} color="#2C2C2E" />
-          <Text style={styles.langToggleText}>{isSpanish ? 'English' : 'Español'}</Text>
+          <Globe size={13} color="#A1A1A6" strokeWidth={1.5} />
+          <Text style={styles.langToggleText}>{isSpanish ? 'English' : 'Espanol'}</Text>
         </Pressable>
         <View style={{ height: 20 }} />
       </ScrollView>
@@ -592,12 +563,12 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   topBar: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingBottom: 16,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -606,14 +577,14 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -0.5,
     flexShrink: 1,
   },
   subGreeting: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     marginTop: 2,
   },
   levelChip: {
@@ -621,27 +592,27 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 5,
     borderWidth: 1,
+    borderColor: "rgba(74,124,89,0.2)",
+    backgroundColor: "rgba(74,124,89,0.06)",
     borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     marginBottom: 2,
     flexShrink: 0,
   },
-  levelChipEmoji: {
-    fontSize: 14,
-  },
   levelChipText: {
     fontSize: 14,
-    fontWeight: "800" as const,
+    fontWeight: "700" as const,
     letterSpacing: -0.3,
+    color: "#4A7C59",
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 110,
-    gap: 12,
+    gap: 16,
   },
   langToggle: {
     flexDirection: "row" as const,
@@ -650,100 +621,92 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.03)",
     alignSelf: "center" as const,
     marginTop: 4,
   },
   langToggleText: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#2C2C2E",
+    color: "#A1A1A6",
     letterSpacing: 0.2,
   },
 });
 
 const heroStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    paddingTop: 28,
+    paddingBottom: 18,
+    paddingHorizontal: 24,
     alignItems: "center" as const,
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
   },
   ringCol: {
     alignItems: "center" as const,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   ringWrap: {
-    width: 160,
-    height: 160,
+    width: 150,
+    height: 150,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-  },
-  ringGlowBg: {
-    position: "absolute" as const,
-    width: 140,
-    height: 140,
-    borderRadius: 70,
   },
   ringCenter: {
     position: "absolute" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  ringEmoji: {
-    fontSize: 22,
-    marginBottom: -2,
-  },
   ringLevel: {
-    fontSize: 52,
+    fontSize: 48,
     fontWeight: "900" as const,
     letterSpacing: -2,
-    lineHeight: 56,
-    textShadowColor: 'rgba(204,255,0,0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+    lineHeight: 52,
+    color: "#1A1A1A",
   },
   levelLabel: {
     fontSize: 10,
     fontWeight: "700" as const,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     letterSpacing: 2,
-    marginTop: 4,
+    marginTop: 6,
   },
   rankTag: {
     alignSelf: "center" as const,
     paddingHorizontal: 16,
     paddingVertical: 5,
     borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: "rgba(74,124,89,0.08)",
+    marginBottom: 18,
   },
   rankTagText: {
     fontSize: 12,
-    fontWeight: "800" as const,
-    letterSpacing: 3,
+    fontWeight: "700" as const,
+    letterSpacing: 2,
     textTransform: "uppercase" as const,
+    color: "#4A7C59",
   },
   xpRow: {
     flexDirection: "row" as const,
     justifyContent: "space-between" as const,
     alignItems: "center" as const,
     width: "100%" as const,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   xpLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
   },
   progressBar: {
-    height: 5,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 2,
     overflow: "hidden" as const,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     width: "100%" as const,
   },
   progressTrack: {
@@ -752,71 +715,59 @@ const heroStyles = StyleSheet.create({
   },
   progressFill: {
     height: "100%" as const,
-    borderRadius: 3,
-    backgroundColor: "#CCFF00",
-  },
-  progressShimmer: {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: "rgba(255,255,255,0.25)",
+    borderRadius: 2,
+    backgroundColor: "#4A7C59",
   },
   xpToGo: {
     fontSize: 12,
-    fontWeight: "600" as const,
-    color: "#3A3A3C",
+    fontWeight: "500" as const,
+    color: "#A1A1A6",
   },
   bottomStrip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    marginTop: 14,
-    paddingTop: 14,
+    marginTop: 16,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.08)",
-    gap: 24,
+    borderTopColor: "rgba(0,0,0,0.04)",
+    gap: 28,
     width: "100%" as const,
   },
   statChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    gap: 4,
+    gap: 5,
   },
   statChipValue: {
     fontSize: 13,
-    fontWeight: "800" as const,
-    color: "#E0E0E0",
+    fontWeight: "700" as const,
+    color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   statChipLabel: {
     fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#3A3A3C",
-  },
-  nextRankEmoji: {
-    fontSize: 13,
+    fontWeight: "500" as const,
+    color: "#A1A1A6",
   },
 });
 
 const questStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    padding: 18,
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   header: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
     marginBottom: 14,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(204,255,0,0.2)",
-    paddingTop: 4,
   },
   headerLeft: {
     flexDirection: "row" as const,
@@ -824,20 +775,20 @@ const questStyles = StyleSheet.create({
     gap: 6,
   },
   heading: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "700" as const,
-    color: "#8E8E93",
+    color: "#1A1A1A",
   },
   completedBadge: {
-    backgroundColor: "rgba(245,158,11,0.1)",
+    backgroundColor: "rgba(212,160,83,0.1)",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   completedText: {
     fontSize: 11,
-    fontWeight: "800" as const,
-    color: "#F59E0B",
+    fontWeight: "700" as const,
+    color: "#D4A053",
   },
   row: {
     flexDirection: "row" as const,
@@ -846,9 +797,17 @@ const questStyles = StyleSheet.create({
     paddingVertical: 8,
     position: "relative" as const,
   },
+  leftAccent: {
+    position: "absolute" as const,
+    left: -18,
+    top: 4,
+    bottom: 4,
+    width: 3,
+    borderRadius: 2,
+  },
   iconWrap: {
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     borderRadius: 10,
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -860,15 +819,15 @@ const questStyles = StyleSheet.create({
   questLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#D0D0D0",
+    color: "#1A1A1A",
   },
   questDone: {
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     textDecorationLine: "line-through" as const,
   },
   questTrack: {
     height: 3,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 2,
     overflow: "hidden" as const,
   },
@@ -878,11 +837,8 @@ const questStyles = StyleSheet.create({
   },
   xpTag: {
     fontSize: 12,
-    fontWeight: "800" as const,
+    fontWeight: "700" as const,
     letterSpacing: -0.3,
-    textShadowColor: 'rgba(204,255,0,0.35)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
   },
   checkMark: {
     width: 18,
@@ -897,26 +853,19 @@ const streakStyles = StyleSheet.create({
   strip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     gap: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   flameWrap: {
     position: "relative" as const,
-  },
-  flameGlow: {
-    position: "absolute" as const,
-    top: -4,
-    left: -4,
-    right: -4,
-    bottom: -4,
-    backgroundColor: "rgba(245,158,11,0.15)",
-    borderRadius: 20,
   },
   items: {
     flex: 1,
@@ -936,38 +885,40 @@ const streakStyles = StyleSheet.create({
   val: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#5A5A5E",
+    color: "#C7C7CC",
     letterSpacing: -0.5,
   },
   lbl: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#3A3A3C",
+    color: "#C7C7CC",
   },
   bonusTag: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 3,
-    backgroundColor: "rgba(245,158,11,0.1)",
+    backgroundColor: "rgba(212,160,83,0.08)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
   },
   bonusText: {
     fontSize: 10,
-    fontWeight: "800" as const,
-    color: "#F59E0B",
+    fontWeight: "700" as const,
+    color: "#D4A053",
   },
 });
 
 const nutStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -979,7 +930,7 @@ const nutStyles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: "rgba(255,107,53,0.1)",
+    backgroundColor: "rgba(232,114,90,0.08)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -989,20 +940,20 @@ const nutStyles = StyleSheet.create({
   },
   heading: {
     fontSize: 17,
-    fontWeight: "800" as const,
-    color: "#E8E8E8",
+    fontWeight: "700" as const,
+    color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   headerSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
   },
   headerArrow: {
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.03)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -1011,8 +962,8 @@ const nutStyles = StyleSheet.create({
     marginBottom: 20,
   },
   dialArea: {
-    width: 110,
-    height: 110,
+    width: 100,
+    height: 100,
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -1021,22 +972,22 @@ const nutStyles = StyleSheet.create({
     alignItems: "center" as const,
   },
   calNum: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "900" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -1,
-    lineHeight: 30,
+    lineHeight: 28,
   },
   calDivider: {
-    fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#3A3A3C",
+    fontSize: 10,
+    fontWeight: "500" as const,
+    color: "#A1A1A6",
     marginTop: 1,
   },
   calUnit: {
     fontSize: 9,
     fontWeight: "600" as const,
-    color: "#5A5A5E",
+    color: "#C7C7CC",
     marginTop: -1,
   },
   macroSection: {
@@ -1045,7 +996,7 @@ const nutStyles = StyleSheet.create({
   },
   macroCard: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#F8F8FA",
     borderRadius: 14,
     padding: 12,
     gap: 8,
@@ -1062,8 +1013,8 @@ const nutStyles = StyleSheet.create({
   },
   macroLabel: {
     fontSize: 11,
-    fontWeight: "700" as const,
-    color: "#5A5A5E",
+    fontWeight: "600" as const,
+    color: "#6E6E73",
   },
   macroValues: {
     flexDirection: "row" as const,
@@ -1073,17 +1024,17 @@ const nutStyles = StyleSheet.create({
   macroVal: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E0E0E0",
+    color: "#1A1A1A",
     letterSpacing: -0.5,
   },
   macroGoalText: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
   },
   macroTrack: {
-    height: 4,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    height: 3,
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 2,
     overflow: "hidden" as const,
   },
@@ -1095,12 +1046,14 @@ const nutStyles = StyleSheet.create({
 
 const weekStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    padding: 20,
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   headerRow: {
     flexDirection: "row" as const,
@@ -1111,7 +1064,7 @@ const weekStyles = StyleSheet.create({
   heading: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#D0D0D0",
+    color: "#1A1A1A",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1122,14 +1075,12 @@ const weekStyles = StyleSheet.create({
     width: "47%" as unknown as number,
     flexGrow: 1,
     flexBasis: "44%" as unknown as number,
-    backgroundColor: "#1A1A1C",
-    borderRadius: 20,
+    backgroundColor: "#F8F8FA",
+    borderRadius: 18,
     padding: 14,
-    borderWidth: 1,
     overflow: "hidden" as const,
     position: "relative" as const,
-    minHeight: 110,
-    borderColor: "rgba(255,255,255,0.10)",
+    minHeight: 100,
   },
   cellTop: {
     flexDirection: "row" as const,
@@ -1146,14 +1097,14 @@ const weekStyles = StyleSheet.create({
     justifyContent: "center" as const,
   },
   cellValue: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "900" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -1,
   },
   cellUnit: {
     fontSize: 16,
-    fontWeight: "700" as const,
+    fontWeight: "600" as const,
   },
   cellLabel: {
     fontSize: 11,
@@ -1161,27 +1112,21 @@ const weekStyles = StyleSheet.create({
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
     flexShrink: 1,
-  },
-  cellAccent: {
-    position: "absolute" as const,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    color: "#6E6E73",
   },
 });
 
 
 const feedStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    padding: 18,
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   header: {
     flexDirection: "row" as const,
@@ -1190,15 +1135,15 @@ const feedStyles = StyleSheet.create({
     marginBottom: 14,
   },
   heading: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "700" as const,
-    color: "#8E8E93",
+    color: "#1A1A1A",
     flex: 1,
   },
   total: {
     fontSize: 11,
-    fontWeight: "700" as const,
-    color: "#5A5A5E",
+    fontWeight: "600" as const,
+    color: "#A1A1A6",
   },
   timeline: {
     gap: 0,
@@ -1220,9 +1165,9 @@ const feedStyles = StyleSheet.create({
     borderWidth: 1.5,
   },
   timelineLine: {
-    width: 1.5,
+    width: 1,
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.06)",
     marginVertical: 2,
   },
   rowContent: {
@@ -1239,17 +1184,17 @@ const feedStyles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#D0D0D0",
+    color: "#1A1A1A",
     marginRight: 8,
   },
   time: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#2C2C2E",
+    color: "#C7C7CC",
   },
   amount: {
     fontSize: 14,
-    fontWeight: "800" as const,
+    fontWeight: "700" as const,
     letterSpacing: -0.3,
   },
 });

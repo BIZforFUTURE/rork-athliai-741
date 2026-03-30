@@ -49,7 +49,7 @@ function LevelUpOverlay() {
 function RootLayoutNav() {
   return (
     <>
-      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#050505" } }}>
+      <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: "#FFFFFF" } }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="workout-builder" options={{ headerShown: false }} />
@@ -70,7 +70,7 @@ function RootLayoutNav() {
 function LoadingScreen() {
   return (
     <View style={[styles.container, styles.loadingContainer]}>
-      <ActivityIndicator size="large" color="#CCFF00" />
+      <ActivityIndicator size="large" color="#4A7C59" />
     </View>
   );
 }
@@ -79,7 +79,6 @@ export default function RootLayout() {
   const [isReady, setIsReady] = React.useState(false);
 
   useEffect(() => {
-    // Give the app a moment to initialize
     const timer = setTimeout(() => {
       setIsReady(true);
       void SplashScreen.hideAsync();
@@ -115,6 +114,6 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
 });

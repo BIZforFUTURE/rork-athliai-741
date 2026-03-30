@@ -77,7 +77,6 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const titleTranslateY = useRef(new Animated.Value(20)).current;
   const buttonOpacity = useRef(new Animated.Value(0)).current;
-  const glowPulse = useRef(new Animated.Value(0.5)).current;
 
   const { t } = useLanguage();
   const rank = getRankForLevel(level);
@@ -88,9 +87,9 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
   const translatedRankTitle = RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title;
 
   const particleColors = useMemo(() => {
-    const base = [rank.color, '#FFFFFF', '#FFD700', '#00E5FF'];
+    const base = ['#4A7C59', '#D4A053', '#E8725A', '#34A853'];
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => base[i % base.length]);
-  }, [rank.color]);
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -120,19 +119,9 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
         ]),
         Animated.timing(buttonOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
       ]).start();
-
-      const glowLoop = Animated.loop(
-        Animated.sequence([
-          Animated.timing(glowPulse, { toValue: 1, duration: 1000, useNativeDriver: true }),
-          Animated.timing(glowPulse, { toValue: 0.5, duration: 1000, useNativeDriver: true }),
-        ])
-      );
-      glowLoop.start();
-
-      return () => glowLoop.stop();
     }
     return undefined;
-  }, [visible, scaleAnim, opacityAnim, levelNumberScale, titleOpacity, titleTranslateY, buttonOpacity, glowPulse]);
+  }, [visible, scaleAnim, opacityAnim, levelNumberScale, titleOpacity, titleTranslateY, buttonOpacity]);
 
   if (!visible) return null;
 
@@ -154,13 +143,10 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
             },
           ]}
         >
-          <Animated.View style={[styles.glowRing, { borderColor: rank.color, opacity: glowPulse }]} />
-
           <Text style={styles.levelUpLabel}>LEVEL UP</Text>
 
           <Animated.View style={{ transform: [{ scale: levelNumberScale }] }}>
-            <Text style={styles.emoji}>{rank.emoji}</Text>
-            <Text style={[styles.levelNumber, { color: rank.color }]}>{level}</Text>
+            <Text style={styles.levelNumber}>{level}</Text>
           </Animated.View>
 
           <Animated.View
@@ -170,8 +156,8 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
               alignItems: 'center' as const,
             }}
           >
-            <View style={[styles.rankBadge, { backgroundColor: rank.color + '20', borderColor: rank.color + '40' }]}>
-              <Text style={[styles.rankTitle, { color: rank.color }]}>{translatedRankTitle}</Text>
+            <View style={styles.rankBadge}>
+              <Text style={styles.rankTitle}>{translatedRankTitle}</Text>
             </View>
 
             {isNewRank && (
@@ -183,7 +169,7 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
 
           <Animated.View style={{ opacity: buttonOpacity, width: '100%' as const }}>
             <TouchableOpacity
-              style={[styles.continueButton, { backgroundColor: rank.color }]}
+              style={styles.continueButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -204,7 +190,7 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -220,34 +206,22 @@ const styles = StyleSheet.create({
   },
   card: {
     width: SCREEN_WIDTH * 0.82,
-    backgroundColor: '#141820',
+    backgroundColor: '#FFFFFF',
     borderRadius: 28,
     padding: 36,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#1F2937',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 40,
     overflow: 'visible',
-  },
-  glowRing: {
-    position: 'absolute',
-    top: -4,
-    left: -4,
-    right: -4,
-    bottom: -4,
-    borderRadius: 32,
-    borderWidth: 2,
   },
   levelUpLabel: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#5A5A5E',
+    color: '#A1A1A6',
     letterSpacing: 4,
     marginBottom: 16,
-  },
-  emoji: {
-    fontSize: 48,
-    textAlign: 'center',
-    marginBottom: 4,
   },
   levelNumber: {
     fontSize: 72,
@@ -255,12 +229,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: -3,
     lineHeight: 80,
+    color: '#4A7C59',
   },
   rankBadge: {
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
+    borderColor: 'rgba(74,124,89,0.2)',
+    backgroundColor: 'rgba(74,124,89,0.06)',
     marginTop: 12,
     marginBottom: 8,
   },
@@ -269,18 +246,19 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
+    color: '#4A7C59',
   },
   newRankText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFD700',
+    color: '#D4A053',
     marginTop: 4,
     marginBottom: 4,
   },
   message: {
     fontSize: 15,
     fontWeight: '500',
-    color: '#8E8E93',
+    color: '#6E6E73',
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 22,
@@ -291,6 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 28,
+    backgroundColor: '#4A7C59',
   },
   continueText: {
     fontSize: 17,

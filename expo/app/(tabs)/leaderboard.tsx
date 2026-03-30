@@ -1162,23 +1162,23 @@ export default function PersonalStatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#050505",
+    backgroundColor: "#FFFFFF",
   },
   pageTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -0.5,
   },
   pageSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#5A5A5E",
+    color: "#A1A1A6",
     marginTop: 2,
   },
   scroll: {
@@ -1194,12 +1194,14 @@ const styles = StyleSheet.create({
 
 const cardStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   cardHeader: {
     flexDirection: "row" as const,
@@ -1210,7 +1212,7 @@ const cardStyles = StyleSheet.create({
   cardHeading: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#8E8E93",
+    color: "#1A1A1A",
     flex: 1,
   },
 });
@@ -1232,29 +1234,29 @@ const goalStyles = StyleSheet.create({
   statLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
   statValue: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#D0D0D0",
+    color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   statUnit: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
   },
   divider: {
     width: 1,
     height: 28,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.06)",
   },
   barOuter: {
     height: 6,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 3,
     overflow: "hidden" as const,
     marginBottom: 6,
@@ -1266,7 +1268,7 @@ const goalStyles = StyleSheet.create({
   barLabel: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     textAlign: "center" as const,
     marginBottom: 8,
   },
@@ -1280,7 +1282,7 @@ const goalStyles = StyleSheet.create({
   dateText: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
   },
   paceTag: {
     flexDirection: "row" as const,
@@ -1316,7 +1318,7 @@ const physStyles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 4,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,
@@ -1324,7 +1326,7 @@ const physStyles = StyleSheet.create({
   editText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#8E8E93",
+    color: "#6E6E73",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1336,7 +1338,7 @@ const physStyles = StyleSheet.create({
     alignItems: "center" as const,
     gap: 6,
     paddingVertical: 14,
-    backgroundColor: "rgba(255,255,255,0.02)",
+    backgroundColor: "#F8F8FA",
     borderRadius: 14,
   },
   cellIcon: {
@@ -1349,13 +1351,13 @@ const physStyles = StyleSheet.create({
   cellValue: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   cellLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     textTransform: "uppercase" as const,
     letterSpacing: 0.3,
   },
@@ -1610,7 +1612,7 @@ const modalStyles = StyleSheet.create({
     color: "#FFFFFF",
   },
   saveBtn: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center" as const,
@@ -1634,7 +1636,7 @@ const bkStyles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 4,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.03)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -1646,7 +1648,7 @@ const bkStyles = StyleSheet.create({
   desc: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#3A3A3C",
+    color: "#A1A1A6",
     lineHeight: 18,
     marginBottom: 14,
   },
@@ -1659,25 +1661,21 @@ const bkStyles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
     gap: 6,
-    backgroundColor: "rgba(0,229,255,0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(0,229,255,0.15)",
+    backgroundColor: "rgba(74,124,89,0.06)",
     borderRadius: 12,
     paddingVertical: 12,
   },
   exportText: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
   },
   importBtn: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
     gap: 6,
-    backgroundColor: "rgba(245,158,11,0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.15)",
+    backgroundColor: "rgba(212,160,83,0.08)",
     borderRadius: 12,
     paddingVertical: 12,
   },
@@ -1690,15 +1688,17 @@ const bkStyles = StyleSheet.create({
 
 const profileStyles = StyleSheet.create({
   card: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 18,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 16,
     overflow: "hidden" as const,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   avatarWrap: {
     width: 68,
@@ -1726,7 +1726,7 @@ const profileStyles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
