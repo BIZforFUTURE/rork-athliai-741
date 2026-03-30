@@ -4,8 +4,7 @@ import React, { useEffect, useRef } from "react";
 import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet, Animated } from "react-native";
 import { useLanguage } from "@/providers/LanguageProvider";
-import { BlurView } from "expo-blur";
-import { DS } from "@/constants/theme";
+import { LinearGradient } from "expo-linear-gradient";
 
 function AnimatedTabIcon({
   children,
@@ -15,18 +14,18 @@ function AnimatedTabIcon({
   focused: boolean;
 }) {
   const scale = useRef(new Animated.Value(1)).current;
-  const indicatorOpacity = useRef(new Animated.Value(0)).current;
+  const glowOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (focused) {
       Animated.parallel([
         Animated.spring(scale, {
-          toValue: 1.1,
-          friction: 6,
+          toValue: 1.15,
+          friction: 5,
           tension: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(indicatorOpacity, {
+        Animated.timing(glowOpacity, {
           toValue: 1,
           duration: 200,
           useNativeDriver: true,
@@ -36,65 +35,25 @@ function AnimatedTabIcon({
       Animated.parallel([
         Animated.spring(scale, {
           toValue: 1,
-          friction: 6,
+          friction: 5,
           tension: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(indicatorOpacity, {
+        Animated.timing(glowOpacity, {
           toValue: 0,
           duration: 150,
           useNativeDriver: true,
         }),
       ]).start();
     }
-  }, [focused, scale, indicatorOpacity]);
+  }, [focused, scale, glowOpacity]);
 
   return (
     <View style={styles.iconOuter}>
+      <Animated.View style={[styles.glowDot, { opacity: glowOpacity }]} />
       <Animated.View style={[styles.iconWrap, { transform: [{ scale }] }]}>
         {children}
       </Animated.View>
-      <Animated.View style={[styles.indicator, { opacity: indicatorOpacity }]} />
-    </View>
-  );
-}
-
-function TabBarBackground() {
-  if (Platform.OS === 'web') {
-    return (
-      <View
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor: 'rgba(8,8,8,0.92)',
-            borderTopWidth: 1,
-            borderTopColor: DS.border.default,
-            // @ts-ignore
-            backdropFilter: 'blur(24px)',
-            WebkitBackdropFilter: 'blur(24px)',
-          },
-        ]}
-      />
-    );
-  }
-
-  return (
-    <View style={StyleSheet.absoluteFill}>
-      <BlurView
-        intensity={50}
-        tint="dark"
-        style={StyleSheet.absoluteFill}
-      />
-      <View
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor: 'rgba(8,8,8,0.75)',
-            borderTopWidth: 1,
-            borderTopColor: DS.border.default,
-          },
-        ]}
-      />
     </View>
   );
 }
@@ -104,23 +63,31 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: DS.accent.lime,
-        tabBarInactiveTintColor: DS.slate.light,
+        tabBarActiveTintColor: "#4ECDC4",
+        tabBarInactiveTintColor: "#374151",
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "transparent",
+          backgroundColor: "#141414",
           borderTopWidth: 0,
           position: "absolute" as const,
           elevation: 0,
         },
         tabBarLabelStyle: {
           fontWeight: "600" as const,
-          fontSize: 9,
-          letterSpacing: 1.5,
+          fontSize: 10,
+          letterSpacing: 1,
           textTransform: "uppercase" as const,
           marginTop: 2,
         },
-        tabBarBackground: () => <TabBarBackground />,
+        tabBarBackground: () => (
+          <View style={{ flex: 1 }}>
+            <LinearGradient
+              colors={['rgba(0,0,0,0)', '#1A1A1A']}
+              style={{ position: 'absolute', top: -24, left: 0, right: 0, height: 24 }}
+            />
+            <View style={{ flex: 1, backgroundColor: '#141414' }} />
+          </View>
+        ),
       }}
     >
       <Tabs.Screen
@@ -129,7 +96,7 @@ export default function TabLayout() {
           title: t('tab_home'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Home size={20} color={color} strokeWidth={DS.stroke.icon} />
+              <Home size={22} color={color} />
             </AnimatedTabIcon>
           ),
         }}
@@ -147,7 +114,7 @@ export default function TabLayout() {
           title: t('tab_run'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Route size={20} color={color} strokeWidth={DS.stroke.icon} />
+              <Route size={22} color={color} />
             </AnimatedTabIcon>
           ),
         }}
@@ -165,7 +132,7 @@ export default function TabLayout() {
           title: t('tab_fuel'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Utensils size={20} color={color} strokeWidth={DS.stroke.icon} />
+              <Utensils size={22} color={color} />
             </AnimatedTabIcon>
           ),
         }}
@@ -183,7 +150,7 @@ export default function TabLayout() {
           title: t('tab_gym'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Dumbbell size={20} color={color} strokeWidth={DS.stroke.icon} />
+              <Dumbbell size={22} color={color} />
             </AnimatedTabIcon>
           ),
         }}
@@ -201,7 +168,7 @@ export default function TabLayout() {
           title: t('tab_stats'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Trophy size={20} color={color} strokeWidth={DS.stroke.icon} />
+              <Trophy size={22} color={color} />
             </AnimatedTabIcon>
           ),
         }}
@@ -228,12 +195,12 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  indicator: {
+  glowDot: {
     position: "absolute" as const,
-    bottom: -4,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: DS.accent.lime,
+    bottom: -6,
+    width: 6,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "#4ECDC4",
   },
 });

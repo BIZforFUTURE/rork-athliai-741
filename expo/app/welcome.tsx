@@ -174,7 +174,6 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
       });
     }, 4500);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipOpacity, tipTranslateY]);
 
   useEffect(() => {
@@ -217,7 +216,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
               </Animated.View>
               <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
                 <View style={styles.loadingIconCircle}>
-                  <Dumbbell size={44} color="#CCFF00" strokeWidth={2.5} />
+                  <Dumbbell size={44} color="#00ADB5" strokeWidth={2.5} />
                 </View>
               </Animated.View>
             </View>
@@ -259,7 +258,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
                     {isComplete ? (
                       <Check size={14} color="#FFFFFF" strokeWidth={3} />
                     ) : (
-                      <IconComponent size={14} color={isActive ? '#CCFF00' : '#71717A'} />
+                      <IconComponent size={14} color={isActive ? '#00ADB5' : '#6B7280'} />
                     )}
                   </View>
                   <Text style={[
@@ -279,7 +278,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
 
           <View style={styles.loadingTipCard}>
             <View style={styles.loadingTipHeader}>
-              <Sparkles size={14} color="#CCFF00" />
+              <Sparkles size={14} color="#00ADB5" />
               <Text style={styles.loadingTipHeaderText}>{isSpanish ? '¿SABÍAS QUE?' : 'DID YOU KNOW?'}</Text>
             </View>
             <Animated.Text
@@ -312,7 +311,7 @@ const slides: WelcomeSlide[] = [
     title: 'Track Everything',
     subtitle: 'Runs • Workouts • Nutrition',
     description: 'Monitor your complete fitness journey in one place. Every rep, every mile, every meal counts.',
-    icon: <Activity size={80} color="#CCFF00" />,
+    icon: <Activity size={80} color="#00ADB5" />,
     gradient: ['#0D0F13', '#111827'],
   },
   {
@@ -320,7 +319,7 @@ const slides: WelcomeSlide[] = [
     title: 'Personalized Plans',
     subtitle: 'Built for You',
     description: 'AI-generated workout and nutrition plans that match your fitness level, goals, and lifestyle.',
-    icon: <Dumbbell size={80} color="#CCFF00" />,
+    icon: <Dumbbell size={80} color="#00ADB5" />,
     gradient: ['#0D0F13', '#111827'],
   },
   {
@@ -328,7 +327,7 @@ const slides: WelcomeSlide[] = [
     title: 'Stay Consistent',
     subtitle: 'Build Lasting Habits',
     description: 'Smart reminders and streak tracking keep you motivated and on track every single day.',
-    icon: <Bell size={80} color="#CCFF00" />,
+    icon: <Bell size={80} color="#00ADB5" />,
     gradient: ['#0D0F13', '#111827'],
   },
   {
@@ -1118,7 +1117,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </View>
 
             <View style={styles.iconContainer}>
-              <Dumbbell size={80} color="#CCFF00" />
+              <Dumbbell size={80} color="#00ADB5" />
             </View>
 
             <View style={styles.contentContainer}>
@@ -1202,7 +1201,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   {isScanningEquipment ? (
                     <View style={scanStyles.scanningContainer}>
                       <Animated.View style={[scanStyles.scanningIconWrap, { opacity: scanPulseAnim }]}>
-                        <Camera size={40} color="#CCFF00" />
+                        <Camera size={40} color="#00ADB5" />
                       </Animated.View>
                       <Text style={scanStyles.scanningText}>{t('gym_scan_analyzing')}</Text>
                       <View style={scanStyles.scanningDots}>
@@ -1232,7 +1231,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                         >
                           <View style={scanStyles.scanButtonInner}>
                             <View style={scanStyles.scanIconCircle}>
-                              <Camera size={20} color="#CCFF00" />
+                              <Camera size={20} color="#00ADB5" />
                             </View>
                             <View style={scanStyles.scanTextWrap}>
                               <Text style={scanStyles.scanButtonTitle}>{t('gym_q3_o5_scan')}</Text>
@@ -1240,7 +1239,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                                 {isSpanish ? 'La IA detectará tu equipo' : 'AI will detect your equipment'}
                               </Text>
                             </View>
-                            <ChevronRight size={18} color="#CCFF00" />
+                            <ChevronRight size={18} color="#00ADB5" />
                           </View>
                         </TouchableOpacity>
                       )}
@@ -1260,7 +1259,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                     multiline
                     numberOfLines={4}
                     placeholder={isSpanish ? 'ej., Quiero construir brazos y pecho más grandes, mejorar mi postura...' : 'e.g., I want to build bigger arms and chest, improve my posture...'}
-                    placeholderTextColor="#71717A"
+                    placeholderTextColor="#6B7280"
                     value={customGoals}
                     onChangeText={setCustomGoals}
                     textAlignVertical="top"
@@ -1331,7 +1330,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </View>
 
             <View style={styles.iconContainer}>
-              <Utensils size={80} color="#CCFF00" />
+              <Utensils size={80} color="#00ADB5" />
             </View>
 
             <View style={styles.contentContainer}>
@@ -1422,7 +1421,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <TextInput
                     style={styles.weightInput}
                     placeholder={isSpanish ? 'ej., 80 kg' : 'e.g., 180'}
-                    placeholderTextColor="#71717A"
+                    placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={currentWeight}
                     onChangeText={setCurrentWeight}
@@ -1439,7 +1438,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                         <TextInput
                           style={styles.heightInput}
                           placeholder="170"
-                          placeholderTextColor="#71717A"
+                          placeholderTextColor="#6B7280"
                           keyboardType="numeric"
                           value={heightFeet}
                           onChangeText={(text) => { setHeightFeet(text); setHeightInches('0'); }}
@@ -1452,7 +1451,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                           <TextInput
                             style={styles.heightInput}
                             placeholder="Feet"
-                            placeholderTextColor="#71717A"
+                            placeholderTextColor="#6B7280"
                             keyboardType="numeric"
                             value={heightFeet}
                             onChangeText={setHeightFeet}
@@ -1463,7 +1462,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                           <TextInput
                             style={styles.heightInput}
                             placeholder="Inches"
-                            placeholderTextColor="#71717A"
+                            placeholderTextColor="#6B7280"
                             keyboardType="numeric"
                             value={heightInches}
                             onChangeText={setHeightInches}
@@ -1482,7 +1481,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
                   <TextInput
                     style={styles.weightInput}
                     placeholder={isSpanish ? 'ej., 75 kg' : 'e.g., 165'}
-                    placeholderTextColor="#71717A"
+                    placeholderTextColor="#6B7280"
                     keyboardType="numeric"
                     value={targetWeight}
                     onChangeText={setTargetWeight}
@@ -1717,7 +1716,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     fontSize: 16,
     fontWeight: '500',
     opacity: 0.8,
@@ -1750,7 +1749,7 @@ const styles = StyleSheet.create({
     textAlign: 'center' as const,
     marginBottom: 20,
     fontWeight: '500' as const,
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   description: {
     fontSize: 16,
@@ -1758,7 +1757,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   pagination: {
     flexDirection: 'row',
@@ -1785,8 +1784,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minWidth: 160,
     justifyContent: 'center',
-    backgroundColor: '#CCFF00',
-    borderColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
+    borderColor: '#00ADB5',
   },
   actionButtonText: {
     fontSize: 18,
@@ -1823,7 +1822,7 @@ const styles = StyleSheet.create({
   underlineTeal: {
     width: 120,
     height: 4,
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
     marginTop: 12,
     borderRadius: 2,
   },
@@ -1839,7 +1838,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipTextMain: {
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     fontSize: 16,
     fontWeight: '500' as const,
     opacity: 0.8,
@@ -1860,7 +1859,7 @@ const styles = StyleSheet.create({
     textAlign: 'center' as const,
     marginBottom: 20,
     fontWeight: '500' as const,
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   descriptionDark: {
     fontSize: 16,
@@ -1868,7 +1867,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     opacity: 0.8,
     maxWidth: '80%',
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   dotDark: {
     width: 8,
@@ -1876,12 +1875,12 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     opacity: 0.3,
     marginHorizontal: 4,
-    backgroundColor: '#A1A1AA',
+    backgroundColor: '#9CA3AF',
   },
   activeDotDark: {
     opacity: 1,
     width: 24,
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
   },
   actionButtonDisabled: {
     opacity: 0.6,
@@ -1896,7 +1895,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     opacity: 0.7,
     textAlign: 'center',
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   quizContainer: {
     width: '100%',
@@ -1925,7 +1924,7 @@ const styles = StyleSheet.create({
   },
   optionButtonSelected: {
     backgroundColor: 'rgba(0, 173, 181, 0.15)',
-    borderColor: '#CCFF00',
+    borderColor: '#00ADB5',
   },
   optionText: {
     color: '#F9FAFB',
@@ -1950,7 +1949,7 @@ const styles = StyleSheet.create({
   },
   daySelectionSubtext: {
     fontSize: 14,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     opacity: 0.8,
     marginBottom: 15,
     textAlign: 'center',
@@ -1974,10 +1973,10 @@ const styles = StyleSheet.create({
   },
   dayButtonSelected: {
     backgroundColor: 'rgba(0, 173, 181, 0.15)',
-    borderColor: '#CCFF00',
+    borderColor: '#00ADB5',
   },
   dayButtonText: {
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -1987,7 +1986,7 @@ const styles = StyleSheet.create({
   },
   goalsSubtext: {
     fontSize: 14,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     opacity: 0.8,
     marginBottom: 15,
     textAlign: 'center',
@@ -2081,7 +2080,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   startTrialButtonText: {
-    color: '#818CF8',
+    color: '#8B5CF6',
     fontSize: 18,
     fontWeight: '700',
     marginRight: 8,
@@ -2152,13 +2151,13 @@ const styles = StyleSheet.create({
   loadingPercent: {
     fontSize: 40,
     fontWeight: '800' as const,
-    color: '#CCFF00',
+    color: '#00ADB5',
     textAlign: 'center',
     marginBottom: 16,
   },
   loadingSubtitle: {
     fontSize: 18,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     textAlign: 'center',
     marginBottom: 20,
     opacity: 0.7,
@@ -2166,7 +2165,7 @@ const styles = StyleSheet.create({
   },
   loadingDescription: {
     fontSize: 16,
-    color: '#71717A',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
     opacity: 0.6,
@@ -2179,8 +2178,8 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     borderWidth: 2.5,
     borderColor: 'transparent',
-    borderTopColor: '#CCFF00',
-    borderRightColor: '#CCFF00',
+    borderTopColor: '#00ADB5',
+    borderRightColor: '#00E5FF',
   },
   loadingRingInner: {
     width: '100%',
@@ -2208,16 +2207,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center' as const,
   },
   loadingStepDotComplete: {
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
   },
   loadingStepDotActive: {
     backgroundColor: 'rgba(0, 173, 181, 0.2)',
     borderWidth: 2,
-    borderColor: '#CCFF00',
+    borderColor: '#00ADB5',
   },
   loadingStepLabel: {
     fontSize: 15,
-    color: '#71717A',
+    color: '#6B7280',
     fontWeight: '500' as const,
     flex: 1,
   },
@@ -2226,13 +2225,13 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
   },
   loadingStepLabelComplete: {
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   loadingStepPulse: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
   },
   loadingTipCard: {
     width: '100%',
@@ -2240,7 +2239,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     borderLeftWidth: 3,
-    borderLeftColor: '#CCFF00',
+    borderLeftColor: '#00ADB5',
   },
   loadingTipHeader: {
     flexDirection: 'row' as const,
@@ -2251,12 +2250,12 @@ const styles = StyleSheet.create({
   loadingTipHeaderText: {
     fontSize: 11,
     fontWeight: '700' as const,
-    color: '#CCFF00',
+    color: '#00ADB5',
     letterSpacing: 1.2,
   },
   loadingTipText: {
     fontSize: 14,
-    color: '#D4D4D8',
+    color: '#D1D5DB',
     lineHeight: 22,
     fontWeight: '400' as const,
   },
@@ -2273,7 +2272,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
     borderRadius: 3,
   },
   heightInputContainer: {
@@ -2303,7 +2302,7 @@ const styles = StyleSheet.create({
   heightLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   quizStepIndicator: {
     fontSize: 14,
@@ -2311,7 +2310,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center' as const,
     opacity: 0.7,
-    color: '#71717A',
+    color: '#6B7280',
   },
   quizProgressBarInline: {
     width: '100%',
@@ -2323,7 +2322,7 @@ const styles = StyleSheet.create({
   },
   quizProgressFill: {
     height: '100%',
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
     borderRadius: 2,
   },
   paywallContainer: {
@@ -2365,7 +2364,7 @@ const styles = StyleSheet.create({
   },
   paywallSubtitle: {
     fontSize: 16,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     textAlign: 'center' as const,
     marginBottom: 32,
   },
@@ -2398,7 +2397,7 @@ const styles = StyleSheet.create({
   },
   paywallFeatureDesc: {
     fontSize: 13,
-    color: '#71717A',
+    color: '#6B7280',
   },
   paywallPriceCard: {
     width: '100%',
@@ -2424,7 +2423,7 @@ const styles = StyleSheet.create({
   },
   paywallTrialLabel: {
     fontSize: 13,
-    color: '#CCFF00',
+    color: '#00ADB5',
     marginTop: 2,
     fontWeight: '500' as const,
   },
@@ -2439,7 +2438,7 @@ const styles = StyleSheet.create({
   },
   paywallPricePeriod: {
     fontSize: 14,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     marginLeft: 2,
   },
   paywallCTA: {
@@ -2466,12 +2465,12 @@ const styles = StyleSheet.create({
   },
   paywallSkipText: {
     fontSize: 14,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     textDecorationLine: 'underline' as const,
   },
   paywallLegal: {
     fontSize: 11,
-    color: '#71717A',
+    color: '#6B7280',
     textAlign: 'center' as const,
     lineHeight: 16,
     paddingHorizontal: 12,
@@ -2489,7 +2488,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 173, 181, 0.3)',
   },
   langButtonText: {
-    color: '#CCFF00',
+    color: '#00ADB5',
     fontSize: 14,
     fontWeight: '600' as const,
   },
@@ -2537,19 +2536,19 @@ const onboardStyles = StyleSheet.create({
   },
   stepActive: {
     backgroundColor: 'rgba(0,173,181,0.2)',
-    borderColor: '#CCFF00',
+    borderColor: '#00ADB5',
   },
   stepDone: {
-    backgroundColor: '#CCFF00',
-    borderColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
+    borderColor: '#00ADB5',
   },
   stepNum: {
     fontSize: 12,
     fontWeight: '700' as const,
-    color: '#52525B',
+    color: '#4B5563',
   },
   stepNumActive: {
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   stepNumDone: {
     color: '#FFFFFF',
@@ -2561,7 +2560,7 @@ const onboardStyles = StyleSheet.create({
     borderRadius: 1,
   },
   connectorDone: {
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
   },
 });
 
@@ -2595,10 +2594,10 @@ const scanStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#3F3F46',
+    backgroundColor: '#374151',
   },
   dotActive: {
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
   },
   scanButton: {
     borderWidth: 2,
@@ -2630,10 +2629,10 @@ const scanStyles = StyleSheet.create({
   scanButtonTitle: {
     fontSize: 15,
     fontWeight: '600' as const,
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   scanButtonSub: {
     fontSize: 12,
-    color: '#71717A',
+    color: '#6B7280',
   },
 });

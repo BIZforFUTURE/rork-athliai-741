@@ -70,7 +70,7 @@ export default function RunNotificationOverlay({
     >
       <View style={[styles.overlay, { paddingTop: insets.top }]}>
         <LinearGradient
-          colors={['#3B82F6', '#818CF8']}
+          colors={['#3B82F6', '#8B5CF6']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.header}
@@ -108,7 +108,7 @@ export default function RunNotificationOverlay({
               <Text style={styles.statLabel}>{t('run_time')}</Text>
             </View>
             <View style={styles.statCard}>
-              <TrendingUp size={24} color="#FBBF24" />
+              <TrendingUp size={24} color="#F59E0B" />
               <Text style={styles.statValue}>{formatPace(pace)}</Text>
               <Text style={styles.statLabel}>{t('run_pace_upper')}</Text>
             </View>
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#71717A',
+    color: '#6B7280',
     letterSpacing: 1,
     marginTop: 4,
   },
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
-    color: '#71717A',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
   },

@@ -106,7 +106,7 @@ export default function PaywallScreen() {
   if (isLoading) {
     return (
       <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={colors.accent.lime} />
+        <ActivityIndicator size="large" color={colors.accent.teal} />
       </View>
     );
   }
@@ -144,7 +144,7 @@ export default function PaywallScreen() {
       >
         <View style={styles.crownContainer}>
           <LinearGradient
-            colors={["#CCFF00", "#0891B2"]}
+            colors={["#00ADB5", "#0891B2"]}
             style={styles.crownBadge}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -162,7 +162,7 @@ export default function PaywallScreen() {
           {FEATURES_EN.map((feature, index) => (
             <View key={index} style={styles.featureRow}>
               <View style={styles.featureIconWrap}>
-                <feature.icon size={20} color={colors.accent.lime} />
+                <feature.icon size={20} color={colors.accent.teal} />
               </View>
               <View style={styles.featureTextWrap}>
                 <Text style={styles.featureTitle}>{t(feature.titleKey)}</Text>
@@ -203,7 +203,7 @@ export default function PaywallScreen() {
           testID="paywall-purchase"
         >
           <LinearGradient
-            colors={["#CCFF00", "#0891B2"]}
+            colors={["#00ADB5", "#0891B2"]}
             style={styles.purchaseButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   trialText: {
     fontSize: 13,
-    color: colors.accent.lime,
+    color: colors.accent.teal,
     marginTop: 2,
     fontWeight: "500" as const,
   },
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   weeklyBreakdownLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: colors.accent.lime,
+    color: colors.accent.teal,
   },
   legalText: {
     fontSize: 11,

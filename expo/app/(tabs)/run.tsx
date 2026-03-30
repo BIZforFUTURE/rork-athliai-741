@@ -748,7 +748,7 @@ export default function RunScreen() {
             <Text style={styles.activeRunTimeLabel}>{t('run_time')}</Text>
             {activeGuideRouteName && (
               <View style={styles.activeRunGuideChip}>
-                <Navigation size={10} color="#818CF8" />
+                <Navigation size={10} color="#8B5CF6" />
                 <Text style={styles.activeRunGuideText}>{activeGuideRouteName}</Text>
               </View>
             )}
@@ -813,10 +813,10 @@ export default function RunScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
-                <X size={20} color="#52525B" />
+                <X size={20} color="#4B5563" />
               </TouchableOpacity>
               <View style={styles.modalIconWrap}>
-                <Flame size={40} color="#FB923C" />
+                <Flame size={40} color="#FF6B35" />
               </View>
               <Text style={styles.modalTitle}>{t('run_great')}</Text>
               <Text style={styles.modalCalText}>{t('run_calories_burned', { cal: String(lastRunCalories) })}</Text>
@@ -859,9 +859,9 @@ export default function RunScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#CCFF00"
-            colors={["#CCFF00"]}
-            progressBackgroundColor="#121214"
+            tintColor="#00E5FF"
+            colors={["#00E5FF"]}
+            progressBackgroundColor="#1A1D24"
           />
         }
       >
@@ -878,21 +878,21 @@ export default function RunScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: "rgba(0,173,181,0.12)" }]}>
-              <Route size={16} color="#CCFF00" />
+              <Route size={16} color="#00ADB5" />
             </View>
             <Text style={styles.statValue}>0.00</Text>
             <Text style={styles.statUnit}>{t('run_miles')}</Text>
           </View>
           <View style={styles.statCard}>
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(129,140,248,0.12)" }]}>
-              <TrendingUp size={16} color="#818CF8" />
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(191,255,0,0.12)" }]}>
+              <TrendingUp size={16} color="#BFFF00" />
             </View>
             <Text style={styles.statValue}>0:00</Text>
             <Text style={styles.statUnit}>{t('run_min_mi')}</Text>
           </View>
           <View style={styles.statCard}>
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(251,146,60,0.12)" }]}>
-              <Flame size={16} color="#FB923C" />
+            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255,107,53,0.12)" }]}>
+              <Flame size={16} color="#FF6B35" />
             </View>
             <Text style={styles.statValue}>0</Text>
             <Text style={styles.statUnit}>{t('run_cal')}</Text>
@@ -911,7 +911,7 @@ export default function RunScreen() {
               <Text style={styles.startBtnText}>START RUN</Text>
             </View>
             <View style={styles.startBtnXp}>
-              <Zap size={12} color="#CCFF00" fill="#CCFF00" />
+              <Zap size={12} color="#00E5FF" fill="#00E5FF" />
               <Text style={styles.startBtnXpText}>+25 XP</Text>
             </View>
           </Animated.View>
@@ -925,7 +925,7 @@ export default function RunScreen() {
         >
           <View style={styles.treadmillLogBtnLeft}>
             <View style={styles.treadmillLogBtnIcon}>
-              <Camera size={20} color="#CCFF00" />
+              <Camera size={20} color="#00E5FF" />
             </View>
             <View style={styles.treadmillLogBtnTextWrap}>
               <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill_short')}</Text>
@@ -933,7 +933,7 @@ export default function RunScreen() {
             </View>
           </View>
           <View style={styles.treadmillLogBtnXp}>
-            <Zap size={10} color="#818CF8" fill="#818CF8" />
+            <Zap size={10} color="#BFFF00" fill="#BFFF00" />
             <Text style={styles.treadmillLogBtnXpText}>+XP</Text>
           </View>
         </TouchableOpacity>
@@ -946,7 +946,7 @@ export default function RunScreen() {
         >
           <View style={styles.savedRoutesBtnLeft}>
             <View style={styles.savedRoutesBtnIcon}>
-              <Navigation size={20} color="#818CF8" />
+              <Navigation size={20} color="#8B5CF6" />
             </View>
             <View style={styles.savedRoutesBtnTextWrap}>
               <Text style={styles.savedRoutesBtnTitle}>Saved Routes</Text>
@@ -957,7 +957,7 @@ export default function RunScreen() {
               </Text>
             </View>
           </View>
-          <ChevronRight size={18} color="#52525B" />
+          <ChevronRight size={18} color="#4B5563" />
         </TouchableOpacity>
 
         <RunHistorySection
@@ -978,12 +978,12 @@ export default function RunScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.treadmillModalContent}>
             <TouchableOpacity style={styles.modalClose} onPress={closeTreadmillModal}>
-              <X size={20} color="#52525B" />
+              <X size={20} color="#4B5563" />
             </TouchableOpacity>
 
             <View style={styles.treadmillModalHeader}>
               <View style={styles.treadmillModalIconWrap}>
-                <ScanLine size={28} color="#CCFF00" />
+                <ScanLine size={28} color="#00E5FF" />
               </View>
               <Text style={styles.treadmillModalTitle}>{t('run_treadmill')}</Text>
               <Text style={styles.treadmillModalSubtitle}>
@@ -996,7 +996,7 @@ export default function RunScreen() {
                 <Image source={{ uri: treadmillPhoto }} style={styles.treadmillModalPhoto} />
                 {treadmillParsing && (
                   <View style={styles.treadmillModalPhotoOverlay}>
-                    <ActivityIndicator size="large" color="#CCFF00" />
+                    <ActivityIndicator size="large" color="#00E5FF" />
                     <Text style={styles.treadmillModalScanText}>Scanning display...</Text>
                   </View>
                 )}
@@ -1014,7 +1014,7 @@ export default function RunScreen() {
                         value={treadmillEditDistance}
                         onChangeText={setTreadmillEditDistance}
                         keyboardType="decimal-pad"
-                        placeholderTextColor="#52525B"
+                        placeholderTextColor="#4B5563"
                         placeholder="0.00"
                       />
                     </View>
@@ -1024,7 +1024,7 @@ export default function RunScreen() {
                         style={styles.treadmillEditInput}
                         value={treadmillEditTime}
                         onChangeText={setTreadmillEditTime}
-                        placeholderTextColor="#52525B"
+                        placeholderTextColor="#4B5563"
                         placeholder="0:00"
                       />
                     </View>
@@ -1032,13 +1032,13 @@ export default function RunScreen() {
                 ) : (
                   <View style={styles.treadmillParsedRow}>
                     <View style={styles.treadmillParsedStat}>
-                      <Route size={16} color="#CCFF00" />
+                      <Route size={16} color="#00E5FF" />
                       <Text style={styles.treadmillParsedValue}>{treadmillEditDistance}</Text>
                       <Text style={styles.treadmillParsedUnit}>{isSpanish ? 'millas' : 'miles'}</Text>
                     </View>
                     <View style={styles.treadmillParsedDivider} />
                     <View style={styles.treadmillParsedStat}>
-                      <TrendingUp size={16} color="#818CF8" />
+                      <TrendingUp size={16} color="#BFFF00" />
                       <Text style={styles.treadmillParsedValue}>{treadmillEditTime}</Text>
                       <Text style={styles.treadmillParsedUnit}>time</Text>
                     </View>
@@ -1049,14 +1049,14 @@ export default function RunScreen() {
                   style={styles.treadmillEditToggle}
                   onPress={() => setTreadmillEditing(!treadmillEditing)}
                 >
-                  <Edit3 size={14} color="#71717A" />
+                  <Edit3 size={14} color="#6B7280" />
                   <Text style={styles.treadmillEditToggleText}>
                     {treadmillEditing ? t('run_done_editing') : t('run_edit_values')}
                   </Text>
                 </TouchableOpacity>
 
                 <View style={styles.treadmillXpPreview}>
-                  <Zap size={14} color="#818CF8" fill="#818CF8" />
+                  <Zap size={14} color="#BFFF00" fill="#BFFF00" />
                   <Text style={styles.treadmillXpPreviewText}>
                     +{XP_REWARDS.RUN_BASE + Math.floor((parseFloat(treadmillEditDistance) || 0) * 4) * XP_REWARDS.RUN_PER_QUARTER_MILE + XP_REWARDS.TREADMILL_PHOTO} XP
                   </Text>
@@ -1086,10 +1086,10 @@ export default function RunScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <TouchableOpacity style={styles.modalClose} onPress={() => setShowCalorieModal(false)}>
-              <X size={20} color="#52525B" />
+              <X size={20} color="#4B5563" />
             </TouchableOpacity>
             <View style={styles.modalIconWrap}>
-              <Flame size={40} color="#FB923C" />
+              <Flame size={40} color="#FF6B35" />
             </View>
             <Text style={styles.modalTitle}>Great Run!</Text>
             <Text style={styles.modalCalText}>{lastRunCalories} calories burned</Text>
@@ -1112,10 +1112,10 @@ export default function RunScreen() {
 const styles = StyleSheet.create({
   activeRunContainer: {
     flex: 1,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
   },
   activeRunPanel: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 16,
@@ -1146,7 +1146,7 @@ const styles = StyleSheet.create({
   activeRunTimeLabel: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#71717A",
+    color: "#6B7280",
     letterSpacing: 3,
     textTransform: "uppercase" as const,
     marginTop: -4,
@@ -1158,13 +1158,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 14,
     paddingVertical: 5,
-    backgroundColor: "rgba(129,140,248,0.12)",
+    backgroundColor: "rgba(139,92,246,0.12)",
     borderRadius: 20,
   },
   activeRunGuideText: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#818CF8",
+    color: "#8B5CF6",
     letterSpacing: 0.5,
   },
   activeRunPausedChip: {
@@ -1203,7 +1203,7 @@ const styles = StyleSheet.create({
   activeRunStatLabel: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#71717A",
+    color: "#6B7280",
     letterSpacing: 1,
     marginTop: 2,
   },
@@ -1242,12 +1242,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 12,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,
@@ -1255,13 +1255,13 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F5F5F5",
     letterSpacing: -0.5,
   },
   screenSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#52525B",
+    color: "#4B5563",
     marginTop: 1,
   },
   xpChip: {
@@ -1288,13 +1288,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   timerCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 28,
+    backgroundColor: "#161616",
+    borderRadius: 24,
     paddingVertical: 32,
     paddingHorizontal: 28,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     overflow: "hidden" as const,
   },
   timerDialWrap: {
@@ -1309,8 +1309,8 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 80,
     borderWidth: 4,
-    borderColor: "rgba(204,255,0,0.2)",
-    shadowColor: "#CCFF00",
+    borderColor: "rgba(78,205,196,0.2)",
+    shadowColor: "#4ECDC4",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 12,
@@ -1322,13 +1322,13 @@ const styles = StyleSheet.create({
   timerValue: {
     fontSize: 42,
     fontWeight: "900" as const,
-    color: "#E8E8E8",
+    color: "#F5F5F5",
     letterSpacing: -2,
   },
   timerLabel: {
     fontSize: 10,
     fontWeight: "700" as const,
-    color: "#52525B",
+    color: "#4B5563",
     letterSpacing: 3,
     marginTop: -2,
   },
@@ -1354,12 +1354,12 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 22,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 14,
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     gap: 6,
     overflow: "hidden" as const,
   },
@@ -1373,13 +1373,13 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     letterSpacing: -0.5,
   },
   statUnit: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#52525B",
+    color: "#4B5563",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
@@ -1417,27 +1417,27 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
   },
   controlBtnPause: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0E1015",
     borderWidth: 1,
     borderColor: "rgba(245,158,11,0.3)",
   },
   controlBtnResume: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0E1015",
     borderWidth: 1,
     borderColor: "rgba(0,173,181,0.3)",
   },
   controlBtnStop: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0E1015",
     borderWidth: 1,
     borderColor: "rgba(239,68,68,0.3)",
   },
   controlBtnDisabled: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0E1015",
     borderColor: "rgba(55,65,81,0.3)",
     opacity: 0.5,
   },
   controlBtnText: {
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontSize: 11,
     fontWeight: "700" as const,
     letterSpacing: 1.5,
@@ -1449,20 +1449,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#EF4444",
   },
   startBtn: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 28,
+    backgroundColor: "#161616",
+    borderRadius: 24,
     padding: 4,
     borderWidth: 1,
-    borderColor: "rgba(204,255,0,0.15)",
+    borderColor: "rgba(78,205,196,0.15)",
     marginTop: 6,
-    shadowColor: "rgba(204,255,0,0.25)",
+    shadowColor: "rgba(78,205,196,0.35)",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 16,
   },
   startBtnInner: {
-    backgroundColor: "#CCFF00",
-    borderRadius: 22,
+    backgroundColor: "#4ECDC4",
+    borderRadius: 20,
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -1472,7 +1472,7 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.15)",
   },
   startBtnText: {
-    color: "#E8E8E8",
+    color: "#F5F5F5",
     fontSize: 18,
     fontWeight: "800" as const,
     letterSpacing: 2,
@@ -1487,7 +1487,7 @@ const styles = StyleSheet.create({
   startBtnXpText: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#CCFF00",
+    color: "#00E5FF",
   },
   modalOverlay: {
     flex: 1,
@@ -1496,13 +1496,13 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
   },
   modalContent: {
-    backgroundColor: "rgba(18,18,20,0.95)",
-    borderRadius: 28,
+    backgroundColor: "#1E1E1E",
+    borderRadius: 24,
     padding: 28,
     width: "85%",
     alignItems: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   modalClose: {
     position: "absolute" as const,
@@ -1514,7 +1514,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "rgba(251,146,60,0.1)",
+    backgroundColor: "rgba(255,107,53,0.1)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     marginBottom: 16,
@@ -1522,18 +1522,18 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     marginBottom: 6,
   },
   modalCalText: {
     fontSize: 17,
     fontWeight: "700" as const,
-    color: "#FB923C",
+    color: "#FF6B35",
     marginBottom: 6,
   },
   modalSubtext: {
     fontSize: 14,
-    color: "#71717A",
+    color: "#6B7280",
     textAlign: "center" as const,
     marginBottom: 24,
   },
@@ -1549,17 +1549,17 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   modalBtnPrimary: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center" as const,
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
   },
   modalBtnSecondaryText: {
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontSize: 15,
     fontWeight: "700" as const,
   },
@@ -1572,11 +1572,11 @@ const styles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 24,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     marginTop: 4,
     overflow: "hidden" as const,
   },
@@ -1590,7 +1590,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "rgba(204,255,0,0.1)",
+    backgroundColor: "rgba(0,229,255,0.1)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -1601,19 +1601,19 @@ const styles = StyleSheet.create({
   treadmillLogBtnTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     letterSpacing: -0.2,
   },
   treadmillLogBtnSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
   treadmillLogBtnXp: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 3,
-    backgroundColor: "rgba(129,140,248,0.1)",
+    backgroundColor: "rgba(191,255,0,0.1)",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
@@ -1621,16 +1621,16 @@ const styles = StyleSheet.create({
   treadmillLogBtnXpText: {
     fontSize: 12,
     fontWeight: "800" as const,
-    color: "#818CF8",
+    color: "#BFFF00",
   },
   treadmillModalContent: {
-    backgroundColor: "rgba(18,18,20,0.95)",
+    backgroundColor: "#1E1E1E",
     borderRadius: 28,
     padding: 24,
     width: "90%",
     maxHeight: "85%",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   treadmillModalHeader: {
     alignItems: "center" as const,
@@ -1640,7 +1640,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 20,
-    backgroundColor: "rgba(204,255,0,0.1)",
+    backgroundColor: "rgba(0,229,255,0.1)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     marginBottom: 12,
@@ -1648,13 +1648,13 @@ const styles = StyleSheet.create({
   treadmillModalTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     letterSpacing: -0.5,
   },
   treadmillModalSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#71717A",
+    color: "#6B7280",
     marginTop: 4,
   },
   treadmillModalPhotoWrap: {
@@ -1683,7 +1683,7 @@ const styles = StyleSheet.create({
   treadmillModalScanText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#CCFF00",
+    color: "#00E5FF",
   },
   treadmillParsedSection: {
     gap: 16,
@@ -1710,7 +1710,7 @@ const styles = StyleSheet.create({
   treadmillParsedUnit: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#71717A",
+    color: "#6B7280",
     textTransform: "uppercase" as const,
     letterSpacing: 1,
   },
@@ -1729,7 +1729,7 @@ const styles = StyleSheet.create({
   treadmillEditToggleText: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
   treadmillEditFields: {
     flexDirection: "row" as const,
@@ -1742,7 +1742,7 @@ const styles = StyleSheet.create({
   treadmillEditLabel: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
   treadmillEditInput: {
     backgroundColor: "rgba(255,255,255,0.06)",
@@ -1753,21 +1753,21 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     textAlign: "center" as const,
     borderWidth: 1,
-    borderColor: "rgba(204,255,0,0.15)",
+    borderColor: "rgba(0,229,255,0.15)",
   },
   treadmillXpPreview: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
     gap: 6,
-    backgroundColor: "rgba(129,140,248,0.08)",
+    backgroundColor: "rgba(191,255,0,0.08)",
     paddingVertical: 10,
     borderRadius: 12,
   },
   treadmillXpPreviewText: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#818CF8",
+    color: "#BFFF00",
   },
   treadmillModalBtns: {
     flexDirection: "row" as const,
@@ -1781,10 +1781,10 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   treadmillModalBtnCancelText: {
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontSize: 15,
     fontWeight: "700" as const,
   },
@@ -1795,7 +1795,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center" as const,
     justifyContent: "center" as const,
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
     gap: 8,
   },
   treadmillModalBtnConfirmText: {
@@ -1874,7 +1874,7 @@ const styles = StyleSheet.create({
   statsPanelLabel: {
     fontSize: 10,
     fontWeight: "500" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     marginTop: 2,
     textAlign: "center" as const,
   },
@@ -1908,24 +1908,24 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "rgba(251,146,60,0.15)",
+    backgroundColor: "rgba(255,107,53,0.15)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
   activityTypeActive: {
-    backgroundColor: "rgba(251,146,60,0.2)",
+    backgroundColor: "rgba(255,107,53,0.2)",
     borderWidth: 2,
-    borderColor: "#FB923C",
+    borderColor: "#FF6B35",
   },
   activityTypeActiveRide: {
-    backgroundColor: "rgba(251,146,60,0.2)",
+    backgroundColor: "rgba(255,107,53,0.2)",
     borderWidth: 2,
-    borderColor: "#FB923C",
+    borderColor: "#FF6B35",
   },
   activityTypeActiveWalk: {
-    backgroundColor: "rgba(251,146,60,0.2)",
+    backgroundColor: "rgba(255,107,53,0.2)",
     borderWidth: 2,
-    borderColor: "#FB923C",
+    borderColor: "#FF6B35",
   },
   activityCheckBadge: {
     position: "absolute" as const,
@@ -1934,7 +1934,7 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "#FB923C",
+    backgroundColor: "#FF6B35",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -1947,7 +1947,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#FB923C",
+    backgroundColor: "#FF6B35",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     alignSelf: "center" as const,
@@ -1955,7 +1955,7 @@ const styles = StyleSheet.create({
   startBtnLabel: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#FB923C",
+    color: "#FF6B35",
     textAlign: "center" as const,
     marginTop: 6,
   },
@@ -1974,18 +1974,18 @@ const styles = StyleSheet.create({
   treadmillBtnLabel: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
   },
 
   savedRoutesBtn: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "space-between" as const,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 24,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     marginTop: 4,
     overflow: "hidden" as const,
   },
@@ -1999,7 +1999,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "rgba(129,140,248,0.1)",
+    backgroundColor: "rgba(139,92,246,0.1)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -2010,12 +2010,12 @@ const styles = StyleSheet.create({
   savedRoutesBtnTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     letterSpacing: -0.2,
   },
   savedRoutesBtnSub: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
 });

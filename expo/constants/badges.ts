@@ -27,7 +27,7 @@ export const BADGES: Badge[] = [
     emoji: '🏃',
     titleKey: 'badge_first_run',
     descKey: 'badge_first_run_desc',
-    color: '#CCFF00',
+    color: '#00E5FF',
     requirement: (s) => s.totalRuns >= 1,
   },
   {
@@ -35,7 +35,7 @@ export const BADGES: Badge[] = [
     emoji: '💪',
     titleKey: 'badge_first_workout',
     descKey: 'badge_first_workout_desc',
-    color: '#FB923C',
+    color: '#FF6B35',
     requirement: (s) => s.totalWorkouts >= 1,
   },
   {
@@ -43,7 +43,7 @@ export const BADGES: Badge[] = [
     emoji: '🍽️',
     titleKey: 'badge_first_meal',
     descKey: 'badge_first_meal_desc',
-    color: '#818CF8',
+    color: '#BFFF00',
     requirement: (s) => s.totalFoodEntries >= 1,
   },
   {
@@ -51,7 +51,7 @@ export const BADGES: Badge[] = [
     emoji: '🔥',
     titleKey: 'badge_run_streak_3',
     descKey: 'badge_run_streak_3_desc',
-    color: '#FBBF24',
+    color: '#F59E0B',
     requirement: (s) => s.runStreak >= 3,
   },
   {
@@ -67,7 +67,7 @@ export const BADGES: Badge[] = [
     emoji: '🏋️',
     titleKey: 'badge_workout_streak_7',
     descKey: 'badge_workout_streak_7_desc',
-    color: '#818CF8',
+    color: '#8B5CF6',
     requirement: (s) => s.workoutStreak >= 7,
   },
   {
@@ -83,7 +83,7 @@ export const BADGES: Badge[] = [
     emoji: '🎯',
     titleKey: 'badge_10_runs',
     descKey: 'badge_10_runs_desc',
-    color: '#CCFF00',
+    color: '#00ADB5',
     requirement: (s) => s.totalRuns >= 10,
   },
   {
@@ -99,7 +99,7 @@ export const BADGES: Badge[] = [
     emoji: '🏆',
     titleKey: 'badge_100_workouts',
     descKey: 'badge_100_workouts_desc',
-    color: '#FBBF24',
+    color: '#F59E0B',
     requirement: (s) => s.totalWorkouts >= 100,
   },
   {
@@ -123,7 +123,7 @@ export const BADGES: Badge[] = [
     emoji: '💎',
     titleKey: 'badge_1000_xp',
     descKey: 'badge_1000_xp_desc',
-    color: '#CCFF00',
+    color: '#00E5FF',
     requirement: (s) => s.totalXP >= 1000,
   },
   {
@@ -131,7 +131,7 @@ export const BADGES: Badge[] = [
     emoji: '🛤️',
     titleKey: 'badge_10_miles',
     descKey: 'badge_10_miles_desc',
-    color: '#CCFF00',
+    color: '#22C55E',
     requirement: (s) => s.totalMiles >= 10,
   },
   {
@@ -145,16 +145,16 @@ export const BADGES: Badge[] = [
 ];
 
 export const AVATAR_OPTIONS = [
-  { id: 'default', emoji: '👤', color: '#52525B' },
-  { id: 'runner', emoji: '🏃', color: '#CCFF00' },
-  { id: 'lifter', emoji: '🏋️', color: '#FB923C' },
-  { id: 'athlete', emoji: '⚡', color: '#FBBF24' },
-  { id: 'ninja', emoji: '🥷', color: '#818CF8' },
+  { id: 'default', emoji: '👤', color: '#4B5563' },
+  { id: 'runner', emoji: '🏃', color: '#00E5FF' },
+  { id: 'lifter', emoji: '🏋️', color: '#FF6B35' },
+  { id: 'athlete', emoji: '⚡', color: '#F59E0B' },
+  { id: 'ninja', emoji: '🥷', color: '#8B5CF6' },
   { id: 'fire', emoji: '🔥', color: '#EF4444' },
-  { id: 'star', emoji: '⭐', color: '#FBBF24' },
+  { id: 'star', emoji: '⭐', color: '#F59E0B' },
   { id: 'crown', emoji: '👑', color: '#E879F9' },
   { id: 'tiger', emoji: '🐯', color: '#F97316' },
   { id: 'eagle', emoji: '🦅', color: '#3B82F6' },
-  { id: 'shark', emoji: '🦈', color: '#CCFF00' },
-  { id: 'dragon', emoji: '🐉', color: '#CCFF00' },
+  { id: 'shark', emoji: '🦈', color: '#00ADB5' },
+  { id: 'dragon', emoji: '🐉', color: '#22C55E' },
 ];

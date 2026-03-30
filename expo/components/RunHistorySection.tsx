@@ -226,12 +226,12 @@ export default function RunHistorySection({
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
         >
-          <Filter size={20} color="#CCFF00" />
+          <Filter size={20} color="#00ADB5" />
           <Text style={styles.filterButtonText}>{t('run_filters')}</Text>
           {showFilters ? (
-            <ChevronUp size={16} color="#CCFF00" />
+            <ChevronUp size={16} color="#00ADB5" />
           ) : (
-            <ChevronDown size={16} color="#CCFF00" />
+            <ChevronDown size={16} color="#00ADB5" />
           )}
         </TouchableOpacity>
       </View>
@@ -239,13 +239,13 @@ export default function RunHistorySection({
       {showFilters && (
         <View style={styles.filtersContainer}>
           <View style={styles.searchContainer}>
-            <Search size={20} color="#71717A" />
+            <Search size={20} color="#6B7280" />
             <TextInput
               style={styles.searchInput}
               placeholder={t('run_search')}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholderTextColor="#A1A1AA"
+              placeholderTextColor="#9CA3AF"
             />
           </View>
 
@@ -310,22 +310,22 @@ export default function RunHistorySection({
           </Text>
           <View style={styles.summaryStats}>
             <View style={styles.summaryStat}>
-              <MapPin size={16} color="#CCFF00" />
+              <MapPin size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{summaryStats.totalDistance.toFixed(1)}</Text>
               <Text style={styles.summaryStatLabel}>{t('run_miles_lower')}</Text>
             </View>
             <View style={styles.summaryStat}>
-              <Clock size={16} color="#CCFF00" />
+              <Clock size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{formatTime(summaryStats.totalTime)}</Text>
               <Text style={styles.summaryStatLabel}>{t('run_total')}</Text>
             </View>
             <View style={styles.summaryStat}>
-              <TrendingUp size={16} color="#CCFF00" />
+              <TrendingUp size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{formatPace(summaryStats.avgPace)}</Text>
               <Text style={styles.summaryStatLabel}>{t('run_avg_pace')}</Text>
             </View>
             <View style={styles.summaryStat}>
-              <Flame size={16} color="#CCFF00" />
+              <Flame size={16} color="#00ADB5" />
               <Text style={styles.summaryStatValue}>{summaryStats.totalCalories}</Text>
               <Text style={styles.summaryStatLabel}>{t('run_calories_lower')}</Text>
             </View>
@@ -369,7 +369,7 @@ export default function RunHistorySection({
                 </Text>
                 {run.treadmillVerified && (
                   <View style={styles.treadmillBadge}>
-                    <Camera size={10} color="#CCFF00" />
+                    <Camera size={10} color="#00E5FF" />
                     <Text style={styles.treadmillBadgeText}>{t('run_treadmill_label')}</Text>
                   </View>
                 )}
@@ -409,10 +409,10 @@ export default function RunHistorySection({
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     testID={`delete-run-${run.id}`}
                   >
-                    <Trash2 size={16} color="#71717A" />
+                    <Trash2 size={16} color="#6B7280" />
                   </TouchableOpacity>
                 )}
-                <ChevronRight size={20} color="#A1A1AA" />
+                <ChevronRight size={20} color="#9CA3AF" />
               </View>
             </TouchableOpacity>
           ))}
@@ -429,9 +429,9 @@ export default function RunHistorySection({
                 }
               </Text>
               {showAllRuns ? (
-                <ChevronUp size={20} color="#CCFF00" />
+                <ChevronUp size={20} color="#00ADB5" />
               ) : (
-                <ChevronDown size={20} color="#CCFF00" />
+                <ChevronDown size={20} color="#00ADB5" />
               )}
             </TouchableOpacity>
           )}
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 32,
     fontWeight: '800' as const,
-    color: '#E8E8E8',
+    color: '#F5F5F5',
     letterSpacing: -0.5,
   },
   filterButton: {
@@ -471,28 +471,28 @@ const styles = StyleSheet.create({
   filterButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   filtersContainer: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 24,
+    backgroundColor: '#161616',
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden' as const,
   },
   searchContainer: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 18,
+    backgroundColor: '#1E1E1E',
+    borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
     gap: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   searchInput: {
     flex: 1,
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   filterOptions: {
     flexDirection: 'row',
@@ -521,23 +521,23 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   filterOptionActive: {
-    backgroundColor: '#CCFF00',
+    backgroundColor: '#00ADB5',
   },
   filterOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   filterOptionTextActive: {
     color: '#FFFFFF',
   },
   summaryContainer: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 24,
+    backgroundColor: '#161616',
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden' as const,
   },
   summaryTitle: {
@@ -561,37 +561,37 @@ const styles = StyleSheet.create({
   },
   summaryStatLabel: {
     fontSize: 12,
-    color: '#71717A',
+    color: '#6B7280',
   },
   emptyState: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 24,
+    backgroundColor: '#161616',
+    borderRadius: 20,
     padding: 30,
     alignItems: 'center' as const,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   emptyText: {
     fontSize: 16,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     textAlign: 'center',
   },
   deleteHint: {
     fontSize: 12,
-    color: '#52525B',
+    color: '#4B5563',
     textAlign: 'center',
     marginBottom: 8,
   },
   runCard: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 22,
+    backgroundColor: '#161616',
+    borderRadius: 20,
     padding: 15,
     flexDirection: 'row' as const,
     justifyContent: 'space-between' as const,
     alignItems: 'center' as const,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden' as const,
   },
   runDate: {
@@ -605,11 +605,11 @@ const styles = StyleSheet.create({
   },
   runTimeText: {
     fontSize: 14,
-    color: '#71717A',
+    color: '#6B7280',
   },
   runWeatherText: {
     fontSize: 12,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
   },
   runStats: {
     flexDirection: 'row',
@@ -623,11 +623,11 @@ const styles = StyleSheet.create({
   runStatValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   runStatLabel: {
     fontSize: 12,
-    color: '#71717A',
+    color: '#6B7280',
   },
   runCardActions: {
     alignItems: 'center',
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   showMoreText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#CCFF00',
+    color: '#00ADB5',
   },
   treadmillBadge: {
     flexDirection: 'row',
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
   treadmillBadgeText: {
     fontSize: 10,
     fontWeight: '700' as const,
-    color: '#CCFF00',
+    color: '#00E5FF',
   },
   achievementBadge: {
     flexDirection: 'row' as const,
@@ -687,6 +687,6 @@ const styles = StyleSheet.create({
   achievementBadgeText: {
     fontSize: 10,
     fontWeight: '700' as const,
-    color: '#FBBF24',
+    color: '#F59E0B',
   },
 });

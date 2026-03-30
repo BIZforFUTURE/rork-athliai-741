@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Animated } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
-import { DS } from "@/constants/theme";
 
 interface CircularProgressProps {
   value: number;
@@ -45,9 +44,10 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
   }, [percentage, animatedPercentage, pulseAnim]);
 
   const size = 110;
-  const strokeWidth = 6;
+  const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
+
   const staticOffset = circumference - (percentage / 100) * circumference;
 
   return (
@@ -56,15 +56,15 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
         <Svg width={size} height={size} style={{ transform: [{ rotate: '-90deg' }] }}>
           <Defs>
             <LinearGradient id={`circGrad-${label}`} x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={exceeds ? DS.accent.red : DS.accent.lime} stopOpacity="1" />
-              <Stop offset="1" stopColor={exceeds ? DS.accent.red : DS.accent.periwinkle} stopOpacity="1" />
+              <Stop offset="0" stopColor={exceeds ? "#EF4444" : "#4ECDC4"} stopOpacity="1" />
+              <Stop offset="1" stopColor={exceeds ? "#EF4444" : "#22C55E"} stopOpacity="1" />
             </LinearGradient>
           </Defs>
           <Circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            stroke="rgba(255,255,255,0.04)"
+            stroke="rgba(255,255,255,0.06)"
             strokeWidth={strokeWidth}
             fill="none"
           />
@@ -81,7 +81,7 @@ const CircularProgress = React.memo(({ value, goal, color, label }: CircularProg
           />
         </Svg>
         <View style={styles.progressRingCenter}>
-          <Text style={[styles.progressPercentage, { color: exceeds ? DS.accent.red : color }]}>
+          <Text style={[styles.progressPercentage, { color: exceeds ? "#EF4444" : color }]}>
             {Math.round(percentage)}%
           </Text>
         </View>
@@ -111,15 +111,13 @@ const styles = StyleSheet.create({
   },
   progressPercentage: {
     fontSize: 20,
-    fontWeight: "800" as const,
-    letterSpacing: -0.5,
+    fontWeight: "bold" as const,
   },
   progressValue: {
-    fontSize: 11,
-    color: DS.text.tertiary,
+    fontSize: 12,
+    color: "#9CA3AF",
     marginTop: 8,
-    fontWeight: "600" as const,
-    letterSpacing: 0.3,
+    fontWeight: "500" as const,
   },
 });
 

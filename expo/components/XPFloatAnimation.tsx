@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, Text } from "react-native";
-import { DS } from "@/constants/theme";
 
 interface XPFloatAnimationProps {
   amount: number;
@@ -68,19 +67,21 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute" as const,
     alignSelf: "center" as const,
-    backgroundColor: DS.accent.lime + "15",
+    backgroundColor: "rgba(34,197,94,0.15)",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: DS.accent.lime + "30",
+    borderColor: "rgba(34,197,94,0.3)",
     zIndex: 999,
   },
   text: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: DS.accent.lime,
-    letterSpacing: 0.5,
+    color: "#22C55E",
+    textShadowColor: "rgba(34,197,94,0.4)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
 });
 

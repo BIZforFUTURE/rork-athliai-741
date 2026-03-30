@@ -175,21 +175,21 @@ export default function NotificationSettingsScreen() {
       case 'undetermined':
         return {
           icon: AlertCircle,
-          color: '#FBBF24',
+          color: '#F59E0B',
           title: 'Permission Required',
           description: 'Allow notifications to receive your daily reminders',
         };
       case 'unsupported':
         return {
           icon: BellOff,
-          color: '#71717A',
+          color: '#6B7280',
           title: 'Not Supported',
           description: 'Notifications are not available on this platform',
         };
       default:
         return {
           icon: Bell,
-          color: '#71717A',
+          color: '#6B7280',
           title: 'Unknown Status',
           description: 'Unable to determine notification status',
         };
@@ -323,7 +323,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.morningXPReminder}
                 onValueChange={(value) => handleSettingChange('morningXPReminder', value)}
                 trackColor={{ false: '#E5E7EB', true: '#E879F9' }}
-                thumbColor={settings.morningXPReminder ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.morningXPReminder ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="morning-xp-switch"
               />
@@ -343,7 +343,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.morningFoodReminder}
                 onValueChange={(value) => handleSettingChange('morningFoodReminder', value)}
                 trackColor={{ false: '#E5E7EB', true: '#F97316' }}
-                thumbColor={settings.morningFoodReminder ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.morningFoodReminder ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="morning-food-switch"
               />
@@ -363,7 +363,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.middayRunReminder}
                 onValueChange={(value) => handleSettingChange('middayRunReminder', value)}
                 trackColor={{ false: '#E5E7EB', true: '#3B82F6' }}
-                thumbColor={settings.middayRunReminder ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.middayRunReminder ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="midday-run-switch"
               />
@@ -383,7 +383,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.eveningWorkoutReminder}
                 onValueChange={(value) => handleSettingChange('eveningWorkoutReminder', value)}
                 trackColor={{ false: '#E5E7EB', true: '#10B981' }}
-                thumbColor={settings.eveningWorkoutReminder ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.eveningWorkoutReminder ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="evening-workout-switch"
               />
@@ -403,7 +403,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.streakWarning}
                 onValueChange={(value) => handleSettingChange('streakWarning', value)}
                 trackColor={{ false: '#E5E7EB', true: '#EF4444' }}
-                thumbColor={settings.streakWarning ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.streakWarning ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="streak-warning-switch"
               />
@@ -418,7 +418,7 @@ export default function NotificationSettingsScreen() {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <View style={[styles.settingIcon, { backgroundColor: '#FEF3C7' }]}>
-                  <Trophy size={20} color="#FBBF24" />
+                  <Trophy size={20} color="#F59E0B" />
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Level Up Alerts</Text>
@@ -428,8 +428,8 @@ export default function NotificationSettingsScreen() {
               <Switch
                 value={settings.levelUpAlerts}
                 onValueChange={(value) => handleSettingChange('levelUpAlerts', value)}
-                trackColor={{ false: '#E5E7EB', true: '#FBBF24' }}
-                thumbColor={settings.levelUpAlerts ? '#FFFFFF' : '#A1A1AA'}
+                trackColor={{ false: '#E5E7EB', true: '#F59E0B' }}
+                thumbColor={settings.levelUpAlerts ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="level-up-switch"
               />
@@ -449,7 +449,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.streakMilestones}
                 onValueChange={(value) => handleSettingChange('streakMilestones', value)}
                 trackColor={{ false: '#E5E7EB', true: '#F97316' }}
-                thumbColor={settings.streakMilestones ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.streakMilestones ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="streak-milestones-switch"
               />
@@ -458,7 +458,7 @@ export default function NotificationSettingsScreen() {
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
                 <View style={[styles.settingIcon, { backgroundColor: '#F5F3FF' }]}>
-                  <CheckCircle size={20} color="#818CF8" />
+                  <CheckCircle size={20} color="#8B5CF6" />
                 </View>
                 <View style={styles.settingText}>
                   <Text style={styles.settingTitle}>Quest Complete</Text>
@@ -468,8 +468,8 @@ export default function NotificationSettingsScreen() {
               <Switch
                 value={settings.workoutCompletionCelebration}
                 onValueChange={(value) => handleSettingChange('workoutCompletionCelebration', value)}
-                trackColor={{ false: '#E5E7EB', true: '#818CF8' }}
-                thumbColor={settings.workoutCompletionCelebration ? '#FFFFFF' : '#A1A1AA'}
+                trackColor={{ false: '#E5E7EB', true: '#8B5CF6' }}
+                thumbColor={settings.workoutCompletionCelebration ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="workout-celebration-switch"
               />
@@ -489,7 +489,7 @@ export default function NotificationSettingsScreen() {
                 value={settings.weeklyProgressSummary}
                 onValueChange={(value) => handleSettingChange('weeklyProgressSummary', value)}
                 trackColor={{ false: '#E5E7EB', true: '#D97706' }}
-                thumbColor={settings.weeklyProgressSummary ? '#FFFFFF' : '#A1A1AA'}
+                thumbColor={settings.weeklyProgressSummary ? '#FFFFFF' : '#9CA3AF'}
                 disabled={permissionStatus !== 'granted'}
                 testID="weekly-summary-switch"
               />
@@ -528,7 +528,7 @@ export default function NotificationSettingsScreen() {
 
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
-            <Settings size={20} color="#71717A" />
+            <Settings size={20} color="#6B7280" />
             <Text style={styles.infoTitle}>How Quest Alerts Work</Text>
           </View>
           <Text style={styles.infoText}>
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#71717A',
+    color: '#6B7280',
   },
   header: {
     paddingHorizontal: 20,
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
   },
   statusDescription: {
     fontSize: 14,
-    color: '#71717A',
+    color: '#6B7280',
     marginBottom: 16,
   },
   enableButton: {
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
   timelineTime: {
     fontSize: 13,
     fontWeight: '700' as const,
-    color: '#71717A',
+    color: '#6B7280',
     letterSpacing: 0.5,
   },
   timelineLabel: {
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
   },
   timelineDesc: {
     fontSize: 13,
-    color: '#A1A1AA',
+    color: '#9CA3AF',
     marginTop: 2,
   },
   settingsCard: {
@@ -736,11 +736,11 @@ const styles = StyleSheet.create({
   },
   settingDescription: {
     fontSize: 13,
-    color: '#71717A',
+    color: '#6B7280',
   },
   divider: {
     height: 1,
-    backgroundColor: '#E8E8E8',
+    backgroundColor: '#F3F4F6',
     marginVertical: 4,
   },
   infoCard: {
@@ -768,7 +768,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: '#71717A',
+    color: '#6B7280',
     lineHeight: 20,
     marginBottom: 8,
   },
@@ -779,7 +779,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: '#818CF8',
+    backgroundColor: '#8B5CF6',
     borderRadius: 12,
     marginTop: 12,
   },

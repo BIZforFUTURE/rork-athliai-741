@@ -1,86 +1,64 @@
 import { Platform } from 'react-native';
 
-export const DS = {
+export const THEME = {
   bg: {
-    base: '#080808',
-    card: '#121214',
-    cardHover: '#1A1A1C',
-    inner: '#0E0E10',
-    elevated: '#1E1E20',
-    overlay: 'rgba(0,0,0,0.7)',
+    base: '#0D0D0D',
+    card: '#161616',
+    inner: '#1E1E1E',
+    elevated: '#242424',
   },
   border: {
-    default: 'rgba(255,255,255,0.10)',
     subtle: 'rgba(255,255,255,0.06)',
-    accent: 'rgba(204,255,0,0.15)',
-    periwinkle: 'rgba(129,140,248,0.15)',
+    accent: 'rgba(78,205,196,0.2)',
   },
   accent: {
-    lime: '#CCFF00',
-    limeDim: '#99BF00',
-    periwinkle: '#818CF8',
-    periwinkleDim: '#6366F1',
-    orange: '#FB923C',
-    cyan: '#22D3EE',
-    red: '#EF4444',
+    teal: '#4ECDC4',
+    tealDark: '#2A9D8F',
     green: '#22C55E',
-    amber: '#FBBF24',
+    greenPrimary: '#22C55E',
+    orange: '#F97316',
   },
   text: {
-    primary: '#E8E8E8',
-    secondary: '#A1A1AA',
-    tertiary: '#71717A',
-    muted: '#52525B',
-    inverse: '#080808',
-  },
-  slate: {
-    deep: '#27272A',
-    mid: '#3F3F46',
-    light: '#52525B',
+    primary: '#F5F5F5',
+    secondary: '#9CA3AF',
+    tertiary: '#6B7280',
+    muted: '#374151',
   },
   radius: {
-    card: 16,
-    hero: 20,
-    button: 12,
-    pill: 8,
-    inner: 10,
-    sm: 6,
+    card: 20,
+    hero: 24,
+    button: 20,
+    pill: 12,
+    inner: 16,
   },
   shadow: {
-    limeGlow: {
-      shadowColor: '#CCFF00',
+    tealGlow: {
+      shadowColor: '#4ECDC4',
       shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.2,
-      shadowRadius: 16,
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
       ...(Platform.OS === 'android' ? { elevation: 6 } : {}),
     },
-    limeButtonGlow: {
-      shadowColor: '#CCFF00',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.35,
-      shadowRadius: 20,
+    tealButtonGlow: {
+      shadowColor: 'rgba(78,205,196,0.35)',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 1,
+      shadowRadius: 16,
       ...(Platform.OS === 'android' ? { elevation: 8 } : {}),
     },
-    periwinkleGlow: {
-      shadowColor: '#818CF8',
+    greenGlow: {
+      shadowColor: 'rgba(34,197,94,0.3)',
       shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.2,
-      shadowRadius: 12,
+      shadowOpacity: 1,
+      shadowRadius: 8,
       ...(Platform.OS === 'android' ? { elevation: 4 } : {}),
     },
     cardSoft: {
-      shadowColor: 'rgba(0,0,0,0.6)',
-      shadowOffset: { width: 0, height: 4 },
+      shadowColor: 'rgba(0,0,0,0.4)',
+      shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1,
-      shadowRadius: 12,
+      shadowRadius: 8,
       ...(Platform.OS === 'android' ? { elevation: 3 } : {}),
     },
   },
-  stroke: {
-    icon: 1.2,
-    iconThin: 1,
-  },
 } as const;
-
-export const GLASS = DS;
-export const THEME = DS;

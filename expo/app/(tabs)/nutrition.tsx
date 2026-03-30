@@ -84,11 +84,11 @@ MacroCard.displayName = "MacroCard";
 const macroCardStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 24,
+    backgroundColor: '#161616',
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.10)',
+    borderColor: 'rgba(255,255,255,0.04)',
   },
   value: {
     fontSize: 26,
@@ -98,7 +98,7 @@ const macroCardStyles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: '#71717A',
+    color: '#6B7280',
     fontWeight: '500' as const,
     marginTop: 2,
   },
@@ -771,9 +771,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#FB923C"
-            colors={["#FB923C"]}
-            progressBackgroundColor="#121214"
+            tintColor="#FF6B35"
+            colors={["#FF6B35"]}
+            progressBackgroundColor="#1A1D24"
           />
         }
       >
@@ -794,13 +794,13 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 setEditGoals({ calorieGoal: nutrition.calorieGoal.toString(), proteinGoal: nutrition.proteinGoal.toString(), carbsGoal: nutrition.carbsGoal.toString(), fatGoal: nutrition.fatGoal.toString() });
                 setShowEditGoals(true);
               }}>
-                <Edit size={18} color="#A1A1AA" />
+                <Edit size={18} color="#9CA3AF" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.headerIconBtn} onPress={() => {
                 if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setShowQuiz(true);
               }}>
-                <Settings size={18} color="#A1A1AA" />
+                <Settings size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
           </View>
@@ -813,7 +813,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 setWeekOffset(prev => prev - 1);
               }}
             >
-              <ChevronLeft size={16} color="#71717A" />
+              <ChevronLeft size={16} color="#6B7280" />
             </TouchableOpacity>
             {weekDays.map((day) => {
               const isToday = day.toDateString() === new Date().toDateString();
@@ -870,7 +870,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               }}
               disabled={weekOffset >= 0}
             >
-              <ChevronRight size={16} color={weekOffset >= 0 ? '#2A2F3A' : '#71717A'} />
+              <ChevronRight size={16} color={weekOffset >= 0 ? '#2A2F3A' : '#6B7280'} />
             </TouchableOpacity>
           </View>
 
@@ -898,13 +898,13 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               <Text style={styles.calorieLeftLabel}>{t('fuel_calories_left')}</Text>
               {activeEntries.some(e => e.calories < 0) && (
                 <View style={styles.exerciseBadge}>
-                  <Dumbbell size={12} color="#A1A1AA" />
+                  <Dumbbell size={12} color="#9CA3AF" />
                   <Text style={styles.exerciseBadgeText}>+{Math.abs(activeEntries.filter(e => e.calories < 0).reduce((s, e) => s + e.calories, 0))}</Text>
                 </View>
               )}
             </View>
             <View style={styles.calorieCardRight}>
-              <CalorieRing percentage={Math.min((activeNutrition.calories / activeNutrition.calorieGoal) * 100, 100)} color={activeNutrition.calories > activeNutrition.calorieGoal ? '#EF4444' : '#CCFF00'} size={100} />
+              <CalorieRing percentage={Math.min((activeNutrition.calories / activeNutrition.calorieGoal) * 100, 100)} color={activeNutrition.calories > activeNutrition.calorieGoal ? '#EF4444' : '#00E5FF'} size={100} />
             </View>
           </View>
         </View>
@@ -913,22 +913,22 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           <MacroCard
             value={Math.max(activeNutrition.proteinGoal - activeNutrition.protein, 0)}
             label={t('fuel_protein_left')}
-            color="#818CF8"
-            icon={<Drumstick size={16} color="#818CF8" />}
+            color="#FF4FB6"
+            icon={<Drumstick size={16} color="#FF4FB6" />}
             percentage={Math.min((activeNutrition.protein / activeNutrition.proteinGoal) * 100, 100)}
           />
           <MacroCard
             value={Math.max(activeNutrition.carbsGoal - activeNutrition.carbs, 0)}
             label={t('fuel_carbs_left')}
-            color="#CCFF00"
-            icon={<Wheat size={16} color="#CCFF00" />}
+            color="#00FFC6"
+            icon={<Wheat size={16} color="#00FFC6" />}
             percentage={Math.min((activeNutrition.carbs / activeNutrition.carbsGoal) * 100, 100)}
           />
           <MacroCard
             value={Math.max(activeNutrition.fatGoal - activeNutrition.fat, 0)}
             label={t('fuel_fat_left')}
-            color="#FBBF24"
-            icon={<Droplet size={16} color="#FBBF24" />}
+            color="#FFB400"
+            icon={<Droplet size={16} color="#FFB400" />}
             percentage={Math.min((activeNutrition.fat / activeNutrition.fatGoal) * 100, 100)}
           />
         </View>
@@ -943,7 +943,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                   <Text style={styles.healthScoreValue}>{t('fuel_health_score_na')}</Text>
                 </View>
                 <View style={styles.healthScoreBarTrack}>
-                  <View style={[styles.healthScoreBarFill, { width: '0%', backgroundColor: '#71717A' }]} />
+                  <View style={[styles.healthScoreBarFill, { width: '0%', backgroundColor: '#6B7280' }]} />
                 </View>
                 <Text style={styles.healthScoreDesc}>{t('fuel_health_score_desc')}</Text>
               </View>
@@ -952,7 +952,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
           const foodEntries = activeEntries.filter(e => e.calories > 0);
           const avgScore = foodEntries.reduce((sum, e) => sum + calculateHealthScore(e).score, 0) / foodEntries.length;
           const roundedScore = Math.round(avgScore * 10) / 10;
-          const scoreColor = roundedScore >= 7.5 ? '#10B981' : roundedScore >= 5 ? '#FBBF24' : '#EF4444';
+          const scoreColor = roundedScore >= 7.5 ? '#10B981' : roundedScore >= 5 ? '#F59E0B' : '#EF4444';
           const scorePercent = (roundedScore / 10) * 100;
           const scoreMsg = roundedScore >= 7.5 ? t('fuel_health_score_great') : roundedScore >= 5 ? t('fuel_health_score_good') : roundedScore >= 3 ? t('fuel_health_score_fair') : t('fuel_health_score_poor');
           return (
@@ -980,7 +980,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                   if (mealPrepDate.toDateString() === new Date().toDateString()) setMealPrepDate(tomorrow);
                   else { const nextDay = new Date(mealPrepDate); nextDay.setDate(nextDay.getDate() + 1); setMealPrepDate(nextDay); }
                 }}>
-                  <Calendar size={14} color="#CCFF00" />
+                  <Calendar size={14} color="#00ADB5" />
                   <Text style={styles.datePickerText}>{mealPrepDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: mealPrepDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined })}</Text>
                 </TouchableOpacity>
               )}
@@ -990,26 +990,26 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             )}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>{t('fuel_food_name')}</Text>
-              <TextInput style={styles.input} placeholder={t('fuel_enter_food_name')} placeholderTextColor="#52525B" value={foodName} onChangeText={setFoodName} />
+              <TextInput style={styles.input} placeholder={t('fuel_enter_food_name')} placeholderTextColor="#4B5563" value={foodName} onChangeText={setFoodName} />
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_calories')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#52525B" value={calories} onChangeText={setCalories} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={calories} onChangeText={setCalories} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_protein_g')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#52525B" value={protein} onChangeText={setProtein} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={protein} onChangeText={setProtein} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_carbs_g')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#52525B" value={carbs} onChangeText={setCarbs} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={carbs} onChangeText={setCarbs} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_fat_g')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#52525B" value={fat} onChangeText={setFat} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#4B5563" value={fat} onChangeText={setFat} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.addFoodButtons}>
@@ -1026,7 +1026,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             {!nutrition.quizCompleted && (
               <View style={styles.quizRequiredCard}>
                 <View style={styles.quizRequiredIconWrap}>
-                  <Brain size={40} color="#CCFF00" />
+                  <Brain size={40} color="#00ADB5" />
                 </View>
                 <Text style={styles.quizRequiredTitle}>{t('fuel_setup_goals')}</Text>
                 <Text style={styles.quizRequiredDescription}>{t('fuel_setup_desc')}</Text>
@@ -1054,7 +1054,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <Svg width={56} height={56} style={{ transform: [{ rotate: '-90deg' }] }}>
                         <Circle
                           cx={28} cy={28} r={23}
-                          stroke="#CCFF00"
+                          stroke="#00E5FF"
                           strokeWidth={5}
                           fill="none"
                           strokeDasharray={`${2 * Math.PI * 23}`}
@@ -1137,15 +1137,15 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     <View style={styles.mealCardBottom}>
                       <View style={styles.mealCardMacros}>
                         <View style={styles.mealMacroChip}>
-                          <View style={[styles.mealMacroDot, { backgroundColor: "#818CF8" }]} />
+                          <View style={[styles.mealMacroDot, { backgroundColor: "#FF4FB6" }]} />
                           <Text style={styles.mealMacroVal}>{entry.protein}g</Text>
                         </View>
                         <View style={styles.mealMacroChip}>
-                          <View style={[styles.mealMacroDot, { backgroundColor: "#CCFF00" }]} />
+                          <View style={[styles.mealMacroDot, { backgroundColor: "#00FFC6" }]} />
                           <Text style={styles.mealMacroVal}>{entry.carbs}g</Text>
                         </View>
                         <View style={styles.mealMacroChip}>
-                          <View style={[styles.mealMacroDot, { backgroundColor: "#FBBF24" }]} />
+                          <View style={[styles.mealMacroDot, { backgroundColor: "#FFB400" }]} />
                           <Text style={styles.mealMacroVal}>{entry.fat}g</Text>
                         </View>
                         <View style={[styles.healthBadge, { backgroundColor: `${healthScore.color}15` }]}>
@@ -1165,7 +1165,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                           ]);
                         }}
                       >
-                        <Trash2 size={14} color="#71717A" />
+                        <Trash2 size={14} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
                   </TouchableOpacity>
@@ -1188,16 +1188,16 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 {currentQuizQuestion.type === "height" ? (
                   <View style={styles.heightInputContainer}>
                     {isSpanish ? (
-                      <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="170 cm" placeholderTextColor="#71717A" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text, heightInches: '0' }))} />
+                      <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="170 cm" placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text, heightInches: '0' }))} />
                     ) : (
                       <>
-                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#71717A" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
-                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#71717A" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
+                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
+                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
                       </>
                     )}
                   </View>
                 ) : currentQuizQuestion.type === "number" ? (
-                  <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#71717A" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />
+                  <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#6B7280" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />
                 ) : (
                   <View style={styles.choicesContainer}>
                     {currentQuizQuestion.choices?.map((choice: { label: string; value: string }) => (
@@ -1252,15 +1252,15 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             <Text style={styles.firstTimeDesc}>{t('fuel_welcome_desc')}</Text>
             <View style={styles.firstTimeFeatures}>
               <View style={styles.firstTimeFeatureRow}>
-                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#CCFF00" }]} />
+                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#00E5FF" }]} />
                 <Text style={styles.firstTimeFeatureText}>{t('fuel_feature_calories')}</Text>
               </View>
               <View style={styles.firstTimeFeatureRow}>
-                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#818CF8" }]} />
+                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#FF4FB6" }]} />
                 <Text style={styles.firstTimeFeatureText}>{t('fuel_feature_macros')}</Text>
               </View>
               <View style={styles.firstTimeFeatureRow}>
-                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#CCFF00" }]} />
+                <View style={[styles.firstTimeFeatureDot, { backgroundColor: "#00FFC6" }]} />
                 <Text style={styles.firstTimeFeatureText}>{t('fuel_feature_progress')}</Text>
               </View>
             </View>
@@ -1281,11 +1281,11 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.sheetModal}>
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowAIInput(false); setAiInput(""); }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_describe_food')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_describe_food_sub')}</Text>
-            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_describe_placeholder')} placeholderTextColor="#52525B" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_describe_placeholder')} placeholderTextColor="#4B5563" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, (!aiInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeWithAI(aiInput); }} disabled={!aiInput || isAnalyzing}>
               {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_analyze_food')}</Text>}
             </TouchableOpacity>
@@ -1338,11 +1338,11 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.foodSearchModal}>
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]); }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_search_foods')}</Text>
             <View style={styles.foodSearchInputRow}>
-              <TextInput style={styles.foodSearchInput} placeholder={t('fuel_search_placeholder')} placeholderTextColor="#52525B" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
+              <TextInput style={styles.foodSearchInput} placeholder={t('fuel_search_placeholder')} placeholderTextColor="#4B5563" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
                 onSubmitEditing={async () => {
                   if (!foodSearchQuery || isSearching) return;
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1365,7 +1365,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </View>
             <ScrollView style={styles.foodSearchResultsList} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               {isSearching && foodSearchResults.length === 0 && (
-                <View style={styles.foodSearchLoading}><ActivityIndicator size="large" color="#CCFF00" /><Text style={styles.foodSearchLoadingText}>{t('fuel_searching_usda')}</Text></View>
+                <View style={styles.foodSearchLoading}><ActivityIndicator size="large" color="#00ADB5" /><Text style={styles.foodSearchLoadingText}>{t('fuel_searching_usda')}</Text></View>
               )}
               {!isSearching && foodSearchResults.length === 0 && foodSearchQuery.length > 0 && (
                 <View style={styles.foodSearchEmpty}><UtensilsCrossed size={36} color="#2A2F3A" /><Text style={styles.foodSearchEmptyText}>{t('fuel_press_search')}</Text></View>
@@ -1399,7 +1399,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               ))}
             </ScrollView>
             <TouchableOpacity style={styles.foodSearchManualBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowFoodSearch(false); setFoodSearchQuery(""); setFoodSearchResults([]); setShowAddFood(true); }}>
-              <Plus size={14} color="#71717A" /><Text style={styles.foodSearchManualText}>{t('fuel_enter_manually_instead')}</Text>
+              <Plus size={14} color="#6B7280" /><Text style={styles.foodSearchManualText}>{t('fuel_enter_manually_instead')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -1409,14 +1409,14 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.sheetModal}>
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowEditGoals(false); }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_edit_goals')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_adjust_targets')}</Text>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_calorie')}</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#52525B" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_protein')}</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#52525B" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_carbs')}</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#52525B" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_fat')}</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#52525B" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_calorie')}</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#4B5563" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_protein')}</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#4B5563" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_carbs')}</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#4B5563" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_fat')}</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#4B5563" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
             <TouchableOpacity style={styles.sheetPrimaryBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleEditGoals(); }}>
               <Text style={styles.sheetPrimaryBtnText}>{t('fuel_save_goals')}</Text>
             </TouchableOpacity>
@@ -1428,11 +1428,11 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.sheetModal}>
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowExerciseInput(false); setExerciseInput(""); }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_log_exercise')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_exercise_sub_desc')}</Text>
-            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_exercise_placeholder')} placeholderTextColor="#52525B" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_exercise_placeholder')} placeholderTextColor="#4B5563" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, styles.exercisePrimaryBtn, (!exerciseInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeExercise(exerciseInput); }} disabled={!exerciseInput || isAnalyzing}>
               {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_estimate_calories')}</Text>}
             </TouchableOpacity>
@@ -1484,7 +1484,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     }
                   }}
                 >
-                  <Bookmark size={18} color={selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) ? "#EF4444" : "#71717A"} fill={selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) ? "#EF4444" : "none"} />
+                  <Bookmark size={18} color={selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) ? "#EF4444" : "#6B7280"} fill={selectedFoodEntry && isFoodSaved(selectedFoodEntry.name) ? "#EF4444" : "none"} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={fdStyles.detailDeleteBtn}
@@ -1501,7 +1501,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                     ]);
                   }}
                 >
-                  <Trash2 size={18} color="#71717A" />
+                  <Trash2 size={18} color="#6B7280" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -1528,7 +1528,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                           keyboardType="numeric"
                           selectTextOnFocus
                         />
-                        <Pencil size={14} color="#71717A" />
+                        <Pencil size={14} color="#6B7280" />
                       </View>
                     </View>
 
@@ -1560,17 +1560,17 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 
                           <View style={fdStyles.macroRow}>
                             <View style={fdStyles.macroBox}>
-                              <Drumstick size={16} color="#818CF8" />
+                              <Drumstick size={16} color="#FF4FB6" />
                               <Text style={fdStyles.macroBoxLabel}>{t('home_protein')}</Text>
                               <Text style={fdStyles.macroBoxValue}>{prot}g</Text>
                             </View>
                             <View style={fdStyles.macroBox}>
-                              <Wheat size={16} color="#CCFF00" />
+                              <Wheat size={16} color="#00FFC6" />
                               <Text style={fdStyles.macroBoxLabel}>{t('home_carbs')}</Text>
                               <Text style={fdStyles.macroBoxValue}>{carb}g</Text>
                             </View>
                             <View style={fdStyles.macroBox}>
-                              <Droplet size={16} color="#FBBF24" />
+                              <Droplet size={16} color="#FFB400" />
                               <Text style={fdStyles.macroBoxLabel}>{t('home_fat')}</Text>
                               <Text style={fdStyles.macroBoxValue}>{fatVal}g</Text>
                             </View>
@@ -1587,9 +1587,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                         setShowDetailRefineInput(true);
                       }}
                     >
-                      <Sparkles size={18} color="#CCFF00" />
+                      <Sparkles size={18} color="#00ADB5" />
                       <Text style={fdStyles.refineAIBtnText}>{t('fuel_detail_refine_ai')}</Text>
-                      <ChevronRight size={16} color="#CCFF00" />
+                      <ChevronRight size={16} color="#00ADB5" />
                     </TouchableOpacity>
                   </>
                 )}
@@ -1616,7 +1616,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <TextInput
                         style={fdStyles.refineInput}
                         placeholder={t('fuel_detail_refine_placeholder')}
-                        placeholderTextColor="#52525B"
+                        placeholderTextColor="#4B5563"
                         value={detailRefineText}
                         onChangeText={setDetailRefineText}
                         multiline
@@ -1684,7 +1684,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.sheetModal}>
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowRefineFood(false); setSelectedFoodEntry(null); setRefinementInput(""); }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_refine_entry')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_refine_sub')}</Text>
@@ -1694,7 +1694,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 <Text style={styles.refineEntryMacros}>{selectedFoodEntry.calories} cal · P: {selectedFoodEntry.protein}g · C: {selectedFoodEntry.carbs}g · F: {selectedFoodEntry.fat}g</Text>
               </View>
             )}
-            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_refine_placeholder')} placeholderTextColor="#52525B" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_refine_placeholder')} placeholderTextColor="#4B5563" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, (!refinementInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); if (selectedFoodEntry) void refineWithAI(selectedFoodEntry, refinementInput); }} disabled={!refinementInput || isAnalyzing}>
               {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_refine_btn')}</Text>}
             </TouchableOpacity>
@@ -1709,7 +1709,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setShowSavedFoods(false);
             }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_saved_foods')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_saved_sub')}</Text>
@@ -1763,7 +1763,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                           deleteSavedFood(item.id);
                         }}
                       >
-                        <Trash2 size={14} color="#71717A" />
+                        <Trash2 size={14} color="#6B7280" />
                       </TouchableOpacity>
                     </View>
                   </TouchableOpacity>
@@ -1812,7 +1812,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 }}
               >
                 <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(0,229,255,0.12)' }]}>
-                  <ScanLine size={24} color="#CCFF00" />
+                  <ScanLine size={24} color="#00E5FF" />
                 </View>
                 <Text style={fabStyles.menuItemLabel}>{t('fuel_scan')} food</Text>
               </TouchableOpacity>
@@ -1827,7 +1827,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 }}
               >
                 <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(191,255,0,0.12)' }]}>
-                  <Brain size={24} color="#818CF8" />
+                  <Brain size={24} color="#BFFF00" />
                 </View>
                 <Text style={fabStyles.menuItemLabel}>{t('fuel_describe')} food</Text>
               </TouchableOpacity>
@@ -1842,7 +1842,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 }}
               >
                 <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(255,107,53,0.12)' }]}>
-                  <Search size={24} color="#FB923C" />
+                  <Search size={24} color="#FF6B35" />
                 </View>
                 <Text style={fabStyles.menuItemLabel}>Food Database</Text>
               </TouchableOpacity>
@@ -1871,7 +1871,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 }}
               >
                 <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(139,92,246,0.12)' }]}>
-                  <Dumbbell size={24} color="#818CF8" />
+                  <Dumbbell size={24} color="#8B5CF6" />
                 </View>
                 <Text style={fabStyles.menuItemLabel}>{t('fuel_log_exercise')}</Text>
               </TouchableOpacity>
@@ -1885,7 +1885,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 }}
               >
                 <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(245,158,11,0.12)' }]}>
-                  <Plus size={24} color="#FBBF24" />
+                  <Plus size={24} color="#F59E0B" />
                 </View>
                 <Text style={fabStyles.menuItemLabel}>{t('fuel_manual')}</Text>
               </TouchableOpacity>
@@ -1898,17 +1898,17 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         <View style={styles.modalOverlay}>
           <View style={styles.sheetModal}>
             <TouchableOpacity style={styles.sheetClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowWeeklyReview(false); setWeeklyReviewData(""); }}>
-              <X size={22} color="#71717A" />
+              <X size={22} color="#6B7280" />
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_weekly_review_title')}</Text>
             <ScrollView style={{ maxHeight: 400, marginTop: 16 }}>
               {_isGeneratingReview ? (
                 <View style={{ alignItems: "center" as const, paddingVertical: 40 }}>
-                  <ActivityIndicator size="large" color="#CCFF00" />
-                  <Text style={{ marginTop: 15, color: "#71717A", fontSize: 15 }}>{t('fuel_analyzing_week')}</Text>
+                  <ActivityIndicator size="large" color="#00ADB5" />
+                  <Text style={{ marginTop: 15, color: "#6B7280", fontSize: 15 }}>{t('fuel_analyzing_week')}</Text>
                 </View>
               ) : (
-                <Text style={{ fontSize: 15, color: "#D4D4D8", lineHeight: 24 }}>{weeklyReviewData}</Text>
+                <Text style={{ fontSize: 15, color: "#D1D5DB", lineHeight: 24 }}>{weeklyReviewData}</Text>
               )}
             </ScrollView>
           </View>
@@ -1921,7 +1921,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
   },
   content: {
     flex: 1,
@@ -1973,7 +1973,7 @@ const styles = StyleSheet.create({
   streakCount: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#FBBF24",
+    color: "#FFB400",
   },
   headerIconBtn: {
     width: 38,
@@ -2012,7 +2012,7 @@ const styles = StyleSheet.create({
   weekDayLabel: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#71717A",
+    color: "#6B7280",
     letterSpacing: 0.3,
   },
   weekDayLabelSelected: {
@@ -2035,7 +2035,7 @@ const styles = StyleSheet.create({
   },
   weekDayCircleSelected: {
     backgroundColor: "rgba(255,255,255,0.12)",
-    borderColor: "#A1A1AA",
+    borderColor: "#9CA3AF",
     borderStyle: "solid" as const,
     borderWidth: 2,
   },
@@ -2060,14 +2060,14 @@ const styles = StyleSheet.create({
     borderStyle: "dashed" as const,
   },
   weekDayCircleFuture: {
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     borderStyle: "solid" as const,
     backgroundColor: "transparent",
   },
   weekDayNum: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
   },
   weekDayNumSelected: {
     color: "#E5E7EB",
@@ -2095,23 +2095,23 @@ const styles = StyleSheet.create({
   viewingPastText: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#CCFF00",
+    color: "#00E5FF",
     flex: 1,
   },
   viewingPastBack: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#CCFF00",
+    color: "#00E5FF",
     marginLeft: 8,
   },
 
   calorieCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 28,
+    backgroundColor: "#161616",
+    borderRadius: 24,
     padding: 20,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.04)",
   },
   calorieCardInner: {
     flexDirection: "row",
@@ -2129,7 +2129,7 @@ const styles = StyleSheet.create({
   },
   calorieLeftLabel: {
     fontSize: 15,
-    color: "#71717A",
+    color: "#6B7280",
     fontWeight: "500" as const,
     marginTop: 2,
   },
@@ -2146,7 +2146,7 @@ const styles = StyleSheet.create({
   },
   exerciseBadgeText: {
     fontSize: 13,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontWeight: "600" as const,
   },
   calorieCardRight: {
@@ -2158,12 +2158,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   healthScoreCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 24,
+    backgroundColor: "#161616",
+    borderRadius: 20,
     padding: 20,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.04)",
   },
   healthScoreHeader: {
     flexDirection: "row",
@@ -2194,7 +2194,7 @@ const styles = StyleSheet.create({
   },
   healthScoreDesc: {
     fontSize: 14,
-    color: "#71717A",
+    color: "#6B7280",
     lineHeight: 20,
   },
 
@@ -2213,7 +2213,7 @@ const styles = StyleSheet.create({
   },
   actionChip: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -2235,18 +2235,18 @@ const styles = StyleSheet.create({
   actionChipLabel: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
   },
   actionChipSub: {
     fontSize: 10,
     fontWeight: "500" as const,
-    color: "#52525B",
+    color: "#4B5563",
     marginTop: 2,
   },
   exerciseChip: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
@@ -2260,11 +2260,11 @@ const styles = StyleSheet.create({
   },
   exerciseChipSub: {
     fontSize: 12,
-    color: "#71717A",
+    color: "#6B7280",
     marginTop: 2,
   },
   exercisePrimaryBtn: {
-    backgroundColor: "#818CF8",
+    backgroundColor: "#8B5CF6",
   },
 
   mealsSection: {
@@ -2284,11 +2284,11 @@ const styles = StyleSheet.create({
   },
   mealsSectionCount: {
     fontSize: 13,
-    color: "#71717A",
+    color: "#6B7280",
     fontWeight: "500" as const,
   },
   emptyMeals: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 40,
     alignItems: "center",
@@ -2297,17 +2297,17 @@ const styles = StyleSheet.create({
   },
   emptyMealsText: {
     fontSize: 15,
-    color: "#71717A",
+    color: "#6B7280",
     marginTop: 12,
     fontWeight: "600" as const,
   },
   emptyMealsHint: {
     fontSize: 13,
-    color: "#52525B",
+    color: "#4B5563",
     marginTop: 4,
   },
   mealCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
@@ -2331,7 +2331,7 @@ const styles = StyleSheet.create({
   },
   mealCardTime: {
     fontSize: 13,
-    color: "#71717A",
+    color: "#6B7280",
     marginTop: 3,
   },
   mealCardRight: {
@@ -2340,12 +2340,12 @@ const styles = StyleSheet.create({
   mealCardCal: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#CCFF00",
+    color: "#00E5FF",
     letterSpacing: -0.5,
   },
   mealCardCalUnit: {
     fontSize: 11,
-    color: "#71717A",
+    color: "#6B7280",
     fontWeight: "500" as const,
     marginTop: -2,
   },
@@ -2376,7 +2376,7 @@ const styles = StyleSheet.create({
   },
   mealMacroVal: {
     fontSize: 12,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontWeight: "600" as const,
   },
   healthBadge: {
@@ -2404,7 +2404,7 @@ const styles = StyleSheet.create({
   },
 
   addFoodCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
@@ -2428,18 +2428,18 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     marginBottom: 6,
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     color: "#F9FAFB",
   },
   nutritionInputRow: {
@@ -2451,12 +2451,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nutritionInput: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     color: "#F9FAFB",
   },
   addFoodButtons: {
@@ -2474,10 +2474,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.05)",
   },
   confirmBtn: {
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
   },
   cancelBtnText: {
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontSize: 15,
     fontWeight: "600" as const,
   },
@@ -2496,19 +2496,19 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   datePickerText: {
-    color: "#CCFF00",
+    color: "#00ADB5",
     fontSize: 13,
     fontWeight: "600" as const,
   },
   mealPrepSubtitle: {
     fontSize: 13,
-    color: "#71717A",
+    color: "#6B7280",
     marginBottom: 14,
     fontStyle: "italic" as const,
   },
 
   quizRequiredCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 32,
     marginTop: 20,
@@ -2528,19 +2528,19 @@ const styles = StyleSheet.create({
   quizRequiredTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     textAlign: "center",
     marginBottom: 10,
   },
   quizRequiredDescription: {
     fontSize: 15,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 24,
   },
   startQuizButton: {
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -2564,16 +2564,16 @@ const styles = StyleSheet.create({
   },
   foodDetailOverlay: {
     flex: 1,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
   },
   sheetModal: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 24,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   sheetClose: {
     position: "absolute",
@@ -2587,27 +2587,27 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     marginBottom: 6,
   },
   sheetSubtitle: {
     fontSize: 14,
-    color: "#71717A",
+    color: "#6B7280",
     marginBottom: 20,
   },
   sheetTextInput: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     borderRadius: 14,
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     minHeight: 100,
     textAlignVertical: "top",
-    color: "#E8E8E8",
+    color: "#F3F4F6",
   },
   sheetPrimaryBtn: {
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
     paddingVertical: 15,
     borderRadius: 14,
     alignItems: "center",
@@ -2629,23 +2629,23 @@ const styles = StyleSheet.create({
   },
   refineEntryName: {
     fontSize: 15,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     fontWeight: "600" as const,
   },
   refineEntryMacros: {
     fontSize: 13,
-    color: "#71717A",
+    color: "#6B7280",
     marginTop: 4,
   },
 
   firstTimeModal: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 28,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     alignItems: "center",
   },
   firstTimeIconWrap: {
@@ -2660,13 +2660,13 @@ const styles = StyleSheet.create({
   firstTimeTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     textAlign: "center",
     marginBottom: 10,
   },
   firstTimeDesc: {
     fontSize: 15,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 24,
@@ -2688,7 +2688,7 @@ const styles = StyleSheet.create({
   },
   firstTimeFeatureText: {
     fontSize: 15,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     flex: 1,
   },
   firstTimeBtns: {
@@ -2703,10 +2703,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   firstTimeSkipText: {
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontSize: 15,
     fontWeight: "600" as const,
   },
@@ -2729,23 +2729,23 @@ const styles = StyleSheet.create({
   },
 
   quizModal: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 28,
     width: "90%",
     maxWidth: 400,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   quizTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     marginBottom: 4,
   },
   quizProgress: {
     fontSize: 13,
-    color: "#71717A",
+    color: "#6B7280",
     marginBottom: 24,
     fontWeight: "500" as const,
   },
@@ -2756,36 +2756,36 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   quizInput: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
-    color: "#E8E8E8",
+    borderColor: "rgba(255,255,255,0.06)",
+    color: "#F3F4F6",
   },
   choicesContainer: {
     gap: 10,
   },
   choiceButton: {
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     padding: 15,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   choiceButtonActive: {
     backgroundColor: "rgba(0,173,181,0.15)",
-    borderColor: "#CCFF00",
+    borderColor: "#00ADB5",
   },
   choiceText: {
     fontSize: 15,
-    color: "#D4D4D8",
+    color: "#D1D5DB",
     textAlign: "center",
     fontWeight: "500" as const,
   },
   choiceTextActive: {
-    color: "#CCFF00",
+    color: "#00E5FF",
     fontWeight: "600" as const,
   },
   quizButtons: {
@@ -2800,12 +2800,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   quizButtonPrimary: {
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
   },
   quizButtonSecondary: {
     backgroundColor: "rgba(255,255,255,0.05)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   quizButtonTextPrimary: {
     color: "#FFFFFF",
@@ -2813,7 +2813,7 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
   },
   quizButtonTextSecondary: {
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     fontSize: 15,
     fontWeight: "600" as const,
   },
@@ -2835,7 +2835,7 @@ const styles = StyleSheet.create({
   cameraText: { position: "absolute", top: "50%", left: 0, right: 0, textAlign: "center", color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, textShadowColor: "rgba(0, 0, 0, 0.5)", textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
   permissionContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
   permissionText: { fontSize: 18, color: "#FFFFFF", marginBottom: 20 },
-  permissionButton: { backgroundColor: "#CCFF00", padding: 15, borderRadius: 12 },
+  permissionButton: { backgroundColor: "#00ADB5", padding: 15, borderRadius: 12 },
   permissionButtonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" as const },
   cameraGuide: { position: "absolute", top: "30%", left: "10%", right: "10%", height: "30%" },
   cameraGuideCorner: { position: "absolute", width: 40, height: 40, borderColor: "#FFFFFF", borderWidth: 3, borderTopWidth: 3, borderLeftWidth: 3, borderBottomWidth: 0, borderRightWidth: 0 },
@@ -2846,14 +2846,14 @@ const styles = StyleSheet.create({
   analyzingText: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, marginTop: 20 },
 
   foodSearchModal: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#161616",
     borderRadius: 24,
     padding: 24,
     width: "92%",
     maxWidth: 420,
     maxHeight: "85%",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   foodSearchInputRow: {
     flexDirection: "row",
@@ -2863,17 +2863,17 @@ const styles = StyleSheet.create({
   },
   foodSearchInput: {
     flex: 1,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   foodSearchBtn: {
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
     width: 48,
     height: 48,
     borderRadius: 14,
@@ -2891,7 +2891,7 @@ const styles = StyleSheet.create({
   foodSearchLoadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: "#71717A",
+    color: "#6B7280",
   },
   foodSearchEmpty: {
     alignItems: "center",
@@ -2900,13 +2900,13 @@ const styles = StyleSheet.create({
   foodSearchEmptyText: {
     marginTop: 12,
     fontSize: 15,
-    color: "#71717A",
+    color: "#6B7280",
     fontWeight: "500" as const,
   },
   foodSearchEmptyHint: {
     marginTop: 4,
     fontSize: 12,
-    color: "#52525B",
+    color: "#4B5563",
   },
   foodSearchResultItem: {
     flexDirection: "row",
@@ -2925,12 +2925,12 @@ const styles = StyleSheet.create({
   foodSearchResultName: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     lineHeight: 20,
   },
   foodSearchResultServing: {
     fontSize: 12,
-    color: "#71717A",
+    color: "#6B7280",
     marginTop: 2,
   },
   foodSearchResultMacros: {
@@ -2940,17 +2940,17 @@ const styles = StyleSheet.create({
   },
   foodSearchMacroP: {
     fontSize: 11,
-    color: "#818CF8",
+    color: "#FF4FB6",
     fontWeight: "600" as const,
   },
   foodSearchMacroC: {
     fontSize: 11,
-    color: "#CCFF00",
+    color: "#00FFC6",
     fontWeight: "600" as const,
   },
   foodSearchMacroF: {
     fontSize: 11,
-    color: "#FBBF24",
+    color: "#FFB400",
     fontWeight: "600" as const,
   },
   foodSearchResultRight: {
@@ -2960,11 +2960,11 @@ const styles = StyleSheet.create({
   foodSearchResultCal: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#CCFF00",
+    color: "#00E5FF",
   },
   foodSearchResultCalLabel: {
     fontSize: 11,
-    color: "#71717A",
+    color: "#6B7280",
     fontWeight: "500" as const,
   },
   foodSearchManualBtn: {
@@ -2977,7 +2977,7 @@ const styles = StyleSheet.create({
   },
   foodSearchManualText: {
     fontSize: 13,
-    color: "#71717A",
+    color: "#6B7280",
     fontWeight: "500" as const,
   },
 });
@@ -3041,11 +3041,11 @@ const analyzingStyles = StyleSheet.create({
   foodNameText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: '#CCFF00',
+    color: '#00E5FF',
   },
   subtitle: {
     fontSize: 12,
-    color: '#71717A',
+    color: '#6B7280',
     fontWeight: '500' as const,
   },
 });
@@ -3053,7 +3053,7 @@ const analyzingStyles = StyleSheet.create({
 const fdStyles = StyleSheet.create({
   detailModal: {
     flex: 1,
-    backgroundColor: "#080808",
+    backgroundColor: "#0D0D0D",
   },
   detailHeader: {
     flexDirection: "row",
@@ -3099,7 +3099,7 @@ const fdStyles = StyleSheet.create({
   detailTimeText: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
   },
   detailFoodName: {
     fontSize: 26,
@@ -3111,7 +3111,7 @@ const fdStyles = StyleSheet.create({
   detailSectionLabel: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
     marginBottom: 10,
   },
   measurementRow: {
@@ -3134,7 +3134,7 @@ const fdStyles = StyleSheet.create({
   measurementChipText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
   measurementChipTextActive: {
     color: "#F9FAFB",
@@ -3148,7 +3148,7 @@ const fdStyles = StyleSheet.create({
   servingsLabel: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#A1A1AA",
+    color: "#9CA3AF",
   },
   servingsInputWrap: {
     flexDirection: "row",
@@ -3180,7 +3180,7 @@ const fdStyles = StyleSheet.create({
   calorieBoxLabel: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
   calorieBoxValue: {
     fontSize: 32,
@@ -3201,12 +3201,12 @@ const fdStyles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   macroBoxLabel: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#71717A",
+    color: "#6B7280",
   },
   macroBoxValue: {
     fontSize: 18,
@@ -3228,7 +3228,7 @@ const fdStyles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#CCFF00",
+    color: "#00ADB5",
   },
   refineSection: {
     gap: 12,
@@ -3243,9 +3243,9 @@ const fdStyles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     fontSize: 15,
-    color: "#E8E8E8",
+    color: "#F3F4F6",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.06)",
     minHeight: 80,
     textAlignVertical: "top" as const,
   },
@@ -3253,7 +3253,7 @@ const fdStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
     borderRadius: 14,
     paddingVertical: 14,
     gap: 8,
@@ -3264,7 +3264,7 @@ const fdStyles = StyleSheet.create({
     color: "#FFFFFF",
   },
   doneBtn: {
-    backgroundColor: "#CCFF00",
+    backgroundColor: "#00ADB5",
     marginHorizontal: 20,
     marginBottom: 36,
     marginTop: 8,
@@ -3306,7 +3306,7 @@ const fabStyles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#121214',
+    backgroundColor: '#1A1D24',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -3326,7 +3326,7 @@ const fabStyles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   menuContainer: {
-    backgroundColor: '#121214',
+    backgroundColor: '#1A1D24',
     borderRadius: 24,
     padding: 16,
     shadowColor: '#000',
