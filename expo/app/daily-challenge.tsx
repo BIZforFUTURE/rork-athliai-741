@@ -450,7 +450,7 @@ export default function DailyChallengeScreen() {
           }}
           testID="daily-challenge-back"
         >
-          <ArrowLeft size={22} color="#FFFFFF" />
+          <ArrowLeft size={22} color="#2C2C2C" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("daily_challenge_title" as any)}</Text>
         <View style={styles.timerPill}>
@@ -601,7 +601,7 @@ export default function DailyChallengeScreen() {
                   setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
                 }}
                 placeholder={isSpanish ? "Escribe aquí..." : "Type here..."}
-                placeholderTextColor="#3A3A3C"
+                placeholderTextColor="#A8A8A0"
                 autoCapitalize="none"
                 autoCorrect={false}
                 onFocus={() => {
@@ -646,7 +646,7 @@ export default function DailyChallengeScreen() {
                     disabled={!textMatches}
                     testID="hold-confirm-btn"
                   >
-                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#3A3A3C"} />
+                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#A8A8A0"} />
                     <Text style={[
                       styles.holdButtonText,
                       !textMatches && styles.holdButtonTextDisabled,
@@ -672,7 +672,7 @@ export default function DailyChallengeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F3EDE4",
   },
   header: {
     flexDirection: "row",
@@ -684,18 +684,18 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#FFFFFF",
+    color: "#2C2C2C",
   },
   timerPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 14,
@@ -842,12 +842,14 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: "row",
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 18,
     padding: 18,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   statBox: {
     flex: 1,
@@ -857,50 +859,54 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   statLabel: {
     fontSize: 11,
-    color: "#5A5A5E",
+    color: "#7A7A7A",
     fontWeight: "500" as const,
     textAlign: "center",
   },
   statDivider: {
     width: 1,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: "rgba(0,0,0,0.06)",
     marginVertical: 4,
   },
   instructionCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 18,
     padding: 20,
     marginTop: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   instructionTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E0E0E0",
+    color: "#2C2C2C",
     marginBottom: 10,
   },
   instructionText: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#7A7A7A",
     lineHeight: 22,
   },
   tipsCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 18,
     padding: 20,
     marginTop: 14,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   tipsTitle: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E0E0E0",
+    color: "#2C2C2C",
     marginBottom: 14,
   },
   tipRow: {
@@ -916,7 +922,7 @@ const styles = StyleSheet.create({
   },
   tipText: {
     fontSize: 14,
-    color: "#94A3B8",
+    color: "#7A7A7A",
     flex: 1,
     lineHeight: 20,
   },
@@ -924,7 +930,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.04)",
+    borderTopColor: "rgba(0,0,0,0.06)",
   },
   completeButton: {
     flexDirection: "row",
@@ -974,22 +980,22 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   confirmInput: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#F0EBE3",
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 14,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(0,0,0,0.06)",
   },
   confirmInputValid: {
-    borderColor: "#10B981",
-    backgroundColor: "rgba(16, 185, 129, 0.06)",
+    borderColor: "#4A7C59",
+    backgroundColor: "rgba(74, 124, 89, 0.06)",
   },
   holdInstructionText: {
     fontSize: 12,
-    color: "#10B981",
+    color: "#4A7C59",
     textAlign: "center",
     fontWeight: "600" as const,
   },
@@ -1017,15 +1023,15 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     gap: 10,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.08)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(0,0,0,0.08)",
+    backgroundColor: "rgba(0,0,0,0.02)",
   },
   holdButtonText: {
     fontSize: 17,
     fontWeight: "700" as const,
-    color: "#FFFFFF",
+    color: "#2C2C2C",
   },
   holdButtonTextDisabled: {
-    color: "#3A3A3C",
+    color: "#A8A8A0",
   },
 });

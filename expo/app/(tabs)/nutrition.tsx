@@ -775,7 +775,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             onRefresh={onRefresh}
             tintColor="#FF6B35"
             colors={["#FF6B35"]}
-            progressBackgroundColor="#1A1D24"
+            progressBackgroundColor="#FEFCF9"
           />
         }
       >
@@ -872,7 +872,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               }}
               disabled={weekOffset >= 0}
             >
-              <ChevronRight size={16} color={weekOffset >= 0 ? '#2A2F3A' : '#6B7280'} />
+              <ChevronRight size={16} color={weekOffset >= 0 ? '#C7C7CC' : '#7A7A7A'} />
             </TouchableOpacity>
           </View>
 
@@ -992,26 +992,26 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             )}
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>{t('fuel_food_name')}</Text>
-              <TextInput style={styles.input} placeholder={t('fuel_enter_food_name')} placeholderTextColor="#3A3A3C" value={foodName} onChangeText={setFoodName} />
+              <TextInput style={styles.input} placeholder={t('fuel_enter_food_name')} placeholderTextColor="#A8A8A0" value={foodName} onChangeText={setFoodName} />
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_calories')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#3A3A3C" value={calories} onChangeText={setCalories} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#A8A8A0" value={calories} onChangeText={setCalories} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_protein_g')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#3A3A3C" value={protein} onChangeText={setProtein} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#A8A8A0" value={protein} onChangeText={setProtein} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.nutritionInputRow}>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_carbs_g')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#3A3A3C" value={carbs} onChangeText={setCarbs} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#A8A8A0" value={carbs} onChangeText={setCarbs} keyboardType="numeric" />
               </View>
               <View style={styles.nutritionInputItem}>
                 <Text style={styles.inputLabel}>{t('fuel_fat_g')}</Text>
-                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#3A3A3C" value={fat} onChangeText={setFat} keyboardType="numeric" />
+                <TextInput style={styles.nutritionInput} placeholder="0" placeholderTextColor="#A8A8A0" value={fat} onChangeText={setFat} keyboardType="numeric" />
               </View>
             </View>
             <View style={styles.addFoodButtons}>
@@ -1102,7 +1102,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </View>
             {activeEntries.length === 0 ? (
               <View style={styles.emptyMeals}>
-                <UtensilsCrossed size={32} color="#2A2F3A" />
+                <UtensilsCrossed size={32} color="#C2BDB4" />
                 <Text style={styles.emptyMealsText}>{t('fuel_no_meals_logged')}</Text>
                 <Text style={styles.emptyMealsHint}>{t('fuel_use_options')}</Text>
               </View>
@@ -1190,16 +1190,16 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 {currentQuizQuestion.type === "height" ? (
                   <View style={styles.heightInputContainer}>
                     {isSpanish ? (
-                      <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="170 cm" placeholderTextColor="#5A5A5E" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text, heightInches: '0' }))} />
+                      <TextInput style={[styles.quizInput, styles.heightInput]} placeholder="170 cm" placeholderTextColor="#A8A8A0" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text, heightInches: '0' }))} />
                     ) : (
                       <>
-                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#5A5A5E" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
-                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#5A5A5E" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
+                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_feet')} placeholderTextColor="#A8A8A0" keyboardType="numeric" value={quizAnswers.heightFeet} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightFeet: text }))} />
+                        <TextInput style={[styles.quizInput, styles.heightInput]} placeholder={t('fuel_inches')} placeholderTextColor="#A8A8A0" keyboardType="numeric" value={quizAnswers.heightInches} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, heightInches: text }))} />
                       </>
                     )}
                   </View>
                 ) : currentQuizQuestion.type === "number" ? (
-                  <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#5A5A5E" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />
+                  <TextInput style={styles.quizInput} placeholder={currentQuizQuestion.placeholder} placeholderTextColor="#A8A8A0" keyboardType="numeric" value={quizAnswers[currentQuizQuestion.key as keyof typeof quizAnswers]} onChangeText={(text) => setQuizAnswers(prev => ({ ...prev, [currentQuizQuestion.key]: text }))} />
                 ) : (
                   <View style={styles.choicesContainer}>
                     {currentQuizQuestion.choices?.map((choice: { label: string; value: string }) => (
@@ -1287,7 +1287,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_describe_food')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_describe_food_sub')}</Text>
-            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_describe_placeholder')} placeholderTextColor="#3A3A3C" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_describe_placeholder')} placeholderTextColor="#A8A8A0" value={aiInput} onChangeText={setAiInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, (!aiInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeWithAI(aiInput); }} disabled={!aiInput || isAnalyzing}>
               {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_analyze_food')}</Text>}
             </TouchableOpacity>
@@ -1344,7 +1344,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_search_foods')}</Text>
             <View style={styles.foodSearchInputRow}>
-              <TextInput style={styles.foodSearchInput} placeholder={t('fuel_search_placeholder')} placeholderTextColor="#3A3A3C" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
+              <TextInput style={styles.foodSearchInput} placeholder={t('fuel_search_placeholder')} placeholderTextColor="#A8A8A0" value={foodSearchQuery} onChangeText={setFoodSearchQuery} autoFocus returnKeyType="search"
                 onSubmitEditing={async () => {
                   if (!foodSearchQuery || isSearching) return;
                   if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1415,10 +1415,10 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_edit_goals')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_adjust_targets')}</Text>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_calorie')}</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#3A3A3C" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_protein')}</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#3A3A3C" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_carbs')}</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#3A3A3C" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
-            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_fat')}</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#3A3A3C" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_calorie')}</Text><TextInput style={styles.input} placeholder="Calories" placeholderTextColor="#A8A8A0" value={editGoals.calorieGoal} onChangeText={(text) => setEditGoals({ ...editGoals, calorieGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_protein')}</Text><TextInput style={styles.input} placeholder="Protein" placeholderTextColor="#A8A8A0" value={editGoals.proteinGoal} onChangeText={(text) => setEditGoals({ ...editGoals, proteinGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_carbs')}</Text><TextInput style={styles.input} placeholder="Carbs" placeholderTextColor="#A8A8A0" value={editGoals.carbsGoal} onChangeText={(text) => setEditGoals({ ...editGoals, carbsGoal: text })} keyboardType="numeric" /></View>
+            <View style={styles.inputContainer}><Text style={styles.inputLabel}>{t('fuel_daily_fat')}</Text><TextInput style={styles.input} placeholder="Fat" placeholderTextColor="#A8A8A0" value={editGoals.fatGoal} onChangeText={(text) => setEditGoals({ ...editGoals, fatGoal: text })} keyboardType="numeric" /></View>
             <TouchableOpacity style={styles.sheetPrimaryBtn} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleEditGoals(); }}>
               <Text style={styles.sheetPrimaryBtnText}>{t('fuel_save_goals')}</Text>
             </TouchableOpacity>
@@ -1434,7 +1434,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </TouchableOpacity>
             <Text style={styles.sheetTitle}>{t('fuel_log_exercise')}</Text>
             <Text style={styles.sheetSubtitle}>{t('fuel_exercise_sub_desc')}</Text>
-            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_exercise_placeholder')} placeholderTextColor="#3A3A3C" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_exercise_placeholder')} placeholderTextColor="#A8A8A0" value={exerciseInput} onChangeText={setExerciseInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, styles.exercisePrimaryBtn, (!exerciseInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void analyzeExercise(exerciseInput); }} disabled={!exerciseInput || isAnalyzing}>
               {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_estimate_calories')}</Text>}
             </TouchableOpacity>
@@ -1461,7 +1461,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                   }
                 }}
               >
-                <ArrowLeft size={20} color="#E8E8E8" />
+                <ArrowLeft size={20} color="#2C2C2C" />
               </TouchableOpacity>
               <Text style={fdStyles.detailHeaderTitle}>{t('fuel_detail_title')}</Text>
               <View style={fdStyles.detailHeaderRight}>
@@ -1618,7 +1618,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                       <TextInput
                         style={fdStyles.refineInput}
                         placeholder={t('fuel_detail_refine_placeholder')}
-                        placeholderTextColor="#3A3A3C"
+                        placeholderTextColor="#A8A8A0"
                         value={detailRefineText}
                         onChangeText={setDetailRefineText}
                         multiline
@@ -1696,7 +1696,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
                 <Text style={styles.refineEntryMacros}>{selectedFoodEntry.calories} cal · P: {selectedFoodEntry.protein}g · C: {selectedFoodEntry.carbs}g · F: {selectedFoodEntry.fat}g</Text>
               </View>
             )}
-            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_refine_placeholder')} placeholderTextColor="#3A3A3C" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
+            <TextInput style={styles.sheetTextInput} placeholder={t('fuel_refine_placeholder')} placeholderTextColor="#A8A8A0" value={refinementInput} onChangeText={setRefinementInput} multiline autoFocus />
             <TouchableOpacity style={[styles.sheetPrimaryBtn, (!refinementInput || isAnalyzing) && styles.disabledButton]} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); if (selectedFoodEntry) void refineWithAI(selectedFoodEntry, refinementInput); }} disabled={!refinementInput || isAnalyzing}>
               {isAnalyzing ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.sheetPrimaryBtnText}>{t('fuel_refine_btn')}</Text>}
             </TouchableOpacity>
@@ -1907,10 +1907,10 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               {_isGeneratingReview ? (
                 <View style={{ alignItems: "center" as const, paddingVertical: 40 }}>
                   <ActivityIndicator size="large" color="#00ADB5" />
-                  <Text style={{ marginTop: 15, color: "#5A5A5E", fontSize: 15 }}>{t('fuel_analyzing_week')}</Text>
+                  <Text style={{ marginTop: 15, color: "#7A7A7A", fontSize: 15 }}>{t('fuel_analyzing_week')}</Text>
                 </View>
               ) : (
-                <Text style={{ fontSize: 15, color: "#D1D5DB", lineHeight: 24 }}>{weeklyReviewData}</Text>
+                <Text style={{ fontSize: 15, color: "#2C2C2C", lineHeight: 24 }}>{weeklyReviewData}</Text>
               )}
             </ScrollView>
           </View>
@@ -2057,11 +2057,11 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   weekDayCircleEmpty: {
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(0,0,0,0.08)",
     borderStyle: "dashed" as const,
   },
   weekDayCircleFuture: {
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
     borderStyle: "solid" as const,
     backgroundColor: "transparent",
   },
@@ -2271,7 +2271,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   exercisePrimaryBtn: {
-    backgroundColor: "#8B5CF6",
+    backgroundColor: "#4A7C59",
   },
 
   mealsSection: {
@@ -2287,7 +2287,7 @@ const styles = StyleSheet.create({
   mealsSectionTitle: {
     fontSize: 17,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   mealsSectionCount: {
     fontSize: 13,
@@ -2295,31 +2295,35 @@ const styles = StyleSheet.create({
     fontWeight: "500" as const,
   },
   emptyMeals: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 40,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   emptyMealsText: {
     fontSize: 15,
-    color: "#5A5A5E",
+    color: "#7A7A7A",
     marginTop: 12,
     fontWeight: "600" as const,
   },
   emptyMealsHint: {
     fontSize: 13,
-    color: "#3A3A3C",
+    color: "#A8A8A0",
     marginTop: 4,
   },
   mealCard: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 16,
     padding: 16,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   mealCardTop: {
     flexDirection: "row",
@@ -2334,7 +2338,7 @@ const styles = StyleSheet.create({
   mealCardName: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   mealCardTime: {
     fontSize: 13,
@@ -2347,7 +2351,7 @@ const styles = StyleSheet.create({
   mealCardCal: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
     letterSpacing: -0.5,
   },
   mealCardCalUnit: {
@@ -2370,7 +2374,7 @@ const styles = StyleSheet.create({
   mealMacroChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -2406,17 +2410,19 @@ const styles = StyleSheet.create({
   mealDeleteBtn: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     marginLeft: 8,
   },
 
   addFoodCard: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   addFoodHeader: {
     flexDirection: "row",
@@ -2427,7 +2433,7 @@ const styles = StyleSheet.create({
   addFoodTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   inputContainer: {
     marginBottom: 14,
@@ -2441,13 +2447,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
-    color: "#E8E8E8",
+    borderColor: "rgba(0,0,0,0.06)",
+    color: "#2C2C2C",
   },
   nutritionInputRow: {
     flexDirection: "row",
@@ -2458,13 +2464,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nutritionInput: {
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
-    color: "#E8E8E8",
+    borderColor: "rgba(0,0,0,0.06)",
+    color: "#2C2C2C",
   },
   addFoodButtons: {
     flexDirection: "row",
@@ -2478,13 +2484,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelBtn: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#F0EBE3",
   },
   confirmBtn: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
   },
   cancelBtnText: {
-    color: "#8E8E93",
+    color: "#7A7A7A",
     fontSize: 15,
     fontWeight: "600" as const,
   },
@@ -2515,12 +2521,14 @@ const styles = StyleSheet.create({
   },
 
   quizRequiredCard: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 32,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
     alignItems: "center",
   },
   quizRequiredIconWrap: {
@@ -2535,7 +2543,7 @@ const styles = StyleSheet.create({
   quizRequiredTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     textAlign: "center",
     marginBottom: 10,
   },
@@ -2547,7 +2555,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   startQuizButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -2565,22 +2573,24 @@ const styles = StyleSheet.create({
 
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
   foodDetailOverlay: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F3EDE4",
   },
   sheetModal: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 24,
     width: "90%",
     maxWidth: 400,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 30,
   },
   sheetClose: {
     position: "absolute",
@@ -2589,32 +2599,32 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 4,
     borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "rgba(0, 0, 0, 0.04)",
   },
   sheetTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     marginBottom: 6,
   },
   sheetSubtitle: {
     fontSize: 14,
-    color: "#5A5A5E",
+    color: "#7A7A7A",
     marginBottom: 20,
   },
   sheetTextInput: {
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 14,
     padding: 16,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
     minHeight: 100,
     textAlignVertical: "top",
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   sheetPrimaryBtn: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     paddingVertical: 15,
     borderRadius: 14,
     alignItems: "center",
@@ -2629,14 +2639,14 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   refineEntryPreview: {
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     padding: 14,
     marginBottom: 16,
   },
   refineEntryName: {
     fontSize: 15,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     fontWeight: "600" as const,
   },
   refineEntryMacros: {
@@ -2646,13 +2656,15 @@ const styles = StyleSheet.create({
   },
 
   firstTimeModal: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 28,
     width: "90%",
     maxWidth: 400,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 30,
     alignItems: "center",
   },
   firstTimeIconWrap: {
@@ -2667,7 +2679,7 @@ const styles = StyleSheet.create({
   firstTimeTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     textAlign: "center",
     marginBottom: 10,
   },
@@ -2708,9 +2720,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 14,
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "#F0EBE3",
   },
   firstTimeSkipText: {
     color: "#8E8E93",
@@ -2724,7 +2734,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#10B981",
+    backgroundColor: "#4A7C59",
     flexDirection: "row",
     gap: 6,
   },
@@ -2736,18 +2746,20 @@ const styles = StyleSheet.create({
   },
 
   quizModal: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 28,
     width: "90%",
     maxWidth: 400,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 30,
   },
   quizTitle: {
     fontSize: 22,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     marginBottom: 4,
   },
   quizProgress: {
@@ -2759,40 +2771,40 @@ const styles = StyleSheet.create({
   quizQuestion: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: "#E5E7EB",
+    color: "#2C2C2C",
     marginBottom: 20,
   },
   quizInput: {
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
-    color: "#E8E8E8",
+    borderColor: "rgba(0,0,0,0.06)",
+    color: "#2C2C2C",
   },
   choicesContainer: {
     gap: 10,
   },
   choiceButton: {
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     padding: 15,
     borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
   },
   choiceButtonActive: {
-    backgroundColor: "rgba(0,173,181,0.15)",
-    borderColor: "#00ADB5",
+    backgroundColor: "rgba(74,124,89,0.1)",
+    borderColor: "#4A7C59",
   },
   choiceText: {
     fontSize: 15,
-    color: "#D1D5DB",
+    color: "#7A7A7A",
     textAlign: "center",
     fontWeight: "500" as const,
   },
   choiceTextActive: {
-    color: "#00E5FF",
+    color: "#4A7C59",
     fontWeight: "600" as const,
   },
   quizButtons: {
@@ -2807,12 +2819,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   quizButtonPrimary: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
   },
   quizButtonSecondary: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "#F0EBE3",
   },
   quizButtonTextPrimary: {
     color: "#FFFFFF",
@@ -2853,14 +2863,16 @@ const styles = StyleSheet.create({
   analyzingText: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" as const, marginTop: 20 },
 
   foodSearchModal: {
-    backgroundColor: "#121214",
+    backgroundColor: "#FEFCF9",
     borderRadius: 24,
     padding: 24,
     width: "92%",
     maxWidth: 420,
     maxHeight: "85%",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 30,
   },
   foodSearchInputRow: {
     flexDirection: "row",
@@ -2870,17 +2882,17 @@ const styles = StyleSheet.create({
   },
   foodSearchInput: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
   },
   foodSearchBtn: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     width: 48,
     height: 48,
     borderRadius: 14,
@@ -2913,17 +2925,15 @@ const styles = StyleSheet.create({
   foodSearchEmptyHint: {
     marginTop: 4,
     fontSize: 12,
-    color: "#3A3A3C",
+    color: "#A8A8A0",
   },
   foodSearchResultItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#F0EBE3",
     borderRadius: 14,
     padding: 14,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
   },
   foodSearchResultLeft: {
     flex: 1,
@@ -2932,7 +2942,7 @@ const styles = StyleSheet.create({
   foodSearchResultName: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     lineHeight: 20,
   },
   foodSearchResultServing: {
@@ -2967,7 +2977,7 @@ const styles = StyleSheet.create({
   foodSearchResultCal: {
     fontSize: 20,
     fontWeight: "700" as const,
-    color: "#00E5FF",
+    color: "#4A7C59",
   },
   foodSearchResultCalLabel: {
     fontSize: 11,
@@ -2994,11 +3004,13 @@ const analyzingStyles = StyleSheet.create({
     marginTop: 20,
   },
   card: {
-    backgroundColor: '#0F2224',
+    backgroundColor: '#FEFCF9',
     borderRadius: 20,
     padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0,229,255,0.12)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   cardContent: {
     flexDirection: 'row' as const,
@@ -3024,7 +3036,7 @@ const analyzingStyles = StyleSheet.create({
     position: 'absolute' as const,
     fontSize: 16,
     fontWeight: '700' as const,
-    color: '#F9FAFB',
+    color: '#2C2C2C',
   },
   textWrap: {
     flex: 1,
@@ -3033,7 +3045,7 @@ const analyzingStyles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700' as const,
-    color: '#F9FAFB',
+    color: '#2C2C2C',
   },
   shimmerRow: {
     flexDirection: 'row' as const,
@@ -3043,12 +3055,12 @@ const analyzingStyles = StyleSheet.create({
   shimmerBar: {
     height: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.06)',
   },
   foodNameText: {
     fontSize: 14,
     fontWeight: '600' as const,
-    color: '#00E5FF',
+    color: '#4A7C59',
   },
   subtitle: {
     fontSize: 12,
@@ -3060,7 +3072,7 @@ const analyzingStyles = StyleSheet.create({
 const fdStyles = StyleSheet.create({
   detailModal: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F3EDE4",
   },
   detailHeader: {
     flexDirection: "row",
@@ -3074,20 +3086,20 @@ const fdStyles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     alignItems: "center",
     justifyContent: "center",
   },
   detailHeaderTitle: {
     fontSize: 17,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   detailDeleteBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -3096,7 +3108,7 @@ const fdStyles = StyleSheet.create({
   },
   detailTimeBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -3111,7 +3123,7 @@ const fdStyles = StyleSheet.create({
   detailFoodName: {
     fontSize: 26,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     marginBottom: 20,
     letterSpacing: -0.3,
   },
@@ -3131,12 +3143,12 @@ const fdStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 24,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
   measurementChipActive: {
-    backgroundColor: "#1F2937",
+    backgroundColor: "#F0EBE3",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(0,0,0,0.08)",
   },
   measurementChipText: {
     fontSize: 14,
@@ -3144,7 +3156,7 @@ const fdStyles = StyleSheet.create({
     color: "#5A5A5E",
   },
   measurementChipTextActive: {
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   servingsRow: {
     flexDirection: "row",
@@ -3161,7 +3173,7 @@ const fdStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -3170,7 +3182,7 @@ const fdStyles = StyleSheet.create({
   servingsInput: {
     fontSize: 16,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     textAlign: "center" as const,
     minWidth: 30,
     padding: 0,
@@ -3202,13 +3214,15 @@ const fdStyles = StyleSheet.create({
   },
   macroBox: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "#FEFCF9",
     borderRadius: 14,
     padding: 14,
     alignItems: "center",
     gap: 6,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
   },
   macroBoxLabel: {
     fontSize: 12,
@@ -3218,7 +3232,7 @@ const fdStyles = StyleSheet.create({
   macroBoxValue: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   refineAIBtn: {
     flexDirection: "row",
@@ -3243,16 +3257,16 @@ const fdStyles = StyleSheet.create({
   refineSectionTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
   },
   refineInput: {
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "#F0EBE3",
     borderRadius: 14,
     padding: 16,
     fontSize: 15,
-    color: "#E8E8E8",
+    color: "#2C2C2C",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(0,0,0,0.06)",
     minHeight: 80,
     textAlignVertical: "top" as const,
   },
@@ -3260,7 +3274,7 @@ const fdStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     borderRadius: 14,
     paddingVertical: 14,
     gap: 8,
@@ -3271,7 +3285,7 @@ const fdStyles = StyleSheet.create({
     color: "#FFFFFF",
   },
   doneBtn: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     marginHorizontal: 20,
     marginBottom: 36,
     marginTop: 8,
@@ -3296,7 +3310,7 @@ const fdStyles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "rgba(0,0,0,0.04)",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -3313,16 +3327,14 @@ const fabStyles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#1A1D24',
+    backgroundColor: '#4A7C59',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#4A7C59',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
     elevation: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
     zIndex: 100,
   },
   overlay: {
@@ -3333,16 +3345,14 @@ const fabStyles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   menuContainer: {
-    backgroundColor: '#1A1D24',
+    backgroundColor: '#FEFCF9',
     borderRadius: 24,
     padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.1,
     shadowRadius: 16,
     elevation: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
   menuGrid: {
     flexDirection: 'row',
@@ -3351,14 +3361,12 @@ const fabStyles = StyleSheet.create({
   },
   menuItem: {
     width: '47%' as any,
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: '#F0EBE3',
     borderRadius: 18,
     paddingVertical: 22,
     paddingHorizontal: 16,
     alignItems: 'center',
     gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
   menuItemIcon: {
     width: 52,
@@ -3370,7 +3378,7 @@ const fabStyles = StyleSheet.create({
   menuItemLabel: {
     fontSize: 14,
     fontWeight: '700' as const,
-    color: '#F0F0F0',
+    color: '#2C2C2C',
     textAlign: 'center' as const,
   },
 });

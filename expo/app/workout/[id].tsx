@@ -425,7 +425,7 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F3EDE4",
   },
   header: {
     flexDirection: "row",
@@ -433,9 +433,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderBottomWidth: 1,
-    borderBottomColor: "#1F2329",
+    borderBottomColor: "rgba(0,0,0,0.06)",
     marginHorizontal: 0,
   },
   closeButton: {
@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
   workoutTitle: {
     fontSize: 18,
     fontWeight: "bold" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   exerciseCounter: {
     fontSize: 14,
@@ -494,11 +494,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   exerciseHeader: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 20,
     padding: 20,
     marginTop: 20,
     marginHorizontal: 20,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   exerciseTitle: {
     flexDirection: "row",
@@ -509,7 +513,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 24,
     fontWeight: "bold" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     flex: 1,
   },
 
@@ -532,26 +536,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 15,
     padding: 20,
     marginTop: 15,
     marginHorizontal: 20,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
   },
   autoFillLabel: {
     fontSize: 16,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   toggle: {
     width: 50,
     height: 30,
-    backgroundColor: "#1F2329",
+    backgroundColor: "#E8E2D9",
     borderRadius: 15,
     justifyContent: "center",
     paddingHorizontal: 2,
   },
   toggleActive: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
   },
   toggleThumb: {
     width: 26,
@@ -573,15 +581,19 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   setRow: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 15,
     padding: 20,
     marginBottom: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
   },
   setLabel: {
     fontSize: 16,
     fontWeight: "bold" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     marginBottom: 15,
   },
   setInputs: {
@@ -598,14 +610,14 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#1F2329",
+    borderColor: "rgba(0,0,0,0.06)",
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
     textAlign: "center" as const,
-    backgroundColor: "#050505",
-    color: "#F9FAFB",
+    backgroundColor: "#F0EBE3",
+    color: "#2C2C2C",
   },
   inputLabel: {
     fontSize: 16,
@@ -620,7 +632,7 @@ const styles = StyleSheet.create({
   autoFillButton: {
     paddingHorizontal: 15,
     paddingVertical: 8,
-    backgroundColor: "#1F2329",
+    backgroundColor: "#F0EBE3",
     borderRadius: 20,
   },
   autoFillButtonText: {
@@ -652,14 +664,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "transparent",
     borderWidth: 2,
-    borderColor: "#00ADB5",
+    borderColor: "#4A7C59",
     borderStyle: "dashed",
     borderRadius: 15,
     paddingVertical: 20,
     gap: 10,
   },
   addSetText: {
-    color: "#00ADB5",
+    color: "#4A7C59",
     fontSize: 14,
     fontWeight: "600" as const,
   },
@@ -667,9 +679,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderTopWidth: 1,
-    borderTopColor: "#1F2329",
+    borderTopColor: "rgba(0,0,0,0.06)",
     gap: 15,
   },
   navButton: {
@@ -677,7 +689,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 25,
     alignItems: "center",
-    backgroundColor: "#1F2329",
+    backgroundColor: "#F0EBE3",
   },
   navButtonDisabled: {
     opacity: 0.5,
@@ -691,7 +703,7 @@ const styles = StyleSheet.create({
     color: "#5A5A5E",
   },
   nextButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",

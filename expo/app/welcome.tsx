@@ -304,7 +304,7 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Your AI Fitness Companion',
     description: 'Track runs, workouts, and nutrition with intelligent insights that adapt to your goals.',
     icon: null,
-    gradient: ['#050505', '#111827'],
+    gradient: ['#F3EDE4', '#E8E2D9'],
   },
   {
     id: 2,
@@ -1088,9 +1088,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
         : ((currentGymStep + 1) / (gymQuestions.length + 2)) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#050505' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F3EDE4' }]}>
         <LinearGradient
-          colors={['#050505', '#111827', '#050505']}
+          colors={['#F3EDE4', '#E8E2D9', '#F3EDE4']}
           style={styles.gradient}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -1301,9 +1301,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
     const nutritionProgressPercent = (currentNutritionStep / totalNutritionSteps) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#050505' }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F3EDE4' }]}>
         <LinearGradient
-          colors={['#050505', '#111827', '#050505']}
+          colors={['#F3EDE4', '#E8E2D9', '#F3EDE4']}
           style={styles.gradient}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -1554,9 +1554,9 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   const _isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#050505' }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F3EDE4' }]}>
       <LinearGradient
-        colors={['#050505', '#111827', '#050505']}
+        colors={['#F3EDE4', '#E8E2D9', '#F3EDE4']}
         style={styles.darkBackground}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
@@ -1914,20 +1914,20 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   optionButton: {
-    backgroundColor: '#171B22',
+    backgroundColor: '#FEFCF9',
     paddingHorizontal: 24,
     paddingVertical: 18,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: 'rgba(0,0,0,0.06)',
     width: '100%',
   },
   optionButtonSelected: {
-    backgroundColor: 'rgba(0, 173, 181, 0.15)',
-    borderColor: '#00ADB5',
+    backgroundColor: 'rgba(74, 124, 89, 0.1)',
+    borderColor: '#4A7C59',
   },
   optionText: {
-    color: '#F9FAFB',
+    color: '#2C2C2C',
     fontSize: 16,
     fontWeight: '500',
     textAlign: 'left',
@@ -1936,7 +1936,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   weightInput: {
-    backgroundColor: '#171B22',
+    backgroundColor: '#FEFCF9',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
@@ -1962,26 +1962,26 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   dayButton: {
-    backgroundColor: '#171B22',
+    backgroundColor: '#FEFCF9',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: 'rgba(0,0,0,0.06)',
     minWidth: 90,
     alignItems: 'center',
   },
   dayButtonSelected: {
-    backgroundColor: 'rgba(0, 173, 181, 0.15)',
-    borderColor: '#00ADB5',
+    backgroundColor: 'rgba(74, 124, 89, 0.1)',
+    borderColor: '#4A7C59',
   },
   dayButtonText: {
-    color: '#8E8E93',
+    color: '#7A7A7A',
     fontSize: 14,
     fontWeight: '500',
   },
   dayButtonTextSelected: {
-    color: '#FFFFFF',
+    color: '#4A7C59',
     fontWeight: '700',
   },
   goalsSubtext: {
@@ -1992,14 +1992,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   goalsInput: {
-    backgroundColor: '#171B22',
+    backgroundColor: '#FEFCF9',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 16,
-    color: '#F9FAFB',
+    color: '#2C2C2C',
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: 'rgba(0,0,0,0.06)',
     marginBottom: 25,
     minHeight: 100,
   },
@@ -2007,12 +2007,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#171B22',
+    backgroundColor: '#FEFCF9',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: 'rgba(0,0,0,0.06)',
     marginBottom: 25,
     gap: 10,
   },
@@ -2108,7 +2108,7 @@ const styles = StyleSheet.create({
   },
   loadingBackground: {
     flex: 1,
-    backgroundColor: '#050505',
+    backgroundColor: '#F3EDE4',
   },
   loadingScrollContent: {
     flexGrow: 1,
@@ -2187,11 +2187,15 @@ const styles = StyleSheet.create({
   },
   loadingStepsContainer: {
     width: '100%',
-    backgroundColor: '#151921',
+    backgroundColor: '#FEFCF9',
     borderRadius: 16,
     padding: 20,
     gap: 16,
     marginBottom: 24,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   loadingStepRow: {
     flexDirection: 'row' as const,
@@ -2202,7 +2206,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#F0EBE3',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
@@ -2221,7 +2225,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingStepLabelActive: {
-    color: '#FFFFFF',
+    color: '#2C2C2C',
     fontWeight: '600' as const,
   },
   loadingStepLabelComplete: {
@@ -2235,11 +2239,15 @@ const styles = StyleSheet.create({
   },
   loadingTipCard: {
     width: '100%',
-    backgroundColor: '#151921',
+    backgroundColor: '#FEFCF9',
     borderRadius: 16,
     padding: 20,
     borderLeftWidth: 3,
-    borderLeftColor: '#00ADB5',
+    borderLeftColor: '#4A7C59',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   loadingTipHeader: {
     flexDirection: 'row' as const,
@@ -2250,12 +2258,12 @@ const styles = StyleSheet.create({
   loadingTipHeaderText: {
     fontSize: 11,
     fontWeight: '700' as const,
-    color: '#00ADB5',
+    color: '#4A7C59',
     letterSpacing: 1.2,
   },
   loadingTipText: {
     fontSize: 14,
-    color: '#D0D0D0',
+    color: '#7A7A7A',
     lineHeight: 22,
     fontWeight: '400' as const,
   },
@@ -2266,13 +2274,13 @@ const styles = StyleSheet.create({
   progressBarBackground: {
     width: '80%',
     height: 6,
-    backgroundColor: '#1F2937',
+    backgroundColor: 'rgba(0,0,0,0.06)',
     borderRadius: 3,
     overflow: 'hidden' as const,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#00ADB5',
+    backgroundColor: '#4A7C59',
     borderRadius: 3,
   },
   heightInputContainer: {
@@ -2289,14 +2297,14 @@ const styles = StyleSheet.create({
   },
   heightInput: {
     flex: 1,
-    backgroundColor: '#171B22',
+    backgroundColor: '#FEFCF9',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 18,
-    color: '#F9FAFB',
+    color: '#2C2C2C',
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: 'rgba(0,0,0,0.06)',
     textAlign: 'center',
   },
   heightLabel: {
@@ -2315,19 +2323,19 @@ const styles = StyleSheet.create({
   quizProgressBarInline: {
     width: '100%',
     height: 4,
-    backgroundColor: '#1F2937',
+    backgroundColor: 'rgba(0,0,0,0.06)',
     borderRadius: 2,
     overflow: 'hidden',
     marginBottom: 40,
   },
   quizProgressFill: {
     height: '100%',
-    backgroundColor: '#00ADB5',
+    backgroundColor: '#4A7C59',
     borderRadius: 2,
   },
   paywallContainer: {
     flex: 1,
-    backgroundColor: '#050505',
+    backgroundColor: '#F3EDE4',
   },
   paywallCloseBtn: {
     position: 'absolute' as const,
@@ -2528,15 +2536,15 @@ const onboardStyles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#F0EBE3',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: '#E8E2D9',
   },
   stepActive: {
-    backgroundColor: 'rgba(0,173,181,0.2)',
-    borderColor: '#00ADB5',
+    backgroundColor: 'rgba(74,124,89,0.15)',
+    borderColor: '#4A7C59',
   },
   stepDone: {
     backgroundColor: '#00ADB5',
@@ -2556,11 +2564,11 @@ const onboardStyles = StyleSheet.create({
   connector: {
     width: 40,
     height: 2,
-    backgroundColor: '#1F2937',
+    backgroundColor: '#E8E2D9',
     borderRadius: 1,
   },
   connectorDone: {
-    backgroundColor: '#00ADB5',
+    backgroundColor: '#4A7C59',
   },
 });
 

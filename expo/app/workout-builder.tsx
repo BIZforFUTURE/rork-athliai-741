@@ -782,7 +782,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F3EDE4",
   },
   header: {
     flexDirection: "row",
@@ -790,9 +790,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderBottomWidth: 1,
-    borderBottomColor: "#050505",
+    borderBottomColor: "rgba(0,0,0,0.06)",
   },
   closeButton: {
     padding: 5,
@@ -800,12 +800,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold" as const,
-    color: "#FFFFFF",
+    color: "#2C2C2C",
   },
   saveButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
@@ -828,17 +828,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     marginBottom: 10,
   },
   nameInput: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 12,
     padding: 15,
     fontSize: 16,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     borderWidth: 1,
-    borderColor: "#1F2329",
+    borderColor: "rgba(0,0,0,0.06)",
   },
   scanGymButton: {
     marginHorizontal: 20,
@@ -887,12 +887,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#4A7C59",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
@@ -904,16 +904,20 @@ const styles = StyleSheet.create({
     fontWeight: "600" as const,
   },
   emptyState: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 16,
     padding: 50,
     alignItems: "center",
     gap: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
   },
   emptyStateText: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   emptyStateSubtext: {
     fontSize: 14,
@@ -923,9 +927,13 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   exerciseCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 12,
     padding: 15,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
   },
   exerciseHeader: {
     flexDirection: "row",
@@ -946,7 +954,7 @@ const styles = StyleSheet.create({
   exerciseNumber: {
     fontSize: 16,
     fontWeight: "bold" as const,
-    color: "#00ADB5",
+    color: "#4A7C59",
   },
   exerciseInfo: {
     flex: 1,
@@ -954,7 +962,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     marginBottom: 4,
   },
   exerciseEquipment: {
@@ -981,7 +989,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 8,
     padding: 5,
     gap: 10,
@@ -989,7 +997,7 @@ const styles = StyleSheet.create({
   paramButton: {
     width: 30,
     height: 30,
-    backgroundColor: "#1F2329",
+    backgroundColor: "#E8E2D9",
     borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
@@ -997,26 +1005,26 @@ const styles = StyleSheet.create({
   paramButtonText: {
     fontSize: 18,
     fontWeight: "600" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   paramValue: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     minWidth: 30,
     textAlign: "center" as const,
   },
   repsInput: {
-    backgroundColor: "#050505",
+    backgroundColor: "#F0EBE3",
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     textAlign: "center" as const,
   },
   pickerContainer: {
     flex: 1,
-    backgroundColor: "#050505",
+    backgroundColor: "#F3EDE4",
   },
   pickerHeader: {
     flexDirection: "row",
@@ -1024,18 +1032,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: "#141820",
+    backgroundColor: "#FEFCF9",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#1F2329",
+    borderBottomColor: "rgba(0,0,0,0.06)",
   },
   cancelButton: {
     minWidth: 70,
   },
   cancelButtonText: {
     fontSize: 16,
-    color: "#8E8E93",
+    color: "#7A7A7A",
     fontWeight: "500" as const,
-    backgroundColor: "#1F2329",
+    backgroundColor: "#F0EBE3",
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
@@ -1044,7 +1052,7 @@ const styles = StyleSheet.create({
   pickerTitle: {
     fontSize: 18,
     fontWeight: "bold" as const,
-    color: "#FFFFFF",
+    color: "#2C2C2C",
   },
   pickerContent: {
     flex: 1,
@@ -1066,14 +1074,16 @@ const styles = StyleSheet.create({
   bodyPartTitle: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#E0E0E0",
+    color: "#2C2C2C",
   },
   exerciseGroupCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#1F2329",
     overflow: "hidden",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
   },
   exercisePickerRow: {
     flexDirection: "row",
@@ -1099,30 +1109,30 @@ const styles = StyleSheet.create({
   exercisePickerName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#00ADB5",
+    color: "#4A7C59",
     marginBottom: 2,
   },
   exercisePickerNameSelected: {
-    color: "#00D4DE",
+    color: "#3A6247",
   },
   exercisePickerTarget: {
     fontSize: 13,
     color: "#5A5A5E",
   },
   selectedBadge: {
-    backgroundColor: "rgba(0, 173, 181, 0.15)",
+    backgroundColor: "rgba(74, 124, 89, 0.12)",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
   },
   selectedBadgeText: {
     fontSize: 11,
-    color: "#00ADB5",
+    color: "#4A7C59",
     fontWeight: "600" as const,
   },
   exerciseDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "#1F2329",
+    backgroundColor: "rgba(0,0,0,0.06)",
     marginLeft: 60,
     marginRight: 16,
   },
@@ -1139,25 +1149,27 @@ const styles = StyleSheet.create({
   savedWorkoutsTitle: {
     fontSize: 18,
     fontWeight: "bold" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
   },
   savedWorkoutsToggle: {
     fontSize: 14,
-    color: "#00ADB5",
+    color: "#4A7C59",
     fontWeight: "600" as const,
   },
   savedWorkoutsList: {
     gap: 10,
   },
   savedWorkoutCard: {
-    backgroundColor: "#171B22",
+    backgroundColor: "#FEFCF9",
     borderRadius: 12,
     padding: 15,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#1F2329",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
   },
   savedWorkoutInfo: {
     flex: 1,
@@ -1165,7 +1177,7 @@ const styles = StyleSheet.create({
   savedWorkoutName: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#F9FAFB",
+    color: "#2C2C2C",
     marginBottom: 4,
   },
   savedWorkoutMeta: {

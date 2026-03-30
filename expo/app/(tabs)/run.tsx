@@ -861,7 +861,7 @@ export default function RunScreen() {
             onRefresh={onRefresh}
             tintColor="#00E5FF"
             colors={["#00E5FF"]}
-            progressBackgroundColor="#1A1D24"
+            progressBackgroundColor="#FEFCF9"
           />
         }
       >
@@ -1427,23 +1427,23 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
   },
   controlBtnPause: {
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#FEFCF9",
     borderWidth: 1,
-    borderColor: "rgba(245,158,11,0.3)",
+    borderColor: "rgba(245,158,11,0.2)",
   },
   controlBtnResume: {
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#FEFCF9",
     borderWidth: 1,
-    borderColor: "rgba(0,173,181,0.3)",
+    borderColor: "rgba(74,124,89,0.2)",
   },
   controlBtnStop: {
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#FEFCF9",
     borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.3)",
+    borderColor: "rgba(239,68,68,0.2)",
   },
   controlBtnDisabled: {
-    backgroundColor: "#0A0A0C",
-    borderColor: "rgba(55,65,81,0.3)",
+    backgroundColor: "#F0EBE3",
+    borderColor: "rgba(0,0,0,0.06)",
     opacity: 0.5,
   },
   controlBtnText: {
