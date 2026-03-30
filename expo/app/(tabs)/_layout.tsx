@@ -5,6 +5,7 @@ import * as Haptics from "expo-haptics";
 import { Platform, View, StyleSheet, Animated } from "react-native";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { BlurView } from "expo-blur";
+import { DS } from "@/constants/theme";
 
 function AnimatedTabIcon({
   children,
@@ -14,18 +15,18 @@ function AnimatedTabIcon({
   focused: boolean;
 }) {
   const scale = useRef(new Animated.Value(1)).current;
-  const glowOpacity = useRef(new Animated.Value(0)).current;
+  const indicatorOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (focused) {
       Animated.parallel([
         Animated.spring(scale, {
-          toValue: 1.15,
-          friction: 5,
+          toValue: 1.1,
+          friction: 6,
           tension: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(glowOpacity, {
+        Animated.timing(indicatorOpacity, {
           toValue: 1,
           duration: 200,
           useNativeDriver: true,
@@ -35,42 +36,42 @@ function AnimatedTabIcon({
       Animated.parallel([
         Animated.spring(scale, {
           toValue: 1,
-          friction: 5,
+          friction: 6,
           tension: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(glowOpacity, {
+        Animated.timing(indicatorOpacity, {
           toValue: 0,
           duration: 150,
           useNativeDriver: true,
         }),
       ]).start();
     }
-  }, [focused, scale, glowOpacity]);
+  }, [focused, scale, indicatorOpacity]);
 
   return (
     <View style={styles.iconOuter}>
-      <Animated.View style={[styles.glowDot, { opacity: glowOpacity }]} />
       <Animated.View style={[styles.iconWrap, { transform: [{ scale }] }]}>
         {children}
       </Animated.View>
+      <Animated.View style={[styles.indicator, { opacity: indicatorOpacity }]} />
     </View>
   );
 }
 
-function GlassTabBackground() {
+function TabBarBackground() {
   if (Platform.OS === 'web') {
     return (
       <View
         style={[
           StyleSheet.absoluteFill,
           {
-            backgroundColor: 'rgba(10,14,26,0.85)',
+            backgroundColor: 'rgba(8,8,8,0.92)',
             borderTopWidth: 1,
-            borderTopColor: 'rgba(255,255,255,0.08)',
+            borderTopColor: DS.border.default,
             // @ts-ignore
-            backdropFilter: 'blur(30px)',
-            WebkitBackdropFilter: 'blur(30px)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
           },
         ]}
       />
@@ -80,7 +81,7 @@ function GlassTabBackground() {
   return (
     <View style={StyleSheet.absoluteFill}>
       <BlurView
-        intensity={60}
+        intensity={50}
         tint="dark"
         style={StyleSheet.absoluteFill}
       />
@@ -88,9 +89,9 @@ function GlassTabBackground() {
         style={[
           StyleSheet.absoluteFill,
           {
-            backgroundColor: 'rgba(10,14,26,0.5)',
+            backgroundColor: 'rgba(8,8,8,0.75)',
             borderTopWidth: 1,
-            borderTopColor: 'rgba(255,255,255,0.08)',
+            borderTopColor: DS.border.default,
           },
         ]}
       />
@@ -103,8 +104,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#00E5FF",
-        tabBarInactiveTintColor: "#3D4560",
+        tabBarActiveTintColor: DS.accent.lime,
+        tabBarInactiveTintColor: DS.slate.light,
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "transparent",
@@ -114,12 +115,12 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontWeight: "600" as const,
-          fontSize: 10,
-          letterSpacing: 1,
+          fontSize: 9,
+          letterSpacing: 1.5,
           textTransform: "uppercase" as const,
           marginTop: 2,
         },
-        tabBarBackground: () => <GlassTabBackground />,
+        tabBarBackground: () => <TabBarBackground />,
       }}
     >
       <Tabs.Screen
@@ -128,7 +129,7 @@ export default function TabLayout() {
           title: t('tab_home'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Home size={22} color={color} />
+              <Home size={20} color={color} strokeWidth={DS.stroke.icon} />
             </AnimatedTabIcon>
           ),
         }}
@@ -146,7 +147,7 @@ export default function TabLayout() {
           title: t('tab_run'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Route size={22} color={color} />
+              <Route size={20} color={color} strokeWidth={DS.stroke.icon} />
             </AnimatedTabIcon>
           ),
         }}
@@ -164,7 +165,7 @@ export default function TabLayout() {
           title: t('tab_fuel'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Utensils size={22} color={color} />
+              <Utensils size={20} color={color} strokeWidth={DS.stroke.icon} />
             </AnimatedTabIcon>
           ),
         }}
@@ -182,7 +183,7 @@ export default function TabLayout() {
           title: t('tab_gym'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Dumbbell size={22} color={color} />
+              <Dumbbell size={20} color={color} strokeWidth={DS.stroke.icon} />
             </AnimatedTabIcon>
           ),
         }}
@@ -200,7 +201,7 @@ export default function TabLayout() {
           title: t('tab_stats'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Trophy size={22} color={color} />
+              <Trophy size={20} color={color} strokeWidth={DS.stroke.icon} />
             </AnimatedTabIcon>
           ),
         }}
@@ -227,12 +228,12 @@ const styles = StyleSheet.create({
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
-  glowDot: {
+  indicator: {
     position: "absolute" as const,
-    bottom: -6,
-    width: 6,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "#00E5FF",
+    bottom: -4,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: DS.accent.lime,
   },
 });

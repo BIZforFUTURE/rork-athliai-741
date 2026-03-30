@@ -7,13 +7,13 @@ export interface RankInfo {
 }
 
 export const RANKS: RankInfo[] = [
-  { title: 'Rookie', emoji: '🌱', color: '#22C55E', glowColor: 'rgba(34, 197, 94, 0.3)', minLevel: 1 },
-  { title: 'Warrior', emoji: '⚔️', color: '#3B82F6', glowColor: 'rgba(59, 130, 246, 0.3)', minLevel: 5 },
-  { title: 'Gladiator', emoji: '🛡️', color: '#8B5CF6', glowColor: 'rgba(139, 92, 246, 0.3)', minLevel: 10 },
-  { title: 'Champion', emoji: '🏆', color: '#F59E0B', glowColor: 'rgba(245, 158, 11, 0.3)', minLevel: 15 },
-  { title: 'Titan', emoji: '⚡', color: '#F97316', glowColor: 'rgba(249, 115, 22, 0.3)', minLevel: 20 },
-  { title: 'Legend', emoji: '🔥', color: '#EF4444', glowColor: 'rgba(239, 68, 68, 0.3)', minLevel: 30 },
-  { title: 'Mythic', emoji: '👑', color: '#E879F9', glowColor: 'rgba(232, 121, 249, 0.3)', minLevel: 40 },
+  { title: 'Rookie', emoji: 'I', color: '#CCFF00', glowColor: 'rgba(204, 255, 0, 0.3)', minLevel: 1 },
+  { title: 'Warrior', emoji: 'II', color: '#818CF8', glowColor: 'rgba(129, 140, 248, 0.3)', minLevel: 5 },
+  { title: 'Gladiator', emoji: 'III', color: '#22D3EE', glowColor: 'rgba(34, 211, 238, 0.3)', minLevel: 10 },
+  { title: 'Champion', emoji: 'IV', color: '#FBBF24', glowColor: 'rgba(251, 191, 36, 0.3)', minLevel: 15 },
+  { title: 'Titan', emoji: 'V', color: '#FB923C', glowColor: 'rgba(251, 146, 60, 0.3)', minLevel: 20 },
+  { title: 'Legend', emoji: 'VI', color: '#F87171', glowColor: 'rgba(248, 113, 113, 0.3)', minLevel: 30 },
+  { title: 'Mythic', emoji: 'VII', color: '#E879F9', glowColor: 'rgba(232, 121, 249, 0.3)', minLevel: 40 },
 ];
 
 export const XP_REWARDS = {

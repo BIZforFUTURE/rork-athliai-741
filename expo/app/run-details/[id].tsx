@@ -262,7 +262,7 @@ export default function RunDetailsScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.dateCard}>
           <View style={styles.dateIconWrap}>
-            <Calendar size={18} color={colors.accent.teal} />
+            <Calendar size={18} color={colors.accent.lime} />
           </View>
           <View style={styles.dateInfo}>
             <Text style={styles.dateText}>{formatDate(run.date)}</Text>
@@ -286,7 +286,7 @@ export default function RunDetailsScreen() {
           <View style={styles.statDivider} />
           <View style={styles.statCard}>
             <View style={[styles.statIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
-              <TrendingUp size={18} color="#F59E0B" />
+              <TrendingUp size={18} color="#FBBF24" />
             </View>
             <Text style={styles.statValue}>{formatPace(run.pace)}</Text>
             <Text style={styles.statLabel}>{t('run_min_mi_lower')}</Text>
@@ -324,7 +324,7 @@ export default function RunDetailsScreen() {
             {routeAlreadySaved ? (
               <BookmarkCheck size={18} color="#10B981" />
             ) : (
-              <Bookmark size={18} color="#00E5FF" />
+              <Bookmark size={18} color="#CCFF00" />
             )}
             <Text
               style={[
@@ -340,7 +340,7 @@ export default function RunDetailsScreen() {
         {run.achievements && run.achievements.length > 0 && (
           <View style={styles.achievementsSection}>
             <View style={styles.achievementsSectionHeader}>
-              <Trophy size={18} color="#F59E0B" />
+              <Trophy size={18} color="#FBBF24" />
               <Text style={styles.achievementsSectionTitle}>Achievements</Text>
               <View style={styles.achievementsCount}>
                 <Text style={styles.achievementsCountText}>{run.achievements.length}</Text>
@@ -371,7 +371,7 @@ export default function RunDetailsScreen() {
         {(!run.achievements || run.achievements.length === 0) && (
           <View style={styles.achievementsSection}>
             <View style={styles.achievementsSectionHeader}>
-              <Trophy size={18} color="#4B5563" />
+              <Trophy size={18} color="#52525B" />
               <Text style={[styles.achievementsSectionTitle, { color: colors.text.tertiary }]}>Achievements</Text>
             </View>
             <View style={styles.emptyAchievements}>
@@ -425,7 +425,7 @@ export default function RunDetailsScreen() {
               onPress={showPhotoOptions}
               testID="add-photo-button"
             >
-              <Plus size={20} color={colors.accent.teal} />
+              <Plus size={20} color={colors.accent.lime} />
               <Text style={styles.addPhotoText}>{t('run_add_photo')}</Text>
             </TouchableOpacity>
           </View>
@@ -446,7 +446,7 @@ export default function RunDetailsScreen() {
                     <Image source={{ uri: photo }} style={styles.photo} />
                   ) : (
                     <View style={[styles.photo, styles.placeholderPhoto]}>
-                      <Camera size={24} color="#9CA3AF" />
+                      <Camera size={24} color="#A1A1AA" />
                     </View>
                   )}
                   <TouchableOpacity
@@ -461,7 +461,7 @@ export default function RunDetailsScreen() {
             </View>
           ) : (
             <View style={styles.emptyPhotos}>
-              <Camera size={48} color="#9CA3AF" />
+              <Camera size={48} color="#A1A1AA" />
               <Text style={styles.emptyPhotosText}>
                 {t('run_no_photos')}
               </Text>
@@ -493,7 +493,7 @@ export default function RunDetailsScreen() {
             />
           ) : (
             <View style={styles.fullScreenImagePlaceholder}>
-              <Camera size={48} color="#9CA3AF" />
+              <Camera size={48} color="#A1A1AA" />
               <Text style={styles.placeholderText}>{t('run_image_not_available')}</Text>
             </View>
           )}
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   editButtonActive: {
-    backgroundColor: colors.accent.teal,
+    backgroundColor: colors.accent.lime,
   },
   content: {
     flex: 1,
@@ -695,7 +695,7 @@ const styles = StyleSheet.create({
   },
   addPhotoText: {
     fontSize: 13,
-    color: colors.accent.teal,
+    color: colors.accent.lime,
     fontWeight: "500" as const,
   },
   photosGrid: {
@@ -794,7 +794,7 @@ const styles = StyleSheet.create({
   saveRouteBtnText: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#00E5FF",
+    color: "#CCFF00",
   },
   saveRouteBtnTextSaved: {
     color: "#10B981",
@@ -827,7 +827,7 @@ const styles = StyleSheet.create({
   achievementsCountText: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#F59E0B",
+    color: "#FBBF24",
   },
   achievementsGrid: {
     gap: 10,

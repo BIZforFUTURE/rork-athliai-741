@@ -262,7 +262,7 @@ export default function WorkoutScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <X size={24} color="#9CA3AF" />
+            <X size={24} color="#A1A1AA" />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.workoutTitle}>{translateWorkoutName(workout.name)}</Text>
@@ -278,7 +278,7 @@ export default function WorkoutScreen() {
         {/* Rest Timer */}
         {isResting && (
           <View style={styles.restTimer}>
-            <Hand size={24} color="#F59E0B" />
+            <Hand size={24} color="#FBBF24" />
             <Text style={styles.restText}>Rest for {formatTime(restTimeLeft)}</Text>
             <TouchableOpacity style={styles.skipButton} onPress={skipRest}>
               <Text style={styles.skipButtonText}>Skip</Text>
@@ -425,7 +425,7 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   header: {
     flexDirection: "row",
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   },
   exerciseCounter: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     marginTop: 2,
   },
   finishButton: {
@@ -477,12 +477,12 @@ const styles = StyleSheet.create({
   restText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#F59E0B",
+    color: "#FBBF24",
   },
   skipButton: {
     paddingHorizontal: 15,
     paddingVertical: 5,
-    backgroundColor: "#F59E0B",
+    backgroundColor: "#FBBF24",
     borderRadius: 15,
   },
   skipButtonText: {
@@ -515,17 +515,17 @@ const styles = StyleSheet.create({
 
   exerciseDetails: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     marginBottom: 8,
   },
   exerciseEquipment: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#71717A",
     marginBottom: 8,
   },
   exerciseDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#71717A",
     lineHeight: 20,
   },
   autoFillContainer: {
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   toggleActive: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
   },
   toggleThumb: {
     width: 26,
@@ -604,12 +604,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     textAlign: "center" as const,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
     color: "#F9FAFB",
   },
   inputLabel: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     minWidth: 30,
   },
   setActions: {
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   autoFillButtonText: {
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     fontSize: 12,
     fontWeight: "600" as const,
   },
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F59E0B",
+    backgroundColor: "#FBBF24",
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
@@ -652,14 +652,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "transparent",
     borderWidth: 2,
-    borderColor: "#00ADB5",
+    borderColor: "#CCFF00",
     borderStyle: "dashed",
     borderRadius: 15,
     paddingVertical: 20,
     gap: 10,
   },
   addSetText: {
-    color: "#00ADB5",
+    color: "#CCFF00",
     fontSize: 14,
     fontWeight: "600" as const,
   },
@@ -685,13 +685,13 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
   },
   navButtonTextDisabled: {
-    color: "#6B7280",
+    color: "#71717A",
   },
   nextButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   restButtonDisabled: {
-    backgroundColor: "#9CA3AF",
+    backgroundColor: "#A1A1AA",
     opacity: 0.6,
   },
 

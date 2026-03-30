@@ -49,26 +49,26 @@ interface SelectedExercise extends ExerciseTemplate {
 }
 
 const BODY_PART_ICONS: Record<BodyPart, React.ReactNode> = {
-  chest: <PersonStanding size={20} color="#9CA3AF" />,
-  back: <PersonStanding size={20} color="#9CA3AF" />,
-  legs: <PersonStanding size={20} color="#9CA3AF" />,
-  shoulders: <PersonStanding size={20} color="#9CA3AF" />,
-  arms: <Zap size={20} color="#9CA3AF" />,
-  core: <Target size={20} color="#9CA3AF" />,
-  cardio: <Footprints size={20} color="#9CA3AF" />,
+  chest: <PersonStanding size={20} color="#A1A1AA" />,
+  back: <PersonStanding size={20} color="#A1A1AA" />,
+  legs: <PersonStanding size={20} color="#A1A1AA" />,
+  shoulders: <PersonStanding size={20} color="#A1A1AA" />,
+  arms: <Zap size={20} color="#A1A1AA" />,
+  core: <Target size={20} color="#A1A1AA" />,
+  cardio: <Footprints size={20} color="#A1A1AA" />,
 };
 
 const CARDIO_EXERCISES = ['treadmill', 'elliptical', 'rowing-machine', 'jump-rope', 'stair-climber'];
 
 function getExerciseIcon(exercise: ExerciseTemplate) {
   if (CARDIO_EXERCISES.includes(exercise.id)) {
-    if (exercise.id === 'treadmill') return <Footprints size={18} color="#00ADB5" />;
-    if (exercise.id === 'elliptical') return <Bike size={18} color="#00ADB5" />;
-    if (exercise.id === 'jump-rope') return <Flame size={18} color="#00ADB5" />;
-    if (exercise.id === 'stair-climber') return <Footprints size={18} color="#00ADB5" />;
-    return <Dumbbell size={18} color="#00ADB5" />;
+    if (exercise.id === 'treadmill') return <Footprints size={18} color="#CCFF00" />;
+    if (exercise.id === 'elliptical') return <Bike size={18} color="#CCFF00" />;
+    if (exercise.id === 'jump-rope') return <Flame size={18} color="#CCFF00" />;
+    if (exercise.id === 'stair-climber') return <Footprints size={18} color="#CCFF00" />;
+    return <Dumbbell size={18} color="#CCFF00" />;
   }
-  return <Dumbbell size={18} color="#00ADB5" />;
+  return <Dumbbell size={18} color="#CCFF00" />;
 }
 
 export default function WorkoutBuilderScreen() {
@@ -529,7 +529,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
           <TextInput
             style={styles.nameInput}
             placeholder={t('builder_name_placeholder')}
-            placeholderTextColor="#6B7280"
+            placeholderTextColor="#71717A"
             value={workoutName}
             onChangeText={setWorkoutName}
           />
@@ -543,11 +543,11 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
         >
           {isScanningGym ? (
             <Animated.View style={[styles.scanGymIconWrap, { opacity: scanPulseAnim }]}>
-              <Camera size={22} color="#00ADB5" />
+              <Camera size={22} color="#CCFF00" />
             </Animated.View>
           ) : (
             <View style={styles.scanGymIconWrap}>
-              <Camera size={22} color="#00ADB5" />
+              <Camera size={22} color="#CCFF00" />
             </View>
           )}
           <View style={styles.scanGymTextWrap}>
@@ -559,9 +559,9 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
             </Text>
           </View>
           {isScanningGym ? (
-            <ActivityIndicator size="small" color="#00ADB5" />
+            <ActivityIndicator size="small" color="#CCFF00" />
           ) : (
-            <Sparkles size={20} color="#00ADB5" />
+            <Sparkles size={20} color="#CCFF00" />
           )}
         </TouchableOpacity>
 
@@ -579,7 +579,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
 
           {selectedExercises.length === 0 ? (
             <View style={styles.emptyState}>
-              <Dumbbell size={40} color="#374151" />
+              <Dumbbell size={40} color="#3F3F46" />
               <Text style={styles.emptyStateText}>{t('builder_no_exercises')}</Text>
               <Text style={styles.emptyStateSubtext}>{t('builder_add_to_start')}</Text>
             </View>
@@ -594,7 +594,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
                         disabled={index === 0}
                         style={[styles.reorderButton, index === 0 && styles.reorderButtonDisabled]}
                       >
-                        <GripVertical size={20} color={index === 0 ? "#4B5563" : "#9CA3AF"} />
+                        <GripVertical size={20} color={index === 0 ? "#52525B" : "#A1A1AA"} />
                       </TouchableOpacity>
                       <Text style={styles.exerciseNumber}>{index + 1}</Text>
                       <TouchableOpacity 
@@ -602,7 +602,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
                         disabled={index === selectedExercises.length - 1}
                         style={[styles.reorderButton, index === selectedExercises.length - 1 && styles.reorderButtonDisabled]}
                       >
-                        <GripVertical size={20} color={index === selectedExercises.length - 1 ? "#4B5563" : "#9CA3AF"} />
+                        <GripVertical size={20} color={index === selectedExercises.length - 1 ? "#52525B" : "#A1A1AA"} />
                       </TouchableOpacity>
                     </View>
                     
@@ -656,7 +656,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
                         value={exercise.reps}
                         onChangeText={(value) => updateExercise(index, 'reps', value)}
                         placeholder="8-12"
-                        placeholderTextColor="#6B7280"
+                        placeholderTextColor="#71717A"
                       />
                     </View>
 
@@ -782,7 +782,7 @@ Return ONLY valid JSON. Use exact exercise names from the provided list.`;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   header: {
     flexDirection: "row",
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   saveButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   scanGymTitle: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#00ADB5",
+    color: "#CCFF00",
     marginBottom: 2,
   },
   scanGymSubtitle: {
@@ -892,7 +892,7 @@ const styles = StyleSheet.create({
   addButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#71717A",
   },
   exercisesList: {
     gap: 15,
@@ -946,7 +946,7 @@ const styles = StyleSheet.create({
   exerciseNumber: {
     fontSize: 16,
     fontWeight: "bold" as const,
-    color: "#00ADB5",
+    color: "#CCFF00",
   },
   exerciseInfo: {
     flex: 1,
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
   },
   exerciseEquipment: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
   },
   deleteButton: {
     padding: 5,
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
   },
   paramLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
     marginBottom: 8,
     textAlign: "center" as const,
   },
@@ -981,7 +981,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
     borderRadius: 8,
     padding: 5,
     gap: 10,
@@ -1007,7 +1007,7 @@ const styles = StyleSheet.create({
     textAlign: "center" as const,
   },
   repsInput: {
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
@@ -1016,7 +1016,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   pickerHeader: {
     flexDirection: "row",
@@ -1033,7 +1033,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     fontWeight: "500" as const,
     backgroundColor: "#1F2329",
     paddingHorizontal: 14,
@@ -1099,7 +1099,7 @@ const styles = StyleSheet.create({
   exercisePickerName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#00ADB5",
+    color: "#CCFF00",
     marginBottom: 2,
   },
   exercisePickerNameSelected: {
@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
   },
   exercisePickerTarget: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#71717A",
   },
   selectedBadge: {
     backgroundColor: "rgba(0, 173, 181, 0.15)",
@@ -1117,7 +1117,7 @@ const styles = StyleSheet.create({
   },
   selectedBadgeText: {
     fontSize: 11,
-    color: "#00ADB5",
+    color: "#CCFF00",
     fontWeight: "600" as const,
   },
   exerciseDivider: {
@@ -1143,7 +1143,7 @@ const styles = StyleSheet.create({
   },
   savedWorkoutsToggle: {
     fontSize: 14,
-    color: "#00ADB5",
+    color: "#CCFF00",
     fontWeight: "600" as const,
   },
   savedWorkoutsList: {
@@ -1170,7 +1170,7 @@ const styles = StyleSheet.create({
   },
   savedWorkoutMeta: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
   },
   savedWorkoutActions: {
     flexDirection: "row",

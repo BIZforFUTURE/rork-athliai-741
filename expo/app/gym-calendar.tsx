@@ -187,7 +187,7 @@ export default function GymCalendarScreen() {
           )}
           {item.status === "rest" && (
             <View style={styles.restBadge}>
-              <Minus size={8} color="#4B5563" strokeWidth={3} />
+              <Minus size={8} color="#52525B" strokeWidth={3} />
             </View>
           )}
           {item.status === "future" && <View style={styles.futureDot} />}
@@ -228,13 +228,13 @@ export default function GymCalendarScreen() {
         <View style={styles.calendarCard}>
           <View style={styles.monthNav}>
             <TouchableOpacity onPress={goToPrevMonth} style={styles.navButton}>
-              <ChevronLeft size={22} color="#9CA3AF" />
+              <ChevronLeft size={22} color="#A1A1AA" />
             </TouchableOpacity>
             <Text style={styles.monthTitle}>
               {MONTH_NAMES[currentMonth]} {currentYear}
             </Text>
             <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
-              <ChevronRight size={22} color="#9CA3AF" />
+              <ChevronRight size={22} color="#A1A1AA" />
             </TouchableOpacity>
           </View>
 
@@ -270,7 +270,7 @@ export default function GymCalendarScreen() {
             </View>
             <View style={styles.legendItem}>
               <View style={styles.restBadge}>
-                <Minus size={10} color="#6B7280" strokeWidth={3} />
+                <Minus size={10} color="#71717A" strokeWidth={3} />
               </View>
               <Text style={styles.legendText}>Rest day</Text>
             </View>
@@ -289,7 +289,7 @@ export default function GymCalendarScreen() {
             <Text style={styles.statLabel}>Missed</Text>
           </View>
           <View style={styles.statBox}>
-            <View style={[styles.statDot, { backgroundColor: "#374151" }]} />
+            <View style={[styles.statDot, { backgroundColor: "#3F3F46" }]} />
             <Text style={styles.statValue}>{stats.restDays}</Text>
             <Text style={styles.statLabel}>Rest Days</Text>
           </View>
@@ -304,7 +304,7 @@ export default function GymCalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   headerGradient: {
     paddingBottom: 16,
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   monthTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.2,
     minWidth: 160,
     textAlign: "center" as const,
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   weekDayHeaderText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#52525B",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
@@ -410,14 +410,14 @@ const styles = StyleSheet.create({
   dayNumber: {
     fontSize: 14,
     fontWeight: "500" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
   },
   dayNumberToday: {
     color: "#FFFFFF",
     fontWeight: "700" as const,
   },
   dayNumberFuture: {
-    color: "#4B5563",
+    color: "#52525B",
   },
   checkBadge: {
     width: 18,
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   legendTitle: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#71717A",
     marginBottom: 12,
     letterSpacing: 0.3,
   },
@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 13,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     fontWeight: "500" as const,
   },
   statsRow: {
@@ -501,12 +501,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 22,
     fontWeight: "700" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   statLabel: {
     fontSize: 11,
-    color: "#6B7280",
+    color: "#71717A",
     marginTop: 3,
     fontWeight: "500" as const,
   },

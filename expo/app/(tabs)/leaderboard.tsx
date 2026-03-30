@@ -147,15 +147,15 @@ function ProfileHeader({ onAvatarPress, _t }: { onAvatarPress: () => void; _t: (
         <Text style={profileStyles.levelText}>Level {xpInfo.level}</Text>
         <View style={profileStyles.miniStats}>
           <View style={profileStyles.miniStat}>
-            <Footprints size={11} color="#00E5FF" />
+            <Footprints size={11} color="#CCFF00" />
             <Text style={profileStyles.miniStatVal}>{recentRuns.length}</Text>
           </View>
           <View style={profileStyles.miniStat}>
-            <Dumbbell size={11} color="#FF6B35" />
+            <Dumbbell size={11} color="#FB923C" />
             <Text style={profileStyles.miniStatVal}>{stats.totalWorkouts}</Text>
           </View>
           <View style={profileStyles.miniStat}>
-            <Activity size={11} color="#BFFF00" />
+            <Activity size={11} color="#818CF8" />
             <Text style={profileStyles.miniStatVal}>{xpInfo.totalXP.toLocaleString()}</Text>
           </View>
         </View>
@@ -189,7 +189,7 @@ function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
-        <Award size={13} color="#F59E0B" />
+        <Award size={13} color="#FBBF24" />
         <Text style={cardStyles.cardHeading}>{t('badges_title')}</Text>
         <View style={badgeStyles.countPill}>
           <Text style={badgeStyles.countText}>{earnedCount}/{BADGES.length} {t('badges_earned')}</Text>
@@ -207,7 +207,7 @@ function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string
                 {earned ? (
                   <Text style={badgeStyles.emoji}>{badge.emoji}</Text>
                 ) : (
-                  <Lock size={16} color="#374151" />
+                  <Lock size={16} color="#3F3F46" />
                 )}
               </View>
               <Text style={[badgeStyles.title, earned && { color: '#E5E7EB' }]} numberOfLines={1}>{t(badge.titleKey)}</Text>
@@ -279,9 +279,9 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
     <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} onPress={onAddWeight}>
       <Animated.View style={[cardStyles.card, { opacity: fadeIn, transform: [{ scale: scaleAnim }] }]}>
         <View style={cardStyles.cardHeader}>
-          <Target size={13} color="#6B7280" />
+          <Target size={13} color="#71717A" />
           <Text style={cardStyles.cardHeading}>{t('stats_weight_goal')}</Text>
-          <ChevronRight size={14} color="#374151" />
+          <ChevronRight size={14} color="#3F3F46" />
         </View>
 
         <View style={goalStyles.statsRow}>
@@ -303,7 +303,7 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
               ) : (
                 <TrendingDown size={12} color={remaining < 0 ? "#10B981" : "#EF4444"} />
               )}
-              <Text style={[goalStyles.statValue, { color: Math.abs(remaining) < 5 ? "#10B981" : "#D1D5DB" }]}>
+              <Text style={[goalStyles.statValue, { color: Math.abs(remaining) < 5 ? "#10B981" : "#D4D4D8" }]}>
                 {isSpanish ? lbsToKg(Math.abs(remaining)).toFixed(1) : Math.abs(remaining).toFixed(1)}<Text style={goalStyles.statUnit}> {isSpanish ? 'kg' : 'lbs'}</Text>
               </Text>
             </View>
@@ -313,7 +313,7 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
         <View style={goalStyles.barOuter}>
           <View style={[goalStyles.barFill, {
             width: `${Math.min(Math.max(progress, 0), 100)}%`,
-            backgroundColor: progress >= 100 ? "#10B981" : "#00ADB5"
+            backgroundColor: progress >= 100 ? "#10B981" : "#CCFF00"
           }]} />
         </View>
         <Text style={goalStyles.barLabel}>
@@ -322,7 +322,7 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
 
         {personalStats.goalEndDate && (
           <View style={goalStyles.dateRow}>
-            <Calendar size={11} color="#4B5563" />
+            <Calendar size={11} color="#52525B" />
             <Text style={goalStyles.dateText}>
               Goal: {new Date(personalStats.goalEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </Text>
@@ -337,13 +337,13 @@ function WeightGoalCard({ onAddWeight, t, isSpanish }: { onAddWeight: () => void
             onPaceStatus === 'behind' && { backgroundColor: "rgba(245,158,11,0.1)" },
           ]}>
             {onPaceStatus === 'on-pace' && <CheckCircle size={12} color="#10B981" />}
-            {onPaceStatus === 'ahead' && <TrendingUp size={12} color="#00ADB5" />}
-            {onPaceStatus === 'behind' && <AlertCircle size={12} color="#F59E0B" />}
+            {onPaceStatus === 'ahead' && <TrendingUp size={12} color="#CCFF00" />}
+            {onPaceStatus === 'behind' && <AlertCircle size={12} color="#FBBF24" />}
             <Text style={[
               goalStyles.paceText,
               onPaceStatus === 'on-pace' && { color: "#10B981" },
-              onPaceStatus === 'ahead' && { color: "#00ADB5" },
-              onPaceStatus === 'behind' && { color: "#F59E0B" },
+              onPaceStatus === 'ahead' && { color: "#CCFF00" },
+              onPaceStatus === 'behind' && { color: "#FBBF24" },
             ]}>
               {onPaceStatus === 'on-pace' && t('stats_on_pace')}
               {onPaceStatus === 'ahead' && t('stats_ahead')}
@@ -384,9 +384,9 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
     ? calculateBMI(personalStats.weight, personalStats.height) : null;
 
   const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { category: 'Underweight', color: '#00ADB5' };
+    if (bmi < 18.5) return { category: 'Underweight', color: '#CCFF00' };
     if (bmi < 25) return { category: 'Normal', color: '#10B981' };
-    if (bmi < 30) return { category: 'Overweight', color: '#F59E0B' };
+    if (bmi < 30) return { category: 'Overweight', color: '#FBBF24' };
     return { category: 'Obese', color: '#EF4444' };
   };
 
@@ -396,10 +396,10 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
     if (!hasStats) return [];
     const result = [
       {
-        icon: <Ruler size={16} color="#00ADB5" />,
+        icon: <Ruler size={16} color="#CCFF00" />,
         value: isSpanish ? formatHeightMetric(personalStats.height!) : (() => { const { feet, inches } = inchesToFeetAndInches(personalStats.height!); return `${feet}'${inches}"`; })(),
         label: t('stats_height'),
-        color: "#00ADB5",
+        color: "#CCFF00",
       },
       {
         icon: <Scale size={16} color="#10B981" />,
@@ -419,10 +419,10 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
     }
     if (personalStats.targetWeight) {
       result.push({
-        icon: <Target size={16} color="#F59E0B" />,
+        icon: <Target size={16} color="#FBBF24" />,
         value: isSpanish ? `${lbsToKg(personalStats.targetWeight!)} kg` : `${personalStats.targetWeight} lbs`,
         label: t('stats_target'),
-        color: "#F59E0B",
+        color: "#FBBF24",
       });
     }
     return result;
@@ -431,7 +431,7 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
-        <User size={13} color="#6B7280" />
+        <User size={13} color="#71717A" />
         <Text style={cardStyles.cardHeading}>{t('stats_physical_stats')}</Text>
         {hasStats && (
           <TouchableOpacity
@@ -441,7 +441,7 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
             }}
             style={physStyles.editBtn}
           >
-            <Edit3 size={12} color="#9CA3AF" />
+            <Edit3 size={12} color="#A1A1AA" />
             <Text style={physStyles.editText}>{t('stats_edit')}</Text>
           </TouchableOpacity>
         )}
@@ -461,7 +461,7 @@ function PhysicalStatsCard({ onEdit, t, isSpanish }: { onEdit: () => void; t: (k
         </View>
       ) : (
         <View style={physStyles.empty}>
-          <Scale size={36} color="#374151" />
+          <Scale size={36} color="#3F3F46" />
           <Text style={physStyles.emptyTitle}>{t('stats_no_stats')}</Text>
           <Text style={physStyles.emptyDesc}>{t('stats_add_stats_desc')}</Text>
           <TouchableOpacity
@@ -511,7 +511,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
-        <TrendingUp size={13} color="#6B7280" />
+        <TrendingUp size={13} color="#71717A" />
         <Text style={cardStyles.cardHeading}>{t('stats_weight_progress')}</Text>
         <TouchableOpacity
           onPress={() => {
@@ -520,7 +520,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
           }}
           style={physStyles.editBtn}
         >
-          <Plus size={12} color="#9CA3AF" />
+          <Plus size={12} color="#A1A1AA" />
           <Text style={physStyles.editText}>{t('stats_log')}</Text>
         </TouchableOpacity>
       </View>
@@ -560,14 +560,14 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
 
       {filteredHistory.length === 0 && (
         <View style={wpStyles.emptyChart}>
-          <Calendar size={24} color="#374151" />
+          <Calendar size={24} color="#3F3F46" />
           <Text style={wpStyles.emptyText}>{t('stats_no_entries')}</Text>
         </View>
       )}
 
       {filteredHistory.length === 1 && (
         <View style={wpStyles.emptyChart}>
-          <BarChart3 size={24} color="#00ADB5" />
+          <BarChart3 size={24} color="#CCFF00" />
           <Text style={wpStyles.emptyTextSub}>{t('stats_add_more')}</Text>
           <View style={wpStyles.singleEntry}>
             <Text style={wpStyles.singleDate}>{new Date(filteredHistory[0].date + 'T00:00:00').toLocaleDateString()}</Text>
@@ -603,14 +603,14 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
               yAxisInterval={1}
               fromZero={false}
               chartConfig={{
-                backgroundColor: '#0E1015',
-                backgroundGradientFrom: '#0E1015',
-                backgroundGradientTo: '#0E1015',
+                backgroundColor: '#0E0E10',
+                backgroundGradientFrom: '#0E0E10',
+                backgroundGradientTo: '#0E0E10',
                 decimalPlaces: 1,
                 color: (opacity = 1) => `rgba(0, 173, 181, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(75, 85, 99, ${opacity})`,
                 style: { borderRadius: 12 },
-                propsForDots: { r: '3', strokeWidth: '1.5', stroke: '#00ADB5', fill: '#0E1015' },
+                propsForDots: { r: '3', strokeWidth: '1.5', stroke: '#CCFF00', fill: '#0E0E10' },
                 propsForBackgroundLines: { strokeDasharray: '', stroke: 'rgba(255,255,255,0.03)', strokeWidth: 1 },
                 propsForLabels: { fontSize: 10 },
               }}
@@ -630,7 +630,7 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     style={wpStyles.historyActionBtn}
                   >
-                    <Edit3 size={13} color="#6B7280" />
+                    <Edit3 size={13} color="#71717A" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => onDeleteWeight(entry)}
@@ -674,22 +674,22 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
   return (
     <Animated.View style={[cardStyles.card, { opacity: fadeIn }]}>
       <View style={cardStyles.cardHeader}>
-        <Shield size={13} color="#6B7280" />
+        <Shield size={13} color="#71717A" />
         <Text style={cardStyles.cardHeading}>{t('stats_data_backup')}</Text>
       </View>
 
       <View style={bkStyles.statsRow}>
         <View style={bkStyles.statPill}>
-          <Footprints size={10} color="#00E5FF" />
-          <Text style={[bkStyles.statText, { color: '#00E5FF' }]}>{runCount} {t('stats_runs_label')}</Text>
+          <Footprints size={10} color="#CCFF00" />
+          <Text style={[bkStyles.statText, { color: '#CCFF00' }]}>{runCount} {t('stats_runs_label')}</Text>
         </View>
         <View style={bkStyles.statPill}>
-          <UtensilsCrossed size={10} color="#BFFF00" />
-          <Text style={[bkStyles.statText, { color: '#BFFF00' }]}>{foodCount} {t('stats_meals')}</Text>
+          <UtensilsCrossed size={10} color="#818CF8" />
+          <Text style={[bkStyles.statText, { color: '#818CF8' }]}>{foodCount} {t('stats_meals')}</Text>
         </View>
         <View style={bkStyles.statPill}>
-          <Dumbbell size={10} color="#FF6B35" />
-          <Text style={[bkStyles.statText, { color: '#FF6B35' }]}>{workoutCount} {t('stats_workouts_count')}</Text>
+          <Dumbbell size={10} color="#FB923C" />
+          <Text style={[bkStyles.statText, { color: '#FB923C' }]}>{workoutCount} {t('stats_workouts_count')}</Text>
         </View>
       </View>
 
@@ -707,7 +707,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
           style={{ flex: 1 }}
         >
           <Animated.View style={[bkStyles.exportBtn, { transform: [{ scale: exportScale }] }]}>
-            {exportCopied ? <Check size={16} color="#10B981" /> : <Download size={16} color="#00E5FF" />}
+            {exportCopied ? <Check size={16} color="#10B981" /> : <Download size={16} color="#CCFF00" />}
             <Text style={[bkStyles.exportText, exportCopied && { color: '#10B981' }]}>
               {exportCopied ? t('stats_copied') : t('stats_export')}
             </Text>
@@ -720,7 +720,7 @@ function DataBackupCard({ onExport, onImport, exportCopied, runCount, foodCount,
           style={{ flex: 1 }}
         >
           <Animated.View style={bkStyles.importBtn}>
-            <Upload size={16} color="#F59E0B" />
+            <Upload size={16} color="#FBBF24" />
             <Text style={bkStyles.importText}>{t('stats_restore')}</Text>
           </Animated.View>
         </Pressable>
@@ -951,7 +951,7 @@ export default function PersonalStatsScreen() {
   if (appLoading) {
     return (
       <View style={[styles.container, { justifyContent: "center" as const, alignItems: "center" as const }]}>
-        <Text style={{ fontSize: 16, color: "#4B5563" }}>Loading...</Text>
+        <Text style={{ fontSize: 16, color: "#52525B" }}>Loading...</Text>
       </View>
     );
   }
@@ -968,17 +968,17 @@ export default function PersonalStatsScreen() {
           </View>
           <ScrollView style={modalStyles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <View style={backupModalStyles.infoBox}>
-              <Shield size={16} color="#F59E0B" />
+              <Shield size={16} color="#FBBF24" />
               <Text style={backupModalStyles.infoText}>{t('stats_restore_info')}</Text>
             </View>
             <TouchableOpacity style={backupModalStyles.pasteBtn} onPress={handlePasteFromClipboard} activeOpacity={0.7}>
-              <ClipboardPaste size={16} color="#00E5FF" />
+              <ClipboardPaste size={16} color="#CCFF00" />
               <Text style={backupModalStyles.pasteBtnText}>{t('stats_paste_clipboard')}</Text>
             </TouchableOpacity>
             <TextInput
               style={backupModalStyles.textArea}
               placeholder={t('stats_paste_backup')}
-              placeholderTextColor="#374151"
+              placeholderTextColor="#3F3F46"
               value={importText}
               onChangeText={(t) => { setImportText(t); setImportStatus('idle'); setImportError(''); }}
               multiline
@@ -997,7 +997,7 @@ export default function PersonalStatsScreen() {
               </View>
             )}
             <TouchableOpacity
-              style={[modalStyles.saveBtn, { backgroundColor: '#F59E0B', opacity: importText.trim() ? 1 : 0.4 }]}
+              style={[modalStyles.saveBtn, { backgroundColor: '#FBBF24', opacity: importText.trim() ? 1 : 0.4 }]}
               onPress={handleImport}
               disabled={!importText.trim() || importStatus === 'success'}
             >
@@ -1021,12 +1021,12 @@ export default function PersonalStatsScreen() {
               <Text style={modalStyles.sectionLabel}>{t('stats_height')}</Text>
               <View style={modalStyles.heightRow}>
                 <View style={modalStyles.heightField}>
-                  <TextInput style={modalStyles.input} placeholder={isSpanish ? "170" : "5"} placeholderTextColor="#374151" value={tempHeightFeet} onChangeText={setTempHeightFeet} keyboardType="numeric" />
+                  <TextInput style={modalStyles.input} placeholder={isSpanish ? "170" : "5"} placeholderTextColor="#3F3F46" value={tempHeightFeet} onChangeText={setTempHeightFeet} keyboardType="numeric" />
                   <Text style={modalStyles.heightUnit}>{isSpanish ? 'cm' : 'ft'}</Text>
                 </View>
                 {!isSpanish && (
                   <View style={modalStyles.heightField}>
-                    <TextInput style={modalStyles.input} placeholder="10" placeholderTextColor="#374151" value={tempHeightInches} onChangeText={setTempHeightInches} keyboardType="numeric" />
+                    <TextInput style={modalStyles.input} placeholder="10" placeholderTextColor="#3F3F46" value={tempHeightInches} onChangeText={setTempHeightInches} keyboardType="numeric" />
                     <Text style={modalStyles.heightUnit}>in</Text>
                   </View>
                 )}
@@ -1034,15 +1034,15 @@ export default function PersonalStatsScreen() {
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_current_weight_lbs')}</Text>
-              <TextInput style={modalStyles.input} placeholder={isSpanish ? "70" : "150"} placeholderTextColor="#374151" value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" />
+              <TextInput style={modalStyles.input} placeholder={isSpanish ? "70" : "150"} placeholderTextColor="#3F3F46" value={tempWeight} onChangeText={setTempWeight} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_target_weight_lbs')}</Text>
-              <TextInput style={modalStyles.input} placeholder={isSpanish ? "65" : "140"} placeholderTextColor="#374151" value={tempTargetWeight} onChangeText={setTempTargetWeight} keyboardType="numeric" />
+              <TextInput style={modalStyles.input} placeholder={isSpanish ? "65" : "140"} placeholderTextColor="#3F3F46" value={tempTargetWeight} onChangeText={setTempTargetWeight} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_age')}</Text>
-              <TextInput style={modalStyles.input} placeholder="25" placeholderTextColor="#374151" value={tempAge} onChangeText={setTempAge} keyboardType="numeric" />
+              <TextInput style={modalStyles.input} placeholder="25" placeholderTextColor="#3F3F46" value={tempAge} onChangeText={setTempAge} keyboardType="numeric" />
             </View>
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_gender')}</Text>
@@ -1082,7 +1082,7 @@ export default function PersonalStatsScreen() {
           <ScrollView style={modalStyles.body} keyboardShouldPersistTaps="handled">
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{editingWeightEntry ? new Date(editingWeightEntry.date + 'T00:00:00').toLocaleDateString() : ''}</Text>
-              <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={editWeight} onChangeText={setEditWeight} keyboardType="numeric" autoFocus />
+              <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#3F3F46" value={editWeight} onChangeText={setEditWeight} keyboardType="numeric" autoFocus />
             </View>
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleSaveEditWeight}>
               <Text style={modalStyles.saveBtnText}>{t('common_save')}</Text>
@@ -1103,7 +1103,7 @@ export default function PersonalStatsScreen() {
           <ScrollView style={modalStyles.body} keyboardShouldPersistTaps="handled">
             <View style={modalStyles.section}>
               <Text style={modalStyles.sectionLabel}>{t('stats_todays_weight')}</Text>
-              <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#374151" value={newWeight} onChangeText={setNewWeight} keyboardType="numeric" autoFocus />
+              <TextInput style={modalStyles.input} placeholder="150.5" placeholderTextColor="#3F3F46" value={newWeight} onChangeText={setNewWeight} keyboardType="numeric" autoFocus />
             </View>
             <TouchableOpacity style={modalStyles.saveBtn} onPress={handleAddWeight}>
               <Text style={modalStyles.saveBtnText}>{t('stats_add_entry')}</Text>
@@ -1133,9 +1133,9 @@ export default function PersonalStatsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#00E5FF"
-            colors={["#00E5FF"]}
-            progressBackgroundColor="#1A1D24"
+            tintColor="#CCFF00"
+            colors={["#CCFF00"]}
+            progressBackgroundColor="#121214"
           />
         }
       >
@@ -1162,23 +1162,23 @@ export default function PersonalStatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   topBar: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   pageTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F0F4FF",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   pageSubtitle: {
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#6B7280",
+    color: "#71717A",
     marginTop: 2,
   },
   scroll: {
@@ -1210,7 +1210,7 @@ const cardStyles = StyleSheet.create({
   cardHeading: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     flex: 1,
   },
 });
@@ -1232,20 +1232,20 @@ const goalStyles = StyleSheet.create({
   statLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#52525B",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
   statValue: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#D1D5DB",
+    color: "#D4D4D8",
     letterSpacing: -0.3,
   },
   statUnit: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#4B5563",
+    color: "#52525B",
   },
   divider: {
     width: 1,
@@ -1266,7 +1266,7 @@ const goalStyles = StyleSheet.create({
   barLabel: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#52525B",
     textAlign: "center" as const,
     marginBottom: 8,
   },
@@ -1280,7 +1280,7 @@ const goalStyles = StyleSheet.create({
   dateText: {
     fontSize: 11,
     fontWeight: "500" as const,
-    color: "#4B5563",
+    color: "#52525B",
   },
   paceTag: {
     flexDirection: "row" as const,
@@ -1324,7 +1324,7 @@ const physStyles = StyleSheet.create({
   editText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1349,13 +1349,13 @@ const physStyles = StyleSheet.create({
   cellValue: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.3,
   },
   cellLabel: {
     fontSize: 10,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#52525B",
     textTransform: "uppercase" as const,
     letterSpacing: 0.3,
   },
@@ -1367,12 +1367,12 @@ const physStyles = StyleSheet.create({
   emptyTitle: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   emptyDesc: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#374151",
+    color: "#3F3F46",
     textAlign: "center" as const,
     marginBottom: 8,
   },
@@ -1380,7 +1380,7 @@ const physStyles = StyleSheet.create({
     flexDirection: "row" as const,
     alignItems: "center" as const,
     gap: 6,
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
@@ -1410,7 +1410,7 @@ const wpStyles = StyleSheet.create({
   progressLabel: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#4B5563",
+    color: "#52525B",
   },
   periodRow: {
     flexDirection: "row" as const,
@@ -1425,12 +1425,12 @@ const wpStyles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.03)",
   },
   periodBtnActive: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
   },
   periodText: {
     fontSize: 12,
     fontWeight: "700" as const,
-    color: "#4B5563",
+    color: "#52525B",
   },
   periodTextActive: {
     color: "#FFFFFF",
@@ -1442,12 +1442,12 @@ const wpStyles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 13,
-    color: "#374151",
+    color: "#3F3F46",
     fontWeight: "500" as const,
   },
   emptyTextSub: {
     fontSize: 12,
-    color: "#374151",
+    color: "#3F3F46",
     fontWeight: "500" as const,
   },
   singleEntry: {
@@ -1463,13 +1463,13 @@ const wpStyles = StyleSheet.create({
   },
   singleDate: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
     fontWeight: "500" as const,
   },
   singleWeight: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D1D5DB",
+    color: "#D4D4D8",
   },
   recentHeader: {
     marginTop: 10,
@@ -1478,7 +1478,7 @@ const wpStyles = StyleSheet.create({
   recentTitle: {
     fontSize: 12,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#71717A",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
@@ -1494,13 +1494,13 @@ const wpStyles = StyleSheet.create({
   },
   historyDate: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
     fontWeight: "500" as const,
   },
   historyWeight: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D1D5DB",
+    color: "#D4D4D8",
   },
   historyActions: {
     flexDirection: "row" as const,
@@ -1516,7 +1516,7 @@ const wpStyles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   header: {
     flexDirection: "row" as const,
@@ -1530,7 +1530,7 @@ const modalStyles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.3,
   },
   closeBtn: {
@@ -1540,7 +1540,7 @@ const modalStyles = StyleSheet.create({
   closeText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   body: {
     flex: 1,
@@ -1553,18 +1553,18 @@ const modalStyles = StyleSheet.create({
   sectionLabel: {
     fontSize: 12,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#71717A",
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
   },
@@ -1581,7 +1581,7 @@ const modalStyles = StyleSheet.create({
     right: 16,
     top: 14,
     fontSize: 15,
-    color: "#4B5563",
+    color: "#52525B",
     fontWeight: "600" as const,
   },
   genderRow: {
@@ -1592,25 +1592,25 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center" as const,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
   },
   genderBtnActive: {
-    backgroundColor: "#00ADB5",
-    borderColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
+    borderColor: "#CCFF00",
   },
   genderText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   genderTextActive: {
     color: "#FFFFFF",
   },
   saveBtn: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center" as const,
@@ -1646,7 +1646,7 @@ const bkStyles = StyleSheet.create({
   desc: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#4B5563",
+    color: "#52525B",
     lineHeight: 18,
     marginBottom: 14,
   },
@@ -1668,7 +1668,7 @@ const bkStyles = StyleSheet.create({
   exportText: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#00E5FF",
+    color: "#CCFF00",
   },
   importBtn: {
     flexDirection: "row" as const,
@@ -1684,7 +1684,7 @@ const bkStyles = StyleSheet.create({
   importText: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: "#F59E0B",
+    color: "#FBBF24",
   },
 });
 
@@ -1726,11 +1726,11 @@ const profileStyles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     borderWidth: 2,
-    borderColor: "#0E1015",
+    borderColor: "#0E0E10",
   },
   infoCol: {
     flex: 1,
@@ -1753,7 +1753,7 @@ const profileStyles = StyleSheet.create({
   levelText: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   miniStats: {
     flexDirection: "row" as const,
@@ -1768,7 +1768,7 @@ const profileStyles = StyleSheet.create({
   miniStatVal: {
     fontSize: 12,
     fontWeight: "700" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
   },
 });
 
@@ -1818,19 +1818,19 @@ const badgeStyles = StyleSheet.create({
   title: {
     fontSize: 10,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#71717A",
     textAlign: "center" as const,
   },
   desc: {
     fontSize: 9,
     fontWeight: "500" as const,
-    color: "#374151",
+    color: "#3F3F46",
     textAlign: "center" as const,
   },
   lockedHint: {
     fontSize: 12,
     fontWeight: "500" as const,
-    color: "#374151",
+    color: "#3F3F46",
     textAlign: "center" as const,
     marginTop: 10,
   },
@@ -1839,7 +1839,7 @@ const badgeStyles = StyleSheet.create({
 const avatarModalStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   header: {
     flexDirection: "row" as const,
@@ -1853,7 +1853,7 @@ const avatarModalStyles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     letterSpacing: -0.3,
   },
   closeBtn: {
@@ -1863,7 +1863,7 @@ const avatarModalStyles = StyleSheet.create({
   closeText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   grid: {
     flexDirection: "row" as const,
@@ -1917,7 +1917,7 @@ const backupModalStyles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: "500" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     lineHeight: 19,
   },
   pasteBtn: {
@@ -1935,15 +1935,15 @@ const backupModalStyles = StyleSheet.create({
   pasteBtnText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#00E5FF",
+    color: "#CCFF00",
   },
   textArea: {
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 13,
-    color: "#F3F4F6",
+    color: "#E8E8E8",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.04)",
     minHeight: 160,

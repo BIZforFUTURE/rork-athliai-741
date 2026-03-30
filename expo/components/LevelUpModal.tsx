@@ -12,6 +12,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { getRankForLevel, getRandomLevelUpMessageKey, RANK_TRANSLATION_KEYS } from '@/constants/xp';
 import { useLanguage } from '@/providers/LanguageProvider';
+import { DS } from '@/constants/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const PARTICLE_COUNT = 24;
@@ -51,7 +52,7 @@ function Particle({ delay, color }: { delay: number; color: string }) {
     return () => clearTimeout(timer);
   }, [delay, opacity, scale, translateX, translateY, targetX, targetY]);
 
-  const size = Math.random() * 8 + 4;
+  const size = Math.random() * 6 + 3;
 
   return (
     <Animated.View
@@ -88,9 +89,9 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
   const translatedRankTitle = RANK_TRANSLATION_KEYS[rank.title] ? t(RANK_TRANSLATION_KEYS[rank.title]) : rank.title;
 
   const particleColors = useMemo(() => {
-    const base = [rank.color, '#FFFFFF', '#FFD700', '#00E5FF'];
+    const base = [DS.accent.lime, '#E8E8E8', DS.accent.periwinkle, DS.accent.amber];
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => base[i % base.length]);
-  }, [rank.color]);
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -154,13 +155,12 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
             },
           ]}
         >
-          <Animated.View style={[styles.glowRing, { borderColor: rank.color, opacity: glowPulse }]} />
+          <Animated.View style={[styles.glowRing, { borderColor: DS.accent.lime, opacity: glowPulse }]} />
 
           <Text style={styles.levelUpLabel}>LEVEL UP</Text>
 
           <Animated.View style={{ transform: [{ scale: levelNumberScale }] }}>
-            <Text style={styles.emoji}>{rank.emoji}</Text>
-            <Text style={[styles.levelNumber, { color: rank.color }]}>{level}</Text>
+            <Text style={styles.levelNumber}>{level}</Text>
           </Animated.View>
 
           <Animated.View
@@ -170,12 +170,12 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
               alignItems: 'center' as const,
             }}
           >
-            <View style={[styles.rankBadge, { backgroundColor: rank.color + '20', borderColor: rank.color + '40' }]}>
-              <Text style={[styles.rankTitle, { color: rank.color }]}>{translatedRankTitle}</Text>
+            <View style={styles.rankBadge}>
+              <Text style={styles.rankTitle}>{translatedRankTitle}</Text>
             </View>
 
             {isNewRank && (
-              <Text style={styles.newRankText}>{t('levelup_new_rank')}</Text>
+              <Text style={styles.newRankText}>NEW RANK UNLOCKED</Text>
             )}
 
             <Text style={styles.message}>{message}</Text>
@@ -183,7 +183,7 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
 
           <Animated.View style={{ opacity: buttonOpacity, width: '100%' as const }}>
             <TouchableOpacity
-              style={[styles.continueButton, { backgroundColor: rank.color }]}
+              style={styles.continueButton}
               onPress={() => {
                 if (Platform.OS !== 'web') {
                   void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -192,7 +192,7 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
               }}
               activeOpacity={0.8}
             >
-              <Text style={styles.continueText}>Continue</Text>
+              <Text style={styles.continueText}>CONTINUE</Text>
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>
@@ -204,7 +204,7 @@ export default function LevelUpModal({ visible, level, previousLevel, onDismiss 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -220,12 +220,12 @@ const styles = StyleSheet.create({
   },
   card: {
     width: SCREEN_WIDTH * 0.82,
-    backgroundColor: '#141820',
-    borderRadius: 28,
+    backgroundColor: DS.bg.card,
+    borderRadius: DS.radius.hero,
     padding: 36,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#1F2937',
+    borderColor: DS.border.default,
     overflow: 'visible',
   },
   glowRing: {
@@ -234,20 +234,15 @@ const styles = StyleSheet.create({
     left: -4,
     right: -4,
     bottom: -4,
-    borderRadius: 32,
-    borderWidth: 2,
+    borderRadius: 24,
+    borderWidth: 1,
   },
   levelUpLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#6B7280',
-    letterSpacing: 4,
+    color: DS.accent.lime,
+    letterSpacing: 6,
     marginBottom: 16,
-  },
-  emoji: {
-    fontSize: 48,
-    textAlign: 'center',
-    marginBottom: 4,
   },
   levelNumber: {
     fontSize: 72,
@@ -255,32 +250,37 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: -3,
     lineHeight: 80,
+    color: DS.text.primary,
   },
   rankBadge: {
     paddingHorizontal: 20,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: DS.radius.pill,
     borderWidth: 1,
     marginTop: 12,
     marginBottom: 8,
+    backgroundColor: DS.accent.lime + '10',
+    borderColor: DS.accent.lime + '30',
   },
   rankTitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '800',
-    letterSpacing: 1,
+    letterSpacing: 3,
     textTransform: 'uppercase',
+    color: DS.accent.lime,
   },
   newRankText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#FFD700',
+    fontSize: 11,
+    fontWeight: '700',
+    color: DS.accent.amber,
     marginTop: 4,
     marginBottom: 4,
+    letterSpacing: 2,
   },
   message: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '500',
-    color: '#9CA3AF',
+    color: DS.text.tertiary,
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 22,
@@ -288,14 +288,15 @@ const styles = StyleSheet.create({
   continueButton: {
     width: '100%',
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: DS.radius.button,
     alignItems: 'center',
     marginTop: 28,
+    backgroundColor: DS.accent.lime,
   },
   continueText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: 0.3,
+    fontSize: 14,
+    fontWeight: '800',
+    color: DS.text.inverse,
+    letterSpacing: 2,
   },
 });

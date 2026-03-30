@@ -205,7 +205,7 @@ function GymLoadingScreen({ t }: { t: (key: any, params?: Record<string, string 
             </Animated.View>
             <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
               <View style={styles.loadingIconCircle}>
-                <Dumbbell size={44} color="#00ADB5" strokeWidth={2.5} />
+                <Dumbbell size={44} color="#CCFF00" strokeWidth={2.5} />
               </View>
             </Animated.View>
           </View>
@@ -267,7 +267,7 @@ function GymLoadingScreen({ t }: { t: (key: any, params?: Record<string, string 
 
         <View style={styles.loadingTipCard}>
           <View style={styles.loadingTipHeader}>
-            <Sparkles size={14} color="#00ADB5" />
+            <Sparkles size={14} color="#CCFF00" />
             <Text style={styles.loadingTipHeaderText}>{t('gym_did_you_know')}</Text>
           </View>
           <Animated.Text
@@ -399,7 +399,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
                   { transform: [{ scale: pulseAnim }] },
                 ]}
               >
-                <Moon size={28} color="#7DD3FC" />
+                <Moon size={28} color="#818CF8" />
               </Animated.View>
             )}
           </View>
@@ -413,7 +413,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
                 : `"${RECOVERY_QUOTES[quoteIndex]}"`}
             </Text>
             <View style={styles.restDayNextRow}>
-              <Calendar size={13} color="#38BDF8" />
+              <Calendar size={13} color="#818CF8" />
               <Text style={styles.nextWorkoutText}>
                 {t('gym_next_workout', { day: nextWorkoutDay })}
               </Text>
@@ -427,7 +427,7 @@ function RestDayCard({ hasCompletedToday, nextWorkoutDay, onViewPlan, t }: {
         onPress={onViewPlan}
       >
         <Text style={styles.viewPlanButtonText}>{t('gym_view_full_plan')}</Text>
-        <ChevronRight size={16} color="#38BDF8" />
+        <ChevronRight size={16} color="#818CF8" />
       </TouchableOpacity>
     </View>
   );
@@ -1108,7 +1108,7 @@ Format as JSON:
               <View style={styles.subtitleRow}>
                 {todaysWorkout ? (
                   <View style={styles.statusBadge}>
-                    <Flame size={12} color="#FF6B35" />
+                    <Flame size={12} color="#FB923C" />
                     <Text style={styles.statusBadgeText}>{t('gym_ready_train')}</Text>
                   </View>
                 ) : generatedPlan ? (
@@ -1145,7 +1145,7 @@ Format as JSON:
                 }}
                 testID="gym-calendar-btn"
               >
-                <Calendar size={20} color="#00ADB5" />
+                <Calendar size={20} color="#CCFF00" />
               </TouchableOpacity>
               {generatedPlan && (
                 <TouchableOpacity
@@ -1157,7 +1157,7 @@ Format as JSON:
                     setShowSettings(true);
                   }}
                 >
-                  <Settings size={20} color="#6B7280" />
+                  <Settings size={20} color="#71717A" />
                 </TouchableOpacity>
               )}
             </View>
@@ -1177,8 +1177,8 @@ Format as JSON:
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#00ADB5"
-            colors={["#00ADB5"]}
+            tintColor="#CCFF00"
+            colors={["#CCFF00"]}
             progressBackgroundColor="#1A1D24"
           />
         }
@@ -1331,7 +1331,7 @@ Format as JSON:
                   <Text style={styles.buildSmallTitle}>{t('gym_build_custom')}</Text>
                   <Text style={styles.buildSmallSub}>{t('gym_pick_exercises')}</Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#52525B" />
               </View>
             </TouchableOpacity>
           </View>
@@ -1368,8 +1368,8 @@ Format as JSON:
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
-          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label={t('gym_streak')} delay={0} color="#FF6B35" />
-          <AnimatedStatCard icon={Calendar} value={stats.weeklyWorkouts} label={t('gym_this_week')} delay={80} color="#00ADB5" />
+          <AnimatedStatCard icon={Flame} value={stats.workoutStreak} label={t('gym_streak')} delay={0} color="#FB923C" />
+          <AnimatedStatCard icon={Calendar} value={stats.weeklyWorkouts} label={t('gym_this_week')} delay={80} color="#CCFF00" />
           <AnimatedStatCard icon={TrendingUp} value={stats.totalWorkouts} label={t('gym_total')} delay={160} color="#8B5CF6" />
         </View>
 
@@ -1397,7 +1397,7 @@ Format as JSON:
               {workoutLogs.length === 0 ? (
                 <View style={styles.emptyState}>
                   <View style={styles.emptyIconWrap}>
-                    <Dumbbell size={36} color="#4B5563" />
+                    <Dumbbell size={36} color="#52525B" />
                   </View>
                   <Text style={styles.emptyStateText}>{t('gym_no_workouts')}</Text>
                   <Text style={styles.emptyStateSubtext}>
@@ -1496,7 +1496,7 @@ Format as JSON:
                 resetQuiz();
               }}
             >
-              <X size={24} color="#9CA3AF" />
+              <X size={24} color="#A1A1AA" />
             </TouchableOpacity>
             <Text style={styles.quizTitle}>{t('gym_fitness_assessment')}</Text>
             <View style={styles.quizProgress}>
@@ -1594,11 +1594,11 @@ Format as JSON:
                     >
                       {isScanningEquipment ? (
                         <Animated.View style={[styles.scanIconWrap, { opacity: scanPulseAnim }]}> 
-                          <Camera size={22} color="#00ADB5" />
+                          <Camera size={22} color="#CCFF00" />
                         </Animated.View>
                       ) : (
                         <View style={styles.scanIconWrap}>
-                          <Camera size={22} color="#00ADB5" />
+                          <Camera size={22} color="#CCFF00" />
                         </View>
                       )}
                       <View style={styles.scanTextWrap}>
@@ -1607,7 +1607,7 @@ Format as JSON:
                         </Text>
                         <Text style={styles.scanButtonSubtitle}>AI detects your available equipment</Text>
                       </View>
-                      <ChevronRight size={20} color="#00ADB5" />
+                      <ChevronRight size={20} color="#CCFF00" />
                     </TouchableOpacity>
                   )}
                   {quizQuestions[currentQuizStep].options.map((option, index) => (
@@ -1618,7 +1618,7 @@ Format as JSON:
                       onPress={() => handleQuizAnswer(option)}
                     >
                       <Text style={styles.optionText}>{option}</Text>
-                      <ChevronRight size={20} color="#4B5563" />
+                      <ChevronRight size={20} color="#52525B" />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -1636,7 +1636,7 @@ Format as JSON:
                   multiline
                   numberOfLines={6}
                   placeholder={t('gym_goals_placeholder')}
-                  placeholderTextColor="#4B5563"
+                  placeholderTextColor="#52525B"
                   value={customGoals}
                   onChangeText={setCustomGoals}
                   textAlignVertical="top"
@@ -1691,7 +1691,7 @@ Format as JSON:
                   setShowCustomPlan(false);
                 }}
               >
-                <X size={24} color="#9CA3AF" />
+                <X size={24} color="#A1A1AA" />
               </TouchableOpacity>
             </View>
 
@@ -1768,7 +1768,7 @@ Format as JSON:
                   setShowQuiz(true);
                 }}
               >
-                <RotateCcw size={18} color="#9CA3AF" />
+                <RotateCcw size={18} color="#A1A1AA" />
                 <Text style={styles.newPlanButtonText}>{t('gym_create_new_plan')}</Text>
               </TouchableOpacity>
             </View>
@@ -1796,7 +1796,7 @@ Format as JSON:
                   setShowSettings(false);
                 }}
               >
-                <X size={22} color="#6B7280" />
+                <X size={22} color="#71717A" />
               </TouchableOpacity>
             </View>
 
@@ -1812,7 +1812,7 @@ Format as JSON:
                 }}
               >
                 <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(0, 173, 181, 0.12)' }]}>
-                  <Calendar size={20} color="#00ADB5" />
+                  <Calendar size={20} color="#CCFF00" />
                 </View>
                 <View style={styles.settingsOptionText}>
                   <Text style={styles.settingsOptionTitle}>{t('gym_adjust_workout_days')}</Text>
@@ -1820,7 +1820,7 @@ Format as JSON:
                     {t('gym_change_days')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#52525B" />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1843,7 +1843,7 @@ Format as JSON:
                     {t('gym_browse_days')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#52525B" />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1857,7 +1857,7 @@ Format as JSON:
                 }}
               >
                 <View style={[styles.settingsIconWrap, { backgroundColor: 'rgba(245, 158, 11, 0.12)' }]}>
-                  <RotateCcw size={20} color="#F59E0B" />
+                  <RotateCcw size={20} color="#FBBF24" />
                 </View>
                 <View style={styles.settingsOptionText}>
                   <Text style={styles.settingsOptionTitle}>{t('gym_retake')}</Text>
@@ -1865,7 +1865,7 @@ Format as JSON:
                     {t('gym_generate_new')}
                   </Text>
                 </View>
-                <ChevronRight size={18} color="#4B5563" />
+                <ChevronRight size={18} color="#52525B" />
               </TouchableOpacity>
             </View>
           </View>
@@ -1889,7 +1889,7 @@ Format as JSON:
                 setShowDayAdjustment(false);
               }}
             >
-              <X size={24} color="#9CA3AF" />
+              <X size={24} color="#A1A1AA" />
             </TouchableOpacity>
           </View>
 
@@ -1968,7 +1968,7 @@ Format as JSON:
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   header: {
     paddingHorizontal: 20,
@@ -1984,7 +1984,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: "800" as const,
-    color: "#F0F4FF",
+    color: "#E8E8E8",
     letterSpacing: -0.5,
   },
   subtitleRow: {
@@ -2006,11 +2006,11 @@ const styles = StyleSheet.create({
   statusBadgeText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#FF6B35",
+    color: "#FB923C",
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#71717A",
     fontWeight: "500" as const,
   },
   headerRight: {
@@ -2067,15 +2067,15 @@ const styles = StyleSheet.create({
   },
   weekDayDotToday: {
     borderWidth: 2,
-    borderColor: "#00ADB5",
+    borderColor: "#CCFF00",
   },
   weekDayLetter: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#4B5563",
+    color: "#52525B",
   },
   weekDayLetterActive: {
-    color: "#00ADB5",
+    color: "#CCFF00",
   },
   weekDayLetterToday: {
     color: "#FFFFFF",
@@ -2093,7 +2093,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#00ADB5",
+    shadowColor: "#CCFF00",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
@@ -2179,7 +2179,7 @@ const styles = StyleSheet.create({
   },
   buildSmallSub: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
     marginTop: 1,
   },
 
@@ -2275,7 +2275,7 @@ const styles = StyleSheet.create({
   restDayStar: {
     position: "absolute" as const,
     borderRadius: 2,
-    backgroundColor: "#7DD3FC",
+    backgroundColor: "#818CF8",
   },
   restDayInner: {
     flexDirection: "row" as const,
@@ -2317,7 +2317,7 @@ const styles = StyleSheet.create({
   },
   nextWorkoutText: {
     fontSize: 12,
-    color: "#38BDF8",
+    color: "#818CF8",
     fontWeight: "600" as const,
   },
   viewPlanButton: {
@@ -2332,7 +2332,7 @@ const styles = StyleSheet.create({
   },
   viewPlanButtonText: {
     fontSize: 14,
-    color: "#38BDF8",
+    color: "#818CF8",
     fontWeight: "600" as const,
   },
 
@@ -2367,7 +2367,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 11,
-    color: "#6B7280",
+    color: "#71717A",
     marginTop: 2,
     fontWeight: "500" as const,
   },
@@ -2395,7 +2395,7 @@ const styles = StyleSheet.create({
   },
   toggleButtonText: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
     fontWeight: "600" as const,
   },
 
@@ -2420,11 +2420,11 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 16,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
   },
   emptyStateSubtext: {
     fontSize: 13,
-    color: "#4B5563",
+    color: "#52525B",
     marginTop: 4,
     textAlign: "center" as const,
   },
@@ -2465,7 +2465,7 @@ const styles = StyleSheet.create({
   },
   recentWorkoutDate: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
   },
   recentWorkoutMetrics: {
     flexDirection: "row" as const,
@@ -2479,11 +2479,11 @@ const styles = StyleSheet.create({
   recentMetricValue: {
     fontSize: 14,
     fontWeight: "700" as const,
-    color: "#D1D5DB",
+    color: "#D4D4D8",
   },
   recentMetricLabel: {
     fontSize: 10,
-    color: "#4B5563",
+    color: "#52525B",
     marginTop: 1,
   },
   recentMetricDivider: {
@@ -2494,7 +2494,7 @@ const styles = StyleSheet.create({
 
   quizContainer: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   quizHeader: {
     flexDirection: "row" as const,
@@ -2516,7 +2516,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     fontWeight: "600" as const,
   },
   quizProgressBar: {
@@ -2528,7 +2528,7 @@ const styles = StyleSheet.create({
   },
   quizProgressFill: {
     height: "100%",
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     borderRadius: 2,
   },
   quizContent: {
@@ -2592,7 +2592,7 @@ const styles = StyleSheet.create({
   scanButtonTitle: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#00ADB5",
+    color: "#CCFF00",
     marginBottom: 2,
   },
   scanButtonSubtitle: {
@@ -2621,7 +2621,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   generateButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -2660,19 +2660,19 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   daySelectionButtonSelected: {
-    backgroundColor: "#00ADB5",
-    borderColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
+    borderColor: "#CCFF00",
   },
   daySelectionText: {
     fontSize: 14,
     fontWeight: "600" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   daySelectionTextSelected: {
     color: "#FFFFFF",
   },
   continueButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     flexDirection: "row" as const,
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -2688,7 +2688,7 @@ const styles = StyleSheet.create({
 
   modalContainer: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   modalHeader: {
     flexDirection: "row" as const,
@@ -2761,7 +2761,7 @@ const styles = StyleSheet.create({
   dayNumberText: {
     fontSize: 16,
     fontWeight: "800" as const,
-    color: "#00ADB5",
+    color: "#CCFF00",
   },
   dayTitleBlock: {
     flex: 1,
@@ -2780,7 +2780,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     alignItems: "center" as const,
     justifyContent: "center" as const,
   },
@@ -2807,7 +2807,7 @@ const styles = StyleSheet.create({
   exerciseIndexText: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#6B7280",
+    color: "#71717A",
   },
   exerciseHeader: {
     flexDirection: "row" as const,
@@ -2818,7 +2818,7 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 15,
     fontWeight: "600" as const,
-    color: "#D1D5DB",
+    color: "#D4D4D8",
     flex: 1,
   },
   exerciseMetaRow: {
@@ -2840,7 +2840,7 @@ const styles = StyleSheet.create({
   },
   exerciseDescription: {
     fontSize: 12,
-    color: "#4B5563",
+    color: "#52525B",
     marginTop: 6,
     lineHeight: 18,
   },
@@ -2873,7 +2873,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.08)",
   },
   newPlanButtonText: {
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     fontSize: 15,
     fontWeight: "600" as const,
   },
@@ -2961,7 +2961,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   saveDaysButton: {
-    backgroundColor: "#00ADB5",
+    backgroundColor: "#CCFF00",
     alignItems: "center" as const,
     justifyContent: "center" as const,
     paddingVertical: 16,

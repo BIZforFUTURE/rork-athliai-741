@@ -100,7 +100,7 @@ const DAILY_CHALLENGES: DailyChallenge[] = [
     icon: "squats",
     difficulty: "medium",
     xpReward: 30,
-    color: "#8B5CF6",
+    color: "#818CF8",
     accentColor: "#A78BFA",
   },
   {
@@ -118,7 +118,7 @@ const DAILY_CHALLENGES: DailyChallenge[] = [
     icon: "wallsit",
     difficulty: "medium",
     xpReward: 25,
-    color: "#F59E0B",
+    color: "#FBBF24",
     accentColor: "#FBBF24",
   },
   {
@@ -542,19 +542,19 @@ export default function DailyChallengeScreen() {
         <Animated.View style={{ transform: [{ translateY: contentSlide }], opacity: contentOpacity }}>
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
-              <Flame size={18} color="#FF6B35" />
+              <Flame size={18} color="#FB923C" />
               <Text style={styles.statValue}>{challengeData.streak}</Text>
               <Text style={styles.statLabel}>{t("daily_challenge_streak" as any)}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Trophy size={18} color="#F59E0B" />
+              <Trophy size={18} color="#FBBF24" />
               <Text style={styles.statValue}>{challengeData.bestStreak}</Text>
               <Text style={styles.statLabel}>{t("daily_challenge_best_streak" as any)}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Star size={18} color="#8B5CF6" />
+              <Star size={18} color="#818CF8" />
               <Text style={styles.statValue}>{challengeData.totalCompleted}</Text>
               <Text style={styles.statLabel}>{t("daily_challenge_total" as any)}</Text>
             </View>
@@ -601,7 +601,7 @@ export default function DailyChallengeScreen() {
                   setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
                 }}
                 placeholder={isSpanish ? "Escribe aquí..." : "Type here..."}
-                placeholderTextColor="#4B5563"
+                placeholderTextColor="#52525B"
                 autoCapitalize="none"
                 autoCorrect={false}
                 onFocus={() => {
@@ -646,7 +646,7 @@ export default function DailyChallengeScreen() {
                     disabled={!textMatches}
                     testID="hold-confirm-btn"
                   >
-                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#4B5563"} />
+                    <Trophy size={20} color={textMatches ? "#FFFFFF" : "#52525B"} />
                     <Text style={[
                       styles.holdButtonText,
                       !textMatches && styles.holdButtonTextDisabled,
@@ -672,7 +672,7 @@ export default function DailyChallengeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0E1A",
+    backgroundColor: "#080808",
   },
   header: {
     flexDirection: "row",
@@ -861,7 +861,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 11,
-    color: "#6B7280",
+    color: "#71717A",
     fontWeight: "500" as const,
     textAlign: "center",
   },
@@ -963,12 +963,12 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
     textAlign: "center",
   },
   confirmRequired: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#71717A",
     textAlign: "center",
     fontStyle: "italic",
     marginBottom: 4,
@@ -1026,6 +1026,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   holdButtonTextDisabled: {
-    color: "#4B5563",
+    color: "#52525B",
   },
 });

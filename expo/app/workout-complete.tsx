@@ -71,8 +71,8 @@ export default function WorkoutCompleteScreen() {
       );
     };
     
-    scheduleMotivationalNotification();
-  }, [workoutName, scheduleWorkoutReminder]);
+    void scheduleMotivationalNotification();
+  }, [workoutName, scheduleWorkoutReminder, scaleAnim, fadeAnim, slideAnim]);
 
   const handleContinue = () => {
     router.push('/(tabs)/home');
@@ -147,7 +147,7 @@ export default function WorkoutCompleteScreen() {
             
             <View style={styles.statCard}>
               <View style={styles.statIconContainer}>
-                <Flame size={24} color="#F59E0B" />
+                <Flame size={24} color="#FBBF24" />
               </View>
               <Text style={styles.statNumber}>{calories}</Text>
               <Text style={styles.statLabel}>{t('workout_complete_calories')}</Text>
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#71717A",
     fontWeight: "600",
   },
   achievementContainer: {
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   achievementDescription: {
     fontSize: 16,
-    color: "#6B7280",
+    color: "#71717A",
     lineHeight: 24,
   },
   buttonContainer: {

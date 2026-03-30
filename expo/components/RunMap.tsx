@@ -122,7 +122,7 @@ export default function RunMap({
       return (
         <View style={[styles.fullscreenMapContainer, { width: screenWidth, height: screenHeight * 0.55 }]}>
           <View style={[styles.webMapFallback, { flex: 1 }]}>
-            <Map size={32} color="#4B5563" />
+            <Map size={32} color="#52525B" />
             <Text style={styles.webMapText}>Map view available on mobile devices</Text>
             <Text style={styles.webMapSubtext}>Your route is being tracked</Text>
           </View>
@@ -158,7 +158,7 @@ export default function RunMap({
       return (
         <View style={[styles.fullscreenMapContainer, { width: screenWidth, height: screenHeight * 0.55 }]}>
           <View style={[styles.webMapFallback, { flex: 1 }]}>
-            <Map size={32} color="#4B5563" />
+            <Map size={32} color="#52525B" />
             <Text style={styles.webMapText}>Map view available on mobile devices</Text>
           </View>
         </View>
@@ -220,14 +220,14 @@ export default function RunMap({
             key: "guide-start-marker",
             coordinate: guideRoute[0],
             title: "Route Start",
-            pinColor: "#8B5CF6",
+            pinColor: "#818CF8",
             identifier: "guide-start-marker",
           }),
           guideRoute && guideRoute.length > 1 && Marker && React.createElement(Marker, {
             key: "guide-end-marker",
             coordinate: guideRoute[guideRoute.length - 1],
             title: "Route End",
-            pinColor: "#8B5CF6",
+            pinColor: "#818CF8",
             identifier: "guide-end-marker",
           }),
           routeCoordinates.length > 1 && Polyline && React.createElement(Polyline, {
@@ -294,20 +294,20 @@ export default function RunMap({
           key: "guide-start-marker",
           coordinate: guideRoute[0],
           title: "Route Start",
-          pinColor: "#8B5CF6",
+          pinColor: "#818CF8",
           identifier: "guide-start-marker",
         }),
         guideRoute && guideRoute.length > 1 && Marker && React.createElement(Marker, {
           key: "guide-end-marker",
           coordinate: guideRoute[guideRoute.length - 1],
           title: "Route End",
-          pinColor: "#8B5CF6",
+          pinColor: "#818CF8",
           identifier: "guide-end-marker",
         }),
         routeCoordinates.length > 1 && Polyline && React.createElement(Polyline, {
           key: "route-polyline",
           coordinates: routeCoordinates,
-          strokeColor: isHistorical ? "#8B5CF6" : "#3B82F6",
+          strokeColor: isHistorical ? "#818CF8" : "#3B82F6",
           strokeWidth: 4,
           lineCap: "round",
           lineJoin: "round",
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     padding: 15,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: "#E8E8E8",
   },
   mapTitle: {
     fontSize: 16,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     height: 200,
   },
   webMapFallback: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: "#E8E8E8",
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
@@ -374,10 +374,10 @@ const styles = StyleSheet.create({
   webMapText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#71717A",
   },
   webMapSubtext: {
     fontSize: 14,
-    color: "#9CA3AF",
+    color: "#A1A1AA",
   },
 });
