@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import Purchases from "react-native-purchases";
 import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   X,
@@ -42,7 +41,6 @@ export default function PaywallScreen() {
   const { t } = useLanguage();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-
 
   const annualPackage = currentOffering?.availablePackages?.[0];
   const priceString = annualPackage?.product?.priceString ?? "$19.99";
@@ -106,27 +104,20 @@ export default function PaywallScreen() {
   if (isLoading) {
     return (
       <View style={[styles.loadingContainer, { paddingTop: insets.top }]}>
-        <ActivityIndicator size="large" color={colors.accent.lime} />
+        <ActivityIndicator size="large" color={colors.accent.sage} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={["#050505", "#0C1E1F", "#050505"]}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      />
-
       <TouchableOpacity
         style={[styles.closeButton, { top: insets.top + 12 }]}
         onPress={handleClose}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         testID="paywall-close"
       >
-        <X size={22} color={colors.text.secondary} />
+        <X size={20} color={colors.text.secondary} />
       </TouchableOpacity>
 
       <KeyboardAvoidingView
@@ -134,51 +125,40 @@ export default function PaywallScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={0}
       >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
-        ]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.crownContainer}>
-          <LinearGradient
-            colors={["#00ADB5", "#0891B2"]}
-            style={styles.crownBadge}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Crown size={32} color="#FFF" />
-          </LinearGradient>
-        </View>
-
-        <Text style={styles.title}>{t('paywall_unlock')}</Text>
-        <Text style={styles.subtitle}>
-          {t('paywall_subtitle')}
-        </Text>
-
-        <View style={styles.featuresContainer}>
-          {FEATURES_EN.map((feature, index) => (
-            <View key={index} style={styles.featureRow}>
-              <View style={styles.featureIconWrap}>
-                <feature.icon size={20} color={colors.accent.lime} />
-              </View>
-              <View style={styles.featureTextWrap}>
-                <Text style={styles.featureTitle}>{t(feature.titleKey)}</Text>
-                <Text style={styles.featureDesc}>{t(feature.descKey)}</Text>
-              </View>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.crownContainer}>
+            <View style={styles.crownBadge}>
+              <Crown size={30} color="#FFFFFF" />
             </View>
-          ))}
-        </View>
+          </View>
 
-        <View style={styles.priceCard}>
-          <LinearGradient
-            colors={["#1F2937", "#0C1E1F"]}
-            style={styles.priceCardGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-          >
+          <Text style={styles.title}>{t('paywall_unlock')}</Text>
+          <Text style={styles.subtitle}>
+            {t('paywall_subtitle')}
+          </Text>
+
+          <View style={styles.featuresContainer}>
+            {FEATURES_EN.map((feature, index) => (
+              <View key={index} style={styles.featureRow}>
+                <View style={styles.featureIconWrap}>
+                  <feature.icon size={20} color={colors.accent.sage} />
+                </View>
+                <View style={styles.featureTextWrap}>
+                  <Text style={styles.featureTitle}>{t(feature.titleKey)}</Text>
+                  <Text style={styles.featureDesc}>{t(feature.descKey)}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.priceCard}>
             <View style={styles.priceRow}>
               <View>
                 <Text style={styles.planName}>{t('paywall_annual')}</Text>
@@ -192,67 +172,59 @@ export default function PaywallScreen() {
             <View style={styles.weeklyBreakdownRow}>
               <Text style={styles.weeklyBreakdownLabel}>$0.38/week</Text>
             </View>
-          </LinearGradient>
-        </View>
+          </View>
 
-        <TouchableOpacity
-          style={styles.purchaseButton}
-          onPress={handlePurchase}
-          disabled={isPurchasing}
-          activeOpacity={0.85}
-          testID="paywall-purchase"
-        >
-          <LinearGradient
-            colors={["#00ADB5", "#0891B2"]}
-            style={styles.purchaseButtonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
+          <TouchableOpacity
+            style={styles.purchaseButton}
+            onPress={handlePurchase}
+            disabled={isPurchasing}
+            activeOpacity={0.85}
+            testID="paywall-purchase"
           >
             {isPurchasing ? (
               <ActivityIndicator size="small" color="#FFF" />
             ) : (
-              <>
+              <View style={styles.purchaseButtonInner}>
                 <Text style={styles.purchaseButtonText}>
                   {t('paywall_start_trial')}
                 </Text>
                 <ChevronRight size={20} color="#FFF" />
-              </>
-            )}
-          </LinearGradient>
-        </TouchableOpacity>
-
-        <View style={styles.bottomLinks}>
-          <TouchableOpacity
-            style={styles.restoreButton}
-            onPress={handleRestore}
-            disabled={isRestoring}
-            testID="paywall-restore"
-          >
-            {isRestoring ? (
-              <ActivityIndicator size="small" color={colors.text.secondary} />
-            ) : (
-              <Text style={styles.restoreText}>{t('paywall_restore')}</Text>
+              </View>
             )}
           </TouchableOpacity>
 
-          {Platform.OS !== "web" && (
-            <>
-              <View style={styles.linkDivider} />
-              <TouchableOpacity
-                style={styles.restoreButton}
-                onPress={handleRedeemPromo}
-                testID="paywall-promo"
-              >
-                <Text style={styles.restoreText}>{t('paywall_redeem')}</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
+          <View style={styles.bottomLinks}>
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={handleRestore}
+              disabled={isRestoring}
+              testID="paywall-restore"
+            >
+              {isRestoring ? (
+                <ActivityIndicator size="small" color={colors.text.secondary} />
+              ) : (
+                <Text style={styles.restoreText}>{t('paywall_restore')}</Text>
+              )}
+            </TouchableOpacity>
 
-        <Text style={styles.legalText}>
-          {t('paywall_legal')}
-        </Text>
-      </ScrollView>
+            {Platform.OS !== "web" && (
+              <>
+                <View style={styles.linkDivider} />
+                <TouchableOpacity
+                  style={styles.restoreButton}
+                  onPress={handleRedeemPromo}
+                  testID="paywall-promo"
+                >
+                  <Text style={styles.restoreText}>{t('paywall_redeem')}</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+
+          <Text style={styles.legalText}>
+            {t('paywall_legal')}
+          </Text>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -276,7 +248,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: colors.background.tertiary,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -284,16 +256,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
     alignItems: "center",
   },
   crownContainer: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   crownBadge: {
     width: 72,
     height: 72,
     borderRadius: 36,
+    backgroundColor: colors.accent.sage,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -309,12 +282,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.text.secondary,
     textAlign: "center" as const,
-    marginBottom: 32,
+    marginBottom: 36,
+    lineHeight: 22,
   },
   featuresContainer: {
     width: "100%",
-    marginBottom: 28,
-    gap: 16,
+    marginBottom: 32,
+    gap: 20,
   },
   featureRow: {
     flexDirection: "row" as const,
@@ -322,12 +296,14 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   featureIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(0, 173, 181, 0.1)",
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: colors.background.secondary,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.light.border,
   },
   featureTextWrap: {
     flex: 1,
@@ -340,19 +316,18 @@ const styles = StyleSheet.create({
   },
   featureDesc: {
     fontSize: 13,
-    color: colors.text.tertiary,
+    color: colors.text.secondary,
+    lineHeight: 18,
   },
   priceCard: {
     width: "100%",
-    borderRadius: 16,
-    overflow: "hidden" as const,
+    borderRadius: 18,
+    backgroundColor: colors.background.secondary,
+    paddingVertical: 20,
+    paddingHorizontal: 22,
     borderWidth: 1,
-    borderColor: "rgba(0, 173, 181, 0.25)",
+    borderColor: colors.light.border,
     marginBottom: 20,
-  },
-  priceCardGradient: {
-    paddingVertical: 18,
-    paddingHorizontal: 20,
   },
   priceRow: {
     flexDirection: "row" as const,
@@ -366,8 +341,8 @@ const styles = StyleSheet.create({
   },
   trialText: {
     fontSize: 13,
-    color: colors.accent.lime,
-    marginTop: 2,
+    color: colors.accent.sage,
+    marginTop: 3,
     fontWeight: "500" as const,
   },
   priceRight: {
@@ -375,32 +350,47 @@ const styles = StyleSheet.create({
     alignItems: "baseline",
   },
   priceAmount: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "800" as const,
     color: colors.text.primary,
   },
   pricePeriod: {
     fontSize: 14,
     color: colors.text.secondary,
-    marginLeft: 2,
+    marginLeft: 3,
+  },
+  weeklyBreakdownRow: {
+    flexDirection: "row" as const,
+    justifyContent: "center",
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.light.border,
+  },
+  weeklyBreakdownLabel: {
+    fontSize: 13,
+    fontWeight: "600" as const,
+    color: colors.accent.sage,
   },
   purchaseButton: {
     width: "100%",
-    borderRadius: 14,
-    overflow: "hidden" as const,
+    borderRadius: 16,
+    backgroundColor: colors.accent.sage,
+    paddingVertical: 17,
     marginBottom: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  purchaseButtonGradient: {
+  purchaseButtonInner: {
     flexDirection: "row" as const,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
     gap: 6,
   },
   purchaseButtonText: {
     fontSize: 17,
     fontWeight: "700" as const,
-    color: "#FFF",
+    color: "#FFFFFF",
   },
   bottomLinks: {
     flexDirection: "row" as const,
@@ -420,17 +410,7 @@ const styles = StyleSheet.create({
   linkDivider: {
     width: 1,
     height: 14,
-    backgroundColor: "rgba(255,255,255,0.15)",
-  },
-  weeklyBreakdownRow: {
-    flexDirection: "row" as const,
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  weeklyBreakdownLabel: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: colors.accent.lime,
+    backgroundColor: colors.light.border,
   },
   legalText: {
     fontSize: 11,

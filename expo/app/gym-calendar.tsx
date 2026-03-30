@@ -12,7 +12,7 @@ import { ChevronLeft, ChevronRight, Check, X, Minus, ArrowLeft } from "lucide-re
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useApp } from "@/providers/AppProvider";
-import { LinearGradient } from "expo-linear-gradient";
+import colors from "@/constants/colors";
 
 const DAYS_OF_WEEK = ["S", "M", "T", "W", "T", "F", "S"];
 const MONTH_NAMES = [
@@ -187,7 +187,7 @@ export default function GymCalendarScreen() {
           )}
           {item.status === "rest" && (
             <View style={styles.restBadge}>
-              <Minus size={8} color="#3A3A3C" strokeWidth={3} />
+              <Minus size={8} color={colors.text.tertiary} strokeWidth={3} />
             </View>
           )}
           {item.status === "future" && <View style={styles.futureDot} />}
@@ -198,27 +198,22 @@ export default function GymCalendarScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <LinearGradient
-        colors={["#050505", "#0C1E1F", "#050505"]}
-        style={styles.headerGradient}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => {
-              if (Platform.OS !== "web") {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }
-              router.back();
-            }}
-            testID="gym-calendar-back"
-          >
-            <ArrowLeft size={22} color="#E0E0E0" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Workout Calendar</Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </LinearGradient>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => {
+            if (Platform.OS !== "web") {
+              void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+            router.back();
+          }}
+          testID="gym-calendar-back"
+        >
+          <ArrowLeft size={22} color={colors.text.primary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Workout Calendar</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
       <ScrollView
         style={styles.scrollView}
@@ -228,13 +223,13 @@ export default function GymCalendarScreen() {
         <View style={styles.calendarCard}>
           <View style={styles.monthNav}>
             <TouchableOpacity onPress={goToPrevMonth} style={styles.navButton}>
-              <ChevronLeft size={22} color="#8E8E93" />
+              <ChevronLeft size={22} color={colors.text.secondary} />
             </TouchableOpacity>
             <Text style={styles.monthTitle}>
               {MONTH_NAMES[currentMonth]} {currentYear}
             </Text>
             <TouchableOpacity onPress={goToNextMonth} style={styles.navButton}>
-              <ChevronRight size={22} color="#8E8E93" />
+              <ChevronRight size={22} color={colors.text.secondary} />
             </TouchableOpacity>
           </View>
 
@@ -270,7 +265,7 @@ export default function GymCalendarScreen() {
             </View>
             <View style={styles.legendItem}>
               <View style={styles.restBadge}>
-                <Minus size={10} color="#5A5A5E" strokeWidth={3} />
+                <Minus size={10} color={colors.text.tertiary} strokeWidth={3} />
               </View>
               <Text style={styles.legendText}>Rest day</Text>
             </View>
@@ -279,17 +274,17 @@ export default function GymCalendarScreen() {
 
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
-            <View style={[styles.statDot, { backgroundColor: "#10B981" }]} />
+            <View style={[styles.statDot, { backgroundColor: colors.accent.sage }]} />
             <Text style={styles.statValue}>{stats.completed}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
           <View style={styles.statBox}>
-            <View style={[styles.statDot, { backgroundColor: "#EF4444" }]} />
+            <View style={[styles.statDot, { backgroundColor: colors.accent.coral }]} />
             <Text style={styles.statValue}>{stats.missed}</Text>
             <Text style={styles.statLabel}>Missed</Text>
           </View>
           <View style={styles.statBox}>
-            <View style={[styles.statDot, { backgroundColor: "#2C2C2E" }]} />
+            <View style={[styles.statDot, { backgroundColor: colors.light.border }]} />
             <Text style={styles.statValue}>{stats.restDays}</Text>
             <Text style={styles.statLabel}>Rest Days</Text>
           </View>
@@ -304,10 +299,7 @@ export default function GymCalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#050505",
-  },
-  headerGradient: {
-    paddingBottom: 16,
+    backgroundColor: colors.background.primary,
   },
   header: {
     flexDirection: "row",
@@ -315,19 +307,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 12,
+    paddingBottom: 16,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: colors.background.secondary,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.light.border,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#FFFFFF",
+    color: colors.text.primary,
     letterSpacing: -0.3,
   },
   scrollView: {
@@ -335,15 +330,15 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 4,
   },
   calendarCard: {
-    backgroundColor: "#151921",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: 22,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: colors.light.border,
   },
   monthNav: {
     flexDirection: "row",
@@ -356,14 +351,16 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: colors.background.secondary,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.light.border,
   },
   monthTitle: {
     fontSize: 18,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: colors.text.primary,
     letterSpacing: -0.2,
     minWidth: 160,
     textAlign: "center" as const,
@@ -380,7 +377,7 @@ const styles = StyleSheet.create({
   weekDayHeaderText: {
     fontSize: 12,
     fontWeight: "600" as const,
-    color: "#3A3A3C",
+    color: colors.text.tertiary,
     textTransform: "uppercase" as const,
     letterSpacing: 0.5,
   },
@@ -403,27 +400,27 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   dayInnerToday: {
-    backgroundColor: "rgba(0, 173, 181, 0.10)",
+    backgroundColor: "rgba(74, 124, 89, 0.08)",
     borderWidth: 1.5,
-    borderColor: "rgba(0, 173, 181, 0.30)",
+    borderColor: "rgba(74, 124, 89, 0.25)",
   },
   dayNumber: {
     fontSize: 14,
     fontWeight: "500" as const,
-    color: "#8E8E93",
+    color: colors.text.primary,
   },
   dayNumberToday: {
-    color: "#FFFFFF",
+    color: colors.accent.sage,
     fontWeight: "700" as const,
   },
   dayNumberFuture: {
-    color: "#3A3A3C",
+    color: colors.text.tertiary,
   },
   checkBadge: {
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "#10B981",
+    backgroundColor: colors.accent.sage,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -431,7 +428,7 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "#EF4444",
+    backgroundColor: colors.accent.coral,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -439,7 +436,7 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: "rgba(55, 65, 81, 0.30)",
+    backgroundColor: colors.background.tertiary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -447,20 +444,20 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    backgroundColor: colors.light.border,
   },
   legendCard: {
     marginTop: 14,
-    backgroundColor: "#151921",
+    backgroundColor: "#FFFFFF",
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: colors.light.border,
   },
   legendTitle: {
     fontSize: 13,
     fontWeight: "600" as const,
-    color: "#5A5A5E",
+    color: colors.text.secondary,
     marginBottom: 12,
     letterSpacing: 0.3,
   },
@@ -475,7 +472,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 13,
-    color: "#8E8E93",
+    color: colors.text.secondary,
     fontWeight: "500" as const,
   },
   statsRow: {
@@ -485,12 +482,12 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: "#151921",
+    backgroundColor: "#FFFFFF",
     borderRadius: 18,
     padding: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: colors.light.border,
   },
   statDot: {
     width: 7,
@@ -501,12 +498,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 22,
     fontWeight: "700" as const,
-    color: "#E8E8E8",
+    color: colors.text.primary,
     letterSpacing: -0.5,
   },
   statLabel: {
     fontSize: 11,
-    color: "#5A5A5E",
+    color: colors.text.secondary,
     marginTop: 3,
     fontWeight: "500" as const,
   },
