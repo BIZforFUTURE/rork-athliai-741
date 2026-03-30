@@ -1463,13 +1463,13 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 4,
     marginTop: 6,
-    shadowColor: "#4A7C59",
+    shadowColor: "#2C2C2C",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.12,
     shadowRadius: 12,
   },
   startBtnInner: {
-    backgroundColor: "#4A7C59",
+    backgroundColor: "#2C2C2C",
     borderRadius: 20,
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -1478,7 +1478,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   startBtnText: {
-    color: "#FFFFFF",
+    color: "#F5F5F0",
     fontSize: 18,
     fontWeight: "800" as const,
     letterSpacing: 2,
@@ -1493,7 +1493,7 @@ const styles = StyleSheet.create({
   startBtnXpText: {
     fontSize: 11,
     fontWeight: "700" as const,
-    color: "#4A7C59",
+    color: "#7A7A7A",
   },
   modalOverlay: {
     flex: 1,

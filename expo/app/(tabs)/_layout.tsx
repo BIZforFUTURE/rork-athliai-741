@@ -75,7 +75,7 @@ export default function TabLayout() {
           title: t('tab_home'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Home size={22} color={color} fill={focused ? color : 'transparent'} strokeWidth={1.5} />
+              <Home size={22} color={color} strokeWidth={1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -93,7 +93,7 @@ export default function TabLayout() {
           title: t('tab_run'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Route size={22} color={color} fill={focused ? color : 'transparent'} strokeWidth={1.5} />
+              <Route size={22} color={color} strokeWidth={1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -111,7 +111,7 @@ export default function TabLayout() {
           title: t('tab_fuel'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Utensils size={22} color={color} fill={focused ? color : 'transparent'} strokeWidth={1.5} />
+              <Utensils size={22} color={color} strokeWidth={1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -129,7 +129,7 @@ export default function TabLayout() {
           title: t('tab_gym'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Dumbbell size={22} color={color} fill={focused ? color : 'transparent'} strokeWidth={1.5} />
+              <Dumbbell size={22} color={color} strokeWidth={1.5} />
             </AnimatedTabIcon>
           ),
         }}
@@ -147,7 +147,7 @@ export default function TabLayout() {
           title: t('tab_stats'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Trophy size={22} color={color} fill={focused ? color : 'transparent'} strokeWidth={1.5} />
+              <Trophy size={22} color={color} strokeWidth={1.5} />
             </AnimatedTabIcon>
           ),
         }}
