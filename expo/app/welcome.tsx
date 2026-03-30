@@ -14,7 +14,6 @@ import {
 import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Activity, Dumbbell, Bell, Utensils, Target, Calendar, Sparkles, Check, Camera, Star } from 'lucide-react-native';
 import { Linking } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -174,7 +173,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
       });
     }, 4500);
     return () => clearInterval(interval);
-  }, [tipOpacity, tipTranslateY]);
+  }, [tipOpacity, tipTranslateY, FITNESS_TIPS.length]);
 
   useEffect(() => {
     const pulseAnimation = Animated.loop(
@@ -304,39 +303,39 @@ const slides: WelcomeSlide[] = [
     subtitle: 'Your AI Fitness Companion',
     description: 'Track runs, workouts, and nutrition with intelligent insights that adapt to your goals.',
     icon: null,
-    gradient: ['#F3EDE4', '#E8E2D9'],
+    gradient: ['#FFFFFF', '#F8F9FA'],
   },
   {
     id: 2,
     title: 'Track Everything',
-    subtitle: 'Runs • Workouts • Nutrition',
+    subtitle: 'Runs \u2022 Workouts \u2022 Nutrition',
     description: 'Monitor your complete fitness journey in one place. Every rep, every mile, every meal counts.',
-    icon: <Activity size={80} color="#00ADB5" />,
-    gradient: ['#050505', '#111827'],
+    icon: <Activity size={72} color="#00ADB5" strokeWidth={1.5} />,
+    gradient: ['#FFFFFF', '#F8F9FA'],
   },
   {
     id: 3,
     title: 'Personalized Plans',
     subtitle: 'Built for You',
     description: 'AI-generated workout and nutrition plans that match your fitness level, goals, and lifestyle.',
-    icon: <Dumbbell size={80} color="#00ADB5" />,
-    gradient: ['#050505', '#111827'],
+    icon: <Dumbbell size={72} color="#00ADB5" strokeWidth={1.5} />,
+    gradient: ['#FFFFFF', '#F8F9FA'],
   },
   {
     id: 4,
     title: 'Stay Consistent',
     subtitle: 'Build Lasting Habits',
     description: 'Smart reminders and streak tracking keep you motivated and on track every single day.',
-    icon: <Bell size={80} color="#00ADB5" />,
-    gradient: ['#050505', '#111827'],
+    icon: <Bell size={72} color="#00ADB5" strokeWidth={1.5} />,
+    gradient: ['#FFFFFF', '#F8F9FA'],
   },
   {
     id: 5,
     title: 'Enjoying AthliAI?',
     subtitle: 'Help Us Grow',
     description: 'A 5-star rating means the world to us and helps other athletes discover AthliAI.',
-    icon: <Star size={80} color="#FFD700" fill="#FFD700" />,
-    gradient: ['#050505', '#111827'],
+    icon: <Star size={72} color="#FFD700" fill="#FFD700" />,
+    gradient: ['#FFFFFF', '#F8F9FA'],
   },
 ];
 
@@ -1088,13 +1087,8 @@ Return ONLY valid JSON, no markdown or code blocks.`;
         : ((currentGymStep + 1) / (gymQuestions.length + 2)) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F3EDE4' }]}>
-        <LinearGradient
-          colors={['#F3EDE4', '#E8E2D9', '#F3EDE4']}
-          style={styles.gradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        >
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#FFFFFF' }]}>
+        <View style={styles.gradient}>
           <View style={{ paddingHorizontal: 32, paddingTop: 16, paddingBottom: 8 }}>
             <OnboardingSteps activePhase="workout" isSpanish={isSpanish} />
           </View>
@@ -1285,7 +1279,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </View>
             </ScrollView>
           </KeyboardAvoidingView>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -1301,13 +1295,8 @@ Return ONLY valid JSON, no markdown or code blocks.`;
     const nutritionProgressPercent = (currentNutritionStep / totalNutritionSteps) * 100;
 
     return (
-      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F3EDE4' }]}>
-        <LinearGradient
-          colors={['#F3EDE4', '#E8E2D9', '#F3EDE4']}
-          style={styles.gradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        >
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#FFFFFF' }]}>
+        <View style={styles.gradient}>
           <View style={{ paddingHorizontal: 32, paddingTop: 16, paddingBottom: 8 }}>
             <OnboardingSteps activePhase="nutrition" isSpanish={isSpanish} />
           </View>
@@ -1546,7 +1535,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </TouchableOpacity>
             </ScrollView>
           </KeyboardAvoidingView>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -1554,13 +1543,8 @@ Return ONLY valid JSON, no markdown or code blocks.`;
   const _isWhiteBackground = currentSlideData.gradient[0] === '#FFFFFF';
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#F3EDE4' }]}>
-      <LinearGradient
-        colors={['#F3EDE4', '#E8E2D9', '#F3EDE4']}
-        style={styles.darkBackground}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-      >
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: '#FFFFFF' }]}>
+      <View style={styles.darkBackground}>
         <TouchableOpacity
           style={styles.langButton}
           onPress={() => {
@@ -1692,7 +1676,7 @@ Return ONLY valid JSON, no markdown or code blocks.`;
             </>
           )}
         </ScrollView>
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -1703,6 +1687,7 @@ const styles = StyleSheet.create({
   },
   gradient: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -1716,17 +1701,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    color: '#8E8E93',
-    fontSize: 16,
+    color: '#9CA3AF',
+    fontSize: 15,
     fontWeight: '500',
-    opacity: 0.8,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
-    paddingTop: 100,
+    paddingTop: 80,
   },
   iconContainer: {
     marginBottom: 60,
@@ -1738,26 +1722,26 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold' as const,
+    fontSize: 28,
+    fontWeight: '800' as const,
     textAlign: 'center' as const,
-    marginBottom: 12,
-    color: '#F9FAFB',
+    marginBottom: 10,
+    color: '#1A1A2E',
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 17,
     textAlign: 'center' as const,
-    marginBottom: 20,
-    fontWeight: '500' as const,
+    marginBottom: 16,
+    fontWeight: '600' as const,
     color: '#00ADB5',
   },
   description: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center' as const,
-    lineHeight: 24,
-    opacity: 0.8,
-    maxWidth: '80%',
-    color: '#8E8E93',
+    lineHeight: 23,
+    maxWidth: '85%',
+    color: '#6B7280',
   },
   pagination: {
     flexDirection: 'row',
@@ -1814,20 +1798,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   appNameLarge: {
-    fontSize: 72,
+    fontSize: 64,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#1A1A2E',
     letterSpacing: -2,
   },
   underlineTeal: {
-    width: 120,
+    width: 80,
     height: 4,
     backgroundColor: '#00ADB5',
-    marginTop: 12,
+    marginTop: 10,
     borderRadius: 2,
   },
   darkBackground: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   skipButtonMain: {
     position: 'absolute' as const,
@@ -1838,48 +1823,49 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipTextMain: {
-    color: '#8E8E93',
-    fontSize: 16,
+    color: '#9CA3AF',
+    fontSize: 15,
     fontWeight: '500' as const,
-    opacity: 0.8,
   },
   iconWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#F0FAFA',
   },
   titleDark: {
-    fontSize: 32,
-    fontWeight: 'bold' as const,
+    fontSize: 30,
+    fontWeight: '800' as const,
     textAlign: 'center' as const,
-    marginBottom: 12,
-    color: '#F9FAFB',
+    marginBottom: 10,
+    color: '#1A1A2E',
+    letterSpacing: -0.5,
   },
   subtitleDark: {
-    fontSize: 18,
+    fontSize: 17,
     textAlign: 'center' as const,
-    marginBottom: 20,
-    fontWeight: '500' as const,
+    marginBottom: 16,
+    fontWeight: '600' as const,
     color: '#00ADB5',
   },
   descriptionDark: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center' as const,
-    lineHeight: 24,
-    opacity: 0.8,
-    maxWidth: '80%',
-    color: '#8E8E93',
+    lineHeight: 23,
+    maxWidth: '85%',
+    color: '#6B7280',
   },
   dotDark: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    opacity: 0.3,
     marginHorizontal: 4,
-    backgroundColor: '#8E8E93',
+    backgroundColor: '#E0E0E0',
   },
   activeDotDark: {
-    opacity: 1,
-    width: 24,
+    width: 28,
     backgroundColor: '#00ADB5',
   },
   actionButtonDisabled: {
@@ -1891,11 +1877,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   skipNotificationsText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
-    opacity: 0.7,
-    textAlign: 'center',
-    color: '#8E8E93',
+    textAlign: 'center' as const,
+    color: '#9CA3AF',
   },
   quizContainer: {
     width: '100%',
@@ -1904,7 +1889,7 @@ const styles = StyleSheet.create({
   quizQuestion: {
     fontSize: 18,
     fontWeight: '600' as const,
-    color: '#F9FAFB',
+    color: '#1A1A2E',
     marginBottom: 15,
     textAlign: 'center' as const,
   },
@@ -1914,38 +1899,39 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   optionButton: {
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     paddingHorizontal: 24,
     paddingVertical: 18,
     borderRadius: 16,
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
     width: '100%',
   },
   optionButtonSelected: {
-    backgroundColor: 'rgba(74, 124, 89, 0.1)',
-    borderColor: '#4A7C59',
+    backgroundColor: '#F0FAFA',
+    borderColor: '#00ADB5',
   },
   optionText: {
-    color: '#2C2C2C',
+    color: '#374151',
     fontSize: 16,
     fontWeight: '500',
-    textAlign: 'left',
+    textAlign: 'left' as const,
   },
   optionTextSelected: {
     fontWeight: '600',
+    color: '#00929A',
   },
   weightInput: {
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 18,
-    color: '#F9FAFB',
-    borderWidth: 2,
-    borderColor: '#1F2937',
+    color: '#1A1A2E',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
     marginBottom: 25,
-    textAlign: 'center',
+    textAlign: 'center' as const,
   },
   daySelectionSubtext: {
     fontSize: 14,
@@ -1962,26 +1948,26 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   dayButton: {
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 15,
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
     minWidth: 90,
-    alignItems: 'center',
+    alignItems: 'center' as const,
   },
   dayButtonSelected: {
-    backgroundColor: 'rgba(74, 124, 89, 0.1)',
-    borderColor: '#4A7C59',
+    backgroundColor: '#F0FAFA',
+    borderColor: '#00ADB5',
   },
   dayButtonText: {
-    color: '#7A7A7A',
+    color: '#6B7280',
     fontSize: 14,
     fontWeight: '500',
   },
   dayButtonTextSelected: {
-    color: '#4A7C59',
+    color: '#00929A',
     fontWeight: '700',
   },
   goalsSubtext: {
@@ -1992,33 +1978,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   goalsInput: {
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 16,
-    color: '#2C2C2C',
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.06)',
+    color: '#1A1A2E',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
     marginBottom: 25,
     minHeight: 100,
   },
   datePickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FEFCF9',
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: '#F8F9FA',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
     marginBottom: 25,
     gap: 10,
   },
   datePickerButtonText: {
     fontSize: 16,
-    color: '#F9FAFB',
+    color: '#1A1A2E',
     fontWeight: '500',
   },
   paywallIconContainer: {
@@ -2108,7 +2094,7 @@ const styles = StyleSheet.create({
   },
   loadingBackground: {
     flex: 1,
-    backgroundColor: '#F3EDE4',
+    backgroundColor: '#FFFFFF',
   },
   loadingScrollContent: {
     flexGrow: 1,
@@ -2144,8 +2130,8 @@ const styles = StyleSheet.create({
   loadingTitle: {
     fontSize: 26,
     fontWeight: '700' as const,
-    color: '#FFFFFF',
-    textAlign: 'center',
+    color: '#1A1A2E',
+    textAlign: 'center' as const,
     marginBottom: 8,
   },
   loadingPercent: {
@@ -2187,15 +2173,13 @@ const styles = StyleSheet.create({
   },
   loadingStepsContainer: {
     width: '100%',
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     borderRadius: 16,
     padding: 20,
     gap: 16,
     marginBottom: 24,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   loadingStepRow: {
     flexDirection: 'row' as const,
@@ -2206,7 +2190,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F0EBE3',
+    backgroundColor: '#E5E7EB',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
@@ -2239,15 +2223,13 @@ const styles = StyleSheet.create({
   },
   loadingTipCard: {
     width: '100%',
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     borderRadius: 16,
     padding: 20,
     borderLeftWidth: 3,
-    borderLeftColor: '#4A7C59',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 20,
+    borderLeftColor: '#00ADB5',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   loadingTipHeader: {
     flexDirection: 'row' as const,
@@ -2258,7 +2240,7 @@ const styles = StyleSheet.create({
   loadingTipHeaderText: {
     fontSize: 11,
     fontWeight: '700' as const,
-    color: '#4A7C59',
+    color: '#00929A',
     letterSpacing: 1.2,
   },
   loadingTipText: {
@@ -2280,7 +2262,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#4A7C59',
+    backgroundColor: '#00ADB5',
     borderRadius: 3,
   },
   heightInputContainer: {
@@ -2297,15 +2279,15 @@ const styles = StyleSheet.create({
   },
   heightInput: {
     flex: 1,
-    backgroundColor: '#FEFCF9',
+    backgroundColor: '#F8F9FA',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 18,
-    color: '#2C2C2C',
-    borderWidth: 2,
-    borderColor: 'rgba(0,0,0,0.06)',
-    textAlign: 'center',
+    color: '#1A1A2E',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    textAlign: 'center' as const,
   },
   heightLabel: {
     fontSize: 16,
@@ -2317,20 +2299,19 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     marginTop: 8,
     textAlign: 'center' as const,
-    opacity: 0.7,
-    color: '#5A5A5E',
+    color: '#9CA3AF',
   },
   quizProgressBarInline: {
     width: '100%',
     height: 4,
-    backgroundColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: '#E5E7EB',
     borderRadius: 2,
-    overflow: 'hidden',
+    overflow: 'hidden' as const,
     marginBottom: 40,
   },
   quizProgressFill: {
     height: '100%',
-    backgroundColor: '#4A7C59',
+    backgroundColor: '#00ADB5',
     borderRadius: 2,
   },
   paywallContainer: {
@@ -2489,23 +2470,23 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(0, 173, 181, 0.15)',
+    paddingVertical: 7,
+    backgroundColor: '#F0FAFA',
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(0, 173, 181, 0.3)',
+    borderColor: '#D1F0F0',
   },
   langButtonText: {
-    color: '#00ADB5',
-    fontSize: 14,
+    color: '#00929A',
+    fontSize: 13,
     fontWeight: '600' as const,
   },
   ratingStarsRow: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    gap: 8,
-    marginBottom: 28,
+    gap: 6,
+    marginBottom: 24,
   },
   rateButton: {
     flexDirection: 'row' as const,
@@ -2514,14 +2495,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 30,
-    backgroundColor: '#FFD700',
+    backgroundColor: '#FFC107',
     minWidth: 160,
     gap: 8,
+    shadowColor: '#FFC107',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   rateButtonText: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700' as const,
-    color: '#050505',
+    color: '#1A1A2E',
   },
 });
 
@@ -2536,15 +2522,15 @@ const onboardStyles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F0EBE3',
+    backgroundColor: '#F3F4F6',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     borderWidth: 2,
-    borderColor: '#E8E2D9',
+    borderColor: '#E5E7EB',
   },
   stepActive: {
-    backgroundColor: 'rgba(74,124,89,0.15)',
-    borderColor: '#4A7C59',
+    backgroundColor: '#F0FAFA',
+    borderColor: '#00ADB5',
   },
   stepDone: {
     backgroundColor: '#00ADB5',
@@ -2553,7 +2539,7 @@ const onboardStyles = StyleSheet.create({
   stepNum: {
     fontSize: 12,
     fontWeight: '700' as const,
-    color: '#3A3A3C',
+    color: '#6B7280',
   },
   stepNumActive: {
     color: '#00ADB5',
@@ -2564,11 +2550,11 @@ const onboardStyles = StyleSheet.create({
   connector: {
     width: 40,
     height: 2,
-    backgroundColor: '#E8E2D9',
+    backgroundColor: '#E5E7EB',
     borderRadius: 1,
   },
   connectorDone: {
-    backgroundColor: '#4A7C59',
+    backgroundColor: '#00ADB5',
   },
 });
 
@@ -2592,7 +2578,7 @@ const scanStyles = StyleSheet.create({
   scanningText: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: '#F9FAFB',
+    color: '#1A1A2E',
   },
   scanningDots: {
     flexDirection: 'row',
