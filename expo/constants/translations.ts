@@ -145,6 +145,7 @@ export const translations = {
     home_gym: 'Gym',
     home_protein: 'Protein',
     home_carbs: 'Carbs',
+    home_carbs_short: 'Carbs',
     home_fat: 'Fat',
 
     // Run screen
@@ -261,6 +262,12 @@ export const translations = {
     run_distance_mi: 'Distance (mi)',
     run_start_label: 'Start',
     run_log_treadmill_short: 'Treadmill',
+    run_saved_routes: 'Saved Routes',
+    run_save_favorite_paths: 'Save your favorite paths',
+    run_routes_saved: '{count} route(s) saved',
+    run_snap_dashboard_short: 'Snap your dashboard to log miles & time',
+    run_scanning_display: 'Scanning display...',
+    run_time_unit: 'time',
 
     // Gym screen
     gym_title: 'Gym',
@@ -1012,6 +1019,7 @@ export const translations = {
     home_gym: 'Gimnasio',
     home_protein: 'Proteína',
     home_carbs: 'Carbohidratos',
+    home_carbs_short: 'Carbos',
     home_fat: 'Grasa',
 
     // Run screen
@@ -1128,6 +1136,12 @@ export const translations = {
     run_distance_mi: 'Distancia (mi)',
     run_start_label: 'Iniciar',
     run_log_treadmill_short: 'Caminadora',
+    run_saved_routes: 'Rutas Guardadas',
+    run_save_favorite_paths: 'Guarda tus rutas favoritas',
+    run_routes_saved: '{count} ruta(s) guardada(s)',
+    run_snap_dashboard_short: 'Toma foto del panel para registrar millas y tiempo',
+    run_scanning_display: 'Escaneando pantalla...',
+    run_time_unit: 'tiempo',
 
     // Gym screen
     gym_title: 'Gimnasio',

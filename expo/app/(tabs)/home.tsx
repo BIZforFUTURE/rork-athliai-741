@@ -268,7 +268,7 @@ function TodayNutrition() {
 
   const macros = [
     { label: t('home_protein'), value: nutrition.protein, goal: nutrition.proteinGoal, color: "#E8725A", short: "P" },
-    { label: t('home_carbs'), value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#4A7C59", short: "C" },
+    { label: t('home_carbs_short'), value: nutrition.carbs, goal: nutrition.carbsGoal, color: "#4A7C59", short: "C" },
     { label: t('home_fat'), value: nutrition.fat, goal: nutrition.fatGoal, color: "#D4A053", short: "F" },
   ];
 
@@ -335,7 +335,7 @@ function TodayNutrition() {
               <View key={m.short} style={nutStyles.macroCard}>
                 <View style={nutStyles.macroTop}>
                   <View style={[nutStyles.macroDot, { backgroundColor: m.color }]} />
-                  <Text style={nutStyles.macroLabel}>{m.label}</Text>
+                  <Text style={nutStyles.macroLabel} numberOfLines={1}>{m.label}</Text>
                 </View>
                 <View style={nutStyles.macroValues}>
                   <Text style={[nutStyles.macroVal, macroHit && { color: m.color }]}>{m.value}</Text>
@@ -1027,6 +1027,7 @@ const nutStyles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "500" as const,
     color: "#7A7A7A",
+    flexShrink: 1,
   },
   macroValues: {
     flexDirection: "row" as const,

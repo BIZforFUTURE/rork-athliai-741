@@ -359,11 +359,11 @@ export default function RunScreen() {
 
   const confirmStopRun = () => {
     Alert.alert(
-      'End Run?',
-      'Are you sure you want to stop this run? This action cannot be undone.',
+      t('run_end_run'),
+      t('run_end_run_confirm'),
       [
-        { text: 'Keep Running', style: 'cancel' },
-        { text: 'End Run', style: 'destructive', onPress: stopRun },
+        { text: t('run_keep_running'), style: 'cancel' },
+        { text: t('run_end'), style: 'destructive', onPress: stopRun },
       ]
     );
   };
@@ -843,7 +843,7 @@ export default function RunScreen() {
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <View>
           <Text style={styles.screenTitle}>{t('tab_run')}</Text>
-          <Text style={styles.screenSubtitle}>Ready to go?</Text>
+          <Text style={styles.screenSubtitle}>{t('run_ready')}</Text>
         </View>
         <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "20", borderColor: xpInfo.rank.color + "40" }]}>
           <Zap size={12} color={xpInfo.rank.color} />
@@ -870,7 +870,7 @@ export default function RunScreen() {
             <View style={styles.timerRing} />
             <View style={styles.timerInner}>
               <Text style={styles.timerValue}>0:00</Text>
-              <Text style={styles.timerLabel}>TIME</Text>
+              <Text style={styles.timerLabel}>{t('run_time')}</Text>
             </View>
           </View>
         </View>
@@ -908,7 +908,7 @@ export default function RunScreen() {
           <Animated.View style={[styles.startBtn, { transform: [{ scale: buttonScale }] }]}>
             <View style={styles.startBtnInner}>
               <Play size={22} color="#FFFFFF" fill="#FFFFFF" />
-              <Text style={styles.startBtnText}>START RUN</Text>
+              <Text style={styles.startBtnText}>{t('run_start')}</Text>
             </View>
             <View style={styles.startBtnXp}>
               <Zap size={12} color="#A8A8A0" />
@@ -929,7 +929,7 @@ export default function RunScreen() {
             </View>
             <View style={styles.treadmillLogBtnTextWrap}>
               <Text style={styles.treadmillLogBtnTitle}>{t('run_log_treadmill_short')}</Text>
-              <Text style={styles.treadmillLogBtnSub}>Snap your dashboard to log miles & time</Text>
+              <Text style={styles.treadmillLogBtnSub}>{t('run_snap_dashboard_short')}</Text>
             </View>
           </View>
           <View style={styles.treadmillLogBtnXp}>
@@ -949,11 +949,11 @@ export default function RunScreen() {
               <Navigation size={20} color="#8B5CF6" />
             </View>
             <View style={styles.savedRoutesBtnTextWrap}>
-              <Text style={styles.savedRoutesBtnTitle}>Saved Routes</Text>
+              <Text style={styles.savedRoutesBtnTitle}>{t('run_saved_routes')}</Text>
               <Text style={styles.savedRoutesBtnSub}>
                 {savedRoutes.length === 0
-                  ? 'Save your favorite paths'
-                  : `${savedRoutes.length} route${savedRoutes.length !== 1 ? 's' : ''} saved`}
+                  ? t('run_save_favorite_paths')
+                  : t('run_routes_saved', { count: String(savedRoutes.length) })}
               </Text>
             </View>
           </View>
@@ -997,7 +997,7 @@ export default function RunScreen() {
                 {treadmillParsing && (
                   <View style={styles.treadmillModalPhotoOverlay}>
                     <ActivityIndicator size="large" color="#00E5FF" />
-                    <Text style={styles.treadmillModalScanText}>Scanning display...</Text>
+                    <Text style={styles.treadmillModalScanText}>{t('run_scanning_display')}</Text>
                   </View>
                 )}
               </View>
@@ -1040,7 +1040,7 @@ export default function RunScreen() {
                     <View style={styles.treadmillParsedStat}>
                       <TrendingUp size={16} color="#BFFF00" />
                       <Text style={styles.treadmillParsedValue}>{treadmillEditTime}</Text>
-                      <Text style={styles.treadmillParsedUnit}>time</Text>
+                      <Text style={styles.treadmillParsedUnit}>{t('run_time_unit')}</Text>
                     </View>
                   </View>
                 )}
@@ -1064,11 +1064,11 @@ export default function RunScreen() {
 
                 <View style={styles.treadmillModalBtns}>
                   <TouchableOpacity style={styles.treadmillModalBtnCancel} onPress={closeTreadmillModal}>
-                    <Text style={styles.treadmillModalBtnCancelText}>Cancel</Text>
+                    <Text style={styles.treadmillModalBtnCancelText}>{t('run_cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.treadmillModalBtnConfirm} onPress={confirmTreadmillRun}>
                     <Check size={18} color="#FFFFFF" />
-                    <Text style={styles.treadmillModalBtnConfirmText}>Log Run</Text>
+                    <Text style={styles.treadmillModalBtnConfirmText}>{t('run_log')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1091,15 +1091,15 @@ export default function RunScreen() {
             <View style={styles.modalIconWrap}>
               <Flame size={40} color="#FF6B35" />
             </View>
-            <Text style={styles.modalTitle}>Great Run!</Text>
-            <Text style={styles.modalCalText}>{lastRunCalories} calories burned</Text>
-            <Text style={styles.modalSubtext}>Subtract these from your daily intake?</Text>
+            <Text style={styles.modalTitle}>{t('run_great')}</Text>
+            <Text style={styles.modalCalText}>{t('run_calories_burned', { cal: String(lastRunCalories) })}</Text>
+            <Text style={styles.modalSubtext}>{t('run_subtract_question')}</Text>
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.modalBtnSecondary} onPress={() => setShowCalorieModal(false)}>
-                <Text style={styles.modalBtnSecondaryText}>No Thanks</Text>
+                <Text style={styles.modalBtnSecondaryText}>{t('run_no_thanks')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleSubtractCalories}>
-                <Text style={styles.modalBtnPrimaryText}>Subtract</Text>
+                <Text style={styles.modalBtnPrimaryText}>{t('run_subtract')}</Text>
               </TouchableOpacity>
             </View>
           </View>
