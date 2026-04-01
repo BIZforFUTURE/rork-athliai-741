@@ -16,12 +16,14 @@ import { useLocalSearchParams, router } from "expo-router";
 import {
   X,
   Camera,
-  ImageIcon,
+  Video,
+  Upload,
   Sparkles,
   CheckCircle,
   AlertTriangle,
   RotateCcw,
 } from "lucide-react-native";
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import { callOpenAIWithVision } from "@/utils/openai";
@@ -42,8 +44,9 @@ export default function FormCheckScreen() {
   const { addFormCheckEntry } = useApp();
   const { isSpanish } = useLanguage();
 
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [thumbnailUri, setThumbnailUri] = useState<string | null>(null);
+  const [thumbnailBase64, setThumbnailBase64] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<FormFeedback | null>(null);
   const [_rawFeedback, setRawFeedback] = useState<string>("");
@@ -72,47 +75,84 @@ export default function FormCheckScreen() {
     }
   }, [isAnalyzing, pulseAnim]);
 
-  const pickImage = async (useCamera: boolean) => {
+  const extractThumbnail = async (uri: string) => {
+    try {
+      if (Platform.OS === 'web') {
+        setThumbnailUri(uri);
+        setThumbnailBase64(null);
+        console.log('Web platform: using video URI as thumbnail fallback');
+        return;
+      }
+      const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(uri, { time: 1000, quality: 0.7 });
+      setThumbnailUri(thumbUri);
+
+      const FileSystem = require('expo-file-system');
+      const base64 = await FileSystem.readAsStringAsync(thumbUri, { encoding: FileSystem.EncodingType.Base64 });
+      setThumbnailBase64(base64);
+      console.log('Thumbnail extracted from video successfully');
+    } catch (error) {
+      console.error('Error extracting thumbnail:', error);
+      setThumbnailUri(uri);
+      setThumbnailBase64(null);
+    }
+  };
+
+  const pickVideo = async (useCamera: boolean) => {
     try {
       if (useCamera) {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== "granted") {
-          Alert.alert("Permission needed", "Camera permission is required to take a photo.");
+          Alert.alert(
+            isSpanish ? "Permiso necesario" : "Permission needed",
+            isSpanish ? "Se requiere permiso de cámara para grabar video." : "Camera permission is required to record video."
+          );
           return;
         }
       }
 
       const result = useCamera
         ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ["images"],
-            quality: 0.7,
-            base64: true,
-            allowsEditing: false,
+            mediaTypes: ["videos"],
+            videoMaxDuration: 30,
+            videoQuality: ImagePicker.UIImagePickerControllerQualityType.Medium,
+            allowsEditing: true,
           })
         : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ["images"],
-            quality: 0.7,
-            base64: true,
-            allowsEditing: false,
+            mediaTypes: ["videos"],
+            videoMaxDuration: 30,
+            allowsEditing: true,
           });
 
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
-        setImageUri(asset.uri);
-        setImageBase64(asset.base64 ?? null);
+        setVideoUri(asset.uri);
         setFeedback(null);
         setRawFeedback("");
-        console.log("Image selected for form check:", asset.uri.substring(0, 50));
+        console.log("Video selected for form check:", asset.uri.substring(0, 50));
+        await extractThumbnail(asset.uri);
       }
     } catch (error) {
-      console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image. Please try again.");
+      console.error("Error picking video:", error);
+      Alert.alert(
+        isSpanish ? "Error" : "Error",
+        isSpanish ? "No se pudo seleccionar el video. Inténtalo de nuevo." : "Failed to pick video. Please try again."
+      );
     }
   };
 
   const analyzeForm = async () => {
-    if (!imageBase64) {
-      Alert.alert("No Image", "Please take or select a photo first.");
+    if (!thumbnailBase64 && Platform.OS !== 'web') {
+      Alert.alert(
+        isSpanish ? "Sin Video" : "No Video",
+        isSpanish ? "Por favor graba o selecciona un video primero." : "Please record or select a video first."
+      );
+      return;
+    }
+    if (!videoUri) {
+      Alert.alert(
+        isSpanish ? "Sin Video" : "No Video",
+        isSpanish ? "Por favor graba o selecciona un video primero." : "Please record or select a video first."
+      );
       return;
     }
 
@@ -127,7 +167,7 @@ export default function FormCheckScreen() {
         ? "\nIMPORTANT: Respond entirely in Spanish."
         : "";
 
-      const prompt = `You are an expert fitness coach and movement specialist. Analyze this photo of someone performing the exercise "${exerciseName || "an exercise"}".${langInstruction}
+      const prompt = `You are an expert fitness coach and movement specialist. Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".${langInstruction}
 
 Evaluate their form and provide detailed feedback. Look at:
 - Body alignment and posture
@@ -148,8 +188,8 @@ Respond in this exact JSON format:
 The score should be 1-10. Be encouraging but honest. Give specific, actionable feedback.
 Return ONLY valid JSON.`;
 
-      console.log("Analyzing exercise form with AI vision...");
-      const aiResponse = await callOpenAIWithVision(prompt, imageBase64);
+      console.log("Analyzing exercise form with AI vision from video frame...");
+      const aiResponse = await callOpenAIWithVision(prompt, thumbnailBase64 || '');
       console.log("AI form analysis response:", aiResponse.substring(0, 200));
 
       setRawFeedback(aiResponse);
@@ -172,7 +212,7 @@ Return ONLY valid JSON.`;
 
       addFormCheckEntry({
         exerciseName: exerciseName || "Unknown Exercise",
-        imageUri: imageUri || "",
+        imageUri: thumbnailUri || videoUri || "",
         feedback: aiResponse,
         date: new Date().toISOString(),
       });
@@ -182,15 +222,19 @@ Return ONLY valid JSON.`;
       }
     } catch (error) {
       console.error("Error analyzing form:", error);
-      Alert.alert("Analysis Failed", "Could not analyze your form. Please try again with a clearer photo.");
+      Alert.alert(
+        isSpanish ? "Análisis Fallido" : "Analysis Failed",
+        isSpanish ? "No se pudo analizar tu forma. Inténtalo de nuevo con un video más claro." : "Could not analyze your form. Please try again with a clearer video."
+      );
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   const resetCheck = () => {
-    setImageUri(null);
-    setImageBase64(null);
+    setVideoUri(null);
+    setThumbnailUri(null);
+    setThumbnailBase64(null);
     setFeedback(null);
     setRawFeedback("");
   };
@@ -235,40 +279,40 @@ Return ONLY valid JSON.`;
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          {!imageUri ? (
+          {!videoUri ? (
             <View style={styles.captureSection}>
               <View style={styles.captureIconWrap}>
-                <Camera size={40} color="#4A7C59" />
+                <Video size={40} color="#4A7C59" />
               </View>
               <Text style={styles.captureTitle}>
-                {isSpanish ? "Captura Tu Forma" : "Capture Your Form"}
+                {isSpanish ? "Graba Tu Forma" : "Record Your Form"}
               </Text>
               <Text style={styles.captureSubtitle}>
                 {isSpanish
-                  ? "Toma una foto o sube una imagen mientras realizas el ejercicio"
-                  : "Take a photo or upload an image of yourself performing the exercise"}
+                  ? "Graba un video o sube uno mientras realizas el ejercicio"
+                  : "Record a video or upload one of yourself performing the exercise"}
               </Text>
 
               <View style={styles.captureButtons}>
                 <TouchableOpacity
                   style={styles.captureButton}
                   activeOpacity={0.8}
-                  onPress={() => pickImage(true)}
+                  onPress={() => pickVideo(true)}
                 >
                   <Camera size={22} color="#FFFFFF" />
                   <Text style={styles.captureButtonText}>
-                    {isSpanish ? "Tomar Foto" : "Take Photo"}
+                    {isSpanish ? "Grabar Video" : "Record Video"}
                   </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={[styles.captureButton, styles.captureButtonSecondary]}
                   activeOpacity={0.8}
-                  onPress={() => pickImage(false)}
+                  onPress={() => pickVideo(false)}
                 >
-                  <ImageIcon size={22} color="#4A7C59" />
+                  <Upload size={22} color="#4A7C59" />
                   <Text style={[styles.captureButtonText, styles.captureButtonTextSecondary]}>
-                    {isSpanish ? "Subir Imagen" : "Upload Image"}
+                    {isSpanish ? "Subir Video" : "Upload Video"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -289,24 +333,37 @@ Return ONLY valid JSON.`;
                 </Text>
                 <Text style={styles.tipItem}>
                   {isSpanish
-                    ? "• Captura desde un ángulo lateral si es posible"
-                    : "• Capture from a side angle if possible"}
+                    ? "• Graba desde un ángulo lateral si es posible"
+                    : "• Record from a side angle if possible"}
                 </Text>
                 <Text style={styles.tipItem}>
                   {isSpanish
-                    ? "• Toma la foto en el punto más bajo/difícil del movimiento"
-                    : "• Take the photo at the bottom/hardest point of the movement"}
+                    ? "• Graba una repetición completa del movimiento (máx 30s)"
+                    : "• Record a full rep of the movement (max 30s)"}
                 </Text>
               </View>
             </View>
           ) : (
             <View style={styles.analysisSection}>
               <View style={styles.imageContainer}>
-                <Image source={{ uri: imageUri }} style={styles.previewImage} resizeMode="cover" />
+                {thumbnailUri ? (
+                  <Image source={{ uri: thumbnailUri }} style={styles.previewImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.previewImage, styles.videoPlaceholder]}>
+                    <Video size={40} color="#7A7A7A" />
+                    <Text style={styles.videoPlaceholderText}>
+                      {isSpanish ? "Procesando video..." : "Processing video..."}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.videoBadge}>
+                  <Video size={12} color="#FFFFFF" />
+                  <Text style={styles.videoBadgeText}>{isSpanish ? "Video" : "Video"}</Text>
+                </View>
                 <TouchableOpacity style={styles.retakeBtn} onPress={resetCheck}>
                   <RotateCcw size={16} color="#FFFFFF" />
                   <Text style={styles.retakeBtnText}>
-                    {isSpanish ? "Retomar" : "Retake"}
+                    {isSpanish ? "Regrabar" : "Re-record"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -407,7 +464,7 @@ Return ONLY valid JSON.`;
                   <TouchableOpacity style={styles.tryAgainButton} onPress={resetCheck}>
                     <RotateCcw size={18} color="#4A7C59" />
                     <Text style={styles.tryAgainText}>
-                      {isSpanish ? "Analizar Otra Foto" : "Analyze Another Photo"}
+                      {isSpanish ? "Analizar Otro Video" : "Analyze Another Video"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -548,6 +605,34 @@ const styles = StyleSheet.create({
   previewImage: {
     width: "100%",
     height: 300,
+  },
+  videoPlaceholder: {
+    backgroundColor: "#E8E2D9",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 8,
+  },
+  videoPlaceholderText: {
+    fontSize: 14,
+    color: "#7A7A7A",
+    fontWeight: "500" as const,
+  },
+  videoBadge: {
+    position: "absolute" as const,
+    top: 12,
+    left: 12,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  videoBadgeText: {
+    fontSize: 12,
+    fontWeight: "600" as const,
+    color: "#FFFFFF",
   },
   retakeBtn: {
     position: "absolute",
