@@ -124,7 +124,7 @@ export default function ExerciseLibraryScreen() {
           <X size={22} color="#5A5A5E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {isSpanish ? "Biblioteca de Ejercicios" : "Exercise Library"}
+          {isSpanish ? "Revisión de Forma con IA" : "AI Form Check"}
         </Text>
         <View style={{ width: 34 }} />
       </View>
