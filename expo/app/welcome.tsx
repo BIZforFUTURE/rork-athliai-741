@@ -1206,9 +1206,9 @@ Return ONLY valid JSON.`;
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={s.flex1}
-        keyboardVerticalOffset={insets.top + 60}
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           style={s.flex1}
