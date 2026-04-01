@@ -507,7 +507,7 @@ function useGreeting() {
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const greeting = useGreeting();
-  const { t, setLanguage, isSpanish } = useLanguage();
+  const { t, setLanguage, language } = useLanguage();
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const onRefresh = useCallback(() => {
@@ -548,13 +548,26 @@ export default function DashboardScreen() {
         <TodayNutrition />
         <WeeklyStats />
         <XPFeed />
-        <Pressable
-          onPress={() => setLanguage(isSpanish ? 'en' : 'es')}
-          style={styles.langToggle}
-        >
-          <Globe size={13} color="#A1A1A6" strokeWidth={1.5} />
-          <Text style={styles.langToggleText}>{isSpanish ? 'English' : 'Espanol'}</Text>
-        </Pressable>
+        <View style={styles.langToggleRow}>
+          <Pressable
+            onPress={() => setLanguage(language === 'es' ? 'en' : 'es')}
+            style={[styles.langToggle, language === 'es' && styles.langToggleActive]}
+          >
+            <Globe size={13} color={language === 'es' ? '#4A7C59' : '#A1A1A6'} strokeWidth={1.5} />
+            <Text style={[styles.langToggleText, language === 'es' && styles.langToggleTextActive]}>
+              {language === 'es' ? 'English' : 'Español'}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
+            style={[styles.langToggle, language === 'pt' && styles.langToggleActive]}
+          >
+            <Globe size={13} color={language === 'pt' ? '#4A7C59' : '#A1A1A6'} strokeWidth={1.5} />
+            <Text style={[styles.langToggleText, language === 'pt' && styles.langToggleTextActive]}>
+              {language === 'pt' ? 'English' : 'Português'}
+            </Text>
+          </Pressable>
+        </View>
         <View style={{ height: 20 }} />
       </ScrollView>
     </View>
@@ -616,6 +629,12 @@ const styles = StyleSheet.create({
     paddingBottom: 110,
     gap: 16,
   },
+  langToggleRow: {
+    flexDirection: "column" as const,
+    alignItems: "center" as const,
+    gap: 8,
+    marginTop: 4,
+  },
   langToggle: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -625,13 +644,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "rgba(0,0,0,0.04)",
     alignSelf: "center" as const,
-    marginTop: 4,
+  },
+  langToggleActive: {
+    backgroundColor: "rgba(74,124,89,0.08)",
   },
   langToggleText: {
     fontSize: 12,
     fontWeight: "500" as const,
     color: "#A8A8A0",
     letterSpacing: 0.2,
+  },
+  langToggleTextActive: {
+    color: "#4A7C59",
+    fontWeight: "600" as const,
   },
 });
 

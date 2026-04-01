@@ -57,6 +57,14 @@ const LOADING_STEPS_ES = [
   { label: 'Finalizando tu plan', icon: Sparkles },
 ];
 
+const LOADING_STEPS_PT = [
+  { label: 'Analisando seus objetivos', icon: Target },
+  { label: 'Selecionando exercícios', icon: Dumbbell },
+  { label: 'Otimizando séries e repetições', icon: Activity },
+  { label: 'Montando seu cronograma', icon: Calendar },
+  { label: 'Finalizando seu plano', icon: Sparkles },
+];
+
 const FITNESS_TIPS_EN = [
   "Progressive overload is the #1 driver of muscle growth — aim to increase weight or reps each week.",
   "Sleep 7-9 hours per night. Your muscles grow during recovery, not during the workout.",
@@ -79,14 +87,25 @@ const FITNESS_TIPS_ES = [
   "La creatina monohidratada es el suplemento más investigado y efectivo para ganar fuerza.",
 ];
 
-function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number; bottom: number; left: number; right: number }; progress: number; isSpanish: boolean }) {
-  const LOADING_STEPS = isSpanish ? LOADING_STEPS_ES : LOADING_STEPS_EN;
+const FITNESS_TIPS_PT = [
+  "A sobrecarga progressiva é o motor #1 do crescimento muscular — tente aumentar peso ou repetições a cada semana.",
+  "Durma 7-9 horas por noite. Seus músculos crescem durante a recuperação, não durante o treino.",
+  "O momento da proteína importa menos que a ingestão diária total. Mire em 1,5-2,2g por kg de peso corporal.",
+  "Movimentos compostos como agachamento e levantamento terra recrutam mais fibras musculares.",
+  "Consistência supera intensidade. Ir 4x na semana a 80% supera ir 1x a 100%.",
+  "Períodos de descanso de 2-3 min para força, 60-90s para hipertrofia e 30-45s para resistência.",
+  "A conexão mente-músculo é real — focar no músculo alvo melhora a ativação em 20%.",
+  "A creatina monoidratada é o suplemento mais pesquisado e eficaz para ganho de força.",
+];
+
+function LoadingScreen({ insets, progress, lang }: { insets: { top: number; bottom: number; left: number; right: number }; progress: number; lang: string }) {
+  const LOADING_STEPS = lang === 'pt' ? LOADING_STEPS_PT : lang === 'es' ? LOADING_STEPS_ES : LOADING_STEPS_EN;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const tipOpacity = useRef(new Animated.Value(1)).current;
   const tipTranslateY = useRef(new Animated.Value(0)).current;
-  const FITNESS_TIPS = isSpanish ? FITNESS_TIPS_ES : FITNESS_TIPS_EN;
+  const FITNESS_TIPS = lang === 'pt' ? FITNESS_TIPS_PT : lang === 'es' ? FITNESS_TIPS_ES : FITNESS_TIPS_EN;
   const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * FITNESS_TIPS_EN.length));
   const [activeStep, setActiveStep] = useState(0);
   const stepAnims = useRef(LOADING_STEPS.map(() => new Animated.Value(0))).current;
@@ -167,7 +186,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
               </View>
             </Animated.View>
           </View>
-          <Text style={loadingStyles.title}>{isSpanish ? 'Creando Tu Plan' : 'Building Your Plan'}</Text>
+          <Text style={loadingStyles.title}>{lang === 'pt' ? 'Criando Seu Plano' : lang === 'es' ? 'Creando Tu Plan' : 'Building Your Plan'}</Text>
           <Text style={loadingStyles.percent}>{percentText}%</Text>
           <View style={loadingStyles.progressBarWrap}>
             <View style={loadingStyles.progressBarBg}>
@@ -206,7 +225,7 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
         <View style={loadingStyles.tipCard}>
           <View style={loadingStyles.tipHeader}>
             <Sparkles size={14} color="#00ADB5" />
-            <Text style={loadingStyles.tipHeaderText}>{isSpanish ? '¿SABÍAS QUE?' : 'DID YOU KNOW?'}</Text>
+            <Text style={loadingStyles.tipHeaderText}>{lang === 'pt' ? 'VOCÊ SABIA?' : lang === 'es' ? '¿SABÍAS QUE?' : 'DID YOU KNOW?'}</Text>
           </View>
           <Animated.Text style={[loadingStyles.tipText, { opacity: tipOpacity, transform: [{ translateY: tipTranslateY }] }]}>
             {FITNESS_TIPS[currentTipIndex]}
@@ -247,7 +266,8 @@ export default function WelcomeScreen() {
   const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
   const insets = useSafeAreaInsets();
-  const { t, setLanguage, isSpanish } = useLanguage();
+  const { t, setLanguage, isSpanish, language } = useLanguage();
+  const isPt = language === 'pt';
 
   const progress = step > 0 ? step / TOTAL_STEPS : 0;
 
@@ -741,17 +761,23 @@ Return ONLY valid JSON.`;
   }, [canContinue, step, hapticMedium, goNext]);
 
   if (isGeneratingPlan) {
-    return <LoadingScreen insets={insets} progress={generationProgress} isSpanish={isSpanish} />;
+    return <LoadingScreen insets={insets} progress={generationProgress} lang={language} />;
   }
 
   const renderHero = () => (
     <View style={[s.flex1, { backgroundColor: '#FFFFFF', paddingTop: insets.top }]}>
       <View style={heroStyles.langRow}>
         <TouchableOpacity
-          style={heroStyles.langButton}
-          onPress={() => { hapticLight(); setLanguage(isSpanish ? 'en' : 'es'); }}
+          style={[heroStyles.langButton, language === 'es' && heroStyles.langButtonActive]}
+          onPress={() => { hapticLight(); setLanguage(language === 'es' ? 'en' : 'es'); }}
         >
-          <Text style={heroStyles.langText}>{isSpanish ? 'English' : 'Español'}</Text>
+          <Text style={[heroStyles.langText, language === 'es' && heroStyles.langTextActive]}>Español</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[heroStyles.langButton, language === 'pt' && heroStyles.langButtonActive]}
+          onPress={() => { hapticLight(); setLanguage(language === 'pt' ? 'en' : 'pt'); }}
+        >
+          <Text style={[heroStyles.langText, language === 'pt' && heroStyles.langTextActive]}>Português</Text>
         </TouchableOpacity>
       </View>
 
@@ -766,10 +792,12 @@ Return ONLY valid JSON.`;
         <View style={heroStyles.underline} />
 
         <Text style={heroStyles.tagline}>
-          {isSpanish ? 'Tu entrenador personal con IA' : 'Your AI gym coach'}
+          {isPt ? 'Seu treinador pessoal com IA' : isSpanish ? 'Tu entrenador personal con IA' : 'Your AI gym coach'}
         </Text>
         <Text style={heroStyles.description}>
-          {isSpanish
+          {isPt
+            ? 'Planos de treino personalizados, acompanhamento inteligente e resultados reais — tudo com IA.'
+            : isSpanish
             ? 'Planes de entrenamiento personalizados, seguimiento inteligente y resultados reales — todo impulsado por IA.'
             : 'Personalized workout plans, intelligent tracking, and real results — all powered by AI.'}
         </Text>
@@ -778,12 +806,12 @@ Return ONLY valid JSON.`;
       <View style={[heroStyles.bottomSection, { paddingBottom: Math.max(40, insets.bottom + 20) }]}>
         <TouchableOpacity style={heroStyles.getStartedBtn} onPress={goNext} activeOpacity={0.85}>
           <Text style={heroStyles.getStartedText}>
-            {isSpanish ? 'Comenzar' : 'Get Started'}
+            {isPt ? 'Começar' : isSpanish ? 'Comenzar' : 'Get Started'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={heroStyles.skipLink} onPress={handleSkip}>
           <Text style={heroStyles.skipLinkText}>
-            {isSpanish ? 'Omitir configuración' : 'Skip setup'}
+            {isPt ? 'Pular configuração' : isSpanish ? 'Omitir configuración' : 'Skip setup'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -834,15 +862,15 @@ Return ONLY valid JSON.`;
   const renderBodyStats = () => (
     <View style={stepStyles.content}>
       <Text style={stepStyles.title}>
-        {isSpanish ? 'Altura y peso' : 'Height & weight'}
+        {isPt ? 'Altura e peso' : isSpanish ? 'Altura y peso' : 'Height & weight'}
       </Text>
       <Text style={stepStyles.subtitle}>
-        {isSpanish ? 'Se usará para calibrar tu plan personalizado.' : 'This will be used to calibrate your custom plan.'}
+        {isPt ? 'Será usado para calibrar seu plano personalizado.' : isSpanish ? 'Se usará para calibrar tu plan personalizado.' : 'This will be used to calibrate your custom plan.'}
       </Text>
 
       <View style={bodyStyles.toggleRow}>
         <Text style={[bodyStyles.toggleLabel, !isMetric && bodyStyles.toggleLabelActive]}>
-          {isSpanish ? 'Imperial' : 'Imperial'}
+          Imperial
         </Text>
         <Switch
           value={isMetric}
@@ -851,14 +879,14 @@ Return ONLY valid JSON.`;
           thumbColor="#FFFFFF"
         />
         <Text style={[bodyStyles.toggleLabel, isMetric && bodyStyles.toggleLabelActive]}>
-          {isSpanish ? 'Métrico' : 'Metric'}
+          {isPt ? 'Métrico' : isSpanish ? 'Métrico' : 'Metric'}
         </Text>
       </View>
 
       <View style={bodyStyles.fieldsRow}>
         <View style={bodyStyles.fieldGroup}>
           <Text style={bodyStyles.fieldLabel}>
-            {isSpanish ? 'Altura' : 'Height'}
+            {isPt ? 'Altura' : isSpanish ? 'Altura' : 'Height'}
           </Text>
           {isMetric ? (
             <View style={bodyStyles.inputRow}>
@@ -898,7 +926,7 @@ Return ONLY valid JSON.`;
 
         <View style={bodyStyles.fieldGroup}>
           <Text style={bodyStyles.fieldLabel}>
-            {isSpanish ? 'Peso' : 'Weight'}
+            {isPt ? 'Peso' : isSpanish ? 'Peso' : 'Weight'}
           </Text>
           <View style={bodyStyles.inputRow}>
             <TextInput
@@ -919,18 +947,18 @@ Return ONLY valid JSON.`;
   const renderTargetWeight = () => {
     const direction = getWeightDirection();
     const directionLabel = direction === 'lose'
-      ? (isSpanish ? 'Perder peso' : 'Lose weight')
+      ? (isPt ? 'Perder peso' : isSpanish ? 'Perder peso' : 'Lose weight')
       : direction === 'gain'
-        ? (isSpanish ? 'Ganar peso' : 'Gain weight')
-        : (isSpanish ? 'Mantener peso' : 'Maintain weight');
+        ? (isPt ? 'Ganhar peso' : isSpanish ? 'Ganar peso' : 'Gain weight')
+        : (isPt ? 'Manter peso' : isSpanish ? 'Mantener peso' : 'Maintain weight');
 
     return (
       <View style={stepStyles.content}>
         <Text style={stepStyles.title}>
-          {isSpanish ? '¿Cuál es tu peso objetivo?' : 'What is your target weight?'}
+          {isPt ? 'Qual é seu peso alvo?' : isSpanish ? '¿Cuál es tu peso objetivo?' : 'What is your target weight?'}
         </Text>
         <Text style={stepStyles.subtitle}>
-          {isSpanish ? 'Opcional — puedes omitir este paso.' : 'Optional — you can skip this step.'}
+          {isPt ? 'Opcional — você pode pular este passo.' : isSpanish ? 'Opcional — puedes omitir este paso.' : 'Optional — you can skip this step.'}
         </Text>
 
         <View style={targetStyles.centerWrap}>
@@ -943,7 +971,7 @@ Return ONLY valid JSON.`;
             </>
           ) : (
             <Text style={targetStyles.placeholder}>
-              {isSpanish ? 'Ingresa tu peso objetivo' : 'Enter your target weight'}
+              {isPt ? 'Insira seu peso alvo' : isSpanish ? 'Ingresa tu peso objetivo' : 'Enter your target weight'}
             </Text>
           )}
         </View>
@@ -968,7 +996,7 @@ Return ONLY valid JSON.`;
     <>
       {renderSelectionStep(
         t('gym_q3'),
-        isSpanish ? 'Selecciona tu acceso a equipo' : 'Select your equipment access',
+        isPt ? 'Selecione seu acesso a equipamento' : isSpanish ? 'Selecciona tu acceso a equipo' : 'Select your equipment access',
         equipmentOptions,
         equipmentAccess,
         setEquipmentAccess,
@@ -988,7 +1016,7 @@ Return ONLY valid JSON.`;
               <View style={scanStyles.scanTextWrap}>
                 <Text style={scanStyles.scanButtonTitle}>{t('gym_q3_o5_scan')}</Text>
                 <Text style={scanStyles.scanButtonSub}>
-                  {isSpanish ? 'La IA detectará tu equipo' : 'AI will detect your equipment'}
+                  {isPt ? 'A IA detectará seu equipamento' : isSpanish ? 'La IA detectará tu equipo' : 'AI will detect your equipment'}
                 </Text>
               </View>
               <ChevronRight size={18} color="#00ADB5" />
@@ -1002,7 +1030,7 @@ Return ONLY valid JSON.`;
   const renderComparison = () => (
     <View style={stepStyles.content}>
       <Text style={stepStyles.title}>
-        {isSpanish
+        {isPt ? 'Treine 2x mais efetivamente com AthliAI' : isSpanish
           ? 'Entrena el doble de efectivo con AthliAI'
           : 'Train 2x more effectively with AthliAI'}
       </Text>
@@ -1011,14 +1039,14 @@ Return ONLY valid JSON.`;
         <View style={compStyles.columnsRow}>
           <View style={compStyles.column}>
             <Text style={compStyles.columnLabel}>
-              {isSpanish ? 'Sin\nAthliAI' : 'Without\nAthliAI'}
+              {isPt ? 'Sem\nAthliAI' : isSpanish ? 'Sin\nAthliAI' : 'Without\nAthliAI'}
             </Text>
             <View style={compStyles.barSmall} />
             <Text style={compStyles.barValue}>20%</Text>
           </View>
           <View style={compStyles.column}>
             <Text style={compStyles.columnLabel}>
-              {isSpanish ? 'Con\nAthliAI' : 'With\nAthliAI'}
+              {isPt ? 'Com\nAthliAI' : isSpanish ? 'Con\nAthliAI' : 'With\nAthliAI'}
             </Text>
             <View style={compStyles.barLarge}>
               <View style={compStyles.barLargeInner} />
@@ -1027,7 +1055,9 @@ Return ONLY valid JSON.`;
           </View>
         </View>
         <Text style={compStyles.cardDesc}>
-          {isSpanish
+          {isPt
+            ? 'AthliAI cria planos personalizados e te mantém responsável pelas suas metas.'
+            : isSpanish
             ? 'AthliAI crea planes personalizados y te mantiene responsable de tus metas.'
             : 'AthliAI creates personalized plans and holds you accountable.'}
         </Text>
@@ -1038,7 +1068,7 @@ Return ONLY valid JSON.`;
           <TrendingUp size={20} color="#00ADB5" />
           <Text style={compStyles.statValue}>87%</Text>
           <Text style={compStyles.statLabel}>
-            {isSpanish ? 'logran sus metas' : 'hit their goals'}
+            {isPt ? 'atingem suas metas' : isSpanish ? 'logran sus metas' : 'hit their goals'}
           </Text>
         </View>
         <View style={compStyles.statDivider} />
@@ -1046,7 +1076,7 @@ Return ONLY valid JSON.`;
           <Flame size={20} color="#00ADB5" />
           <Text style={compStyles.statValue}>4.2x</Text>
           <Text style={compStyles.statLabel}>
-            {isSpanish ? 'más consistentes' : 'more consistent'}
+            {isPt ? 'mais consistentes' : isSpanish ? 'más consistentes' : 'more consistent'}
           </Text>
         </View>
       </View>
@@ -1055,22 +1085,22 @@ Return ONLY valid JSON.`;
 
   const renderWorkoutDays = () => {
     const days = [
-      { key: 'monday', label: t('day_monday'), short: isSpanish ? 'L' : 'M' },
-      { key: 'tuesday', label: t('day_tuesday'), short: isSpanish ? 'Ma' : 'Tu' },
-      { key: 'wednesday', label: t('day_wednesday'), short: isSpanish ? 'Mi' : 'W' },
-      { key: 'thursday', label: t('day_thursday'), short: isSpanish ? 'J' : 'Th' },
-      { key: 'friday', label: t('day_friday'), short: isSpanish ? 'V' : 'F' },
-      { key: 'saturday', label: t('day_saturday'), short: isSpanish ? 'S' : 'Sa' },
-      { key: 'sunday', label: t('day_sunday'), short: isSpanish ? 'D' : 'Su' },
+      { key: 'monday', label: t('day_monday'), short: isPt ? 'S' : isSpanish ? 'L' : 'M' },
+      { key: 'tuesday', label: t('day_tuesday'), short: isPt ? 'T' : isSpanish ? 'Ma' : 'Tu' },
+      { key: 'wednesday', label: t('day_wednesday'), short: isPt ? 'Q' : isSpanish ? 'Mi' : 'W' },
+      { key: 'thursday', label: t('day_thursday'), short: isPt ? 'Qi' : isSpanish ? 'J' : 'Th' },
+      { key: 'friday', label: t('day_friday'), short: isPt ? 'Sx' : isSpanish ? 'V' : 'F' },
+      { key: 'saturday', label: t('day_saturday'), short: isPt ? 'Sa' : isSpanish ? 'S' : 'Sa' },
+      { key: 'sunday', label: t('day_sunday'), short: isPt ? 'D' : isSpanish ? 'D' : 'Su' },
     ];
 
     return (
       <View style={stepStyles.content}>
         <Text style={stepStyles.title}>
-          {isSpanish ? 'Selecciona tus días de entrenamiento' : 'Select your workout days'}
+          {isPt ? 'Selecione seus dias de treino' : isSpanish ? 'Selecciona tus días de entrenamiento' : 'Select your workout days'}
         </Text>
         <Text style={stepStyles.subtitle}>
-          {isSpanish ? 'Elige qué días quieres entrenar' : 'Choose which days you want to train'}
+          {isPt ? 'Escolha em quais dias quer treinar' : isSpanish ? 'Elige qué días quieres entrenar' : 'Choose which days you want to train'}
         </Text>
 
         <View style={dayStyles.grid}>
@@ -1103,7 +1133,7 @@ Return ONLY valid JSON.`;
         </View>
 
         <Text style={dayStyles.countLabel}>
-          {selectedDays.length} {isSpanish ? 'días seleccionados' : 'days selected'}
+          {selectedDays.length} {isPt ? 'dias selecionados' : isSpanish ? 'días seleccionados' : 'days selected'}
         </Text>
       </View>
     );
@@ -1112,10 +1142,12 @@ Return ONLY valid JSON.`;
   const renderGoalsInput = () => (
     <View style={stepStyles.content}>
       <Text style={stepStyles.title}>
-        {isSpanish ? '¿Algún objetivo específico?' : 'Any specific goals?'}
+        {isPt ? 'Algum objetivo específico?' : isSpanish ? '¿Algún objetivo específico?' : 'Any specific goals?'}
       </Text>
       <Text style={stepStyles.subtitle}>
-        {isSpanish
+        {isPt
+          ? 'Conte-nos sobre áreas específicas ou limitações que devemos saber.'
+          : isSpanish
           ? 'Cuéntanos sobre áreas específicas o limitaciones que debamos saber.'
           : 'Tell us about specific areas you want to focus on or anything we should know.'}
       </Text>
@@ -1125,7 +1157,9 @@ Return ONLY valid JSON.`;
         multiline
         numberOfLines={4}
         placeholder={
-          isSpanish
+          isPt
+            ? 'ex., Quero braços e peito maiores, melhorar minha postura...'
+            : isSpanish
             ? 'ej., Quiero brazos y pecho más grandes, mejorar mi postura...'
             : 'e.g., I want bigger arms and chest, improve my posture...'
         }
@@ -1142,7 +1176,7 @@ Return ONLY valid JSON.`;
       case 1:
         return renderSelectionStep(
           t('gym_q1'),
-          isSpanish ? 'Esto guiará tu plan de entrenamiento' : 'This will guide your training plan',
+          isPt ? 'Isso guiará seu plano de treino' : isSpanish ? 'Esto guiará tu plan de entrenamiento' : 'This will guide your training plan',
           goalOptions,
           fitnessGoal,
           setFitnessGoal,
@@ -1150,7 +1184,7 @@ Return ONLY valid JSON.`;
       case 2:
         return renderSelectionStep(
           t('gym_q2'),
-          isSpanish ? 'Sé honesto — no hay respuestas incorrectas' : "Be honest — there are no wrong answers",
+          isPt ? 'Seja honesto — não há respostas erradas' : isSpanish ? 'Sé honesto — no hay respuestas incorrectas' : "Be honest — there are no wrong answers",
           levelOptions,
           fitnessLevel,
           setFitnessLevel,
@@ -1164,7 +1198,7 @@ Return ONLY valid JSON.`;
       case 6:
         return renderSelectionStep(
           t('gym_q4'),
-          isSpanish ? 'Adaptaremos tu plan a tu horario' : "We'll fit your plan to your schedule",
+          isPt ? 'Vamos adaptar seu plano ao seu horário' : isSpanish ? 'Adaptaremos tu plan a tu horario' : "We'll fit your plan to your schedule",
           timeOptions,
           workoutTime,
           setWorkoutTime,
@@ -1172,7 +1206,7 @@ Return ONLY valid JSON.`;
       case 7:
         return renderSelectionStep(
           t('gym_q5'),
-          isSpanish ? 'Tu seguridad es lo primero' : 'Your safety comes first',
+          isPt ? 'Sua segurança vem primeiro' : isSpanish ? 'Tu seguridad es lo primero' : 'Your safety comes first',
           limitationOptions.map(o => ({ ...o, icon: o.key === 'none' ? Shield : undefined })),
           physicalLimitations,
           setPhysicalLimitations,
@@ -1191,8 +1225,8 @@ Return ONLY valid JSON.`;
   if (step === 0) return renderHero();
 
   const continueLabel = step === 10
-    ? (isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
-    : (isSpanish ? 'Continuar' : 'Continue');
+    ? (isPt ? 'Criar Meu Plano' : isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
+    : (isPt ? 'Continuar' : isSpanish ? 'Continuar' : 'Continue');
 
   return (
     <View style={[s.flex1, { backgroundColor: '#FFFFFF', paddingTop: insets.top }]}>
@@ -1231,7 +1265,7 @@ Return ONLY valid JSON.`;
           </TouchableOpacity>
           {step === 4 && !targetWeightVal && (
             <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
-              <Text style={footerStyles.skipText}>{isSpanish ? 'Omitir' : 'Skip'}</Text>
+              <Text style={footerStyles.skipText}>{isPt ? 'Pular' : isSpanish ? 'Omitir' : 'Skip'}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1250,6 +1284,7 @@ const heroStyles = StyleSheet.create({
     justifyContent: 'flex-end' as const,
     paddingHorizontal: 20,
     paddingTop: 12,
+    gap: 8,
   },
   langButton: {
     paddingHorizontal: 14,
@@ -1261,6 +1296,12 @@ const heroStyles = StyleSheet.create({
     color: '#6B7280',
     fontSize: 13,
     fontWeight: '600' as const,
+  },
+  langButtonActive: {
+    backgroundColor: '#1A1A2E',
+  },
+  langTextActive: {
+    color: '#FFFFFF',
   },
   content: {
     flex: 1,
