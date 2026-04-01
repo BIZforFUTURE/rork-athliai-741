@@ -3176,51 +3176,7 @@ const styles = StyleSheet.create({
   smallCtaRow: {
     marginTop: 14,
   },
-  dailyChallengeButton: {
-    marginTop: 14,
-    borderRadius: 16,
-    overflow: 'hidden' as const,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  dailyChallengeGradient: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    padding: 16,
-    gap: 12,
-  },
-  dailyChallengeIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  dailyChallengeText: {
-    flex: 1,
-  },
-  dailyChallengeTitle: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: '#FFFFFF',
-    marginBottom: 2,
-  },
-  dailyChallengeSub: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
-  },
-  dailyChallengeArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
+
   aiFormCheckCard: {
     marginTop: 14,
     backgroundColor: '#FEFCF9',
