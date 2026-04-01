@@ -34,7 +34,6 @@ import {
   RotateCcw,
   Moon,
   Sun,
-  Trophy,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -48,7 +47,7 @@ import { useLanguage } from "@/providers/LanguageProvider";
 import { TranslationKey } from "@/constants/translations";
 import * as ImagePicker from "expo-image-picker";
 import { callOpenAIWithVision } from "@/utils/openai";
-import { Camera, Search } from "lucide-react-native";
+import { Camera } from "lucide-react-native";
 
 interface QuizAnswer {
   question: string;
@@ -1337,75 +1336,27 @@ Format as JSON:
           </View>
         )}
 
-        <View style={styles.aiToolsRow}>
-          <TouchableOpacity
-            style={styles.aiToolCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              router.push('/exercise-library');
-            }}
-            testID="exercise-library-btn"
-          >
-            <View style={[styles.aiToolIcon, { backgroundColor: 'rgba(99,102,241,0.1)' }]}>
-              <Search size={20} color="#6366F1" />
-            </View>
-            <Text style={styles.aiToolTitle}>{isSpanish ? 'Biblioteca' : 'Exercise Library'}</Text>
-            <Text style={styles.aiToolSub}>{isSpanish ? 'Buscar y revisar forma' : 'Browse & form check'}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.aiToolCard}
-            activeOpacity={0.85}
-            onPress={() => {
-              if (Platform.OS !== 'web') {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }
-              router.push({
-                pathname: '/form-check' as any,
-                params: { exerciseName: '' },
-              });
-            }}
-            testID="quick-form-check-btn"
-          >
-            <View style={[styles.aiToolIcon, { backgroundColor: 'rgba(74,124,89,0.1)' }]}>
-              <Sparkles size={20} color="#4A7C59" />
-            </View>
-            <Text style={styles.aiToolTitle}>{isSpanish ? 'Revisión IA' : 'AI Form Check'}</Text>
-            <Text style={styles.aiToolSub}>{isSpanish ? 'Analiza tu forma' : 'Analyze your form'}</Text>
-          </TouchableOpacity>
-        </View>
-
         <TouchableOpacity
-          style={styles.dailyChallengeButton}
+          style={styles.aiFormCheckCard}
           activeOpacity={0.85}
           onPress={() => {
             if (Platform.OS !== 'web') {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             }
-            router.push('/daily-challenge');
+            router.push('/exercise-library');
           }}
-          testID="daily-challenge-btn"
+          testID="exercise-library-btn"
         >
-          <LinearGradient
-            colors={['#C4654E', '#A8503D']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.dailyChallengeGradient}
-          >
-            <View style={styles.dailyChallengeIcon}>
-              <Trophy size={22} color="#FFFFFF" />
+          <View style={styles.aiFormCheckInner}>
+            <View style={styles.aiFormCheckIconWrap}>
+              <Sparkles size={22} color="#4A7C59" />
             </View>
-            <View style={styles.dailyChallengeText}>
-              <Text style={styles.dailyChallengeTitle}>{t('daily_challenge_title' as any)}</Text>
-              <Text style={styles.dailyChallengeSub}>{t('daily_challenge_subtitle' as any)}</Text>
+            <View style={styles.aiFormCheckTextWrap}>
+              <Text style={styles.aiFormCheckTitle}>{isSpanish ? 'Revisión de Forma con IA' : 'AI Form Check'}</Text>
+              <Text style={styles.aiFormCheckSub}>{isSpanish ? 'Busca un ejercicio y analiza tu forma' : 'Search an exercise & analyze your form'}</Text>
             </View>
-            <View style={styles.dailyChallengeArrow}>
-              <ArrowRight size={18} color="rgba(255,255,255,0.7)" />
-            </View>
-          </LinearGradient>
+            <ChevronRight size={18} color="#4A7C59" />
+          </View>
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
@@ -3270,41 +3221,42 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
-  aiToolsRow: {
-    flexDirection: 'row' as const,
-    gap: 10,
+  aiFormCheckCard: {
     marginTop: 14,
-  },
-  aiToolCard: {
-    flex: 1,
     backgroundColor: '#FEFCF9',
     borderRadius: 20,
-    padding: 16,
-    alignItems: 'center' as const,
+    overflow: 'hidden' as const,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
     shadowRadius: 20,
   },
-  aiToolIcon: {
+  aiFormCheckInner: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    padding: 16,
+    gap: 14,
+  },
+  aiFormCheckIconWrap: {
     width: 44,
     height: 44,
     borderRadius: 14,
+    backgroundColor: 'rgba(74,124,89,0.1)',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    marginBottom: 10,
   },
-  aiToolTitle: {
-    fontSize: 14,
+  aiFormCheckTextWrap: {
+    flex: 1,
+  },
+  aiFormCheckTitle: {
+    fontSize: 15,
     fontWeight: '700' as const,
     color: '#2C2C2C',
-    textAlign: 'center' as const,
     marginBottom: 2,
   },
-  aiToolSub: {
-    fontSize: 11,
+  aiFormCheckSub: {
+    fontSize: 12,
     color: '#A8A8A0',
-    textAlign: 'center' as const,
   },
   formHistorySection: {
     marginTop: 24,

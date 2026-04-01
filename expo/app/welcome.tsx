@@ -228,9 +228,9 @@ export default function WelcomeScreen() {
   const [physicalLimitations, setPhysicalLimitations] = useState<string | null>(null);
 
   const [isMetric, setIsMetric] = useState(false);
-  const [heightFt, setHeightFt] = useState('5');
-  const [heightIn, setHeightIn] = useState('8');
-  const [heightCm, setHeightCm] = useState('173');
+  const [heightFt, setHeightFt] = useState('');
+  const [heightIn, setHeightIn] = useState('');
+  const [heightCm, setHeightCm] = useState('');
   const [weightVal, setWeightVal] = useState('');
   const [targetWeightVal, setTargetWeightVal] = useState('');
 
@@ -1211,6 +1211,7 @@ Return ONLY valid JSON.`;
         keyboardVerticalOffset={insets.top + 60}
       >
         <ScrollView
+          style={s.flex1}
           contentContainerStyle={stepStyles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
