@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -15,8 +16,10 @@ import {
   SkipForward, 
   Plus, 
   CheckCircle,
-  Hand
+  Hand,
+  Sparkles,
 } from "lucide-react-native";
+import * as Haptics from "expo-haptics";
 import { useApp } from "@/providers/AppProvider";
 import { getWorkoutById, WorkoutLog, calculateWorkoutCalories, Exercise } from "@/constants/workouts";
 import { useLanguage } from "@/providers/LanguageProvider";
@@ -301,6 +304,25 @@ export default function WorkoutScreen() {
               <Text style={styles.exerciseDescription}>
                 {currentExercise.description}
               </Text>
+
+              <TouchableOpacity
+                style={styles.aiHelpButton}
+                activeOpacity={0.8}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  router.push({
+                    pathname: '/form-check' as any,
+                    params: { exerciseName: currentExercise.name },
+                  });
+                }}
+              >
+                <Sparkles size={16} color="#FFFFFF" />
+                <Text style={styles.aiHelpButtonText}>
+                  {isSpanish ? 'Revisión de Forma con IA' : 'AI Form Check'}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Auto Fill Toggle */}
@@ -718,5 +740,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#8E8E93",
     opacity: 0.6,
   },
-
+  aiHelpButton: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    gap: 8,
+    backgroundColor: "#4A7C59",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    marginTop: 14,
+  },
+  aiHelpButtonText: {
+    fontSize: 14,
+    fontWeight: "700" as const,
+    color: "#FFFFFF",
+  },
 });

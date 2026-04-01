@@ -48,7 +48,7 @@ import { useLanguage } from "@/providers/LanguageProvider";
 import { TranslationKey } from "@/constants/translations";
 import * as ImagePicker from "expo-image-picker";
 import { callOpenAIWithVision } from "@/utils/openai";
-import { Camera } from "lucide-react-native";
+import { Camera, Search } from "lucide-react-native";
 
 interface QuizAnswer {
   question: string;
@@ -476,7 +476,7 @@ function AnimatedStatCard({ icon: Icon, value, label, delay, color }: {
 }
 
 export default function GymScreen() {
-  const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan } = useApp();
+  const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan, formCheckHistory, deleteFormCheckEntry } = useApp();
   const { isPremium } = useRevenueCat();
   const { t, isSpanish } = useLanguage();
   const insets = useSafeAreaInsets();
@@ -1337,6 +1337,47 @@ Format as JSON:
           </View>
         )}
 
+        <View style={styles.aiToolsRow}>
+          <TouchableOpacity
+            style={styles.aiToolCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              router.push('/exercise-library');
+            }}
+            testID="exercise-library-btn"
+          >
+            <View style={[styles.aiToolIcon, { backgroundColor: 'rgba(99,102,241,0.1)' }]}>
+              <Search size={20} color="#6366F1" />
+            </View>
+            <Text style={styles.aiToolTitle}>{isSpanish ? 'Biblioteca' : 'Exercise Library'}</Text>
+            <Text style={styles.aiToolSub}>{isSpanish ? 'Buscar y revisar forma' : 'Browse & form check'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.aiToolCard}
+            activeOpacity={0.85}
+            onPress={() => {
+              if (Platform.OS !== 'web') {
+                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }
+              router.push({
+                pathname: '/form-check' as any,
+                params: { exerciseName: '' },
+              });
+            }}
+            testID="quick-form-check-btn"
+          >
+            <View style={[styles.aiToolIcon, { backgroundColor: 'rgba(74,124,89,0.1)' }]}>
+              <Sparkles size={20} color="#4A7C59" />
+            </View>
+            <Text style={styles.aiToolTitle}>{isSpanish ? 'Revisión IA' : 'AI Form Check'}</Text>
+            <Text style={styles.aiToolSub}>{isSpanish ? 'Analiza tu forma' : 'Analyze your form'}</Text>
+          </TouchableOpacity>
+        </View>
+
         <TouchableOpacity
           style={styles.dailyChallengeButton}
           activeOpacity={0.85}
@@ -1469,6 +1510,56 @@ Format as JSON:
             </View>
           )}
         </View>
+
+        {formCheckHistory.length > 0 && (
+          <View style={styles.formHistorySection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{isSpanish ? 'Revisiones de Forma' : 'Past Form Checks'}</Text>
+            </View>
+            {formCheckHistory.slice(0, 5).map((entry) => (
+              <TouchableOpacity
+                key={entry.id}
+                style={styles.formHistoryCard}
+                activeOpacity={0.85}
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  router.push({
+                    pathname: '/form-check' as any,
+                    params: { exerciseName: entry.exerciseName },
+                  });
+                }}
+              >
+                <View style={styles.formHistoryDot} />
+                <View style={styles.formHistoryInfo}>
+                  <Text style={styles.formHistoryName} numberOfLines={1}>{entry.exerciseName}</Text>
+                  <Text style={styles.formHistoryDate}>
+                    {new Date(entry.date).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.formHistoryDeleteBtn}
+                  onPress={() => {
+                    if (Platform.OS !== 'web') {
+                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }
+                    Alert.alert(
+                      isSpanish ? 'Eliminar' : 'Delete',
+                      isSpanish ? '¿Eliminar esta revisión de forma?' : 'Delete this form check?',
+                      [
+                        { text: isSpanish ? 'Cancelar' : 'Cancel', style: 'cancel' },
+                        { text: isSpanish ? 'Eliminar' : 'Delete', style: 'destructive', onPress: () => deleteFormCheckEntry(entry.id) },
+                      ]
+                    );
+                  }}
+                >
+                  <X size={14} color="#EF4444" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       <Modal
@@ -3178,5 +3269,81 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
+  },
+  aiToolsRow: {
+    flexDirection: 'row' as const,
+    gap: 10,
+    marginTop: 14,
+  },
+  aiToolCard: {
+    flex: 1,
+    backgroundColor: '#FEFCF9',
+    borderRadius: 20,
+    padding: 16,
+    alignItems: 'center' as const,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 20,
+  },
+  aiToolIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    marginBottom: 10,
+  },
+  aiToolTitle: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    color: '#2C2C2C',
+    textAlign: 'center' as const,
+    marginBottom: 2,
+  },
+  aiToolSub: {
+    fontSize: 11,
+    color: '#A8A8A0',
+    textAlign: 'center' as const,
+  },
+  formHistorySection: {
+    marginTop: 24,
+  },
+  formHistoryCard: {
+    backgroundColor: '#FEFCF9',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 12,
+    marginBottom: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+  },
+  formHistoryDot: {
+    width: 4,
+    height: 36,
+    borderRadius: 2,
+    backgroundColor: '#4A7C59',
+  },
+  formHistoryInfo: {
+    flex: 1,
+  },
+  formHistoryName: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#2C2C2C',
+    marginBottom: 2,
+  },
+  formHistoryDate: {
+    fontSize: 12,
+    color: '#A8A8A0',
+  },
+  formHistoryDeleteBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(239,68,68,0.08)',
   },
 });
