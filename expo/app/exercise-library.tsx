@@ -118,7 +118,8 @@ export default function ExerciseLibraryScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
+      <View style={[styles.statusBarFill, { height: insets.top }]} />
       <View style={styles.header}>
         <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
           <X size={22} color="#5A5A5E" />
@@ -247,6 +248,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F3EDE4",
+  },
+  statusBarFill: {
+    backgroundColor: "#FEFCF9",
   },
   header: {
     flexDirection: "row",
