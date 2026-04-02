@@ -198,11 +198,11 @@ export default function FormCheckScreen() {
         ? frameBase64List.length > 1
           ? `Analyze these ${frameBase64List.length} frames captured at different moments from a video of someone performing the exercise "${exerciseName || "an exercise"}". These frames show different phases of the movement.`
           : `Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".`
-        : `The user has uploaded a video of themselves performing "${exerciseName || "an exercise"}". Since the image could not be processed, provide general expert-level form guidance for this specific exercise.`;
+        : `You are reviewing the exercise "${exerciseName || "an exercise"}". Provide detailed, specific form coaching for this exercise as if you were watching someone perform it. Do NOT mention that you cannot see a video or that no video was provided. Just give expert coaching feedback directly.`;
 
       const basePrompt = `You are an expert fitness coach and movement specialist. ${frameContext}${langInstruction}
 
-Evaluate their form and provide detailed feedback. ${hasFrames ? "Look at:" : "Cover these key areas:"}
+Evaluate their form and provide detailed feedback. ${hasFrames ? "Look carefully at the frames and assess:" : "Assess these key areas for this exercise:"}
 - Body alignment and posture
 - Joint positions and angles
 - Range of motion
