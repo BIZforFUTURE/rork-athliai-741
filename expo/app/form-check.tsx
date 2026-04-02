@@ -48,6 +48,7 @@ export default function FormCheckScreen() {
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [thumbnailUri, setThumbnailUri] = useState<string | null>(null);
   const [frameBase64List, setFrameBase64List] = useState<string[]>([]);
+  const [frameTimestamps, setFrameTimestamps] = useState<number[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<FormFeedback | null>(null);
   const [_rawFeedback, setRawFeedback] = useState<string>("");
@@ -84,8 +85,12 @@ export default function FormCheckScreen() {
       return;
     }
 
-    const timestamps = [500, 2000, 5000, 8000];
+    const timestamps = [
+      0, 500, 1000, 1500, 2000, 3000, 4000, 5000,
+      6000, 7000, 8000, 10000, 12000, 15000, 20000,
+    ];
     const base64Frames: string[] = [];
+    const successTimestamps: number[] = [];
     let firstThumbUri: string | null = null;
 
     for (const time of timestamps) {
@@ -99,6 +104,7 @@ export default function FormCheckScreen() {
         });
         if (base64 && base64.length > 100) {
           base64Frames.push(base64);
+          successTimestamps.push(time);
           console.log(`Base64 frame at ${time}ms: ${base64.length} chars`);
         }
       } catch (err) {
@@ -115,6 +121,7 @@ export default function FormCheckScreen() {
         });
         if (base64 && base64.length > 100) {
           base64Frames.push(base64);
+          successTimestamps.push(0);
           console.log('Fallback frame extracted successfully');
         }
       } catch (err) {
@@ -124,6 +131,7 @@ export default function FormCheckScreen() {
 
     setThumbnailUri(firstThumbUri || uri);
     setFrameBase64List(base64Frames);
+    setFrameTimestamps(successTimestamps);
     console.log(`Total frames extracted: ${base64Frames.length}`);
   };
 
@@ -194,9 +202,13 @@ export default function FormCheckScreen() {
       const hasFrames = frameBase64List.length > 0;
       console.log("Has frames for vision:", hasFrames, "count:", frameBase64List.length);
 
+      const frameLabels = hasFrames && frameTimestamps.length === frameBase64List.length
+        ? frameTimestamps.map((t, i) => `Frame ${i + 1} at ${(t / 1000).toFixed(1)}s`).join(', ')
+        : '';
+
       const frameContext = hasFrames
         ? frameBase64List.length > 1
-          ? `Analyze these ${frameBase64List.length} frames captured at different moments from a video of someone performing the exercise "${exerciseName || "an exercise"}". These frames show different phases of the movement.`
+          ? `Analyze these ${frameBase64List.length} sequential frames captured from a video of someone performing the exercise "${exerciseName || "an exercise"}". The frames are in chronological order: ${frameLabels}. Use the temporal sequence to understand the full movement pattern, speed, control, and transitions between phases of the rep.`
           : `Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".`
         : `You are reviewing the exercise "${exerciseName || "an exercise"}". Provide detailed, specific form coaching for this exercise as if you were watching someone perform it. Do NOT mention that you cannot see a video or that no video was provided. Just give expert coaching feedback directly.`;
 
@@ -225,7 +237,7 @@ Return ONLY valid JSON.`;
 
       if (hasFrames) {
         console.log("Analyzing exercise form with AI vision from", frameBase64List.length, "video frames...");
-        aiResponse = await callOpenAIWithMultipleFrames(basePrompt, frameBase64List);
+        aiResponse = await callOpenAIWithMultipleFrames(basePrompt, frameBase64List, frameTimestamps);
       } else {
         console.log("No frames available, using text-only analysis for:", exerciseName);
         aiResponse = await callOpenAI(basePrompt);
@@ -275,6 +287,7 @@ Return ONLY valid JSON.`;
     setVideoUri(null);
     setThumbnailUri(null);
     setFrameBase64List([]);
+    setFrameTimestamps([]);
     setFeedback(null);
     setRawFeedback("");
   };
