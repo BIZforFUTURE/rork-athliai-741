@@ -26,7 +26,7 @@ import {
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
-import { callOpenAIWithVision } from "@/utils/openai";
+import { callOpenAI, callOpenAIWithVision } from "@/utils/openai";
 import { useApp } from "@/providers/AppProvider";
 import { useLanguage } from "@/providers/LanguageProvider";
 
@@ -141,13 +141,6 @@ export default function FormCheckScreen() {
   };
 
   const analyzeForm = async () => {
-    if (!thumbnailBase64 && Platform.OS !== 'web') {
-      Alert.alert(
-        isSpanish ? "Sin Video" : "No Video",
-        isSpanish ? "Por favor graba o selecciona un video primero." : "Please record or select a video first."
-      );
-      return;
-    }
     if (!videoUri) {
       Alert.alert(
         isSpanish ? "Sin Video" : "No Video",
@@ -161,15 +154,19 @@ export default function FormCheckScreen() {
     }
 
     setIsAnalyzing(true);
+    console.log("analyzeForm called. thumbnailBase64 available:", !!thumbnailBase64, "Platform:", Platform.OS);
 
     try {
       const langInstruction = isSpanish
         ? "\nIMPORTANT: Respond entirely in Spanish."
         : "";
 
-      const prompt = `You are an expert fitness coach and movement specialist. Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".${langInstruction}
+      const hasImage = !!thumbnailBase64;
+      console.log("Has image for vision:", hasImage);
 
-Evaluate their form and provide detailed feedback. Look at:
+      const basePrompt = `You are an expert fitness coach and movement specialist. ${hasImage ? `Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".` : `The user has uploaded a video of themselves performing "${exerciseName || "an exercise"}". Since the image could not be processed, provide general expert-level form guidance for this specific exercise.`}${langInstruction}
+
+Evaluate their form and provide detailed feedback. ${hasImage ? "Look at:" : "Cover these key areas:"}
 - Body alignment and posture
 - Joint positions and angles
 - Range of motion
@@ -178,20 +175,27 @@ Evaluate their form and provide detailed feedback. Look at:
 
 Respond in this exact JSON format:
 {
-  "overall": "A 2-3 sentence overall assessment of their form",
+  "overall": "A 2-3 sentence overall assessment",
   "score": 7,
-  "strengths": ["Specific thing they're doing well 1", "Specific thing they're doing well 2"],
-  "improvements": ["Specific improvement suggestion 1", "Specific improvement suggestion 2"],
-  "tips": ["Pro tip for this exercise 1", "Pro tip for this exercise 2"]
+  "strengths": ["Specific thing 1", "Specific thing 2"],
+  "improvements": ["Specific improvement 1", "Specific improvement 2"],
+  "tips": ["Pro tip 1", "Pro tip 2"]
 }
 
 The score should be 1-10. Be encouraging but honest. Give specific, actionable feedback.
 Return ONLY valid JSON.`;
 
-      console.log("Analyzing exercise form with AI vision from video frame...");
-      const aiResponse = await callOpenAIWithVision(prompt, thumbnailBase64 || '');
-      console.log("AI form analysis response:", aiResponse.substring(0, 200));
+      let aiResponse: string;
 
+      if (hasImage) {
+        console.log("Analyzing exercise form with AI vision from video frame...");
+        aiResponse = await callOpenAIWithVision(basePrompt, thumbnailBase64!);
+      } else {
+        console.log("No image available, using text-only analysis for:", exerciseName);
+        aiResponse = await callOpenAI(basePrompt);
+      }
+
+      console.log("AI form analysis response:", aiResponse.substring(0, 200));
       setRawFeedback(aiResponse);
 
       let cleaned = aiResponse.replace(/```json/gi, "").replace(/```/g, "").trim();
@@ -220,8 +224,8 @@ Return ONLY valid JSON.`;
       if (Platform.OS !== "web") {
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-    } catch (error) {
-      console.error("Error analyzing form:", error);
+    } catch (error: any) {
+      console.error("Error analyzing form:", error?.message || error);
       Alert.alert(
         isSpanish ? "Análisis Fallido" : "Analysis Failed",
         isSpanish ? "No se pudo analizar tu forma. Inténtalo de nuevo con un video más claro." : "Could not analyze your form. Please try again with a clearer video."
