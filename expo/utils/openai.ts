@@ -39,6 +39,31 @@ const callOpenAIWithVision = async (prompt: string, base64Image: string): Promis
   }
 };
 
+const callOpenAIWithMultipleFrames = async (prompt: string, base64Frames: string[]): Promise<string> => {
+  try {
+    console.log('Calling AI vision with', base64Frames.length, 'frames via Rork toolkit...');
+    const contentParts: ({ type: 'text'; text: string } | { type: 'image'; image: string })[] = [
+      { type: 'text', text: prompt },
+      ...base64Frames.map((b64) => ({
+        type: 'image' as const,
+        image: `data:image/jpeg;base64,${b64}`,
+      })),
+    ];
+    const response = await generateText({
+      messages: [
+        {
+          role: 'user',
+          content: contentParts,
+        },
+      ],
+    });
+    return response;
+  } catch (error: any) {
+    console.error('AI multi-frame vision call failed:', error);
+    throw error;
+  }
+};
+
 const cleanJsonResponse = (response: string): string => {
   let cleaned = response
     .replace(/```json/gi, '')
@@ -97,4 +122,4 @@ const parseNutritionResponse = (response: string): { name: string; calories: num
   }
 };
 
-export { callOpenAI, callOpenAIWithVision, cleanJsonResponse, parseNutritionResponse };
+export { callOpenAI, callOpenAIWithVision, callOpenAIWithMultipleFrames, cleanJsonResponse, parseNutritionResponse };

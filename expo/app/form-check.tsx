@@ -24,9 +24,10 @@ import {
   RotateCcw,
 } from "lucide-react-native";
 import * as VideoThumbnails from 'expo-video-thumbnails';
+import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
-import { callOpenAI, callOpenAIWithVision } from "@/utils/openai";
+import { callOpenAI, callOpenAIWithMultipleFrames } from "@/utils/openai";
 import { useApp } from "@/providers/AppProvider";
 import { useLanguage } from "@/providers/LanguageProvider";
 
@@ -46,7 +47,7 @@ export default function FormCheckScreen() {
 
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [thumbnailUri, setThumbnailUri] = useState<string | null>(null);
-  const [thumbnailBase64, setThumbnailBase64] = useState<string | null>(null);
+  const [frameBase64List, setFrameBase64List] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<FormFeedback | null>(null);
   const [_rawFeedback, setRawFeedback] = useState<string>("");
@@ -75,26 +76,55 @@ export default function FormCheckScreen() {
     }
   }, [isAnalyzing, pulseAnim]);
 
-  const extractThumbnail = async (uri: string) => {
-    try {
-      if (Platform.OS === 'web') {
-        setThumbnailUri(uri);
-        setThumbnailBase64(null);
-        console.log('Web platform: using video URI as thumbnail fallback');
-        return;
-      }
-      const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(uri, { time: 1000, quality: 0.7 });
-      setThumbnailUri(thumbUri);
-
-      const FileSystem = require('expo-file-system');
-      const base64 = await FileSystem.readAsStringAsync(thumbUri, { encoding: FileSystem.EncodingType.Base64 });
-      setThumbnailBase64(base64);
-      console.log('Thumbnail extracted from video successfully');
-    } catch (error) {
-      console.error('Error extracting thumbnail:', error);
+  const extractFrames = async (uri: string) => {
+    if (Platform.OS === 'web') {
       setThumbnailUri(uri);
-      setThumbnailBase64(null);
+      setFrameBase64List([]);
+      console.log('Web platform: using video URI as thumbnail fallback');
+      return;
     }
+
+    const timestamps = [500, 2000, 5000, 8000];
+    const base64Frames: string[] = [];
+    let firstThumbUri: string | null = null;
+
+    for (const time of timestamps) {
+      try {
+        const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(uri, { time, quality: 0.8 });
+        console.log(`Frame extracted at ${time}ms: ${thumbUri.substring(0, 60)}`);
+        if (!firstThumbUri) firstThumbUri = thumbUri;
+
+        const base64 = await FileSystem.readAsStringAsync(thumbUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        if (base64 && base64.length > 100) {
+          base64Frames.push(base64);
+          console.log(`Base64 frame at ${time}ms: ${base64.length} chars`);
+        }
+      } catch (err) {
+        console.warn(`Failed to extract frame at ${time}ms:`, err);
+      }
+    }
+
+    if (base64Frames.length === 0) {
+      try {
+        const { uri: fallbackUri } = await VideoThumbnails.getThumbnailAsync(uri, { time: 0, quality: 0.8 });
+        firstThumbUri = fallbackUri;
+        const base64 = await FileSystem.readAsStringAsync(fallbackUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        if (base64 && base64.length > 100) {
+          base64Frames.push(base64);
+          console.log('Fallback frame extracted successfully');
+        }
+      } catch (err) {
+        console.error('Fallback frame extraction also failed:', err);
+      }
+    }
+
+    setThumbnailUri(firstThumbUri || uri);
+    setFrameBase64List(base64Frames);
+    console.log(`Total frames extracted: ${base64Frames.length}`);
   };
 
   const pickVideo = async (useCamera: boolean) => {
@@ -129,7 +159,7 @@ export default function FormCheckScreen() {
         setFeedback(null);
         setRawFeedback("");
         console.log("Video selected for form check:", asset.uri.substring(0, 50));
-        await extractThumbnail(asset.uri);
+        await extractFrames(asset.uri);
       }
     } catch (error) {
       console.error("Error picking video:", error);
@@ -154,19 +184,25 @@ export default function FormCheckScreen() {
     }
 
     setIsAnalyzing(true);
-    console.log("analyzeForm called. thumbnailBase64 available:", !!thumbnailBase64, "Platform:", Platform.OS);
+    console.log("analyzeForm called. frames available:", frameBase64List.length, "Platform:", Platform.OS);
 
     try {
       const langInstruction = isSpanish
         ? "\nIMPORTANT: Respond entirely in Spanish."
         : "";
 
-      const hasImage = !!thumbnailBase64;
-      console.log("Has image for vision:", hasImage);
+      const hasFrames = frameBase64List.length > 0;
+      console.log("Has frames for vision:", hasFrames, "count:", frameBase64List.length);
 
-      const basePrompt = `You are an expert fitness coach and movement specialist. ${hasImage ? `Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".` : `The user has uploaded a video of themselves performing "${exerciseName || "an exercise"}". Since the image could not be processed, provide general expert-level form guidance for this specific exercise.`}${langInstruction}
+      const frameContext = hasFrames
+        ? frameBase64List.length > 1
+          ? `Analyze these ${frameBase64List.length} frames captured at different moments from a video of someone performing the exercise "${exerciseName || "an exercise"}". These frames show different phases of the movement.`
+          : `Analyze this frame captured from a video of someone performing the exercise "${exerciseName || "an exercise"}".`
+        : `The user has uploaded a video of themselves performing "${exerciseName || "an exercise"}". Since the image could not be processed, provide general expert-level form guidance for this specific exercise.`;
 
-Evaluate their form and provide detailed feedback. ${hasImage ? "Look at:" : "Cover these key areas:"}
+      const basePrompt = `You are an expert fitness coach and movement specialist. ${frameContext}${langInstruction}
+
+Evaluate their form and provide detailed feedback. ${hasFrames ? "Look at:" : "Cover these key areas:"}
 - Body alignment and posture
 - Joint positions and angles
 - Range of motion
@@ -187,11 +223,11 @@ Return ONLY valid JSON.`;
 
       let aiResponse: string;
 
-      if (hasImage) {
-        console.log("Analyzing exercise form with AI vision from video frame...");
-        aiResponse = await callOpenAIWithVision(basePrompt, thumbnailBase64!);
+      if (hasFrames) {
+        console.log("Analyzing exercise form with AI vision from", frameBase64List.length, "video frames...");
+        aiResponse = await callOpenAIWithMultipleFrames(basePrompt, frameBase64List);
       } else {
-        console.log("No image available, using text-only analysis for:", exerciseName);
+        console.log("No frames available, using text-only analysis for:", exerciseName);
         aiResponse = await callOpenAI(basePrompt);
       }
 
@@ -238,7 +274,7 @@ Return ONLY valid JSON.`;
   const resetCheck = () => {
     setVideoUri(null);
     setThumbnailUri(null);
-    setThumbnailBase64(null);
+    setFrameBase64List([]);
     setFeedback(null);
     setRawFeedback("");
   };
