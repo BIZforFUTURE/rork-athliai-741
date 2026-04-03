@@ -87,12 +87,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="run"
+        name="gym"
         options={{
-          title: t('tab_run'),
+          title: t('tab_gym'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Route size={22} color={color} strokeWidth={1.25} />
+              <Dumbbell size={22} color={color} strokeWidth={1.25} />
             </AnimatedTabIcon>
           ),
         }}
@@ -123,12 +123,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="gym"
+        name="run"
         options={{
-          title: t('tab_gym'),
+          title: t('tab_run'),
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon focused={focused}>
-              <Dumbbell size={22} color={color} strokeWidth={1.25} />
+              <Route size={22} color={color} strokeWidth={1.25} />
             </AnimatedTabIcon>
           ),
         }}
