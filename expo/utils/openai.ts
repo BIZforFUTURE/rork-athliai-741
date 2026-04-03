@@ -1,5 +1,12 @@
 import { generateText } from "@rork-ai/toolkit-sdk";
 
+const ensureBase64Format = (base64: string): string => {
+  if (base64.startsWith('data:')) {
+    return base64;
+  }
+  return `data:image/jpeg;base64,${base64}`;
+};
+
 const callOpenAI = async (prompt: string): Promise<string> => {
   try {
     console.log('Calling AI via Rork toolkit...');
@@ -11,45 +18,70 @@ const callOpenAI = async (prompt: string): Promise<string> => {
         },
       ],
     });
+    console.log('AI text response received, length:', response?.length ?? 0);
+    if (!response) {
+      throw new Error('Empty response from AI');
+    }
     return response;
   } catch (error: any) {
-    console.error('AI call failed:', error);
-    throw error;
+    console.error('AI call failed:', error?.message || error);
+    throw new Error(error?.message || 'AI request failed');
   }
 };
 
 const callOpenAIWithVision = async (prompt: string, base64Image: string): Promise<string> => {
   try {
     console.log('Calling AI vision via Rork toolkit...');
+    console.log('Image base64 length:', base64Image?.length ?? 0);
+
+    if (!base64Image || base64Image.length < 100) {
+      throw new Error('Invalid or empty image data');
+    }
+
+    const imageData = ensureBase64Format(base64Image);
+
     const response = await generateText({
       messages: [
         {
           role: 'user',
           content: [
             { type: 'text', text: prompt },
-            { type: 'image', image: `data:image/jpeg;base64,${base64Image}` },
+            { type: 'image', image: imageData },
           ],
         },
       ],
     });
+    console.log('AI vision response received, length:', response?.length ?? 0);
+    if (!response) {
+      throw new Error('Empty response from AI vision');
+    }
     return response;
   } catch (error: any) {
-    console.error('AI vision call failed:', error);
-    throw error;
+    console.error('AI vision call failed:', error?.message || error);
+    throw new Error(error?.message || 'AI vision request failed');
   }
 };
 
 const callOpenAIWithMultipleFrames = async (prompt: string, base64Frames: string[], timestamps?: number[]): Promise<string> => {
   try {
-    console.log('Calling AI vision with', base64Frames.length, 'frames via Rork toolkit...');
+    const validFrames = base64Frames.filter(f => f && f.length > 100);
+    console.log('Calling AI vision with', validFrames.length, 'valid frames (of', base64Frames.length, 'total) via Rork toolkit...');
+
+    if (validFrames.length === 0) {
+      throw new Error('No valid image frames to analyze');
+    }
+
+    const maxFrames = Math.min(validFrames.length, 10);
+    const selectedFrames = validFrames.slice(0, maxFrames);
+
     const contentParts: ({ type: 'text'; text: string } | { type: 'image'; image: string })[] = [
       { type: 'text', text: prompt },
     ];
-    base64Frames.forEach((b64, i) => {
+    selectedFrames.forEach((b64, i) => {
       if (timestamps && timestamps[i] !== undefined) {
         contentParts.push({ type: 'text', text: `Frame ${i + 1} at ${(timestamps[i] / 1000).toFixed(1)}s:` });
       }
-      contentParts.push({ type: 'image', image: `data:image/jpeg;base64,${b64}` });
+      contentParts.push({ type: 'image', image: ensureBase64Format(b64) });
     });
     const response = await generateText({
       messages: [
@@ -59,10 +91,14 @@ const callOpenAIWithMultipleFrames = async (prompt: string, base64Frames: string
         },
       ],
     });
+    console.log('AI multi-frame response received, length:', response?.length ?? 0);
+    if (!response) {
+      throw new Error('Empty response from AI multi-frame vision');
+    }
     return response;
   } catch (error: any) {
-    console.error('AI multi-frame vision call failed:', error);
-    throw error;
+    console.error('AI multi-frame vision call failed:', error?.message || error);
+    throw new Error(error?.message || 'AI multi-frame vision request failed');
   }
 };
 

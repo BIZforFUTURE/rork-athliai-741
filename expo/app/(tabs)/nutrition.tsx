@@ -22,7 +22,7 @@ import { Calendar, Settings, Brain, ScanLine, X, Edit, Plus, Trash2, Drumstick, 
 import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import { callOpenAI, callOpenAIWithVision } from "@/utils/openai";
 import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
 import { calculateHealthScore } from "@/utils/healthScore";
@@ -134,7 +134,7 @@ export default function NutritionScreen() {
   }, []);
   const [showAddFood, setShowAddFood] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
+  const [_showCamera, setShowCamera] = useState(false);
   const [showAIInput, setShowAIInput] = useState(false);
   const [_showCalendar, _setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -191,11 +191,9 @@ export default function NutritionScreen() {
   const [aiInput, setAiInput] = useState("");
   const [_capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
   const [showAnalyzingCard, setShowAnalyzingCard] = useState(false);
   const [analyzingFoodName, setAnalyzingFoodName] = useState<string | null>(null);
 
-  const cameraRef = React.useRef<any>(null);
   const headerFadeAnim = useRef(new Animated.Value(0)).current;
   const analyzingProgressAnim = useRef(new Animated.Value(0)).current;
   const analyzingPulseAnim = useRef(new Animated.Value(0.4)).current;
@@ -664,20 +662,34 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
   };
 
   const takePicture = async () => {
-    if (cameraRef.current) {
-      try {
-        setIsAnalyzing(true);
-        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5, skipProcessing: Platform.OS === 'ios', exif: false });
-        if (!photo.base64) throw new Error("Failed to capture image data");
-        setCapturedImage(photo.base64);
-        await analyzeWithAI(photo.base64, true);
-      } catch (error: any) {
-        console.error("Failed to take picture:", error.message);
-        Alert.alert("Camera Error", "Failed to capture image. Please try again.");
+    try {
+      setIsAnalyzing(true);
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('fuel_camera_permission'));
         setIsAnalyzing(false);
+        return;
       }
-    } else {
-      Alert.alert("Camera Error", "Camera is not ready. Please try again.");
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 0.7,
+        base64: true,
+        allowsEditing: false,
+      });
+      if (result.canceled || !result.assets?.[0]?.base64) {
+        console.log('Camera cancelled or no base64 data');
+        setIsAnalyzing(false);
+        setShowCamera(false);
+        return;
+      }
+      const base64Image = result.assets[0].base64;
+      console.log('Food image captured, base64 length:', base64Image.length);
+      setCapturedImage(base64Image);
+      setShowCamera(false);
+      await analyzeWithAI(base64Image, true);
+    } catch (error: any) {
+      console.error("Failed to take picture:", error?.message || error);
+      Alert.alert("Camera Error", "Failed to capture image. Please try again.");
       setIsAnalyzing(false);
     }
   };
@@ -759,7 +771,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
 
   const activeEntries = isViewingToday ? todaysFoodEntries : selectedDayEntries;
 
-  if (!permission) return <View />;
+
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -1295,46 +1307,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
         </KeyboardAvoidingView>
       </Modal>
 
-      <Modal visible={showCamera} animationType="slide">
-        <View style={styles.cameraContainer}>
-          {!permission?.granted ? (
-            <View style={styles.permissionContainer}>
-              <Text style={styles.permissionText}>{t('fuel_camera_permission')}</Text>
-              <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-                <Text style={styles.permissionButtonText}>{t('fuel_grant_permission')}</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <>
-              <CameraView ref={cameraRef} style={styles.camera} facing="back">
-                <View style={styles.cameraOverlay}>
-                  <TouchableOpacity style={styles.cameraClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowCamera(false); setCapturedImage(null); }}>
-                    <X size={32} color="#FFFFFF" />
-                  </TouchableOpacity>
-                  <View style={styles.cameraGuide}>
-                    <View style={[styles.cameraGuideCorner, { top: 0, left: 0 }]} />
-                    <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerTR]} />
-                    <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerBL]} />
-                    <View style={[styles.cameraGuideCorner, styles.cameraGuideCornerBR]} />
-                  </View>
-                  <Text style={styles.cameraText}>{t('fuel_position_food')}</Text>
-                  <View style={styles.cameraBottomContainer}>
-                    <TouchableOpacity style={styles.captureButton} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); void takePicture(); }} disabled={isAnalyzing}>
-                      <View style={styles.captureButtonInner} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </CameraView>
-              {isAnalyzing && (
-                <View style={styles.analyzingOverlay}>
-                  <ActivityIndicator size="large" color="#FFFFFF" />
-                  <Text style={styles.analyzingText}>{t('fuel_analyzing_food')}</Text>
-                </View>
-              )}
-            </>
-          )}
-        </View>
-      </Modal>
+
 
       <Modal visible={showFoodSearch} animationType="slide" transparent>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -1807,10 +1780,10 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
               <TouchableOpacity
                 style={fabStyles.menuItem}
                 activeOpacity={0.7}
-                onPress={async () => {
+                onPress={() => {
                   toggleFABMenu();
                   if (!isPremium) { router.push('/paywall'); return; }
-                  if (!permission?.granted) { const result = await requestPermission(); if (result.granted) setShowCamera(true); } else setShowCamera(true);
+                  void takePicture();
                 }}
               >
                 <View style={[fabStyles.menuItemIcon, { backgroundColor: 'rgba(0,229,255,0.12)' }]}>
