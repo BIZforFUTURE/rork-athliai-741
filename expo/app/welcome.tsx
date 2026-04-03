@@ -39,7 +39,7 @@ import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { getVideoUrlForExercise } from '@/utils/videoUrls';
 import { useLanguage } from '@/providers/LanguageProvider';
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 const LOADING_STEPS_EN = [
   { label: 'Analyzing your goals', icon: Target },
@@ -742,16 +742,15 @@ Return ONLY valid JSON.`;
       case 5: return !!equipmentAccess;
       case 6: return !!workoutTime;
       case 7: return !!physicalLimitations;
-      case 8: return true;
-      case 9: return selectedDays.length > 0;
-      case 10: return !!customGoals.trim();
+      case 8: return selectedDays.length > 0;
+      case 9: return !!customGoals.trim();
       default: return true;
     }
   }, [step, fitnessGoal, fitnessLevel, weightVal, isMetric, heightCm, heightFt, heightIn, equipmentAccess, workoutTime, physicalLimitations, selectedDays, customGoals]);
 
   const handleContinue = useCallback(() => {
     if (!canContinue()) return;
-    if (step === 10) {
+    if (step === 9) {
       hapticMedium();
       void generateGymPlan();
       return;
@@ -1027,62 +1026,6 @@ Return ONLY valid JSON.`;
     </>
   );
 
-  const renderComparison = () => (
-    <View style={stepStyles.content}>
-      <Text style={stepStyles.title}>
-        {isPt ? 'Treine 2x mais efetivamente com AthliAI' : isSpanish
-          ? 'Entrena el doble de efectivo con AthliAI'
-          : 'Train 2x more effectively with AthliAI'}
-      </Text>
-
-      <View style={compStyles.card}>
-        <View style={compStyles.columnsRow}>
-          <View style={compStyles.column}>
-            <Text style={compStyles.columnLabel}>
-              {isPt ? 'Sem\nAthliAI' : isSpanish ? 'Sin\nAthliAI' : 'Without\nAthliAI'}
-            </Text>
-            <View style={compStyles.barSmall} />
-            <Text style={compStyles.barValue}>20%</Text>
-          </View>
-          <View style={compStyles.column}>
-            <Text style={compStyles.columnLabel}>
-              {isPt ? 'Com\nAthliAI' : isSpanish ? 'Con\nAthliAI' : 'With\nAthliAI'}
-            </Text>
-            <View style={compStyles.barLarge}>
-              <View style={compStyles.barLargeInner} />
-            </View>
-            <Text style={compStyles.barValueAccent}>2X</Text>
-          </View>
-        </View>
-        <Text style={compStyles.cardDesc}>
-          {isPt
-            ? 'AthliAI cria planos personalizados e te mantém responsável pelas suas metas.'
-            : isSpanish
-            ? 'AthliAI crea planes personalizados y te mantiene responsable de tus metas.'
-            : 'AthliAI creates personalized plans and holds you accountable.'}
-        </Text>
-      </View>
-
-      <View style={compStyles.statsRow}>
-        <View style={compStyles.statItem}>
-          <TrendingUp size={20} color="#00ADB5" />
-          <Text style={compStyles.statValue}>87%</Text>
-          <Text style={compStyles.statLabel}>
-            {isPt ? 'atingem suas metas' : isSpanish ? 'logran sus metas' : 'hit their goals'}
-          </Text>
-        </View>
-        <View style={compStyles.statDivider} />
-        <View style={compStyles.statItem}>
-          <Flame size={20} color="#00ADB5" />
-          <Text style={compStyles.statValue}>4.2x</Text>
-          <Text style={compStyles.statLabel}>
-            {isPt ? 'mais consistentes' : isSpanish ? 'más consistentes' : 'more consistent'}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-
   const renderWorkoutDays = () => {
     const days = [
       { key: 'monday', label: t('day_monday'), short: isPt ? 'S' : isSpanish ? 'L' : 'M' },
@@ -1212,10 +1155,8 @@ Return ONLY valid JSON.`;
           setPhysicalLimitations,
         );
       case 8:
-        return renderComparison();
-      case 9:
         return renderWorkoutDays();
-      case 10:
+      case 9:
         return renderGoalsInput();
       default:
         return null;
@@ -1224,7 +1165,7 @@ Return ONLY valid JSON.`;
 
   if (step === 0) return renderHero();
 
-  const continueLabel = step === 10
+  const continueLabel = step === 9
     ? (isPt ? 'Criar Meu Plano' : isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
     : (isPt ? 'Continuar' : isSpanish ? 'Continuar' : 'Continue');
 
@@ -1261,7 +1202,7 @@ Return ONLY valid JSON.`;
             activeOpacity={0.85}
           >
             <Text style={footerStyles.continueText}>{continueLabel}</Text>
-            {step === 10 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
+            {step === 9 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
           </TouchableOpacity>
           {step === 4 && !targetWeightVal && (
             <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
@@ -1582,99 +1523,6 @@ const targetStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600' as const,
     color: '#9CA3AF',
-  },
-});
-
-const compStyles = StyleSheet.create({
-  card: {
-    backgroundColor: '#F8F9FA',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#EEEEEE',
-  },
-  columnsRow: {
-    flexDirection: 'row' as const,
-    justifyContent: 'center' as const,
-    alignItems: 'flex-end' as const,
-    gap: 24,
-    marginBottom: 20,
-    paddingTop: 12,
-  },
-  column: {
-    alignItems: 'center' as const,
-    flex: 1,
-  },
-  columnLabel: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: '#6B7280',
-    textAlign: 'center' as const,
-    marginBottom: 12,
-  },
-  barSmall: {
-    width: 80,
-    height: 60,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  barLarge: {
-    width: 80,
-    height: 120,
-    backgroundColor: '#1A1A2E',
-    borderRadius: 12,
-    marginBottom: 10,
-    overflow: 'hidden' as const,
-  },
-  barLargeInner: {
-    flex: 1,
-    backgroundColor: '#1A1A2E',
-  },
-  barValue: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: '#9CA3AF',
-  },
-  barValueAccent: {
-    fontSize: 18,
-    fontWeight: '800' as const,
-    color: '#1A1A2E',
-  },
-  cardDesc: {
-    fontSize: 14,
-    color: '#7A7A7A',
-    textAlign: 'center' as const,
-    lineHeight: 20,
-  },
-  statsRow: {
-    flexDirection: 'row' as const,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#EEEEEE',
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center' as const,
-    gap: 6,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: '#E5E7EB',
-    marginHorizontal: 12,
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: '800' as const,
-    color: '#1A1A2E',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#7A7A7A',
-    fontWeight: '500' as const,
   },
 });
 
