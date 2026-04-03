@@ -879,9 +879,9 @@ export const translations = {
     // Tab labels
     tab_home: 'Inicio',
     tab_run: 'Correr',
-    tab_fuel: 'Nutrición',
-    tab_gym: 'Gimnasio',
-    tab_stats: 'Estadísticas',
+    tab_fuel: 'Nutri',
+    tab_gym: 'Gym',
+    tab_stats: 'Estadíst.',
 
     // Welcome screen
     welcome_skip: 'Omitir',
