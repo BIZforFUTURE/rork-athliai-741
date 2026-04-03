@@ -56,7 +56,6 @@ export const [LanguageProvider, useLanguage] = createContextHook(() => {
   );
 
   const isSpanish = language === "es";
-  const isPortuguese = language === "pt";
 
   return useMemo(
     () => ({
@@ -64,8 +63,7 @@ export const [LanguageProvider, useLanguage] = createContextHook(() => {
       setLanguage,
       t,
       isSpanish,
-      isPortuguese,
     }),
-    [language, setLanguage, t, isSpanish, isPortuguese]
+    [language, setLanguage, t, isSpanish]
   );
 });

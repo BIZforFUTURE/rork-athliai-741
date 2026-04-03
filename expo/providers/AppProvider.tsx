@@ -126,14 +126,6 @@ interface CustomWorkoutPlan {
   }[];
 }
 
-interface FormCheckEntry {
-  id: string;
-  exerciseName: string;
-  imageUri: string;
-  feedback: string;
-  date: string;
-}
-
 interface SavedWorkout {
   id: string;
   name: string;
@@ -167,7 +159,6 @@ interface CoreState {
   savedWorkouts: SavedWorkout[];
   savedFoods: SavedFood[];
   savedRoutes: SavedRoute[];
-  formCheckHistory: FormCheckEntry[];
   personalStats: PersonalStats;
   weightHistory: WeightEntry[];
   xp: XPState;
@@ -183,8 +174,6 @@ interface AppState extends CoreState {
   foodHistory: FoodEntry[];
   workoutLogs: WorkoutLog[];
 }
-
-export type { FormCheckEntry };
 
 const STORAGE_KEYS = {
   CORE: '@app_core',
@@ -235,7 +224,6 @@ const defaultState: AppState = {
   savedWorkouts: [],
   savedFoods: [],
   savedRoutes: [],
-  formCheckHistory: [],
   personalStats: {},
   weightHistory: [],
   xp: defaultXPState,
@@ -305,7 +293,6 @@ function validateState(parsed: Record<string, unknown>): AppState {
     savedWorkouts: Array.isArray(parsed.savedWorkouts) ? parsed.savedWorkouts : [],
     savedFoods: Array.isArray(parsed.savedFoods) ? parsed.savedFoods : [],
     savedRoutes: Array.isArray(parsed.savedRoutes) ? parsed.savedRoutes : [],
-    formCheckHistory: Array.isArray(parsed.formCheckHistory) ? parsed.formCheckHistory : [],
     personalStats: (parsed.personalStats as PersonalStats) || {},
     weightHistory: Array.isArray(parsed.weightHistory) ? parsed.weightHistory : [],
     xp: parsed.xp ? {
@@ -458,7 +445,7 @@ export const [AppProvider, useApp] = createContextHook(() => {
   const getChangedDomains = useCallback((prev: AppState, next: AppState): ChangedDomains => {
     return {
       core: prev.user !== next.user || prev.stats !== next.stats || prev.nutrition !== next.nutrition ||
-        prev.customWorkoutPlan !== next.customWorkoutPlan || prev.savedWorkouts !== next.savedWorkouts || prev.formCheckHistory !== next.formCheckHistory ||
+        prev.customWorkoutPlan !== next.customWorkoutPlan || prev.savedWorkouts !== next.savedWorkouts ||
         prev.personalStats !== next.personalStats || prev.weightHistory !== next.weightHistory ||
         prev.xp !== next.xp || prev.lastResetDate !== next.lastResetDate ||
         prev.lastRunDate !== next.lastRunDate || prev.lastFoodDate !== next.lastFoodDate ||
@@ -1107,26 +1094,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     });
   }, [persistState]);
 
-  const addFormCheckEntry = useCallback((entry: Omit<FormCheckEntry, 'id'>) => {
-    setAppState(prev => {
-      const newEntry: FormCheckEntry = {
-        ...entry,
-        id: `form-check-${Date.now()}`,
-      };
-      const updated = { ...prev, formCheckHistory: [newEntry, ...prev.formCheckHistory].slice(0, 50) };
-      persistState(updated);
-      return updated;
-    });
-  }, [persistState]);
-
-  const deleteFormCheckEntry = useCallback((entryId: string) => {
-    setAppState(prev => {
-      const updated = { ...prev, formCheckHistory: prev.formCheckHistory.filter(e => e.id !== entryId) };
-      persistState(updated);
-      return updated;
-    });
-  }, [persistState]);
-
   const isRouteSaved = useCallback((runId: string) => {
     return appState.savedRoutes.some(r => r.runId === runId);
   }, [appState.savedRoutes]);
@@ -1335,7 +1302,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     savedWorkouts: appState.savedWorkouts,
     savedFoods: appState.savedFoods,
     savedRoutes: appState.savedRoutes,
-    formCheckHistory: appState.formCheckHistory,
     personalStats: appState.personalStats,
     weightHistory: appState.weightHistory,
     hasSeenWelcome: appState.hasSeenWelcome,
@@ -1366,8 +1332,6 @@ export const [AppProvider, useApp] = createContextHook(() => {
     deleteSavedRoute,
     updateSavedRoute,
     isRouteSaved,
-    addFormCheckEntry,
-    deleteFormCheckEntry,
     updatePersonalStats,
     addWeightEntry,
     deleteWeightEntry,
@@ -1381,5 +1345,5 @@ export const [AppProvider, useApp] = createContextHook(() => {
     importAllData,
     runStorage,
     isLoading: !isInitialized || isLoadingState,
-  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.savedFoods, appState.savedRoutes, appState.formCheckHistory, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, saveFoodItem, deleteSavedFood, isFoodSaved, saveRoute, deleteSavedRoute, updateSavedRoute, isRouteSaved, addFormCheckEntry, deleteFormCheckEntry, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
+  }), [mergedStats, appState.user, appState.nutrition, appState.runs, appState.foodHistory, appState.workoutLogs, appState.customWorkoutPlan, appState.savedWorkouts, appState.savedFoods, appState.savedRoutes, appState.personalStats, appState.weightHistory, appState.hasSeenWelcome, updateUser, updateStats, updateNutrition, addRun, deleteRun, updateRun, addFoodEntry, deleteFoodEntry, updateFoodEntry, addWorkoutLog, updateCustomWorkoutPlan, saveCustomWorkout, deleteSavedWorkout, saveFoodItem, deleteSavedFood, isFoodSaved, saveRoute, deleteSavedRoute, updateSavedRoute, isRouteSaved, updatePersonalStats, addWeightEntry, deleteWeightEntry, updateWeightEntry, getWeightHistory, subtractCaloriesFromRun, markWelcomeAsSeen, setStartingXP, dismissLevelUp, exportAllData, importAllData, pendingLevelUp, xpInfo, isInitialized, isLoadingState, getTodaysFoodEntries, getTodaysRuns, getTodaysWorkouts, getWeeklyRuns, getWeeklyWorkouts]);
 });

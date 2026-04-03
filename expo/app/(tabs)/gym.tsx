@@ -34,6 +34,7 @@ import {
   RotateCcw,
   Moon,
   Sun,
+  Trophy,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -475,7 +476,7 @@ function AnimatedStatCard({ icon: Icon, value, label, delay, color }: {
 }
 
 export default function GymScreen() {
-  const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan, formCheckHistory, deleteFormCheckEntry } = useApp();
+  const { stats, workoutLogs, customWorkoutPlan, updateCustomWorkoutPlan } = useApp();
   const { isPremium } = useRevenueCat();
   const { t, isSpanish } = useLanguage();
   const insets = useSafeAreaInsets();
@@ -1337,26 +1338,33 @@ Format as JSON:
         )}
 
         <TouchableOpacity
-          style={styles.aiFormCheckCard}
+          style={styles.dailyChallengeButton}
           activeOpacity={0.85}
           onPress={() => {
             if (Platform.OS !== 'web') {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             }
-            router.push('/exercise-library');
+            router.push('/daily-challenge');
           }}
-          testID="exercise-library-btn"
+          testID="daily-challenge-btn"
         >
-          <View style={styles.aiFormCheckInner}>
-            <View style={styles.aiFormCheckIconWrap}>
-              <Sparkles size={22} color="#4A7C59" />
+          <LinearGradient
+            colors={['#C4654E', '#A8503D']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.dailyChallengeGradient}
+          >
+            <View style={styles.dailyChallengeIcon}>
+              <Trophy size={22} color="#FFFFFF" />
             </View>
-            <View style={styles.aiFormCheckTextWrap}>
-              <Text style={styles.aiFormCheckTitle}>{isSpanish ? 'Revisión de Forma con IA' : 'AI Form Check'}</Text>
-              <Text style={styles.aiFormCheckSub}>{isSpanish ? 'Busca un ejercicio y analiza tu forma' : 'Search an exercise & analyze your form'}</Text>
+            <View style={styles.dailyChallengeText}>
+              <Text style={styles.dailyChallengeTitle}>{t('daily_challenge_title' as any)}</Text>
+              <Text style={styles.dailyChallengeSub}>{t('daily_challenge_subtitle' as any)}</Text>
             </View>
-            <ChevronRight size={18} color="#4A7C59" />
-          </View>
+            <View style={styles.dailyChallengeArrow}>
+              <ArrowRight size={18} color="rgba(255,255,255,0.7)" />
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
@@ -1461,56 +1469,6 @@ Format as JSON:
             </View>
           )}
         </View>
-
-        {formCheckHistory.length > 0 && (
-          <View style={styles.formHistorySection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{isSpanish ? 'Revisiones de Forma' : 'Past Form Checks'}</Text>
-            </View>
-            {formCheckHistory.slice(0, 5).map((entry) => (
-              <TouchableOpacity
-                key={entry.id}
-                style={styles.formHistoryCard}
-                activeOpacity={0.85}
-                onPress={() => {
-                  if (Platform.OS !== 'web') {
-                    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  }
-                  router.push({
-                    pathname: '/form-check' as any,
-                    params: { exerciseName: entry.exerciseName },
-                  });
-                }}
-              >
-                <View style={styles.formHistoryDot} />
-                <View style={styles.formHistoryInfo}>
-                  <Text style={styles.formHistoryName} numberOfLines={1}>{entry.exerciseName}</Text>
-                  <Text style={styles.formHistoryDate}>
-                    {new Date(entry.date).toLocaleDateString(isSpanish ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.formHistoryDeleteBtn}
-                  onPress={() => {
-                    if (Platform.OS !== 'web') {
-                      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }
-                    Alert.alert(
-                      isSpanish ? 'Eliminar' : 'Delete',
-                      isSpanish ? '¿Eliminar esta revisión de forma?' : 'Delete this form check?',
-                      [
-                        { text: isSpanish ? 'Cancelar' : 'Cancel', style: 'cancel' },
-                        { text: isSpanish ? 'Eliminar' : 'Delete', style: 'destructive', onPress: () => deleteFormCheckEntry(entry.id) },
-                      ]
-                    );
-                  }}
-                >
-                  <X size={14} color="#EF4444" />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
       </ScrollView>
 
       <Modal
@@ -3176,82 +3134,49 @@ const styles = StyleSheet.create({
   smallCtaRow: {
     marginTop: 14,
   },
-
-  aiFormCheckCard: {
+  dailyChallengeButton: {
     marginTop: 14,
-    backgroundColor: '#FEFCF9',
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden' as const,
-    shadowColor: '#000000',
+    shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 20,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  aiFormCheckInner: {
+  dailyChallengeGradient: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     padding: 16,
-    gap: 14,
+    gap: 12,
   },
-  aiFormCheckIconWrap: {
+  dailyChallengeIcon: {
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: 'rgba(74,124,89,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
-  aiFormCheckTextWrap: {
+  dailyChallengeText: {
     flex: 1,
   },
-  aiFormCheckTitle: {
-    fontSize: 15,
+  dailyChallengeTitle: {
+    fontSize: 16,
     fontWeight: '700' as const,
-    color: '#2C2C2C',
+    color: '#FFFFFF',
     marginBottom: 2,
   },
-  aiFormCheckSub: {
-    fontSize: 12,
-    color: '#A8A8A0',
+  dailyChallengeSub: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.75)',
   },
-  formHistorySection: {
-    marginTop: 24,
-  },
-  formHistoryCard: {
-    backgroundColor: '#FEFCF9',
+  dailyChallengeArrow: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    padding: 14,
-    flexDirection: 'row' as const,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center' as const,
-    gap: 12,
-    marginBottom: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 12,
-  },
-  formHistoryDot: {
-    width: 4,
-    height: 36,
-    borderRadius: 2,
-    backgroundColor: '#4A7C59',
-  },
-  formHistoryInfo: {
-    flex: 1,
-  },
-  formHistoryName: {
-    fontSize: 15,
-    fontWeight: '600' as const,
-    color: '#2C2C2C',
-    marginBottom: 2,
-  },
-  formHistoryDate: {
-    fontSize: 12,
-    color: '#A8A8A0',
-  },
-  formHistoryDeleteBtn: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(239,68,68,0.08)',
+    justifyContent: 'center' as const,
   },
 });

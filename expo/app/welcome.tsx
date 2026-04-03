@@ -39,7 +39,7 @@ import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { getVideoUrlForExercise } from '@/utils/videoUrls';
 import { useLanguage } from '@/providers/LanguageProvider';
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const LOADING_STEPS_EN = [
   { label: 'Analyzing your goals', icon: Target },
@@ -55,14 +55,6 @@ const LOADING_STEPS_ES = [
   { label: 'Optimizando series y repeticiones', icon: Activity },
   { label: 'Construyendo tu horario', icon: Calendar },
   { label: 'Finalizando tu plan', icon: Sparkles },
-];
-
-const LOADING_STEPS_PT = [
-  { label: 'Analisando seus objetivos', icon: Target },
-  { label: 'Selecionando exercícios', icon: Dumbbell },
-  { label: 'Otimizando séries e repetições', icon: Activity },
-  { label: 'Montando seu cronograma', icon: Calendar },
-  { label: 'Finalizando seu plano', icon: Sparkles },
 ];
 
 const FITNESS_TIPS_EN = [
@@ -87,25 +79,14 @@ const FITNESS_TIPS_ES = [
   "La creatina monohidratada es el suplemento más investigado y efectivo para ganar fuerza.",
 ];
 
-const FITNESS_TIPS_PT = [
-  "A sobrecarga progressiva é o motor #1 do crescimento muscular — tente aumentar peso ou repetições a cada semana.",
-  "Durma 7-9 horas por noite. Seus músculos crescem durante a recuperação, não durante o treino.",
-  "O momento da proteína importa menos que a ingestão diária total. Mire em 1,5-2,2g por kg de peso corporal.",
-  "Movimentos compostos como agachamento e levantamento terra recrutam mais fibras musculares.",
-  "Consistência supera intensidade. Ir 4x na semana a 80% supera ir 1x a 100%.",
-  "Períodos de descanso de 2-3 min para força, 60-90s para hipertrofia e 30-45s para resistência.",
-  "A conexão mente-músculo é real — focar no músculo alvo melhora a ativação em 20%.",
-  "A creatina monoidratada é o suplemento mais pesquisado e eficaz para ganho de força.",
-];
-
-function LoadingScreen({ insets, progress, lang }: { insets: { top: number; bottom: number; left: number; right: number }; progress: number; lang: string }) {
-  const LOADING_STEPS = lang === 'pt' ? LOADING_STEPS_PT : lang === 'es' ? LOADING_STEPS_ES : LOADING_STEPS_EN;
+function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number; bottom: number; left: number; right: number }; progress: number; isSpanish: boolean }) {
+  const LOADING_STEPS = isSpanish ? LOADING_STEPS_ES : LOADING_STEPS_EN;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const tipOpacity = useRef(new Animated.Value(1)).current;
   const tipTranslateY = useRef(new Animated.Value(0)).current;
-  const FITNESS_TIPS = lang === 'pt' ? FITNESS_TIPS_PT : lang === 'es' ? FITNESS_TIPS_ES : FITNESS_TIPS_EN;
+  const FITNESS_TIPS = isSpanish ? FITNESS_TIPS_ES : FITNESS_TIPS_EN;
   const [currentTipIndex, setCurrentTipIndex] = useState(() => Math.floor(Math.random() * FITNESS_TIPS_EN.length));
   const [activeStep, setActiveStep] = useState(0);
   const stepAnims = useRef(LOADING_STEPS.map(() => new Animated.Value(0))).current;
@@ -186,7 +167,7 @@ function LoadingScreen({ insets, progress, lang }: { insets: { top: number; bott
               </View>
             </Animated.View>
           </View>
-          <Text style={loadingStyles.title}>{lang === 'pt' ? 'Criando Seu Plano' : lang === 'es' ? 'Creando Tu Plan' : 'Building Your Plan'}</Text>
+          <Text style={loadingStyles.title}>{isSpanish ? 'Creando Tu Plan' : 'Building Your Plan'}</Text>
           <Text style={loadingStyles.percent}>{percentText}%</Text>
           <View style={loadingStyles.progressBarWrap}>
             <View style={loadingStyles.progressBarBg}>
@@ -225,7 +206,7 @@ function LoadingScreen({ insets, progress, lang }: { insets: { top: number; bott
         <View style={loadingStyles.tipCard}>
           <View style={loadingStyles.tipHeader}>
             <Sparkles size={14} color="#00ADB5" />
-            <Text style={loadingStyles.tipHeaderText}>{lang === 'pt' ? 'VOCÊ SABIA?' : lang === 'es' ? '¿SABÍAS QUE?' : 'DID YOU KNOW?'}</Text>
+            <Text style={loadingStyles.tipHeaderText}>{isSpanish ? '¿SABÍAS QUE?' : 'DID YOU KNOW?'}</Text>
           </View>
           <Animated.Text style={[loadingStyles.tipText, { opacity: tipOpacity, transform: [{ translateY: tipTranslateY }] }]}>
             {FITNESS_TIPS[currentTipIndex]}
@@ -247,9 +228,9 @@ export default function WelcomeScreen() {
   const [physicalLimitations, setPhysicalLimitations] = useState<string | null>(null);
 
   const [isMetric, setIsMetric] = useState(false);
-  const [heightFt, setHeightFt] = useState('');
-  const [heightIn, setHeightIn] = useState('');
-  const [heightCm, setHeightCm] = useState('');
+  const [heightFt, setHeightFt] = useState('5');
+  const [heightIn, setHeightIn] = useState('8');
+  const [heightCm, setHeightCm] = useState('173');
   const [weightVal, setWeightVal] = useState('');
   const [targetWeightVal, setTargetWeightVal] = useState('');
 
@@ -266,8 +247,7 @@ export default function WelcomeScreen() {
   const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
   const insets = useSafeAreaInsets();
-  const { t, setLanguage, isSpanish, language } = useLanguage();
-  const isPt = language === 'pt';
+  const { t, setLanguage, isSpanish } = useLanguage();
 
   const progress = step > 0 ? step / TOTAL_STEPS : 0;
 
@@ -742,15 +722,16 @@ Return ONLY valid JSON.`;
       case 5: return !!equipmentAccess;
       case 6: return !!workoutTime;
       case 7: return !!physicalLimitations;
-      case 8: return selectedDays.length > 0;
-      case 9: return !!customGoals.trim();
+      case 8: return true;
+      case 9: return selectedDays.length > 0;
+      case 10: return !!customGoals.trim();
       default: return true;
     }
   }, [step, fitnessGoal, fitnessLevel, weightVal, isMetric, heightCm, heightFt, heightIn, equipmentAccess, workoutTime, physicalLimitations, selectedDays, customGoals]);
 
   const handleContinue = useCallback(() => {
     if (!canContinue()) return;
-    if (step === 9) {
+    if (step === 10) {
       hapticMedium();
       void generateGymPlan();
       return;
@@ -760,23 +741,17 @@ Return ONLY valid JSON.`;
   }, [canContinue, step, hapticMedium, goNext]);
 
   if (isGeneratingPlan) {
-    return <LoadingScreen insets={insets} progress={generationProgress} lang={language} />;
+    return <LoadingScreen insets={insets} progress={generationProgress} isSpanish={isSpanish} />;
   }
 
   const renderHero = () => (
     <View style={[s.flex1, { backgroundColor: '#FFFFFF', paddingTop: insets.top }]}>
       <View style={heroStyles.langRow}>
         <TouchableOpacity
-          style={[heroStyles.langButton, language === 'es' && heroStyles.langButtonActive]}
-          onPress={() => { hapticLight(); setLanguage(language === 'es' ? 'en' : 'es'); }}
+          style={heroStyles.langButton}
+          onPress={() => { hapticLight(); setLanguage(isSpanish ? 'en' : 'es'); }}
         >
-          <Text style={[heroStyles.langText, language === 'es' && heroStyles.langTextActive]}>Español</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[heroStyles.langButton, language === 'pt' && heroStyles.langButtonActive]}
-          onPress={() => { hapticLight(); setLanguage(language === 'pt' ? 'en' : 'pt'); }}
-        >
-          <Text style={[heroStyles.langText, language === 'pt' && heroStyles.langTextActive]}>Português</Text>
+          <Text style={heroStyles.langText}>{isSpanish ? 'English' : 'Español'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -791,12 +766,10 @@ Return ONLY valid JSON.`;
         <View style={heroStyles.underline} />
 
         <Text style={heroStyles.tagline}>
-          {isPt ? 'Seu treinador pessoal com IA' : isSpanish ? 'Tu entrenador personal con IA' : 'Your AI gym coach'}
+          {isSpanish ? 'Tu entrenador personal con IA' : 'Your AI gym coach'}
         </Text>
         <Text style={heroStyles.description}>
-          {isPt
-            ? 'Planos de treino personalizados, acompanhamento inteligente e resultados reais — tudo com IA.'
-            : isSpanish
+          {isSpanish
             ? 'Planes de entrenamiento personalizados, seguimiento inteligente y resultados reales — todo impulsado por IA.'
             : 'Personalized workout plans, intelligent tracking, and real results — all powered by AI.'}
         </Text>
@@ -805,12 +778,12 @@ Return ONLY valid JSON.`;
       <View style={[heroStyles.bottomSection, { paddingBottom: Math.max(40, insets.bottom + 20) }]}>
         <TouchableOpacity style={heroStyles.getStartedBtn} onPress={goNext} activeOpacity={0.85}>
           <Text style={heroStyles.getStartedText}>
-            {isPt ? 'Começar' : isSpanish ? 'Comenzar' : 'Get Started'}
+            {isSpanish ? 'Comenzar' : 'Get Started'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={heroStyles.skipLink} onPress={handleSkip}>
           <Text style={heroStyles.skipLinkText}>
-            {isPt ? 'Pular configuração' : isSpanish ? 'Omitir configuración' : 'Skip setup'}
+            {isSpanish ? 'Omitir configuración' : 'Skip setup'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -861,15 +834,15 @@ Return ONLY valid JSON.`;
   const renderBodyStats = () => (
     <View style={stepStyles.content}>
       <Text style={stepStyles.title}>
-        {isPt ? 'Altura e peso' : isSpanish ? 'Altura y peso' : 'Height & weight'}
+        {isSpanish ? 'Altura y peso' : 'Height & weight'}
       </Text>
       <Text style={stepStyles.subtitle}>
-        {isPt ? 'Será usado para calibrar seu plano personalizado.' : isSpanish ? 'Se usará para calibrar tu plan personalizado.' : 'This will be used to calibrate your custom plan.'}
+        {isSpanish ? 'Se usará para calibrar tu plan personalizado.' : 'This will be used to calibrate your custom plan.'}
       </Text>
 
       <View style={bodyStyles.toggleRow}>
         <Text style={[bodyStyles.toggleLabel, !isMetric && bodyStyles.toggleLabelActive]}>
-          Imperial
+          {isSpanish ? 'Imperial' : 'Imperial'}
         </Text>
         <Switch
           value={isMetric}
@@ -878,14 +851,14 @@ Return ONLY valid JSON.`;
           thumbColor="#FFFFFF"
         />
         <Text style={[bodyStyles.toggleLabel, isMetric && bodyStyles.toggleLabelActive]}>
-          {isPt ? 'Métrico' : isSpanish ? 'Métrico' : 'Metric'}
+          {isSpanish ? 'Métrico' : 'Metric'}
         </Text>
       </View>
 
       <View style={bodyStyles.fieldsRow}>
         <View style={bodyStyles.fieldGroup}>
           <Text style={bodyStyles.fieldLabel}>
-            {isPt ? 'Altura' : isSpanish ? 'Altura' : 'Height'}
+            {isSpanish ? 'Altura' : 'Height'}
           </Text>
           {isMetric ? (
             <View style={bodyStyles.inputRow}>
@@ -925,7 +898,7 @@ Return ONLY valid JSON.`;
 
         <View style={bodyStyles.fieldGroup}>
           <Text style={bodyStyles.fieldLabel}>
-            {isPt ? 'Peso' : isSpanish ? 'Peso' : 'Weight'}
+            {isSpanish ? 'Peso' : 'Weight'}
           </Text>
           <View style={bodyStyles.inputRow}>
             <TextInput
@@ -946,18 +919,18 @@ Return ONLY valid JSON.`;
   const renderTargetWeight = () => {
     const direction = getWeightDirection();
     const directionLabel = direction === 'lose'
-      ? (isPt ? 'Perder peso' : isSpanish ? 'Perder peso' : 'Lose weight')
+      ? (isSpanish ? 'Perder peso' : 'Lose weight')
       : direction === 'gain'
-        ? (isPt ? 'Ganhar peso' : isSpanish ? 'Ganar peso' : 'Gain weight')
-        : (isPt ? 'Manter peso' : isSpanish ? 'Mantener peso' : 'Maintain weight');
+        ? (isSpanish ? 'Ganar peso' : 'Gain weight')
+        : (isSpanish ? 'Mantener peso' : 'Maintain weight');
 
     return (
       <View style={stepStyles.content}>
         <Text style={stepStyles.title}>
-          {isPt ? 'Qual é seu peso alvo?' : isSpanish ? '¿Cuál es tu peso objetivo?' : 'What is your target weight?'}
+          {isSpanish ? '¿Cuál es tu peso objetivo?' : 'What is your target weight?'}
         </Text>
         <Text style={stepStyles.subtitle}>
-          {isPt ? 'Opcional — você pode pular este passo.' : isSpanish ? 'Opcional — puedes omitir este paso.' : 'Optional — you can skip this step.'}
+          {isSpanish ? 'Opcional — puedes omitir este paso.' : 'Optional — you can skip this step.'}
         </Text>
 
         <View style={targetStyles.centerWrap}>
@@ -970,7 +943,7 @@ Return ONLY valid JSON.`;
             </>
           ) : (
             <Text style={targetStyles.placeholder}>
-              {isPt ? 'Insira seu peso alvo' : isSpanish ? 'Ingresa tu peso objetivo' : 'Enter your target weight'}
+              {isSpanish ? 'Ingresa tu peso objetivo' : 'Enter your target weight'}
             </Text>
           )}
         </View>
@@ -995,7 +968,7 @@ Return ONLY valid JSON.`;
     <>
       {renderSelectionStep(
         t('gym_q3'),
-        isPt ? 'Selecione seu acesso a equipamento' : isSpanish ? 'Selecciona tu acceso a equipo' : 'Select your equipment access',
+        isSpanish ? 'Selecciona tu acceso a equipo' : 'Select your equipment access',
         equipmentOptions,
         equipmentAccess,
         setEquipmentAccess,
@@ -1015,7 +988,7 @@ Return ONLY valid JSON.`;
               <View style={scanStyles.scanTextWrap}>
                 <Text style={scanStyles.scanButtonTitle}>{t('gym_q3_o5_scan')}</Text>
                 <Text style={scanStyles.scanButtonSub}>
-                  {isPt ? 'A IA detectará seu equipamento' : isSpanish ? 'La IA detectará tu equipo' : 'AI will detect your equipment'}
+                  {isSpanish ? 'La IA detectará tu equipo' : 'AI will detect your equipment'}
                 </Text>
               </View>
               <ChevronRight size={18} color="#00ADB5" />
@@ -1026,24 +999,78 @@ Return ONLY valid JSON.`;
     </>
   );
 
+  const renderComparison = () => (
+    <View style={stepStyles.content}>
+      <Text style={stepStyles.title}>
+        {isSpanish
+          ? 'Entrena el doble de efectivo con AthliAI'
+          : 'Train 2x more effectively with AthliAI'}
+      </Text>
+
+      <View style={compStyles.card}>
+        <View style={compStyles.columnsRow}>
+          <View style={compStyles.column}>
+            <Text style={compStyles.columnLabel}>
+              {isSpanish ? 'Sin\nAthliAI' : 'Without\nAthliAI'}
+            </Text>
+            <View style={compStyles.barSmall} />
+            <Text style={compStyles.barValue}>20%</Text>
+          </View>
+          <View style={compStyles.column}>
+            <Text style={compStyles.columnLabel}>
+              {isSpanish ? 'Con\nAthliAI' : 'With\nAthliAI'}
+            </Text>
+            <View style={compStyles.barLarge}>
+              <View style={compStyles.barLargeInner} />
+            </View>
+            <Text style={compStyles.barValueAccent}>2X</Text>
+          </View>
+        </View>
+        <Text style={compStyles.cardDesc}>
+          {isSpanish
+            ? 'AthliAI crea planes personalizados y te mantiene responsable de tus metas.'
+            : 'AthliAI creates personalized plans and holds you accountable.'}
+        </Text>
+      </View>
+
+      <View style={compStyles.statsRow}>
+        <View style={compStyles.statItem}>
+          <TrendingUp size={20} color="#00ADB5" />
+          <Text style={compStyles.statValue}>87%</Text>
+          <Text style={compStyles.statLabel}>
+            {isSpanish ? 'logran sus metas' : 'hit their goals'}
+          </Text>
+        </View>
+        <View style={compStyles.statDivider} />
+        <View style={compStyles.statItem}>
+          <Flame size={20} color="#00ADB5" />
+          <Text style={compStyles.statValue}>4.2x</Text>
+          <Text style={compStyles.statLabel}>
+            {isSpanish ? 'más consistentes' : 'more consistent'}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
   const renderWorkoutDays = () => {
     const days = [
-      { key: 'monday', label: t('day_monday'), short: isPt ? 'S' : isSpanish ? 'L' : 'M' },
-      { key: 'tuesday', label: t('day_tuesday'), short: isPt ? 'T' : isSpanish ? 'Ma' : 'Tu' },
-      { key: 'wednesday', label: t('day_wednesday'), short: isPt ? 'Q' : isSpanish ? 'Mi' : 'W' },
-      { key: 'thursday', label: t('day_thursday'), short: isPt ? 'Qi' : isSpanish ? 'J' : 'Th' },
-      { key: 'friday', label: t('day_friday'), short: isPt ? 'Sx' : isSpanish ? 'V' : 'F' },
-      { key: 'saturday', label: t('day_saturday'), short: isPt ? 'Sa' : isSpanish ? 'S' : 'Sa' },
-      { key: 'sunday', label: t('day_sunday'), short: isPt ? 'D' : isSpanish ? 'D' : 'Su' },
+      { key: 'monday', label: t('day_monday'), short: isSpanish ? 'L' : 'M' },
+      { key: 'tuesday', label: t('day_tuesday'), short: isSpanish ? 'Ma' : 'Tu' },
+      { key: 'wednesday', label: t('day_wednesday'), short: isSpanish ? 'Mi' : 'W' },
+      { key: 'thursday', label: t('day_thursday'), short: isSpanish ? 'J' : 'Th' },
+      { key: 'friday', label: t('day_friday'), short: isSpanish ? 'V' : 'F' },
+      { key: 'saturday', label: t('day_saturday'), short: isSpanish ? 'S' : 'Sa' },
+      { key: 'sunday', label: t('day_sunday'), short: isSpanish ? 'D' : 'Su' },
     ];
 
     return (
       <View style={stepStyles.content}>
         <Text style={stepStyles.title}>
-          {isPt ? 'Selecione seus dias de treino' : isSpanish ? 'Selecciona tus días de entrenamiento' : 'Select your workout days'}
+          {isSpanish ? 'Selecciona tus días de entrenamiento' : 'Select your workout days'}
         </Text>
         <Text style={stepStyles.subtitle}>
-          {isPt ? 'Escolha em quais dias quer treinar' : isSpanish ? 'Elige qué días quieres entrenar' : 'Choose which days you want to train'}
+          {isSpanish ? 'Elige qué días quieres entrenar' : 'Choose which days you want to train'}
         </Text>
 
         <View style={dayStyles.grid}>
@@ -1076,7 +1103,7 @@ Return ONLY valid JSON.`;
         </View>
 
         <Text style={dayStyles.countLabel}>
-          {selectedDays.length} {isPt ? 'dias selecionados' : isSpanish ? 'días seleccionados' : 'days selected'}
+          {selectedDays.length} {isSpanish ? 'días seleccionados' : 'days selected'}
         </Text>
       </View>
     );
@@ -1085,12 +1112,10 @@ Return ONLY valid JSON.`;
   const renderGoalsInput = () => (
     <View style={stepStyles.content}>
       <Text style={stepStyles.title}>
-        {isPt ? 'Algum objetivo específico?' : isSpanish ? '¿Algún objetivo específico?' : 'Any specific goals?'}
+        {isSpanish ? '¿Algún objetivo específico?' : 'Any specific goals?'}
       </Text>
       <Text style={stepStyles.subtitle}>
-        {isPt
-          ? 'Conte-nos sobre áreas específicas ou limitações que devemos saber.'
-          : isSpanish
+        {isSpanish
           ? 'Cuéntanos sobre áreas específicas o limitaciones que debamos saber.'
           : 'Tell us about specific areas you want to focus on or anything we should know.'}
       </Text>
@@ -1100,9 +1125,7 @@ Return ONLY valid JSON.`;
         multiline
         numberOfLines={4}
         placeholder={
-          isPt
-            ? 'ex., Quero braços e peito maiores, melhorar minha postura...'
-            : isSpanish
+          isSpanish
             ? 'ej., Quiero brazos y pecho más grandes, mejorar mi postura...'
             : 'e.g., I want bigger arms and chest, improve my posture...'
         }
@@ -1119,7 +1142,7 @@ Return ONLY valid JSON.`;
       case 1:
         return renderSelectionStep(
           t('gym_q1'),
-          isPt ? 'Isso guiará seu plano de treino' : isSpanish ? 'Esto guiará tu plan de entrenamiento' : 'This will guide your training plan',
+          isSpanish ? 'Esto guiará tu plan de entrenamiento' : 'This will guide your training plan',
           goalOptions,
           fitnessGoal,
           setFitnessGoal,
@@ -1127,7 +1150,7 @@ Return ONLY valid JSON.`;
       case 2:
         return renderSelectionStep(
           t('gym_q2'),
-          isPt ? 'Seja honesto — não há respostas erradas' : isSpanish ? 'Sé honesto — no hay respuestas incorrectas' : "Be honest — there are no wrong answers",
+          isSpanish ? 'Sé honesto — no hay respuestas incorrectas' : "Be honest — there are no wrong answers",
           levelOptions,
           fitnessLevel,
           setFitnessLevel,
@@ -1141,7 +1164,7 @@ Return ONLY valid JSON.`;
       case 6:
         return renderSelectionStep(
           t('gym_q4'),
-          isPt ? 'Vamos adaptar seu plano ao seu horário' : isSpanish ? 'Adaptaremos tu plan a tu horario' : "We'll fit your plan to your schedule",
+          isSpanish ? 'Adaptaremos tu plan a tu horario' : "We'll fit your plan to your schedule",
           timeOptions,
           workoutTime,
           setWorkoutTime,
@@ -1149,14 +1172,16 @@ Return ONLY valid JSON.`;
       case 7:
         return renderSelectionStep(
           t('gym_q5'),
-          isPt ? 'Sua segurança vem primeiro' : isSpanish ? 'Tu seguridad es lo primero' : 'Your safety comes first',
+          isSpanish ? 'Tu seguridad es lo primero' : 'Your safety comes first',
           limitationOptions.map(o => ({ ...o, icon: o.key === 'none' ? Shield : undefined })),
           physicalLimitations,
           setPhysicalLimitations,
         );
       case 8:
-        return renderWorkoutDays();
+        return renderComparison();
       case 9:
+        return renderWorkoutDays();
+      case 10:
         return renderGoalsInput();
       default:
         return null;
@@ -1165,9 +1190,9 @@ Return ONLY valid JSON.`;
 
   if (step === 0) return renderHero();
 
-  const continueLabel = step === 9
-    ? (isPt ? 'Criar Meu Plano' : isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
-    : (isPt ? 'Continuar' : isSpanish ? 'Continuar' : 'Continue');
+  const continueLabel = step === 10
+    ? (isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
+    : (isSpanish ? 'Continuar' : 'Continue');
 
   return (
     <View style={[s.flex1, { backgroundColor: '#FFFFFF', paddingTop: insets.top }]}>
@@ -1181,12 +1206,11 @@ Return ONLY valid JSON.`;
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={s.flex1}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={insets.top + 60}
       >
         <ScrollView
-          style={s.flex1}
           contentContainerStyle={stepStyles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -1202,11 +1226,11 @@ Return ONLY valid JSON.`;
             activeOpacity={0.85}
           >
             <Text style={footerStyles.continueText}>{continueLabel}</Text>
-            {step === 9 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
+            {step === 10 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
           </TouchableOpacity>
           {step === 4 && !targetWeightVal && (
             <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
-              <Text style={footerStyles.skipText}>{isPt ? 'Pular' : isSpanish ? 'Omitir' : 'Skip'}</Text>
+              <Text style={footerStyles.skipText}>{isSpanish ? 'Omitir' : 'Skip'}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -1225,7 +1249,6 @@ const heroStyles = StyleSheet.create({
     justifyContent: 'flex-end' as const,
     paddingHorizontal: 20,
     paddingTop: 12,
-    gap: 8,
   },
   langButton: {
     paddingHorizontal: 14,
@@ -1237,12 +1260,6 @@ const heroStyles = StyleSheet.create({
     color: '#6B7280',
     fontSize: 13,
     fontWeight: '600' as const,
-  },
-  langButtonActive: {
-    backgroundColor: '#1A1A2E',
-  },
-  langTextActive: {
-    color: '#FFFFFF',
   },
   content: {
     flex: 1,
@@ -1523,6 +1540,99 @@ const targetStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600' as const,
     color: '#9CA3AF',
+  },
+});
+
+const compStyles = StyleSheet.create({
+  card: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+  },
+  columnsRow: {
+    flexDirection: 'row' as const,
+    justifyContent: 'center' as const,
+    alignItems: 'flex-end' as const,
+    gap: 24,
+    marginBottom: 20,
+    paddingTop: 12,
+  },
+  column: {
+    alignItems: 'center' as const,
+    flex: 1,
+  },
+  columnLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#6B7280',
+    textAlign: 'center' as const,
+    marginBottom: 12,
+  },
+  barSmall: {
+    width: 80,
+    height: 60,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  barLarge: {
+    width: 80,
+    height: 120,
+    backgroundColor: '#1A1A2E',
+    borderRadius: 12,
+    marginBottom: 10,
+    overflow: 'hidden' as const,
+  },
+  barLargeInner: {
+    flex: 1,
+    backgroundColor: '#1A1A2E',
+  },
+  barValue: {
+    fontSize: 18,
+    fontWeight: '700' as const,
+    color: '#9CA3AF',
+  },
+  barValueAccent: {
+    fontSize: 18,
+    fontWeight: '800' as const,
+    color: '#1A1A2E',
+  },
+  cardDesc: {
+    fontSize: 14,
+    color: '#7A7A7A',
+    textAlign: 'center' as const,
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: 'row' as const,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center' as const,
+    gap: 6,
+  },
+  statDivider: {
+    width: 1,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 12,
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: '800' as const,
+    color: '#1A1A2E',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#7A7A7A',
+    fontWeight: '500' as const,
   },
 });
 
