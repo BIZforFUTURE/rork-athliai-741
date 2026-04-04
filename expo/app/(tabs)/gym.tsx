@@ -595,13 +595,18 @@ export default function GymScreen() {
 
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'],
-        quality: 0.7,
+        quality: 0.3,
         base64: true,
         allowsEditing: false,
       });
 
-      if (result.canceled || !result.assets?.[0]?.base64) {
-        console.log('Camera cancelled or no base64 data');
+      if (result.canceled) {
+        console.log('Camera cancelled');
+        return;
+      }
+      if (!result.assets?.[0]?.base64) {
+        console.log('No base64 data returned from camera');
+        Alert.alert('Camera Error', 'Failed to capture image data. Please try again.');
         return;
       }
 
@@ -616,6 +621,7 @@ export default function GymScreen() {
       scanPulse.start();
 
       const base64Image = result.assets[0].base64;
+      console.log('Gym scan image captured, base64 length:', base64Image.length);
 
       const prompt = `You are analyzing a photo of a gym or workout space. Look at all visible equipment and surroundings.
 
@@ -633,8 +639,22 @@ Respond in JSON format:
 Return ONLY valid JSON.`;
 
       console.log('Analyzing gym equipment with AI vision...');
-      const aiResponse = await callOpenAIWithVision(prompt, base64Image);
-      console.log('AI equipment analysis:', aiResponse);
+      let aiResponse: string;
+      try {
+        aiResponse = await callOpenAIWithVision(prompt, base64Image);
+        console.log('AI equipment analysis response length:', aiResponse?.length);
+      } catch (visionError: any) {
+        console.error('Vision API failed:', visionError?.message);
+        scanPulse.stop();
+        scanPulseAnim.setValue(0.4);
+        setIsScanningEquipment(false);
+        Alert.alert(
+          t('gym_error' as any) || 'Error',
+          (t('gym_scan_error' as any) || 'Failed to analyze image. Please select your equipment manually.'),
+          [{ text: 'OK' }]
+        );
+        return;
+      }
 
       scanPulse.stop();
       scanPulseAnim.setValue(0.4);

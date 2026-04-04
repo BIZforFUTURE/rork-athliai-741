@@ -667,7 +667,9 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
     if (cameraRef.current) {
       try {
         setIsAnalyzing(true);
-        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5, skipProcessing: Platform.OS === 'ios', exif: false });
+        console.log('Taking picture for food scan...');
+        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.3, skipProcessing: false, exif: false });
+        console.log('Photo captured, base64 length:', photo.base64?.length ?? 'none');
         if (!photo.base64) throw new Error("Failed to capture image data");
         setCapturedImage(photo.base64);
         await analyzeWithAI(photo.base64, true);

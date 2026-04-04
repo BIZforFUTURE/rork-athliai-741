@@ -11,31 +11,42 @@ const callOpenAI = async (prompt: string): Promise<string> => {
         },
       ],
     });
+    console.log('AI response received, length:', response?.length ?? 0);
     return response;
   } catch (error: any) {
-    console.error('AI call failed:', error);
-    throw error;
+    console.error('AI call failed:', error?.message || error);
+    throw new Error('AI analysis failed: ' + (error?.message || 'Unknown error'));
   }
 };
 
 const callOpenAIWithVision = async (prompt: string, base64Image: string): Promise<string> => {
   try {
-    console.log('Calling AI vision via Rork toolkit...');
+    const imageSizeKB = (base64Image.length / 1024).toFixed(0);
+    console.log('Calling AI vision via Rork toolkit... (image size: ' + imageSizeKB + 'KB)');
+
+    const imagePrefix = base64Image.startsWith('data:')
+      ? base64Image
+      : 'data:image/jpeg;base64,' + base64Image;
+
     const response = await generateText({
       messages: [
         {
           role: 'user',
           content: [
             { type: 'text', text: prompt },
-            { type: 'image', image: `data:image/jpeg;base64,${base64Image}` },
+            { type: 'image', image: imagePrefix },
           ],
         },
       ],
     });
+    console.log('AI vision response received, length:', response?.length ?? 0);
+    if (!response || response.trim().length === 0) {
+      throw new Error('Empty response from AI vision');
+    }
     return response;
   } catch (error: any) {
-    console.error('AI vision call failed:', error);
-    throw error;
+    console.error('AI vision call failed:', error?.message || error);
+    throw new Error('AI vision analysis failed: ' + (error?.message || 'Unknown error'));
   }
 };
 
