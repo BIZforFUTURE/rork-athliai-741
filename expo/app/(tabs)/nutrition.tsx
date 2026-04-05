@@ -196,7 +196,6 @@ export default function NutritionScreen() {
   const [analyzingFoodName, setAnalyzingFoodName] = useState<string | null>(null);
 
   const cameraRef = React.useRef<any>(null);
-  const [isCameraReady, setIsCameraReady] = useState(false);
   const headerFadeAnim = useRef(new Animated.Value(0)).current;
   const analyzingProgressAnim = useRef(new Animated.Value(0)).current;
   const analyzingPulseAnim = useRef(new Animated.Value(0.4)).current;
@@ -665,25 +664,20 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
   };
 
   const takePicture = async () => {
-    if (cameraRef.current && isCameraReady) {
+    if (cameraRef.current) {
       try {
         setIsAnalyzing(true);
-        console.log('Taking picture for food scan...');
-        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.1, skipProcessing: true, exif: false });
-        console.log('Photo captured, base64 length:', photo?.base64?.length ?? 'none');
-        if (!photo || !photo.base64) throw new Error("Failed to capture image data - no base64 returned");
-        const base64Data = photo.base64 as string;
-        console.log('Base64 data size (KB):', (base64Data.length / 1024).toFixed(0));
-        setCapturedImage(base64Data);
-        await analyzeWithAI(base64Data, true);
+        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5, skipProcessing: Platform.OS === 'ios', exif: false });
+        if (!photo.base64) throw new Error("Failed to capture image data");
+        setCapturedImage(photo.base64);
+        await analyzeWithAI(photo.base64, true);
       } catch (error: any) {
-        console.error("Failed to take picture:", error?.message || error);
+        console.error("Failed to take picture:", error.message);
         Alert.alert("Camera Error", "Failed to capture image. Please try again.");
         setIsAnalyzing(false);
       }
     } else {
-      console.log('Camera not ready - ref:', !!cameraRef.current, 'ready:', isCameraReady);
-      Alert.alert("Camera Error", "Camera is not ready. Please wait a moment and try again.");
+      Alert.alert("Camera Error", "Camera is not ready. Please try again.");
       setIsAnalyzing(false);
     }
   };
@@ -1312,7 +1306,7 @@ Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"na
             </View>
           ) : (
             <>
-              <CameraView ref={cameraRef} style={styles.camera} facing="back" onCameraReady={() => { console.log('Camera ready'); setIsCameraReady(true); }} onMountError={(e: any) => { console.error('Camera mount error:', e?.nativeEvent?.message); }}>
+              <CameraView ref={cameraRef} style={styles.camera} facing="back">
                 <View style={styles.cameraOverlay}>
                   <TouchableOpacity style={styles.cameraClose} onPress={() => { if (Platform.OS !== 'web') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowCamera(false); setCapturedImage(null); }}>
                     <X size={32} color="#FFFFFF" />
