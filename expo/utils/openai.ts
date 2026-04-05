@@ -19,14 +19,27 @@ const callOpenAI = async (prompt: string): Promise<string> => {
   }
 };
 
+const MAX_BASE64_LENGTH = 500000;
+
 const callOpenAIWithVision = async (prompt: string, base64Image: string): Promise<string> => {
   try {
-    const imageSizeKB = (base64Image.length / 1024).toFixed(0);
-    console.log('Calling AI vision via Rork toolkit... (image size: ' + imageSizeKB + 'KB)');
+    let imageData = base64Image;
+    
+    if (imageData.startsWith('data:')) {
+      const commaIndex = imageData.indexOf(',');
+      if (commaIndex !== -1) {
+        imageData = imageData.substring(commaIndex + 1);
+      }
+    }
 
-    const imagePrefix = base64Image.startsWith('data:')
-      ? base64Image
-      : 'data:image/jpeg;base64,' + base64Image;
+    if (imageData.length > MAX_BASE64_LENGTH) {
+      console.log('Image too large (' + (imageData.length / 1024).toFixed(0) + 'KB), truncating to ' + (MAX_BASE64_LENGTH / 1024).toFixed(0) + 'KB');
+      imageData = imageData.substring(0, MAX_BASE64_LENGTH);
+    }
+
+    const imagePrefix = 'data:image/jpeg;base64,' + imageData;
+    const imageSizeKB = (imageData.length / 1024).toFixed(0);
+    console.log('Calling AI vision via Rork toolkit... (image size: ' + imageSizeKB + 'KB)');
 
     const response = await generateText({
       messages: [
@@ -40,12 +53,13 @@ const callOpenAIWithVision = async (prompt: string, base64Image: string): Promis
       ],
     });
     console.log('AI vision response received, length:', response?.length ?? 0);
+    console.log('AI vision response preview:', response?.substring(0, 200));
     if (!response || response.trim().length === 0) {
       throw new Error('Empty response from AI vision');
     }
     return response;
   } catch (error: any) {
-    console.error('AI vision call failed:', error?.message || error);
+    console.error('AI vision call failed:', JSON.stringify({ message: error?.message, stack: error?.stack?.substring(0, 300) }));
     throw new Error('AI vision analysis failed: ' + (error?.message || 'Unknown error'));
   }
 };
