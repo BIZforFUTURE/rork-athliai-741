@@ -23,7 +23,7 @@ import { useApp } from "@/providers/AppProvider";
 import { useRouter, router } from "expo-router";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { callOpenAI, callOpenAIWithVision } from "@/utils/openai";
+import { analyzeFood, analyzeFoodImage, analyzeExerciseAI, refineFoodAI } from "@/utils/openai";
 import { searchUSDAFoods, FoodSearchResult } from "@/utils/foodApi";
 import { calculateHealthScore } from "@/utils/healthScore";
 import Svg, { Circle } from "react-native-svg";
@@ -398,31 +398,14 @@ export default function NutritionScreen() {
   const _analyzeQuickMeal = async (mealName: string, targetDate: Date) => {
     setIsAnalyzing(true);
     try {
-      const prompt = `You are a nutrition expert. Analyze meal names and provide accurate nutritional estimates based on typical serving sizes and preparation methods. Consider common ingredients, cooking methods, and standard portion sizes for the described meal.
-
-Analyze this meal: "${mealName}". Estimate nutritional content based on a typical serving size. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "${mealName}", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
-
       console.log("Analyzing quick meal for meal prep...");
-      const response = await callOpenAI(prompt);
+      const result = await analyzeFood(mealName);
       
-      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
-      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) cleanedResponse = jsonMatch[0];
-      
-      const nutritionData = JSON.parse(cleanedResponse);
-      const name = nutritionData.name || mealName;
-      const cals = Number(nutritionData.calories) || 0;
-      const prot = Number(nutritionData.protein) || 0;
-      const carb = Number(nutritionData.carbs) || 0;
-      const fatVal = Number(nutritionData.fat) || 0;
-      
-      if (cals === 0) throw new Error("Invalid nutrition data");
-      
-      const newEntry = { id: Date.now().toString(), name, calories: Math.round(cals), protein: Math.round(prot), carbs: Math.round(carb), fat: Math.round(fatVal), date: targetDate.toISOString() };
+      const newEntry = { id: Date.now().toString(), name: result.name, calories: result.calories, protein: result.protein, carbs: result.carbs, fat: result.fat, date: targetDate.toISOString() };
       addFoodEntry(newEntry);
       setShowQuickMealPrep(false);
       setQuickMealName("");
-      Alert.alert("Meal Prepped!", `Added "${name}" for ${targetDate.toLocaleDateString()}\n\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g`);
+      Alert.alert("Meal Prepped!", `Added "${result.name}" for ${targetDate.toLocaleDateString()}\n\nCalories: ${result.calories}\nProtein: ${result.protein}g\nCarbs: ${result.carbs}g\nFat: ${result.fat}g`);
     } catch (error: any) {
       console.error("Quick meal analysis error:", error.message);
       Alert.alert("Analysis Failed", "Unable to analyze the meal. Please try again or use manual meal prep.", [
@@ -435,32 +418,17 @@ Analyze this meal: "${mealName}". Estimate nutritional content based on a typica
   const _analyzeProteinShake = async (ingredients: string) => {
     setIsAnalyzing(true);
     try {
-      const prompt = `You are a nutrition expert specializing in protein shakes and supplements. Analyze the ingredients list and provide accurate nutritional estimates based on typical serving sizes for protein shakes.
-
-Analyze this protein shake recipe: "${ingredients}". Estimate the total nutritional content assuming this is one complete shake serving. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "Protein Shake with [main ingredients]", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
-
       console.log("Analyzing protein shake...");
-      const response = await callOpenAI(prompt);
-      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
-      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) cleanedResponse = jsonMatch[0];
+      const result = await analyzeFood(`Protein shake with: ${ingredients}`);
       
-      const nutritionData = JSON.parse(cleanedResponse);
-      const name = nutritionData.name || "Protein Shake";
-      const cals = Number(nutritionData.calories) || 0;
-      const prot = Number(nutritionData.protein) || 0;
-      const carb = Number(nutritionData.carbs) || 0;
-      const fatVal = Number(nutritionData.fat) || 0;
-      if (cals === 0) throw new Error("Invalid nutrition data");
-      
-      setFoodName(name);
-      setCalories(Math.round(cals).toString());
-      setProtein(Math.round(prot).toString());
-      setCarbs(Math.round(carb).toString());
-      setFat(Math.round(fatVal).toString());
+      setFoodName(result.name);
+      setCalories(result.calories.toString());
+      setProtein(result.protein.toString());
+      setCarbs(result.carbs.toString());
+      setFat(result.fat.toString());
       setShowProteinShake(false);
       setShowAddFood(true);
-      Alert.alert("Protein Shake Analyzed!", `${name}\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g\n\nYou can adjust the values if needed.`);
+      Alert.alert("Protein Shake Analyzed!", `${result.name}\nCalories: ${result.calories}\nProtein: ${result.protein}g\nCarbs: ${result.carbs}g\nFat: ${result.fat}g\n\nYou can adjust the values if needed.`);
     } catch (error: any) {
       console.error("Protein shake analysis error:", error.message);
       Alert.alert("Analysis Failed", "Unable to analyze the protein shake. Please try again or enter manually.", [
@@ -473,28 +441,13 @@ Analyze this protein shake recipe: "${ingredients}". Estimate the total nutritio
   const analyzeExercise = async (description: string) => {
     setIsAnalyzing(true);
     try {
-      const prompt = `You are a fitness and nutrition expert. The user will describe an exercise or physical activity they performed. Estimate the calories burned based on the description, assuming an average adult body weight unless specified otherwise.
-
-Exercise described: "${description}"
-
-Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "exercise description", "caloriesBurned": number, "duration": "estimated duration string"}. All numeric values must be numbers, not strings.`;
-
       console.log("Analyzing exercise...");
-      const response = await callOpenAI(prompt);
-      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
-      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) cleanedResponse = jsonMatch[0];
-
-      const exerciseData = JSON.parse(cleanedResponse);
-      const name = exerciseData.name || description;
-      const burned = Number(exerciseData.caloriesBurned) || 0;
-      const duration = exerciseData.duration || "";
-      if (burned === 0) throw new Error("Invalid exercise data");
+      const result = await analyzeExerciseAI(description);
 
       const newEntry = {
         id: Date.now().toString(),
-        name: `${name}`,
-        calories: -Math.round(burned),
+        name: result.name,
+        calories: -Math.round(result.caloriesBurned),
         protein: 0,
         carbs: 0,
         fat: 0,
@@ -507,7 +460,7 @@ Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"nam
       setExerciseInput("");
       Alert.alert(
         "Exercise Logged!",
-        `${name}${duration ? ` (~${duration})` : ""}\n\nCalories burned: ${Math.round(burned)} cal\n\nThis has been subtracted from your daily intake.`
+        `${result.name}${result.duration ? ` (~${result.duration})` : ""}\n\nCalories burned: ${Math.round(result.caloriesBurned)} cal\n\nThis has been subtracted from your daily intake.`
       );
     } catch (error: any) {
       console.error("Exercise analysis error:", error.message);
@@ -523,32 +476,14 @@ Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"nam
   const refineWithAI = async (entry: any, refinementText: string) => {
     setIsAnalyzing(true);
     try {
-      const prompt = `You are a nutrition expert. The user has logged a food item and wants to refine its nutritional information with additional details.
-
-Original food entry: "${entry.name}" with ${entry.calories} calories, ${entry.protein}g protein, ${entry.carbs}g carbs, ${entry.fat}g fat.
-Additional details: "${refinementText}"
-
-Please provide a refined nutritional estimate. Return ONLY a valid JSON object (no markdown, no code blocks) with format: {"name": "refined food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers, not strings.`;
-
       console.log("Refining food entry with AI...");
-      const response = await callOpenAI(prompt);
-      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
-      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) cleanedResponse = jsonMatch[0];
+      const result = await refineFoodAI(entry.name, entry.calories, entry.protein, entry.carbs, entry.fat, refinementText);
       
-      const nutritionData = JSON.parse(cleanedResponse);
-      const name = nutritionData.name || entry.name;
-      const cals = Number(nutritionData.calories) || entry.calories;
-      const prot = Number(nutritionData.protein) || entry.protein;
-      const carb = Number(nutritionData.carbs) || entry.carbs;
-      const fatVal = Number(nutritionData.fat) || entry.fat;
-      if (cals === 0) throw new Error("Invalid nutrition data");
-      
-      updateFoodEntry(entry.id, { name, calories: Math.round(cals), protein: Math.round(prot), carbs: Math.round(carb), fat: Math.round(fatVal) });
+      updateFoodEntry(entry.id, { name: result.name, calories: result.calories, protein: result.protein, carbs: result.carbs, fat: result.fat });
       setShowRefineFood(false);
       setSelectedFoodEntry(null);
       setRefinementInput("");
-      Alert.alert("Food Refined!", `Updated "${name}"\n\nCalories: ${Math.round(cals)}\nProtein: ${Math.round(prot)}g\nCarbs: ${Math.round(carb)}g\nFat: ${Math.round(fatVal)}g`);
+      Alert.alert("Food Refined!", `Updated "${result.name}"\n\nCalories: ${result.calories}\nProtein: ${result.protein}g\nCarbs: ${result.carbs}g\nFat: ${result.fat}g`);
     } catch (error: any) {
       console.error("Food refinement error:", error.message);
       Alert.alert("Refinement Failed", "Unable to refine the food entry. Please try again.", [
@@ -567,94 +502,37 @@ Please provide a refined nutritional estimate. Return ONLY a valid JSON object (
     setAnalyzingFoodName(null);
     startAnalyzingAnimation();
     try {
-      let prompt;
+      console.log('Starting food analysis...', isImage ? 'image mode' : 'text mode');
+      let result;
       
       if (isImage) {
-        try {
-          const visionPrompt = 'You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Return ONLY a valid JSON object with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}.';
-          prompt = await callOpenAIWithVision(visionPrompt, input);
-        } catch (imageError) {
-          console.error('Image analysis failed:', imageError);
-          setShowAnalyzingCard(false);
-          Alert.alert("Image Analysis Failed", "Unable to analyze the image. Please try describing your food instead.", [{ text: "OK", onPress: () => { setShowAIInput(true); } }]);
-          return;
-        }
+        result = await analyzeFoodImage(input);
       } else {
-        prompt = `You are a professional nutritionist. Provide accurate nutritional estimates based on standard serving sizes. Return ONLY valid JSON without any markdown formatting.
-
-Analyze this food: "${input}". Return ONLY a valid JSON object with format: {"name": "food description", "calories": number, "protein": number, "carbs": number, "fat": number}. All numeric values must be numbers.`;
+        result = await analyzeFood(input);
       }
 
-      let response;
-      if (isImage) { response = prompt; } else { console.log("Sending request to AI..."); response = await callOpenAI(prompt); }
-      
-      let cleanedResponse = response.replace(/```json/gi, '').replace(/```/g, '').replace(/^[^{]*/, '').replace(/[^}]*$/, '').trim();
-      const jsonMatch = cleanedResponse.match(/{[^{}]*(?:{[^{}]*}[^{}]*)*}/);
-      if (jsonMatch) cleanedResponse = jsonMatch[0];
-      
-      let parsedName = "";
-      let parsedCals = 0;
-      let parsedProt = 0;
-      let parsedCarb = 0;
-      let parsedFatVal = 0;
-      let parsed = false;
-
-      try {
-        const nutritionData = JSON.parse(cleanedResponse);
-        parsedName = nutritionData.name || "Unknown food";
-        parsedCals = Number(nutritionData.calories) || 0;
-        parsedProt = Number(nutritionData.protein) || 0;
-        parsedCarb = Number(nutritionData.carbs) || 0;
-        parsedFatVal = Number(nutritionData.fat) || 0;
-        if (parsedName && parsedCals > 0) parsed = true;
-      } catch (parseError: any) {
-        console.error("Failed to parse AI response:", parseError.message);
-        try {
-          const nameMatch = cleanedResponse.match(/"name"\s*:\s*"([^"]+)"/);
-          const caloriesMatch = cleanedResponse.match(/"calories"\s*:\s*(\d+)/);
-          if (nameMatch && caloriesMatch) {
-            parsedName = nameMatch[1];
-            parsedCals = parseInt(caloriesMatch[1]);
-            const proteinMatch = cleanedResponse.match(/"protein"\s*:\s*(\d+)/);
-            const carbsMatch = cleanedResponse.match(/"carbs"\s*:\s*(\d+)/);
-            const fatMatch = cleanedResponse.match(/"fat"\s*:\s*(\d+)/);
-            parsedProt = proteinMatch ? parseInt(proteinMatch[1]) : 0;
-            parsedCarb = carbsMatch ? parseInt(carbsMatch[1]) : 0;
-            parsedFatVal = fatMatch ? parseInt(fatMatch[1]) : 0;
-            parsed = true;
-          }
-        } catch (fallbackError) { console.error("Fallback parsing also failed:", fallbackError); }
-      }
-
-      if (parsed) {
-        completeAnalyzingAnimation();
-        setAnalyzingFoodName(parsedName);
-        const newEntry = {
-          id: Date.now().toString(),
-          name: parsedName,
-          calories: Math.round(parsedCals),
-          protein: Math.round(parsedProt),
-          carbs: Math.round(parsedCarb),
-          fat: Math.round(parsedFatVal),
-          date: new Date().toISOString(),
-        };
+      console.log('Analysis successful:', JSON.stringify(result));
+      completeAnalyzingAnimation();
+      setAnalyzingFoodName(result.name);
+      const newEntry = {
+        id: Date.now().toString(),
+        name: result.name,
+        calories: result.calories,
+        protein: result.protein,
+        carbs: result.carbs,
+        fat: result.fat,
+        date: new Date().toISOString(),
+      };
+      setTimeout(() => {
+        addFoodEntry(newEntry);
+        if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setTimeout(() => {
-          addFoodEntry(newEntry);
-          if (Platform.OS !== 'web') void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setTimeout(() => {
-            setShowAnalyzingCard(false);
-            setAnalyzingFoodName(null);
-          }, 1200);
-        }, 500);
-      } else {
-        setShowAnalyzingCard(false);
-        Alert.alert("Analysis Error", "Could not understand the nutritional data. Please try again or enter manually.", [
-          { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
-          { text: "Enter Manually", onPress: () => { setShowAddFood(true); } }
-        ]);
-      }
+          setShowAnalyzingCard(false);
+          setAnalyzingFoodName(null);
+        }, 1200);
+      }, 500);
     } catch (error: any) {
-      console.error("AI analysis error:", error.message);
+      console.error("AI analysis error:", error?.message || error);
       setShowAnalyzingCard(false);
       Alert.alert("Analysis Failed", "Unable to analyze the food. Please try again or enter manually.", [
         { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
