@@ -5,7 +5,10 @@
 
 const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY ?? "";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = "gpt-4o-mini";
+const TEXT_MODEL = "gpt-4o-mini";
+const VISION_MODEL = "gpt-4o";
+const MODEL = TEXT_MODEL;
+const REQUEST_TIMEOUT_MS = 45_000;
 
 type NutritionData = {
   name: string;
@@ -36,20 +39,37 @@ const assertKey = () => {
 
 const postChat = async (body: Record<string, unknown>): Promise<any> => {
   assertKey();
-  const res = await fetch(OPENAI_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    console.error("OpenAI HTTP error", res.status, text);
-    throw new Error(`OpenAI request failed (${res.status})`);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch(OPENAI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error("OpenAI HTTP error", res.status, text);
+      let message = `OpenAI request failed (${res.status})`;
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed?.error?.message) message = parsed.error.message;
+      } catch {}
+      throw new Error(message);
+    }
+    return await res.json();
+  } catch (e: any) {
+    if (e?.name === "AbortError") {
+      throw new Error("Request timed out. Please check your connection and try again.");
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json();
 };
 
 /** Extract assistant text content from a chat completion response. */
@@ -109,72 +129,93 @@ const exerciseJsonSchema = {
   },
 };
 
+const NUTRITION_SYSTEM_PROMPT = `You are a board-certified nutritionist and registered dietitian with 20 years of experience analyzing food portions and macronutrients.
+
+Rules:
+- Always estimate based on the MOST LIKELY real-world serving size shown or implied. If a quantity is given ("2 slices", "a bowl", "large"), respect it. Otherwise assume one standard adult serving.
+- For mixed/prepared dishes, infer typical ingredients and proportions (e.g. a burger = bun + patty + cheese + condiments).
+- Round all macro grams to whole numbers; calories to the nearest 5.
+- The "name" field MUST be a short, human-readable description including the portion (e.g. "Grilled chicken breast (6 oz)", "2 slices of pepperoni pizza", "Large caesar salad with chicken"). Title Case.
+- Calories MUST roughly equal protein*4 + carbs*4 + fat*9 (±15%). Self-check before answering.
+- If the input is clearly not food (e.g. a chair, person, blank image), set name="Unknown" and all macros to 0.
+- Never refuse. Never add disclaimers. Only return the JSON object that matches the schema.`;
+
+const sanitizeNutrition = (parsed: NutritionData): NutritionData => {
+  const safe = (n: unknown): number => {
+    const v = typeof n === "number" ? n : Number(n);
+    return Number.isFinite(v) && v > 0 ? v : 0;
+  };
+  return {
+    name: (parsed.name ?? "").toString().trim() || "Unknown food",
+    calories: Math.max(0, Math.round(safe(parsed.calories) / 5) * 5),
+    protein: Math.max(0, Math.round(safe(parsed.protein))),
+    carbs: Math.max(0, Math.round(safe(parsed.carbs))),
+    fat: Math.max(0, Math.round(safe(parsed.fat))),
+  };
+};
+
+const requestNutrition = async (
+  model: string,
+  userContent: Content
+): Promise<NutritionData> => {
+  const data = await postChat({
+    model,
+    temperature: 0.2,
+    messages: [
+      { role: "system", content: NUTRITION_SYSTEM_PROMPT },
+      { role: "user", content: userContent },
+    ],
+    response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
+  });
+  const raw = extractText(data);
+  if (!raw) {
+    console.warn("OpenAI returned empty content", JSON.stringify(data).slice(0, 500));
+    throw new Error("Empty response from AI");
+  }
+  const parsed = parseJson<NutritionData>(raw);
+  const cleaned = sanitizeNutrition(parsed);
+  if (cleaned.name.toLowerCase() === "unknown" || cleaned.name === "Unknown food") {
+    throw new Error("Could not identify the food. Try describing it more specifically.");
+  }
+  return cleaned;
+};
+
 const analyzeFood = async (description: string): Promise<NutritionData> => {
-  console.log("Analyzing food via OpenAI:", description);
+  const trimmed = description.trim();
+  if (!trimmed) throw new Error("Please describe the food first.");
+  console.log("[Food][text] analyze:", trimmed);
   try {
-    const data = await postChat({
-      model: MODEL,
-      messages: [
-        {
-          role: "user",
-          content: `You are a professional nutritionist. Analyze this food and provide accurate nutritional estimates based on standard serving sizes: "${description}". Return name, calories, protein (g), carbs (g), fat (g).`,
-        },
-      ],
-      response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
-    });
-    const parsed = parseJson<NutritionData>(extractText(data));
-    if (!parsed.name || parsed.calories <= 0) {
-      throw new Error("Invalid nutrition data returned");
-    }
-    return {
-      name: parsed.name,
-      calories: Math.round(parsed.calories),
-      protein: Math.round(parsed.protein),
-      carbs: Math.round(parsed.carbs),
-      fat: Math.round(parsed.fat),
-    };
+    return await requestNutrition(
+      TEXT_MODEL,
+      `Analyze this food and return nutrition for the portion described. If no portion is given, assume one standard adult serving.\n\nFood: "${trimmed}"`
+    );
   } catch (error: any) {
-    console.error("analyzeFood failed:", error?.message ?? error);
-    throw new Error("Failed to analyze food. Please try again.");
+    const msg = error?.message ?? String(error);
+    console.error("[Food][text] failed:", msg);
+    throw new Error(msg.startsWith("Could not identify") ? msg : `Failed to analyze food: ${msg}`);
   }
 };
 
 const analyzeFoodImage = async (base64Image: string): Promise<NutritionData> => {
-  console.log("Analyzing food image via OpenAI vision...");
+  if (!base64Image || base64Image.length < 100) {
+    throw new Error("No image data captured. Please try taking the photo again.");
+  }
+  console.log("[Food][image] analyze, bytes:", base64Image.length);
   try {
-    const data = await postChat({
-      model: MODEL,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: "You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Return name, calories, protein (g), carbs (g), fat (g).",
-            },
-            {
-              type: "image_url",
-              image_url: { url: `data:image/jpeg;base64,${base64Image}` },
-            },
-          ],
-        },
-      ],
-      response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
-    });
-    const parsed = parseJson<NutritionData>(extractText(data));
-    if (!parsed.name || parsed.calories <= 0) {
-      throw new Error("Invalid nutrition data from image");
-    }
-    return {
-      name: parsed.name,
-      calories: Math.round(parsed.calories),
-      protein: Math.round(parsed.protein),
-      carbs: Math.round(parsed.carbs),
-      fat: Math.round(parsed.fat),
-    };
+    return await requestNutrition(VISION_MODEL, [
+      {
+        type: "text",
+        text: "Identify every food and drink in this image and estimate the total nutrition for what is actually visible on the plate / in the cup. Pay attention to portion size relative to the plate, utensils, or hand for scale. If multiple distinct items, combine them into a single entry and reflect that in the name (e.g. \"Steak, mashed potatoes & broccoli\").",
+      },
+      {
+        type: "image_url",
+        image_url: { url: `data:image/jpeg;base64,${base64Image}` },
+      },
+    ]);
   } catch (error: any) {
-    console.error("analyzeFoodImage failed:", error?.message ?? error);
-    throw new Error("Failed to analyze food image. Please try again.");
+    const msg = error?.message ?? String(error);
+    console.error("[Food][image] failed:", msg);
+    throw new Error(msg.startsWith("Could not identify") ? msg : `Failed to analyze image: ${msg}`);
   }
 };
 
@@ -183,6 +224,7 @@ const analyzeExerciseAI = async (description: string): Promise<ExerciseData> => 
   try {
     const data = await postChat({
       model: MODEL,
+      temperature: 0.2,
       messages: [
         {
           role: "user",
@@ -213,23 +255,20 @@ const refineFoodAI = async (
   console.log("Refining food entry via OpenAI...");
   try {
     const data = await postChat({
-      model: MODEL,
+      model: TEXT_MODEL,
+      temperature: 0.2,
       messages: [
+        { role: "system", content: NUTRITION_SYSTEM_PROMPT },
         {
           role: "user",
-          content: `You are a nutrition expert. The user logged "${originalName}" with ${originalCalories} cal, ${originalProtein}g protein, ${originalCarbs}g carbs, ${originalFat}g fat. They want to refine it with: "${refinementText}". Return updated nutrition estimates.`,
+          content: `The user logged "${originalName}" with ${originalCalories} cal, ${originalProtein}g protein, ${originalCarbs}g carbs, ${originalFat}g fat. They want to refine it with this extra info: "${refinementText}". Return updated nutrition estimates that reflect the refinement.`,
         },
       ],
       response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
     });
     const parsed = parseJson<NutritionData>(extractText(data));
-    return {
-      name: parsed.name || originalName,
-      calories: Math.round(parsed.calories),
-      protein: Math.round(parsed.protein),
-      carbs: Math.round(parsed.carbs),
-      fat: Math.round(parsed.fat),
-    };
+    const cleaned = sanitizeNutrition(parsed);
+    return { ...cleaned, name: cleaned.name || originalName };
   } catch (error: any) {
     console.error("refineFoodAI failed:", error?.message ?? error);
     throw new Error("Failed to refine food entry. Please try again.");

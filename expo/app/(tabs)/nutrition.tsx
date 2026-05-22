@@ -532,9 +532,10 @@ export default function NutritionScreen() {
         }, 1200);
       }, 500);
     } catch (error: any) {
-      console.error("AI analysis error:", error?.message || error);
+      const msg = error?.message || "Unable to analyze the food.";
+      console.error("AI analysis error:", msg);
       setShowAnalyzingCard(false);
-      Alert.alert("Analysis Failed", "Unable to analyze the food. Please try again or enter manually.", [
+      Alert.alert("Analysis Failed", `${msg}\n\nTry again, or enter the food manually.`, [
         { text: "Try Again", onPress: () => isImage ? setShowCamera(true) : setShowAIInput(true) },
         { text: "Enter Manually", onPress: () => { setShowAddFood(true); } }
       ]);
@@ -545,7 +546,7 @@ export default function NutritionScreen() {
     if (cameraRef.current) {
       try {
         setIsAnalyzing(true);
-        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5, skipProcessing: Platform.OS === 'ios', exif: false });
+        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.8, skipProcessing: false, exif: false });
         if (!photo.base64) throw new Error("Failed to capture image data");
         setCapturedImage(photo.base64);
         await analyzeWithAI(photo.base64, true);
