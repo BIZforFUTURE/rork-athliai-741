@@ -1,105 +1,204 @@
-import { generateObject, generateText } from "@rork-ai/toolkit-sdk";
-import * as z from "zod/v4";
+/**
+ * Direct OpenAI API client.
+ * Uses EXPO_PUBLIC_OPENAI_API_KEY for all AI features in the app.
+ */
 
-const NutritionSchema = z.object({
-  name: z.string(),
-  calories: z.number(),
-  protein: z.number(),
-  carbs: z.number(),
-  fat: z.number(),
-});
+const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY ?? "";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const MODEL = "gpt-4o-mini";
 
-type NutritionData = z.infer<typeof NutritionSchema>;
+type NutritionData = {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+};
 
-const ExerciseSchema = z.object({
-  name: z.string(),
-  caloriesBurned: z.number(),
-  duration: z.string(),
-});
+type ExerciseData = {
+  name: string;
+  caloriesBurned: number;
+  duration: string;
+};
 
-type ExerciseData = z.infer<typeof ExerciseSchema>;
+type TextPart = { type: "text"; text: string };
+type ImageUrlPart = { type: "image_url"; image_url: { url: string } };
+type Content = string | (TextPart | ImageUrlPart)[];
+type Message = { role: "system" | "user" | "assistant"; content: Content };
+
+const assertKey = () => {
+  if (!OPENAI_API_KEY) {
+    throw new Error(
+      "Missing EXPO_PUBLIC_OPENAI_API_KEY. Set it in your environment."
+    );
+  }
+};
+
+const postChat = async (body: Record<string, unknown>): Promise<any> => {
+  assertKey();
+  const res = await fetch(OPENAI_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.error("OpenAI HTTP error", res.status, text);
+    throw new Error(`OpenAI request failed (${res.status})`);
+  }
+  return res.json();
+};
+
+/** Extract assistant text content from a chat completion response. */
+const extractText = (data: any): string => {
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((c: any) => (typeof c === "string" ? c : c?.text ?? ""))
+      .join("");
+  }
+  return "";
+};
+
+/** Parse a JSON object out of an LLM response, stripping code fences if present. */
+const parseJson = <T,>(text: string): T => {
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?/i, "")
+    .replace(/```$/g, "")
+    .trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  const slice = start >= 0 && end > start ? cleaned.slice(start, end + 1) : cleaned;
+  return JSON.parse(slice) as T;
+};
+
+const nutritionJsonSchema = {
+  name: "nutrition",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      name: { type: "string" },
+      calories: { type: "number" },
+      protein: { type: "number" },
+      carbs: { type: "number" },
+      fat: { type: "number" },
+    },
+    required: ["name", "calories", "protein", "carbs", "fat"],
+  },
+};
+
+const exerciseJsonSchema = {
+  name: "exercise",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      name: { type: "string" },
+      caloriesBurned: { type: "number" },
+      duration: { type: "string" },
+    },
+    required: ["name", "caloriesBurned", "duration"],
+  },
+};
 
 const analyzeFood = async (description: string): Promise<NutritionData> => {
-  console.log('Analyzing food with AI (structured):', description);
+  console.log("Analyzing food via OpenAI:", description);
   try {
-    const result = await generateObject({
+    const data = await postChat({
+      model: MODEL,
       messages: [
         {
-          role: 'user',
-          content: `You are a professional nutritionist. Analyze this food and provide accurate nutritional estimates based on standard serving sizes: "${description}". Provide the food name, calories, protein (g), carbs (g), and fat (g).`,
+          role: "user",
+          content: `You are a professional nutritionist. Analyze this food and provide accurate nutritional estimates based on standard serving sizes: "${description}". Return name, calories, protein (g), carbs (g), fat (g).`,
         },
       ],
-      schema: NutritionSchema,
+      response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
     });
-    console.log('Food analysis result:', JSON.stringify(result));
-    if (!result.name || result.calories <= 0) {
-      throw new Error('Invalid nutrition data returned');
+    const parsed = parseJson<NutritionData>(extractText(data));
+    if (!parsed.name || parsed.calories <= 0) {
+      throw new Error("Invalid nutrition data returned");
     }
     return {
-      name: result.name,
-      calories: Math.round(result.calories),
-      protein: Math.round(result.protein),
-      carbs: Math.round(result.carbs),
-      fat: Math.round(result.fat),
+      name: parsed.name,
+      calories: Math.round(parsed.calories),
+      protein: Math.round(parsed.protein),
+      carbs: Math.round(parsed.carbs),
+      fat: Math.round(parsed.fat),
     };
   } catch (error: any) {
-    console.error('analyzeFood failed:', error?.message || error);
-    throw new Error('Failed to analyze food. Please try again.');
+    console.error("analyzeFood failed:", error?.message ?? error);
+    throw new Error("Failed to analyze food. Please try again.");
   }
 };
 
 const analyzeFoodImage = async (base64Image: string): Promise<NutritionData> => {
-  console.log('Analyzing food image with AI vision (structured)...');
+  console.log("Analyzing food image via OpenAI vision...");
   try {
-    const result = await generateObject({
+    const data = await postChat({
+      model: MODEL,
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: [
-            { type: 'text', text: 'You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Provide the food name, calories, protein (g), carbs (g), and fat (g).' },
-            { type: 'image', image: `data:image/jpeg;base64,${base64Image}` },
+            {
+              type: "text",
+              text: "You are a professional nutritionist. Analyze this food image and provide accurate nutritional estimates. Return name, calories, protein (g), carbs (g), fat (g).",
+            },
+            {
+              type: "image_url",
+              image_url: { url: `data:image/jpeg;base64,${base64Image}` },
+            },
           ],
         },
       ],
-      schema: NutritionSchema,
+      response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
     });
-    console.log('Food image analysis result:', JSON.stringify(result));
-    if (!result.name || result.calories <= 0) {
-      throw new Error('Invalid nutrition data from image');
+    const parsed = parseJson<NutritionData>(extractText(data));
+    if (!parsed.name || parsed.calories <= 0) {
+      throw new Error("Invalid nutrition data from image");
     }
     return {
-      name: result.name,
-      calories: Math.round(result.calories),
-      protein: Math.round(result.protein),
-      carbs: Math.round(result.carbs),
-      fat: Math.round(result.fat),
+      name: parsed.name,
+      calories: Math.round(parsed.calories),
+      protein: Math.round(parsed.protein),
+      carbs: Math.round(parsed.carbs),
+      fat: Math.round(parsed.fat),
     };
   } catch (error: any) {
-    console.error('analyzeFoodImage failed:', error?.message || error);
-    throw new Error('Failed to analyze food image. Please try again.');
+    console.error("analyzeFoodImage failed:", error?.message ?? error);
+    throw new Error("Failed to analyze food image. Please try again.");
   }
 };
 
 const analyzeExerciseAI = async (description: string): Promise<ExerciseData> => {
-  console.log('Analyzing exercise with AI (structured):', description);
+  console.log("Analyzing exercise via OpenAI:", description);
   try {
-    const result = await generateObject({
+    const data = await postChat({
+      model: MODEL,
       messages: [
         {
-          role: 'user',
-          content: `You are a fitness expert. The user performed this exercise: "${description}". Estimate the calories burned assuming an average adult. Provide the exercise name, calories burned, and estimated duration.`,
+          role: "user",
+          content: `You are a fitness expert. The user performed this exercise: "${description}". Estimate calories burned assuming an average adult. Return name, caloriesBurned, duration.`,
         },
       ],
-      schema: ExerciseSchema,
+      response_format: { type: "json_schema", json_schema: exerciseJsonSchema },
     });
-    console.log('Exercise analysis result:', JSON.stringify(result));
-    if (result.caloriesBurned <= 0) {
-      throw new Error('Invalid exercise data returned');
+    const parsed = parseJson<ExerciseData>(extractText(data));
+    if (parsed.caloriesBurned <= 0) {
+      throw new Error("Invalid exercise data returned");
     }
-    return result;
+    return parsed;
   } catch (error: any) {
-    console.error('analyzeExerciseAI failed:', error?.message || error);
-    throw new Error('Failed to analyze exercise. Please try again.');
+    console.error("analyzeExerciseAI failed:", error?.message ?? error);
+    throw new Error("Failed to analyze exercise. Please try again.");
   }
 };
 
@@ -111,70 +210,75 @@ const refineFoodAI = async (
   originalFat: number,
   refinementText: string
 ): Promise<NutritionData> => {
-  console.log('Refining food entry with AI (structured)...');
+  console.log("Refining food entry via OpenAI...");
   try {
-    const result = await generateObject({
+    const data = await postChat({
+      model: MODEL,
       messages: [
         {
-          role: 'user',
-          content: `You are a nutrition expert. The user logged "${originalName}" with ${originalCalories} cal, ${originalProtein}g protein, ${originalCarbs}g carbs, ${originalFat}g fat. They want to refine it with: "${refinementText}". Provide updated nutritional estimates.`,
+          role: "user",
+          content: `You are a nutrition expert. The user logged "${originalName}" with ${originalCalories} cal, ${originalProtein}g protein, ${originalCarbs}g carbs, ${originalFat}g fat. They want to refine it with: "${refinementText}". Return updated nutrition estimates.`,
         },
       ],
-      schema: NutritionSchema,
+      response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
     });
-    console.log('Food refinement result:', JSON.stringify(result));
+    const parsed = parseJson<NutritionData>(extractText(data));
     return {
-      name: result.name || originalName,
-      calories: Math.round(result.calories),
-      protein: Math.round(result.protein),
-      carbs: Math.round(result.carbs),
-      fat: Math.round(result.fat),
+      name: parsed.name || originalName,
+      calories: Math.round(parsed.calories),
+      protein: Math.round(parsed.protein),
+      carbs: Math.round(parsed.carbs),
+      fat: Math.round(parsed.fat),
     };
   } catch (error: any) {
-    console.error('refineFoodAI failed:', error?.message || error);
-    throw new Error('Failed to refine food entry. Please try again.');
+    console.error("refineFoodAI failed:", error?.message ?? error);
+    throw new Error("Failed to refine food entry. Please try again.");
   }
 };
 
 const callOpenAI = async (prompt: string): Promise<string> => {
   try {
-    console.log('Calling AI via Rork toolkit...');
-    const response = await generateText({
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    console.log("Calling OpenAI text...");
+    const data = await postChat({
+      model: MODEL,
+      messages: [{ role: "user", content: prompt }],
     });
-    return response;
+    return extractText(data);
   } catch (error: any) {
-    console.error('AI call failed:', error);
+    console.error("callOpenAI failed:", error?.message ?? error);
     throw error;
   }
 };
 
-const callOpenAIWithVision = async (prompt: string, base64Image: string): Promise<string> => {
+const callOpenAIWithVision = async (
+  prompt: string,
+  base64Image: string
+): Promise<string> => {
   try {
-    console.log('Calling AI vision via Rork toolkit...');
-    const response = await generateText({
+    console.log("Calling OpenAI vision...");
+    const data = await postChat({
+      model: MODEL,
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: [
-            { type: 'text', text: prompt },
-            { type: 'image', image: `data:image/jpeg;base64,${base64Image}` },
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: { url: `data:image/jpeg;base64,${base64Image}` },
+            },
           ],
         },
       ],
     });
-    return response;
+    return extractText(data);
   } catch (error: any) {
-    console.error('AI vision call failed:', error);
+    console.error("callOpenAIWithVision failed:", error?.message ?? error);
     throw error;
   }
 };
 
+export type { NutritionData, ExerciseData, Message };
 export {
   analyzeFood,
   analyzeFoodImage,
