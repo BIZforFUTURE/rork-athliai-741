@@ -11,6 +11,7 @@ import {
   Animated,
   Alert,
   Switch,
+  Linking,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
@@ -39,6 +40,10 @@ import { useNotifications } from '@/providers/NotificationProvider';
 import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { getVideoUrlForExercise } from '@/utils/videoUrls';
 import { useLanguage } from '@/providers/LanguageProvider';
+import * as StoreReview from 'expo-store-review';
+
+const APP_STORE_ID = '0000000000';
+const ANDROID_PACKAGE = 'app.rork.athliai';
 
 const HERO_VIDEO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/qiqsr7sy559z2lkqdcyfd.mov';
 
@@ -911,8 +916,29 @@ Return ONLY valid JSON.`;
     }
   }, [step, fitnessGoal, fitnessLevel, weightVal, isMetric, heightCm, heightFt, heightIn, equipmentAccess, workoutTime, physicalLimitations, selectedDays, customGoals]);
 
-  const handleRateApp = () => {
+  const handleRateApp = async () => {
     hapticMedium();
+    try {
+      const isAvailable = await StoreReview.isAvailableAsync();
+      const hasAction = await StoreReview.hasAction();
+      if (isAvailable && hasAction) {
+        await StoreReview.requestReview();
+      } else {
+        const storeUrl = Platform.select({
+          ios: `itms-apps://itunes.apple.com/app/id${APP_STORE_ID}?action=write-review`,
+          android: `market://details?id=${ANDROID_PACKAGE}`,
+          default: `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`,
+        });
+        if (storeUrl) {
+          const canOpen = await Linking.canOpenURL(storeUrl);
+          if (canOpen) {
+            await Linking.openURL(storeUrl);
+          }
+        }
+      }
+    } catch (e) {
+      console.log('[Review] Failed to request review', e);
+    }
     void generateGymPlan();
   };
 
