@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -48,10 +48,38 @@ export default function PaywallScreen() {
 
   const { annualPackage, monthlyPackage } = useMemo(() => {
     const pkgs = currentOffering?.availablePackages ?? [];
-    const annual =
-      pkgs.find((p) => p.packageType === PACKAGE_TYPE.ANNUAL) ?? null;
+    const matches = (p: PurchasesPackage, kind: "annual" | "monthly") => {
+      const id = p.product.identifier.toLowerCase();
+      const pkgId = p.identifier.toLowerCase();
+      if (kind === "annual") {
+        return (
+          p.packageType === PACKAGE_TYPE.ANNUAL ||
+          pkgId.includes("annual") ||
+          pkgId.includes("yearly") ||
+          id.includes("unlimited") ||
+          id.includes("annual") ||
+          id.includes("yearly") ||
+          id.includes("year")
+        );
+      }
+      return (
+        p.packageType === PACKAGE_TYPE.MONTHLY ||
+        pkgId.includes("monthly") ||
+        id.includes("month_to_month") ||
+        id.includes("month-to-month") ||
+        id.includes("monthly") ||
+        id.includes("month")
+      );
+    };
+    const annual = pkgs.find((p) => matches(p, "annual")) ?? null;
     const monthly =
-      pkgs.find((p) => p.packageType === PACKAGE_TYPE.MONTHLY) ?? null;
+      pkgs.find((p) => p !== annual && matches(p, "monthly")) ?? null;
+    console.log(
+      "[Paywall] Resolved packages — annual:",
+      annual?.product.identifier,
+      "| monthly:",
+      monthly?.product.identifier
+    );
     return { annualPackage: annual, monthlyPackage: monthly };
   }, [currentOffering]);
 
@@ -60,6 +88,14 @@ export default function PaywallScreen() {
 
   const selectedPackage: PurchasesPackage | null =
     selectedPlan === "annual" ? annualPackage : monthlyPackage;
+
+  useEffect(() => {
+    if (selectedPlan === "annual" && !annualPackage && monthlyPackage) {
+      setSelectedPlan("monthly");
+    } else if (selectedPlan === "monthly" && !monthlyPackage && annualPackage) {
+      setSelectedPlan("annual");
+    }
+  }, [annualPackage, monthlyPackage, selectedPlan]);
 
   const handleSelect = (plan: PlanKey) => {
     if (Platform.OS !== "web") {
@@ -70,6 +106,13 @@ export default function PaywallScreen() {
 
   const handlePurchase = async () => {
     if (isPurchasing) return;
+    if (!selectedPackage) {
+      Alert.alert(
+        "Unavailable",
+        "This plan isn't available right now. Please try again later."
+      );
+      return;
+    }
     setIsPurchasing(true);
     if (Platform.OS !== "web") {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -180,26 +223,30 @@ export default function PaywallScreen() {
             ))}
           </View>
 
-          <PlanOption
-            label={t('paywall_annual')}
-            price={annualPrice}
-            period={t('paywall_year')}
-            trial={t('paywall_trial')}
-            badge={t('paywall_save_badge')}
-            selected={selectedPlan === "annual"}
-            onPress={() => handleSelect("annual")}
-            testID="paywall-plan-annual"
-          />
+          {annualPackage ? (
+            <PlanOption
+              label={t('paywall_annual')}
+              price={annualPrice}
+              period={t('paywall_year')}
+              trial={t('paywall_trial')}
+              badge={t('paywall_save_badge')}
+              selected={selectedPlan === "annual"}
+              onPress={() => handleSelect("annual")}
+              testID="paywall-plan-annual"
+            />
+          ) : null}
 
-          <PlanOption
-            label={t('paywall_monthly')}
-            price={monthlyPrice}
-            period={t('paywall_month')}
-            trial={t('paywall_trial')}
-            selected={selectedPlan === "monthly"}
-            onPress={() => handleSelect("monthly")}
-            testID="paywall-plan-monthly"
-          />
+          {monthlyPackage ? (
+            <PlanOption
+              label={t('paywall_monthly')}
+              price={monthlyPrice}
+              period={t('paywall_month')}
+              trial={t('paywall_trial')}
+              selected={selectedPlan === "monthly"}
+              onPress={() => handleSelect("monthly")}
+              testID="paywall-plan-monthly"
+            />
+          ) : null}
 
           <TouchableOpacity
             style={styles.purchaseButton}

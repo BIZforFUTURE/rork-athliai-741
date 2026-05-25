@@ -66,6 +66,18 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
             "packages:",
             offerings.current.availablePackages.length
           );
+          offerings.current.availablePackages.forEach((p) => {
+            console.log(
+              "[RevenueCat] Package:",
+              p.identifier,
+              "| type:",
+              p.packageType,
+              "| product:",
+              p.product.identifier,
+              "| price:",
+              p.product.priceString
+            );
+          });
         } else {
           console.warn("[RevenueCat] No current offering found");
         }
