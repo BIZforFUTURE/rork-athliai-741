@@ -44,7 +44,7 @@ import { getVideoUrlForExercise } from '@/utils/videoUrls';
 import { useLanguage } from '@/providers/LanguageProvider';
 import * as StoreReview from 'expo-store-review';
 
-const APP_STORE_ID = '0000000000';
+const APP_STORE_ID = '6752545980';
 const ANDROID_PACKAGE = 'app.rork.athliai';
 
 const HERO_VIDEO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/qiqsr7sy559z2lkqdcyfd.mov';
