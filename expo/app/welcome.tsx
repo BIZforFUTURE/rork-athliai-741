@@ -643,8 +643,10 @@ Return ONLY valid JSON, no markdown or code blocks.`;
 
       setTimeout(() => {
         markWelcomeAsSeen();
-        router.push('/paywall');
         router.replace('/(tabs)/home');
+        setTimeout(() => {
+          router.push('/paywall');
+        }, 600);
       }, 400);
     } catch (error) {
       console.error('Error generating plan:', error);

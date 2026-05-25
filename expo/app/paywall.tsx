@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
 } from "react-native";
-import Purchases from "react-native-purchases";
+import Purchases, { PACKAGE_TYPE, PurchasesPackage } from "react-native-purchases";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Shield,
   ChevronRight,
+  Check,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -34,16 +35,38 @@ const FEATURES_EN = [
   { icon: Shield, titleKey: 'paywall_unlimited' as const, descKey: 'paywall_unlimited_desc' as const },
 ];
 
+type PlanKey = "annual" | "monthly";
+
 export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const { purchasePackage, restorePurchases, currentOffering, isLoading } =
     useRevenueCat();
   const { t } = useLanguage();
-  const [isPurchasing, setIsPurchasing] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
+  const [isRestoring, setIsRestoring] = useState<boolean>(false);
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey>("annual");
 
-  const annualPackage = currentOffering?.availablePackages?.[0];
-  const priceString = annualPackage?.product?.priceString ?? "$19.99";
+  const { annualPackage, monthlyPackage } = useMemo(() => {
+    const pkgs = currentOffering?.availablePackages ?? [];
+    const annual =
+      pkgs.find((p) => p.packageType === PACKAGE_TYPE.ANNUAL) ?? null;
+    const monthly =
+      pkgs.find((p) => p.packageType === PACKAGE_TYPE.MONTHLY) ?? null;
+    return { annualPackage: annual, monthlyPackage: monthly };
+  }, [currentOffering]);
+
+  const annualPrice = annualPackage?.product?.priceString ?? "$39.99";
+  const monthlyPrice = monthlyPackage?.product?.priceString ?? "$9.99";
+
+  const selectedPackage: PurchasesPackage | null =
+    selectedPlan === "annual" ? annualPackage : monthlyPackage;
+
+  const handleSelect = (plan: PlanKey) => {
+    if (Platform.OS !== "web") {
+      void Haptics.selectionAsync();
+    }
+    setSelectedPlan(plan);
+  };
 
   const handlePurchase = async () => {
     if (isPurchasing) return;
@@ -52,9 +75,8 @@ export default function PaywallScreen() {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
     try {
-      const result = await purchasePackage(annualPackage ?? undefined);
+      const result = await purchasePackage(selectedPackage ?? undefined);
       if (result.success) {
-        console.log("[Paywall] Purchase successful, closing paywall");
         if (router.canGoBack()) {
           router.back();
         }
@@ -158,21 +180,26 @@ export default function PaywallScreen() {
             ))}
           </View>
 
-          <View style={styles.priceCard}>
-            <View style={styles.priceRow}>
-              <View>
-                <Text style={styles.planName}>{t('paywall_annual')}</Text>
-                <Text style={styles.trialText}>{t('paywall_trial')}</Text>
-              </View>
-              <View style={styles.priceRight}>
-                <Text style={styles.priceAmount}>{priceString}</Text>
-                <Text style={styles.pricePeriod}>{t('paywall_year')}</Text>
-              </View>
-            </View>
-            <View style={styles.weeklyBreakdownRow}>
-              <Text style={styles.weeklyBreakdownLabel}>$0.38/week</Text>
-            </View>
-          </View>
+          <PlanOption
+            label={t('paywall_annual')}
+            price={annualPrice}
+            period={t('paywall_year')}
+            trial={t('paywall_trial')}
+            badge={t('paywall_save_badge')}
+            selected={selectedPlan === "annual"}
+            onPress={() => handleSelect("annual")}
+            testID="paywall-plan-annual"
+          />
+
+          <PlanOption
+            label={t('paywall_monthly')}
+            price={monthlyPrice}
+            period={t('paywall_month')}
+            trial={t('paywall_trial')}
+            selected={selectedPlan === "monthly"}
+            onPress={() => handleSelect("monthly")}
+            testID="paywall-plan-monthly"
+          />
 
           <TouchableOpacity
             style={styles.purchaseButton}
@@ -227,6 +254,49 @@ export default function PaywallScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
+  );
+}
+
+interface PlanOptionProps {
+  label: string;
+  price: string;
+  period: string;
+  trial: string;
+  badge?: string;
+  selected: boolean;
+  onPress: () => void;
+  testID?: string;
+}
+
+function PlanOption({ label, price, period, trial, badge, selected, onPress, testID }: PlanOptionProps) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      style={[styles.priceCard, selected && styles.priceCardSelected]}
+      testID={testID}
+    >
+      {badge ? (
+        <View style={styles.badgePill}>
+          <Text style={styles.badgePillText}>{badge}</Text>
+        </View>
+      ) : null}
+      <View style={styles.priceRow}>
+        <View style={styles.priceLeft}>
+          <View style={[styles.radioOuter, selected && styles.radioOuterSelected]}>
+            {selected ? <Check size={14} color="#FFFFFF" /> : null}
+          </View>
+          <View>
+            <Text style={styles.planName}>{label}</Text>
+            <Text style={styles.trialText}>{trial}</Text>
+          </View>
+        </View>
+        <View style={styles.priceRight}>
+          <Text style={styles.priceAmount}>{price}</Text>
+          <Text style={styles.pricePeriod}>{period}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -287,7 +357,7 @@ const styles = StyleSheet.create({
   },
   featuresContainer: {
     width: "100%",
-    marginBottom: 32,
+    marginBottom: 28,
     gap: 20,
   },
   featureRow: {
@@ -323,26 +393,64 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: 18,
     backgroundColor: colors.background.secondary,
-    paddingVertical: 20,
-    paddingHorizontal: 22,
-    borderWidth: 1,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    borderWidth: 1.5,
     borderColor: colors.light.border,
-    marginBottom: 20,
+    marginBottom: 12,
+  },
+  priceCardSelected: {
+    borderColor: colors.accent.sage,
+    backgroundColor: colors.background.primary,
+  },
+  badgePill: {
+    position: "absolute" as const,
+    top: -10,
+    right: 14,
+    backgroundColor: colors.accent.sage,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  badgePillText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "800" as const,
+    letterSpacing: 0.5,
   },
   priceRow: {
     flexDirection: "row" as const,
     justifyContent: "space-between",
     alignItems: "center",
   },
+  priceLeft: {
+    flexDirection: "row" as const,
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: colors.light.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  radioOuterSelected: {
+    backgroundColor: colors.accent.sage,
+    borderColor: colors.accent.sage,
+  },
   planName: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700" as const,
     color: colors.text.primary,
   },
   trialText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.accent.sage,
-    marginTop: 3,
+    marginTop: 2,
     fontWeight: "500" as const,
   },
   priceRight: {
@@ -350,33 +458,21 @@ const styles = StyleSheet.create({
     alignItems: "baseline",
   },
   priceAmount: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: "800" as const,
     color: colors.text.primary,
   },
   pricePeriod: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text.secondary,
     marginLeft: 3,
-  },
-  weeklyBreakdownRow: {
-    flexDirection: "row" as const,
-    justifyContent: "center",
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: colors.light.border,
-  },
-  weeklyBreakdownLabel: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: colors.accent.sage,
   },
   purchaseButton: {
     width: "100%",
     borderRadius: 16,
     backgroundColor: colors.accent.sage,
     paddingVertical: 17,
+    marginTop: 12,
     marginBottom: 16,
     alignItems: "center",
     justifyContent: "center",
