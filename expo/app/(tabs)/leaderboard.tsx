@@ -855,7 +855,7 @@ export default function PersonalStatsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <Modal visible={showImportModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => { setShowImportModal(false); setImportText(''); setImportStatus('idle'); }}>
         <View style={[modalStyles.container, { paddingTop: insets.top }]}>
           <View style={modalStyles.header}>
@@ -1011,13 +1011,6 @@ export default function PersonalStatsScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-      <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-        <View>
-          <Text style={styles.pageTitle}>{t('stats_title')}</Text>
-          <Text style={styles.pageSubtitle}>{t('stats_your_journey')}</Text>
-        </View>
-      </View>
-
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
@@ -1029,6 +1022,12 @@ export default function PersonalStatsScreen() {
           />
         }
       >
+        <View style={styles.topBar}>
+          <View>
+            <Text style={styles.pageTitle}>{t('stats_title')}</Text>
+            <Text style={styles.pageSubtitle}>{t('stats_your_journey')}</Text>
+          </View>
+        </View>
         <AchievementBadges t={t} />
         <PhysicalStatsCard onEdit={() => setShowStatsModal(true)} t={t} isSpanish={isSpanish} />
             <WeightGoalCard onAddWeight={() => setShowWeightModal(true)} t={t} isSpanish={isSpanish} />
@@ -1054,9 +1053,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3EDE4",
   },
   topBar: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    backgroundColor: "#F3EDE4",
+    paddingHorizontal: 4,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
   pageTitle: {
     fontSize: 30,

@@ -816,18 +816,7 @@ export default function RunScreen() {
 
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
-        <View>
-          <Text style={styles.screenTitle}>{t('tab_run')}</Text>
-          <Text style={styles.screenSubtitle}>{t('run_ready')}</Text>
-        </View>
-        <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "20", borderColor: xpInfo.rank.color + "40" }]}>
-          <Zap size={12} color={xpInfo.rank.color} />
-          <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+25 XP</Text>
-        </View>
-      </View>
-
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -842,6 +831,16 @@ export default function RunScreen() {
           />
         }
       >
+        <View style={styles.topBar}>
+          <View>
+            <Text style={styles.screenTitle}>{t('tab_run')}</Text>
+            <Text style={styles.screenSubtitle}>{t('run_ready')}</Text>
+          </View>
+          <View style={[styles.xpChip, { backgroundColor: xpInfo.rank.color + "20", borderColor: xpInfo.rank.color + "40" }]}>
+            <Zap size={12} color={xpInfo.rank.color} />
+            <Text style={[styles.xpChipText, { color: xpInfo.rank.color }]}>+25 XP</Text>
+          </View>
+        </View>
         <View style={styles.timerCard}>
           <View style={styles.timerDialWrap}>
             <View style={styles.timerRing} />
@@ -1223,9 +1222,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3EDE4",
   },
   topBar: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 4,
+    paddingTop: 8,
     paddingBottom: 12,
-    backgroundColor: "#F3EDE4",
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,

@@ -518,16 +518,7 @@ export default function DashboardScreen() {
   const { xpInfo } = useApp();
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.greetingText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{greeting}</Text>
-          <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
-        </View>
-        <View style={styles.levelChip}>
-          <Text style={styles.levelChipText}>Lv {xpInfo.level}</Text>
-        </View>
-      </View>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
@@ -542,6 +533,15 @@ export default function DashboardScreen() {
           />
         }
       >
+        <View style={styles.topBar}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.greetingText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{greeting}</Text>
+            <Text style={styles.subGreeting}>{t('home_keep_leveling')}</Text>
+          </View>
+          <View style={styles.levelChip}>
+            <Text style={styles.levelChipText}>Lv {xpInfo.level}</Text>
+          </View>
+        </View>
         <HeroSection />
         <StreakStrip />
         <DailyQuests />
@@ -567,9 +567,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3EDE4",
   },
   topBar: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    backgroundColor: "#F3EDE4",
+    paddingHorizontal: 4,
+    paddingTop: 12,
+    paddingBottom: 4,
     flexDirection: "row" as const,
     alignItems: "flex-end" as const,
     justifyContent: "space-between" as const,

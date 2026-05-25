@@ -1094,6 +1094,20 @@ Format as JSON:
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#4A7C59"
+            colors={["#4A7C59"]}
+            progressBackgroundColor="#F3EDE4"
+          />
+        }
+      >
       <LinearGradient
         colors={['#F3EDE4', '#EDE7DE', '#F3EDE4']}
         style={styles.header}
@@ -1167,21 +1181,6 @@ Format as JSON:
           )}
         </Animated.View>
       </LinearGradient>
-
-      <ScrollView 
-        style={styles.content} 
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#4A7C59"
-            colors={["#4A7C59"]}
-            progressBackgroundColor="#F3EDE4"
-          />
-        }
-      >
         {!generatedPlan ? (
           <>
             <TouchableOpacity 
@@ -1965,6 +1964,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3EDE4",
   },
   header: {
+    marginHorizontal: -20,
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 20,
