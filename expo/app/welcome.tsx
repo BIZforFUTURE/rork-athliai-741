@@ -32,12 +32,15 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { callOpenAIWithVision, callOpenAI } from '@/utils/openai';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { useApp } from '@/providers/AppProvider';
 import { getStartingLevelFromQuiz } from '@/constants/xp';
 import { useNotifications } from '@/providers/NotificationProvider';
 import { useRevenueCat } from '@/providers/RevenueCatProvider';
 import { getVideoUrlForExercise } from '@/utils/videoUrls';
 import { useLanguage } from '@/providers/LanguageProvider';
+
+const HERO_VIDEO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/qiqsr7sy559z2lkqdcyfd.mov';
 
 const TOTAL_STEPS = 10;
 
@@ -214,6 +217,71 @@ function LoadingScreen({ insets, progress, isSpanish }: { insets: { top: number;
         </View>
         <View style={{ height: 40 }} />
       </ScrollView>
+    </View>
+  );
+}
+
+function HeroSlide({
+  insets,
+  isSpanish,
+  onGetStarted,
+  onSkip,
+  hapticLight,
+  setLanguage,
+}: {
+  insets: { top: number; bottom: number; left: number; right: number };
+  isSpanish: boolean;
+  onGetStarted: () => void;
+  onSkip: () => void;
+  hapticLight: () => void;
+  setLanguage: (lang: string) => void;
+}) {
+  const player = useVideoPlayer(HERO_VIDEO_URL, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.play();
+  });
+
+  return (
+    <View style={[s.flex1, heroStyles.bg, { paddingTop: insets.top }]}>
+      <View style={heroStyles.langRow}>
+        <TouchableOpacity
+          style={heroStyles.langButton}
+          onPress={() => { hapticLight(); setLanguage(isSpanish ? 'en' : 'es'); }}
+          activeOpacity={0.7}
+        >
+          <Text style={heroStyles.langText}>{isSpanish ? 'English' : 'Español'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={heroStyles.phoneContainer}>
+        <View style={heroStyles.phoneFrame}>
+          <VideoView
+            style={heroStyles.phoneVideo}
+            player={player}
+          />
+        </View>
+      </View>
+
+      <View style={heroStyles.textSection}>
+        <Text style={heroStyles.appName}>AthliAI</Text>
+        <Text style={heroStyles.tagline}>
+          {isSpanish ? 'Seguimiento de Fitness Simplificado' : 'Fitness Tracking Made Easy'}
+        </Text>
+      </View>
+
+      <View style={[heroStyles.bottomSection, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
+        <TouchableOpacity style={heroStyles.getStartedBtn} onPress={onGetStarted} activeOpacity={0.85}>
+          <Text style={heroStyles.getStartedText}>
+            {isSpanish ? 'Comenzar' : 'Get Started'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={heroStyles.skipLink} onPress={onSkip} activeOpacity={0.7}>
+          <Text style={heroStyles.skipLinkText}>
+            {isSpanish ? 'Omitir configuración' : 'Skip setup'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -751,52 +819,6 @@ Return ONLY valid JSON.`;
     return <LoadingScreen insets={insets} progress={generationProgress} isSpanish={isSpanish} />;
   }
 
-  const renderHero = () => (
-    <View style={[s.flex1, { backgroundColor: '#FFFFFF', paddingTop: insets.top }]}>
-      <View style={heroStyles.langRow}>
-        <TouchableOpacity
-          style={heroStyles.langButton}
-          onPress={() => { hapticLight(); setLanguage(isSpanish ? 'en' : 'es'); }}
-        >
-          <Text style={heroStyles.langText}>{isSpanish ? 'English' : 'Español'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={heroStyles.content}>
-        <View style={heroStyles.iconWrap}>
-          <View style={heroStyles.iconBg}>
-            <Dumbbell size={48} color="#00ADB5" strokeWidth={2} />
-          </View>
-        </View>
-
-        <Text style={heroStyles.appName}>AthliAI</Text>
-        <View style={heroStyles.underline} />
-
-        <Text style={heroStyles.tagline}>
-          {isSpanish ? 'Tu entrenador personal con IA' : 'Your AI gym coach'}
-        </Text>
-        <Text style={heroStyles.description}>
-          {isSpanish
-            ? 'Planes de entrenamiento personalizados, seguimiento inteligente y resultados reales — todo impulsado por IA.'
-            : 'Personalized workout plans, intelligent tracking, and real results — all powered by AI.'}
-        </Text>
-      </View>
-
-      <View style={[heroStyles.bottomSection, { paddingBottom: Math.max(40, insets.bottom + 20) }]}>
-        <TouchableOpacity style={heroStyles.getStartedBtn} onPress={goNext} activeOpacity={0.85}>
-          <Text style={heroStyles.getStartedText}>
-            {isSpanish ? 'Comenzar' : 'Get Started'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={heroStyles.skipLink} onPress={handleSkip}>
-          <Text style={heroStyles.skipLinkText}>
-            {isSpanish ? 'Omitir configuración' : 'Skip setup'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   const renderSelectionStep = (
     title: string,
     subtitle: string,
@@ -1228,7 +1250,7 @@ Return ONLY valid JSON.`;
     }
   };
 
-  if (step === 0) return renderHero();
+  if (step === 0) return <HeroSlide insets={insets} isSpanish={isSpanish} onGetStarted={goNext} onSkip={handleSkip} hapticLight={hapticLight} setLanguage={setLanguage} />;
 
   const continueLabel = step === 10
     ? (isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
@@ -1286,69 +1308,67 @@ const s = StyleSheet.create({
 });
 
 const heroStyles = StyleSheet.create({
+  bg: {
+    backgroundColor: '#000000',
+  },
   langRow: {
     flexDirection: 'row' as const,
     justifyContent: 'flex-end' as const,
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingBottom: 8,
   },
   langButton: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 20,
   },
   langText: {
-    color: '#6B7280',
+    color: 'rgba(255,255,255,0.65)',
     fontSize: 13,
     fontWeight: '600' as const,
   },
-  content: {
+  phoneContainer: {
     flex: 1,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    paddingHorizontal: 32,
+    paddingHorizontal: 36,
   },
-  iconWrap: {
-    marginBottom: 28,
+  phoneFrame: {
+    width: '100%',
+    aspectRatio: 0.49,
+    borderRadius: 44,
+    overflow: 'hidden' as const,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: '#0D0D0D',
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.06,
+    shadowRadius: 24,
+    elevation: 8,
   },
-  iconBg: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#F0FAFA',
+  phoneVideo: {
+    flex: 1,
+  },
+  textSection: {
     alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    borderWidth: 1,
-    borderColor: '#D1F0F0',
+    paddingHorizontal: 32,
+    paddingBottom: 20,
   },
   appName: {
-    fontSize: 52,
+    fontSize: 46,
     fontWeight: '900' as const,
-    color: '#1A1A2E',
-    letterSpacing: -2,
-    marginBottom: 4,
-  },
-  underline: {
-    width: 64,
-    height: 4,
-    backgroundColor: '#00ADB5',
-    borderRadius: 2,
-    marginBottom: 24,
+    color: '#FFFFFF',
+    letterSpacing: -1.5,
+    marginBottom: 6,
   },
   tagline: {
-    fontSize: 20,
-    fontWeight: '600' as const,
-    color: '#2C2C2C',
+    fontSize: 16,
+    fontWeight: '500' as const,
+    color: 'rgba(255,255,255,0.55)',
     textAlign: 'center' as const,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 15,
-    lineHeight: 23,
-    color: '#7A7A7A',
-    textAlign: 'center' as const,
-    maxWidth: 300,
+    lineHeight: 22,
   },
   bottomSection: {
     paddingHorizontal: 24,
@@ -1356,15 +1376,15 @@ const heroStyles = StyleSheet.create({
   },
   getStartedBtn: {
     width: '100%',
-    backgroundColor: '#1A1A2E',
-    paddingVertical: 18,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 17,
     borderRadius: 50,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
   getStartedText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: '#000000',
+    fontSize: 17,
     fontWeight: '700' as const,
   },
   skipLink: {
@@ -1372,7 +1392,7 @@ const heroStyles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipLinkText: {
-    color: '#9CA3AF',
+    color: 'rgba(255,255,255,0.35)',
     fontSize: 14,
     fontWeight: '500' as const,
   },
