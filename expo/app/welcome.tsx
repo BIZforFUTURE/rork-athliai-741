@@ -243,6 +243,11 @@ export default function WelcomeScreen() {
   const scanPulseAnim = useRef(new Animated.Value(0.4)).current;
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const heightCmRef = useRef<TextInput>(null);
+  const weightRef = useRef<TextInput>(null);
+  const targetWeightRef = useRef<TextInput>(null);
+
   const { markWelcomeAsSeen, updateNutrition, updatePersonalStats, updateCustomWorkoutPlan, setStartingXP } = useApp();
   const { requestPermissions, scheduleAllDailyReminders } = useNotifications();
   useRevenueCat();
@@ -865,33 +870,52 @@ Return ONLY valid JSON.`;
           {isMetric ? (
             <View style={bodyStyles.inputRow}>
               <TextInput
-                style={bodyStyles.input}
+                ref={heightCmRef}
+                style={[bodyStyles.input, focusedField === 'heightCm' && bodyStyles.inputFocused]}
                 value={heightCm}
                 onChangeText={setHeightCm}
                 keyboardType="numeric"
                 placeholder="170"
                 placeholderTextColor="#C4C4C4"
+                selectionColor="#00ADB5"
+                cursorColor="#00ADB5"
+                onFocus={() => setFocusedField('heightCm')}
+                onBlur={() => setFocusedField(null)}
+                returnKeyType="next"
+                onSubmitEditing={() => weightRef.current?.focus()}
               />
               <Text style={bodyStyles.unitLabel}>cm</Text>
             </View>
           ) : (
             <View style={bodyStyles.inputRow}>
               <TextInput
-                style={[bodyStyles.input, { flex: 1 }]}
+                style={[bodyStyles.input, { flex: 1 }, focusedField === 'heightFt' && bodyStyles.inputFocused]}
                 value={heightFt}
                 onChangeText={setHeightFt}
                 keyboardType="numeric"
                 placeholder="5"
                 placeholderTextColor="#C4C4C4"
+                selectionColor="#00ADB5"
+                cursorColor="#00ADB5"
+                onFocus={() => setFocusedField('heightFt')}
+                onBlur={() => setFocusedField(null)}
+                returnKeyType="next"
+                onSubmitEditing={() => weightRef.current?.focus()}
               />
               <Text style={bodyStyles.unitLabel}>ft</Text>
               <TextInput
-                style={[bodyStyles.input, { flex: 1 }]}
+                style={[bodyStyles.input, { flex: 1 }, focusedField === 'heightIn' && bodyStyles.inputFocused]}
                 value={heightIn}
                 onChangeText={setHeightIn}
                 keyboardType="numeric"
                 placeholder="8"
                 placeholderTextColor="#C4C4C4"
+                selectionColor="#00ADB5"
+                cursorColor="#00ADB5"
+                onFocus={() => setFocusedField('heightIn')}
+                onBlur={() => setFocusedField(null)}
+                returnKeyType="next"
+                onSubmitEditing={() => weightRef.current?.focus()}
               />
               <Text style={bodyStyles.unitLabel}>in</Text>
             </View>
@@ -904,12 +928,17 @@ Return ONLY valid JSON.`;
           </Text>
           <View style={bodyStyles.inputRow}>
             <TextInput
-              style={bodyStyles.input}
+              ref={weightRef}
+              style={[bodyStyles.input, focusedField === 'weight' && bodyStyles.inputFocused]}
               value={weightVal}
               onChangeText={setWeightVal}
               keyboardType="numeric"
               placeholder={isMetric ? '75' : '165'}
               placeholderTextColor="#C4C4C4"
+              selectionColor="#00ADB5"
+              cursorColor="#00ADB5"
+              onFocus={() => setFocusedField('weight')}
+              onBlur={() => setFocusedField(null)}
             />
             <Text style={bodyStyles.unitLabel}>{getWeightUnit()}</Text>
           </View>
@@ -952,13 +981,18 @@ Return ONLY valid JSON.`;
 
         <View style={targetStyles.inputWrap}>
           <TextInput
-            style={targetStyles.input}
+            ref={targetWeightRef}
+            style={[targetStyles.input, focusedField === 'targetWeight' && targetStyles.inputFocused]}
             value={targetWeightVal}
             onChangeText={setTargetWeightVal}
             keyboardType="numeric"
             placeholder={isMetric ? '70' : '155'}
             placeholderTextColor="#C4C4C4"
             textAlign="center"
+            selectionColor="#00ADB5"
+            cursorColor="#00ADB5"
+            onFocus={() => setFocusedField('targetWeight')}
+            onBlur={() => setFocusedField(null)}
           />
           <Text style={targetStyles.inputUnit}>{getWeightUnit()}</Text>
         </View>
@@ -1208,9 +1242,9 @@ Return ONLY valid JSON.`;
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={s.flex1}
-        keyboardVerticalOffset={insets.top + 60}
+        keyboardVerticalOffset={insets.top + 56}
       >
         <ScrollView
           contentContainerStyle={stepStyles.scrollContent}
@@ -1218,24 +1252,24 @@ Return ONLY valid JSON.`;
           keyboardShouldPersistTaps="handled"
         >
           {renderStepContent()}
-        </ScrollView>
 
-        <View style={[footerStyles.container, { paddingBottom: Math.max(24, insets.bottom + 12) }]}>
-          <TouchableOpacity
-            style={[footerStyles.continueBtn, !canContinue() && footerStyles.continueBtnDisabled]}
-            onPress={handleContinue}
-            disabled={!canContinue()}
-            activeOpacity={0.85}
-          >
-            <Text style={footerStyles.continueText}>{continueLabel}</Text>
-            {step === 10 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
-          </TouchableOpacity>
-          {step === 4 && !targetWeightVal && (
-            <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
-              <Text style={footerStyles.skipText}>{isSpanish ? 'Omitir' : 'Skip'}</Text>
+          <View style={footerStyles.innerWrap}>
+            <TouchableOpacity
+              style={[footerStyles.continueBtn, !canContinue() && footerStyles.continueBtnDisabled]}
+              onPress={handleContinue}
+              disabled={!canContinue()}
+              activeOpacity={0.85}
+            >
+              <Text style={footerStyles.continueText}>{continueLabel}</Text>
+              {step === 10 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
             </TouchableOpacity>
-          )}
-        </View>
+            {step === 4 && !targetWeightVal && (
+              <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
+                <Text style={footerStyles.skipText}>{isSpanish ? 'Omitir' : 'Skip'}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -1486,8 +1520,12 @@ const bodyStyles = StyleSheet.create({
     color: '#1A1A2E',
     textAlign: 'center' as const,
     minWidth: 80,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EEEEEE',
+  },
+  inputFocused: {
+    borderColor: '#00ADB5',
+    backgroundColor: '#F0FAFA',
   },
   unitLabel: {
     fontSize: 16,
@@ -1535,8 +1573,12 @@ const targetStyles = StyleSheet.create({
     fontWeight: '700' as const,
     color: '#1A1A2E',
     minWidth: 120,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#EEEEEE',
+  },
+  inputFocused: {
+    borderColor: '#00ADB5',
+    backgroundColor: '#F0FAFA',
   },
   inputUnit: {
     fontSize: 18,
@@ -1711,12 +1753,10 @@ const goalsStyles = StyleSheet.create({
 });
 
 const footerStyles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F5F5F5',
+  innerWrap: {
+    paddingTop: 16,
+    paddingBottom: 24,
+    gap: 12,
   },
   continueBtn: {
     width: '100%',
