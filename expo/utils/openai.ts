@@ -6,7 +6,7 @@
 const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY ?? "";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const TEXT_MODEL = "gpt-4o-mini";
-const VISION_MODEL = "gpt-4o";
+const VISION_MODEL = "gpt-4o-mini";
 const MODEL = TEXT_MODEL;
 const REQUEST_TIMEOUT_MS = 45_000;
 
@@ -165,6 +165,7 @@ const requestNutrition = async (
       { role: "system", content: NUTRITION_SYSTEM_PROMPT },
       { role: "user", content: userContent },
     ],
+    max_tokens: 500,
     response_format: { type: "json_schema", json_schema: nutritionJsonSchema },
   });
   const raw = extractText(data);
@@ -209,7 +210,7 @@ const analyzeFoodImage = async (base64Image: string): Promise<NutritionData> => 
       },
       {
         type: "image_url",
-        image_url: { url: `data:image/jpeg;base64,${base64Image}` },
+        image_url: { url: `data:image/jpeg;base64,${base64Image}`, detail: "auto" },
       },
     ]);
   } catch (error: any) {

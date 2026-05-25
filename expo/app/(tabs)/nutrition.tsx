@@ -546,7 +546,7 @@ export default function NutritionScreen() {
     if (cameraRef.current) {
       try {
         setIsAnalyzing(true);
-        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.8, skipProcessing: false, exif: false });
+        const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5, skipProcessing: false, exif: false });
         if (!photo.base64) throw new Error("Failed to capture image data");
         setCapturedImage(photo.base64);
         await analyzeWithAI(photo.base64, true);
