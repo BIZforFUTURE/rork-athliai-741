@@ -1671,12 +1671,12 @@ Format as JSON:
         {generatedPlan && (
           <View style={[styles.modalContainer, { paddingTop: insets.top }]}>
             <View style={styles.modalHeader}>
-              <View>
+              <View style={styles.modalHeaderTitleWrap}>
                 <Text style={styles.modalTitle}>{generatedPlan.name}</Text>
                 <Text style={styles.modalSubtitle}>{generatedPlan.days.length} {t('gym_day_program')}</Text>
               </View>
               <TouchableOpacity
-                style={styles.closeButton}
+                style={styles.confirmButton}
                 onPress={() => {
                   if (Platform.OS !== 'web') {
                     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -1684,7 +1684,7 @@ Format as JSON:
                   setShowCustomPlan(false);
                 }}
               >
-                <X size={24} color="#8E8E93" />
+                <Check size={22} color="#FFFFFF" strokeWidth={3} />
               </TouchableOpacity>
             </View>
 
@@ -2709,6 +2709,19 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 10,
     backgroundColor: "rgba(0,0,0,0.04)",
+  },
+  modalHeaderTitleWrap: {
+    flex: 1,
+    marginRight: 12,
+  },
+  confirmButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#4A7C59",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    flexShrink: 0,
   },
   modalContent: {
     flex: 1,
