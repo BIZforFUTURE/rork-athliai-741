@@ -417,7 +417,109 @@ const callOpenAIWithVision = async (
   }
 };
 
-export type { NutritionData, ExerciseData, TreadmillData, Message };
+type FormAnalysis = {
+  exercise: string;
+  score: number;
+  summary: string;
+  good: string[];
+  fixes: { issue: string; correction: string; severity: "low" | "medium" | "high" }[];
+  cues: string[];
+};
+
+const formAnalysisSchema = {
+  name: "form_analysis",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      exercise: { type: "string" },
+      score: { type: "number", description: "Form score 0-100" },
+      summary: { type: "string", description: "1-2 sentence overall assessment" },
+      good: { type: "array", items: { type: "string" }, description: "Things done well" },
+      fixes: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            issue: { type: "string" },
+            correction: { type: "string" },
+            severity: { type: "string", enum: ["low", "medium", "high"] },
+          },
+          required: ["issue", "correction", "severity"],
+        },
+      },
+      cues: { type: "array", items: { type: "string" }, description: "Short verbal cues to apply next set" },
+    },
+    required: ["exercise", "score", "summary", "good", "fixes", "cues"],
+  },
+};
+
+/**
+ * Analyze exercise form from a sequence of video frames (base64 JPEG strings).
+ * Frames should be sampled across the duration of the lift (e.g. 4-8 frames).
+ */
+const analyzeExerciseForm = async (
+  exerciseName: string,
+  frames: string[]
+): Promise<FormAnalysis> => {
+  if (!frames.length) throw new Error("No video frames provided.");
+  const valid = frames.filter((f) => typeof f === "string" && f.length > 100);
+  if (valid.length === 0) throw new Error("Could not read the video. Try a shorter clip.");
+
+  console.log(`[FormCheck] analyze "${exerciseName}" with ${valid.length} frames`);
+
+  const imageParts: ImageUrlPart[] = valid.map((f) => ({
+    type: "image_url",
+    image_url: { url: `data:image/jpeg;base64,${f}`, detail: "low" },
+  }));
+
+  const userContent: (TextPart | ImageUrlPart)[] = [
+    {
+      type: "text",
+      text: `These frames were sampled in order from a video of someone performing: ${exerciseName}.
+Analyze the lifter's form across the full rep. Look at posture, joint angles, bar/limb path, depth, range of motion, tempo, and any compensations.
+Return a JSON object matching the schema with: exercise name, overall score 0-100, short summary, 2-4 things they're doing well, 1-4 prioritized fixes (with severity), and 2-3 short verbal cues to apply on the next set.
+If no person is visible in the frames, set score=0 and summary="No person detected" and leave arrays empty.`,
+    },
+    ...imageParts,
+  ];
+
+  try {
+    const data = await postChat({
+      model: VISION_MODEL,
+      temperature: 0.2,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a strength coach and movement specialist who critiques exercise form from video. Be specific, technical, and actionable. Never refuse. Only return the JSON object that matches the schema.",
+        },
+        { role: "user", content: userContent },
+      ],
+      max_tokens: 900,
+      response_format: { type: "json_schema", json_schema: formAnalysisSchema },
+    });
+    const raw = extractText(data);
+    if (!raw) throw new Error("Empty response from AI");
+    const parsed = parseJson<FormAnalysis>(raw);
+    return {
+      exercise: parsed.exercise || exerciseName,
+      score: Math.max(0, Math.min(100, Math.round(Number(parsed.score) || 0))),
+      summary: parsed.summary || "",
+      good: Array.isArray(parsed.good) ? parsed.good.slice(0, 6) : [],
+      fixes: Array.isArray(parsed.fixes) ? parsed.fixes.slice(0, 6) : [],
+      cues: Array.isArray(parsed.cues) ? parsed.cues.slice(0, 5) : [],
+    };
+  } catch (error: any) {
+    const msg = error?.message ?? String(error);
+    console.error("[FormCheck] failed:", msg);
+    throw new Error(`Form analysis failed: ${msg}`);
+  }
+};
+
+export type { NutritionData, ExerciseData, TreadmillData, Message, FormAnalysis };
 export {
   analyzeFood,
   analyzeFoodImage,
@@ -426,4 +528,5 @@ export {
   callOpenAI,
   callOpenAIWithVision,
   parseTreadmillPhoto,
+  analyzeExerciseForm,
 };

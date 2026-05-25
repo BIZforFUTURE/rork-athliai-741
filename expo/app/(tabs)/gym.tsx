@@ -34,7 +34,6 @@ import {
   RotateCcw,
   Moon,
   Sun,
-  Trophy,
 } from "lucide-react-native";
 import { useApp } from "@/providers/AppProvider";
 import { useRevenueCat } from "@/providers/RevenueCatProvider";
@@ -1338,33 +1337,28 @@ Format as JSON:
         )}
 
         <TouchableOpacity
-          style={styles.dailyChallengeButton}
+          style={styles.formCheckCard}
           activeOpacity={0.85}
           onPress={() => {
             if (Platform.OS !== 'web') {
               void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             }
-            router.push('/daily-challenge');
+            if (!isPremium) {
+              router.push('/paywall');
+              return;
+            }
+            router.push('/form-check');
           }}
-          testID="daily-challenge-btn"
+          testID="form-check-btn"
         >
-          <LinearGradient
-            colors={['#C4654E', '#A8503D']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.dailyChallengeGradient}
-          >
-            <View style={styles.dailyChallengeIcon}>
-              <Trophy size={22} color="#FFFFFF" />
-            </View>
-            <View style={styles.dailyChallengeText}>
-              <Text style={styles.dailyChallengeTitle}>{t('daily_challenge_title' as any)}</Text>
-              <Text style={styles.dailyChallengeSub}>{t('daily_challenge_subtitle' as any)}</Text>
-            </View>
-            <View style={styles.dailyChallengeArrow}>
-              <ArrowRight size={18} color="rgba(255,255,255,0.7)" />
-            </View>
-          </LinearGradient>
+          <View style={styles.formCheckIcon}>
+            <Sparkles size={20} color="#4A7C59" strokeWidth={2.2} />
+          </View>
+          <View style={styles.formCheckText}>
+            <Text style={styles.formCheckTitle}>AI Form Check</Text>
+            <Text style={styles.formCheckSub}>Search an exercise & analyze your form</Text>
+          </View>
+          <ChevronRight size={20} color="#4A7C59" />
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
@@ -3134,49 +3128,38 @@ const styles = StyleSheet.create({
   smallCtaRow: {
     marginTop: 14,
   },
-  dailyChallengeButton: {
+  formCheckCard: {
     marginTop: 14,
-    borderRadius: 16,
-    overflow: 'hidden' as const,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  dailyChallengeGradient: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    padding: 16,
+    backgroundColor: "#FEFCF9",
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     gap: 12,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
   },
-  dailyChallengeIcon: {
+  formCheckIcon: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
+    borderRadius: 12,
+    backgroundColor: "rgba(74,124,89,0.12)",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
   },
-  dailyChallengeText: {
+  formCheckText: {
     flex: 1,
   },
-  dailyChallengeTitle: {
+  formCheckTitle: {
     fontSize: 16,
-    fontWeight: '700' as const,
-    color: '#FFFFFF',
+    fontWeight: "700" as const,
+    color: "#2C2C2C",
     marginBottom: 2,
   },
-  dailyChallengeSub: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
-  },
-  dailyChallengeArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
+  formCheckSub: {
+    fontSize: 12.5,
+    color: "#A8A8A0",
   },
 });
