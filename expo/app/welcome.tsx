@@ -42,7 +42,7 @@ import { useLanguage } from '@/providers/LanguageProvider';
 
 const HERO_VIDEO_URL = 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/qiqsr7sy559z2lkqdcyfd.mov';
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 11;
 
 const LOADING_STEPS_EN = [
   { label: 'Analyzing your goals', icon: Target },
@@ -291,6 +291,100 @@ function HeroSlide({
         <TouchableOpacity style={heroStyles.skipLink} onPress={onSkip} activeOpacity={0.7}>
           <Text style={heroStyles.skipLinkText}>
             {isSpanish ? 'Omitir configuración' : 'Skip setup'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+function ReviewSlide({
+  insets,
+  isSpanish,
+  onRateApp,
+  onMaybeLater,
+  hapticLight,
+}: {
+  insets: { top: number; bottom: number; left: number; right: number };
+  isSpanish: boolean;
+  onRateApp: () => void;
+  onMaybeLater: () => void;
+  hapticLight: () => void;
+}) {
+  const starAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
+  const scaleAnim = useRef(new Animated.Value(0.85)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(scaleAnim, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true }),
+      Animated.timing(opacityAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+    ]).start();
+
+    const starEntrances = starAnims.map((anim, i) =>
+      Animated.spring(anim, {
+        toValue: 1,
+        friction: 4,
+        tension: 80,
+        delay: 150 + i * 80,
+        useNativeDriver: true,
+      })
+    );
+    Animated.stagger(80, starEntrances).start();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <View style={[s.flex1, reviewStyles.bg, { paddingTop: insets.top }]}>
+      <View style={reviewStyles.content}>
+        <Animated.View style={[reviewStyles.starsRow, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
+          {starAnims.map((anim, i) => (
+            <Animated.View
+              key={i}
+              style={{
+                transform: [{ scale: anim }, { rotate: anim.interpolate({ inputRange: [0, 1], outputRange: ['-30deg', '0deg'] }) }],
+                opacity: anim,
+              }}
+            >
+              <View style={reviewStyles.star}>
+                <Text style={reviewStyles.starEmoji}>⭐</Text>
+              </View>
+            </Animated.View>
+          ))}
+        </Animated.View>
+
+        <Animated.View style={{ opacity: opacityAnim }}>
+          <Text style={reviewStyles.title}>
+            {isSpanish ? '¿Disfrutando AthliAI?' : 'Enjoying AthliAI?'}
+          </Text>
+          <Text style={reviewStyles.subtitle}>
+            {isSpanish ? 'Ayúdanos a crecer' : 'Help Us Grow'}
+          </Text>
+          <Text style={reviewStyles.description}>
+            {isSpanish
+              ? 'Una calificación de 5 estrellas significa mucho para nosotros y ayuda a otros atletas a descubrir AthliAI.'
+              : 'A 5-star rating means the world to us and helps other athletes discover AthliAI.'}
+          </Text>
+        </Animated.View>
+      </View>
+
+      <View style={[reviewStyles.bottomSection, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
+        <TouchableOpacity
+          style={reviewStyles.rateBtn}
+          onPress={() => { hapticLight(); onRateApp(); }}
+          activeOpacity={0.85}
+        >
+          <Text style={reviewStyles.rateBtnText}>
+            {isSpanish ? 'Calificar 5 Estrellas' : 'Rate 5 Stars'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={reviewStyles.laterBtn}
+          onPress={() => { hapticLight(); onMaybeLater(); }}
+          activeOpacity={0.7}
+        >
+          <Text style={reviewStyles.laterBtnText}>
+            {isSpanish ? 'Quizás más tarde' : 'Maybe Later'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -812,13 +906,29 @@ Return ONLY valid JSON.`;
       case 8: return true;
       case 9: return selectedDays.length > 0;
       case 10: return !!customGoals.trim();
+      case 11: return true;
       default: return true;
     }
   }, [step, fitnessGoal, fitnessLevel, weightVal, isMetric, heightCm, heightFt, heightIn, equipmentAccess, workoutTime, physicalLimitations, selectedDays, customGoals]);
 
+  const handleRateApp = () => {
+    hapticMedium();
+    void generateGymPlan();
+  };
+
+  const handleMaybeLater = () => {
+    hapticLight();
+    void generateGymPlan();
+  };
+
   const handleContinue = useCallback(() => {
     if (!canContinue()) return;
     if (step === 10) {
+      hapticMedium();
+      goNext();
+      return;
+    }
+    if (step === 11) {
       hapticMedium();
       void generateGymPlan();
       return;
@@ -1264,8 +1374,12 @@ Return ONLY valid JSON.`;
 
   if (step === 0) return <HeroSlide insets={insets} isSpanish={isSpanish} onGetStarted={goNext} onSkip={handleSkip} hapticLight={hapticLight} setLanguage={setLanguage} />;
 
+  if (step === 11) return <ReviewSlide insets={insets} isSpanish={isSpanish} onRateApp={handleRateApp} onMaybeLater={handleMaybeLater} hapticLight={hapticLight} />;
+
   const continueLabel = step === 10
-    ? (isSpanish ? 'Crear Mi Plan' : 'Create My Plan')
+    ? (isSpanish ? 'Continuar' : 'Continue')
+    : step === 11
+    ? (isSpanish ? 'Calificar 5 Estrellas' : 'Rate 5 Stars')
     : (isSpanish ? 'Continuar' : 'Continue');
 
   return (
@@ -2042,5 +2156,94 @@ const loadingStyles = StyleSheet.create({
     fontSize: 14,
     color: '#7A7A7A',
     lineHeight: 22,
+  },
+});
+
+const reviewStyles = StyleSheet.create({
+  bg: {
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: 36,
+  },
+  starsRow: {
+    flexDirection: 'row' as const,
+    justifyContent: 'center' as const,
+    gap: 10,
+    marginBottom: 32,
+  },
+  star: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFF8E1',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  starEmoji: {
+    fontSize: 28,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700' as const,
+    color: '#1A1A2E',
+    textAlign: 'center' as const,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 17,
+    fontWeight: '600' as const,
+    color: '#00ADB5',
+    textAlign: 'center' as const,
+    marginBottom: 16,
+  },
+  description: {
+    fontSize: 14,
+    color: '#7A7A7A',
+    textAlign: 'center' as const,
+    lineHeight: 22,
+    paddingHorizontal: 8,
+  },
+  bottomSection: {
+    paddingHorizontal: 36,
+    alignItems: 'center' as const,
+  },
+  rateBtn: {
+    width: '100%',
+    backgroundColor: '#1A1A2E',
+    paddingVertical: 18,
+    borderRadius: 50,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    flexDirection: 'row' as const,
+    shadowColor: '#1A1A2E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  rateBtnText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700' as const,
+  },
+  laterBtn: {
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center' as const,
+  },
+  laterBtnText: {
+    color: '#9CA3AF',
+    fontSize: 15,
+    fontWeight: '500' as const,
   },
 });
