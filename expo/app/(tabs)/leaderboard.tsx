@@ -104,19 +104,19 @@ function AchievementBadges({ t }: { t: (key: any, params?: Record<string, string
         {BADGES.map((badge) => {
           const earned = badge.requirement(badgeStats);
           return (
-            <View key={badge.id} style={[badgeStyles.cell, earned && { borderColor: badge.color + '25' }]}>
+            <View key={badge.id} style={[badgeStyles.cell, earned && { borderColor: 'rgba(16,185,129,0.35)', backgroundColor: 'rgba(16,185,129,0.06)' }]}>
               <View style={[
                 badgeStyles.emojiWrap,
-                { backgroundColor: earned ? badge.color + '15' : 'rgba(0,0,0,0.03)' },
+                { backgroundColor: earned ? '#10B981' : 'rgba(0,0,0,0.03)' },
               ]}>
                 {earned ? (
-                  <Text style={badgeStyles.emoji}>{badge.emoji}</Text>
+                  <Check size={22} color="#FFFFFF" strokeWidth={3.5} />
                 ) : (
                   <Lock size={16} color="#C2BDB4" />
                 )}
               </View>
               <Text style={[badgeStyles.title, earned && { color: '#2C2C2C' }]} numberOfLines={1}>{t(badge.titleKey)}</Text>
-              <Text style={[badgeStyles.desc, earned && { color: badge.color }]} numberOfLines={1}>{t(badge.descKey)}</Text>
+              <Text style={[badgeStyles.desc, earned && { color: '#10B981', fontWeight: '700' as const }]} numberOfLines={1}>{t(badge.descKey)}</Text>
             </View>
           );
         })}
