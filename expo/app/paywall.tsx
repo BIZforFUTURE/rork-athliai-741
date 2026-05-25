@@ -193,7 +193,7 @@ export default function PaywallScreen() {
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 },
+            { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 40 },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
