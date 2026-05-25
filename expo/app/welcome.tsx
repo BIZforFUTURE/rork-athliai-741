@@ -29,6 +29,8 @@ import {
   TrendingUp,
   Flame,
   Shield,
+  Star,
+  MessageSquareText,
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -316,73 +318,162 @@ function ReviewSlide({
   onMaybeLater: () => void;
   hapticLight: () => void;
 }) {
-  const starAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
-  const scaleAnim = useRef(new Animated.Value(0.85)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const [userRating, setUserRating] = useState(0);
+  const starScaleAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
+  const cardScale = useRef(new Animated.Value(0.92)).current;
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+  const messageOpacity = useRef(new Animated.Value(0)).current;
+  const messageTranslateY = useRef(new Animated.Value(12)).current;
+  const selectedStarPulse = useRef(new Animated.Value(1)).current;
+
+  const isPositive = userRating >= 4;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(scaleAnim, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true }),
-      Animated.timing(opacityAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.spring(cardScale, { toValue: 1, friction: 6, tension: 50, useNativeDriver: true }),
+      Animated.timing(cardOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
     ]).start();
 
-    const starEntrances = starAnims.map((anim, i) =>
+    const entrances = starScaleAnims.map((anim, i) =>
       Animated.spring(anim, {
         toValue: 1,
-        friction: 4,
-        tension: 80,
-        delay: 150 + i * 80,
+        friction: 5,
+        tension: 70,
+        delay: 180 + i * 60,
         useNativeDriver: true,
       })
     );
-    Animated.stagger(80, starEntrances).start();
+    Animated.stagger(60, entrances).start();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (userRating > 0) {
+      Animated.parallel([
+        Animated.spring(selectedStarPulse, { toValue: 1.15, friction: 3, tension: 100, useNativeDriver: true }),
+        Animated.timing(messageOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+        Animated.timing(messageTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+      ]).start(() => {
+        Animated.spring(selectedStarPulse, { toValue: 1, friction: 4, tension: 60, useNativeDriver: true }).start();
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userRating]);
+
+  const handleStarTap = (rating: number) => {
+    hapticLight();
+    setUserRating(rating);
+    Animated.sequence([
+      Animated.timing(starScaleAnims[rating - 1], { toValue: 0.7, duration: 60, useNativeDriver: true }),
+      Animated.spring(starScaleAnims[rating - 1], { toValue: 1, friction: 3, tension: 120, useNativeDriver: true }),
+    ]).start();
+  };
 
   return (
     <View style={[s.flex1, reviewStyles.bg, { paddingTop: insets.top }]}>
       <View style={reviewStyles.content}>
-        <Animated.View style={[reviewStyles.starsRow, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
-          {starAnims.map((anim, i) => (
-            <Animated.View
-              key={i}
-              style={{
-                transform: [{ scale: anim }, { rotate: anim.interpolate({ inputRange: [0, 1], outputRange: ['-30deg', '0deg'] }) }],
-                opacity: anim,
-              }}
-            >
-              <View style={reviewStyles.star}>
-                <Text style={reviewStyles.starEmoji}>⭐</Text>
-              </View>
-            </Animated.View>
-          ))}
-        </Animated.View>
+        <Animated.View style={[
+          reviewStyles.card,
+          { transform: [{ scale: cardScale }], opacity: cardOpacity },
+        ]}>
+          <View style={reviewStyles.appIconWrap}>
+            <View style={reviewStyles.appIconInner}>
+              <Dumbbell size={28} color="#4A7C59" strokeWidth={2.5} />
+            </View>
+          </View>
 
-        <Animated.View style={{ opacity: opacityAnim }}>
           <Text style={reviewStyles.title}>
             {isSpanish ? '¿Disfrutando AthliAI?' : 'Enjoying AthliAI?'}
           </Text>
-          <Text style={reviewStyles.subtitle}>
-            {isSpanish ? 'Ayúdanos a crecer' : 'Help Us Grow'}
-          </Text>
-          <Text style={reviewStyles.description}>
-            {isSpanish
-              ? 'Una calificación de 5 estrellas significa mucho para nosotros y ayuda a otros atletas a descubrir AthliAI.'
-              : 'A 5-star rating means the world to us and helps other athletes discover AthliAI.'}
-          </Text>
+
+          <View style={reviewStyles.starsRow}>
+            {[1, 2, 3, 4, 5].map((star) => {
+              const filled = star <= userRating;
+              return (
+                <Animated.View
+                  key={star}
+                  style={{
+                    transform: [
+                      { scale: starScaleAnims[star - 1] },
+                      ...(star === userRating ? [{ scale: selectedStarPulse }] : []),
+                    ],
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => handleStarTap(star)}
+                    activeOpacity={0.7}
+                    style={reviewStyles.starBtn}
+                  >
+                    <Star
+                      size={40}
+                      color={filled ? '#F59E0B' : '#E0D8CC'}
+                      fill={filled ? '#F59E0B' : 'transparent'}
+                      strokeWidth={1.8}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            })}
+          </View>
+
+          {userRating > 0 && (
+            <Animated.View style={{
+              opacity: messageOpacity,
+              transform: [{ translateY: messageTranslateY }],
+              alignItems: 'center' as const,
+            }}>
+              {isPositive ? (
+                <>
+                  <Text style={reviewStyles.responseTitle}>
+                    {isSpanish ? '¡Genial! 🎉' : 'Amazing! 🎉'}
+                  </Text>
+                  <Text style={reviewStyles.responseSub}>
+                    {isSpanish
+                      ? 'Nos encanta que estés disfrutando AthliAI. ¿Nos ayudarías compartiendo tu experiencia?'
+                      : 'We love that you\'re enjoying AthliAI. Would you help us by sharing your experience?'}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={reviewStyles.responseTitle}>
+                    {isSpanish ? 'Gracias por tu feedback' : 'Thanks for your feedback'}
+                  </Text>
+                  <Text style={reviewStyles.responseSub}>
+                    {isSpanish
+                      ? 'Queremos mejorar para ti. Cuéntanos qué podemos hacer mejor.'
+                      : 'We want to improve for you. Tell us what we can do better.'}
+                  </Text>
+                </>
+              )}
+            </Animated.View>
+          )}
         </Animated.View>
       </View>
 
       <View style={[reviewStyles.bottomSection, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
-        <TouchableOpacity
-          style={reviewStyles.rateBtn}
-          onPress={() => { hapticLight(); onRateApp(); }}
-          activeOpacity={0.85}
-        >
-          <Text style={reviewStyles.rateBtnText}>
-            {isSpanish ? 'Calificar 5 Estrellas' : 'Rate 5 Stars'}
-          </Text>
-        </TouchableOpacity>
+        {userRating > 0 && (
+          <TouchableOpacity
+            style={[reviewStyles.rateBtn, !isPositive && reviewStyles.feedbackBtn]}
+            onPress={() => { hapticLight(); if (isPositive) onRateApp(); else onMaybeLater(); }}
+            activeOpacity={0.85}
+          >
+            {isPositive ? (
+              <>
+                <Star size={18} color="#FFFFFF" fill="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={reviewStyles.rateBtnText}>
+                  {isSpanish ? 'Calificar en App Store' : 'Rate on App Store'}
+                </Text>
+              </>
+            ) : (
+              <>
+                <MessageSquareText size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={reviewStyles.rateBtnText}>
+                  {isSpanish ? 'Enviar Comentarios' : 'Send Feedback'}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={reviewStyles.laterBtn}
           onPress={() => { hapticLight(); onMaybeLater(); }}
@@ -1402,11 +1493,7 @@ Return ONLY valid JSON.`;
 
   if (step === 11) return <ReviewSlide insets={insets} isSpanish={isSpanish} onRateApp={handleRateApp} onMaybeLater={handleMaybeLater} hapticLight={hapticLight} />;
 
-  const continueLabel = step === 10
-    ? (isSpanish ? 'Continuar' : 'Continue')
-    : step === 11
-    ? (isSpanish ? 'Calificar 5 Estrellas' : 'Rate 5 Stars')
-    : (isSpanish ? 'Continuar' : 'Continue');
+  const continueLabel = isSpanish ? 'Continuar' : 'Continue';
 
   return (
     <View style={[s.flex1, { backgroundColor: '#FFFFFF', paddingTop: insets.top }]}>
@@ -2187,78 +2274,98 @@ const loadingStyles = StyleSheet.create({
 
 const reviewStyles = StyleSheet.create({
   bg: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAF8F5',
   },
   content: {
     flex: 1,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    paddingHorizontal: 36,
+    paddingHorizontal: 28,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    paddingVertical: 36,
+    paddingHorizontal: 24,
+    alignItems: 'center' as const,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 32,
+    elevation: 4,
+  },
+  appIconWrap: {
+    marginBottom: 24,
+  },
+  appIconInner: {
+    width: 68,
+    height: 68,
+    borderRadius: 18,
+    backgroundColor: '#EDF5EF',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: '#4A7C59',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: '#1A1A2E',
+    textAlign: 'center' as const,
+    marginBottom: 28,
   },
   starsRow: {
     flexDirection: 'row' as const,
     justifyContent: 'center' as const,
-    gap: 10,
-    marginBottom: 32,
+    gap: 8,
+    marginBottom: 24,
   },
-  star: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FFF8E1',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+  starBtn: {
+    padding: 6,
   },
-  starEmoji: {
-    fontSize: 28,
-  },
-  title: {
-    fontSize: 26,
+  responseTitle: {
+    fontSize: 18,
     fontWeight: '700' as const,
     color: '#1A1A2E',
     textAlign: 'center' as const,
     marginBottom: 8,
   },
-  subtitle: {
-    fontSize: 17,
-    fontWeight: '600' as const,
-    color: '#00ADB5',
-    textAlign: 'center' as const,
-    marginBottom: 16,
-  },
-  description: {
+  responseSub: {
     fontSize: 14,
-    color: '#7A7A7A',
+    color: '#6B7280',
     textAlign: 'center' as const,
-    lineHeight: 22,
-    paddingHorizontal: 8,
+    lineHeight: 21,
+    paddingHorizontal: 4,
   },
   bottomSection: {
-    paddingHorizontal: 36,
+    paddingHorizontal: 28,
     alignItems: 'center' as const,
   },
   rateBtn: {
     width: '100%',
-    backgroundColor: '#1A1A2E',
-    paddingVertical: 18,
+    backgroundColor: '#4A7C59',
+    paddingVertical: 16,
     borderRadius: 50,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     flexDirection: 'row' as const,
+    shadowColor: '#4A7C59',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 5,
+  },
+  feedbackBtn: {
+    backgroundColor: '#1A1A2E',
     shadowColor: '#1A1A2E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
   },
   rateBtnText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700' as const,
   },
   laterBtn: {
