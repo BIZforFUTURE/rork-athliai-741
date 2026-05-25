@@ -1015,8 +1015,9 @@ Return ONLY valid JSON.`;
       if (isAvailable && hasAction) {
         await StoreReview.requestReview();
       } else {
+        const hasRealIosId = APP_STORE_ID !== '0000000000' && APP_STORE_ID.length > 0;
         const storeUrl = Platform.select({
-          ios: `itms-apps://itunes.apple.com/app/id${APP_STORE_ID}?action=write-review`,
+          ios: hasRealIosId ? `itms-apps://itunes.apple.com/app/id${APP_STORE_ID}?action=write-review` : undefined,
           android: `market://details?id=${ANDROID_PACKAGE}`,
           default: `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`,
         });
@@ -1024,7 +1025,11 @@ Return ONLY valid JSON.`;
           const canOpen = await Linking.canOpenURL(storeUrl);
           if (canOpen) {
             await Linking.openURL(storeUrl);
+          } else {
+            console.log('[Review] Store URL not openable, skipping', storeUrl);
           }
+        } else {
+          console.log('[Review] No real App Store ID set yet, skipping store fallback');
         }
       }
     } catch (e) {
