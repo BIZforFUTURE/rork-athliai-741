@@ -1157,7 +1157,7 @@ Return ONLY valid JSON.`;
       </Text>
 
       <TextInput
-        style={goalsStyles.textArea}
+        style={[goalsStyles.textArea, focusedField === 'goals' && goalsStyles.textAreaFocused]}
         multiline
         numberOfLines={4}
         placeholder={
@@ -1169,6 +1169,10 @@ Return ONLY valid JSON.`;
         value={customGoals}
         onChangeText={setCustomGoals}
         textAlignVertical="top"
+        selectionColor="#00ADB5"
+        cursorColor="#00ADB5"
+        onFocus={() => setFocusedField('goals')}
+        onBlur={() => setFocusedField(null)}
       />
     </View>
   );
@@ -1756,12 +1760,16 @@ const goalsStyles = StyleSheet.create({
     minHeight: 120,
     lineHeight: 24,
   },
+  textAreaFocused: {
+    borderColor: '#00ADB5',
+    backgroundColor: '#F0FAFA',
+  },
 });
 
 const footerStyles = StyleSheet.create({
   innerWrap: {
     paddingTop: 16,
-    paddingBottom: 24,
+    paddingBottom: 8,
     gap: 12,
   },
   continueBtn: {
