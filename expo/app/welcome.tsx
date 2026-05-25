@@ -259,6 +259,10 @@ function HeroSlide({
           <VideoView
             style={heroStyles.phoneVideo}
             player={player}
+            nativeControls={false}
+            contentFit="cover"
+            allowsFullscreen={false}
+            allowsPictureInPicture={false}
           />
         </View>
       </View>
@@ -1309,7 +1313,7 @@ const s = StyleSheet.create({
 
 const heroStyles = StyleSheet.create({
   bg: {
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
   },
   langRow: {
     flexDirection: 'row' as const,
@@ -1320,11 +1324,11 @@ const heroStyles = StyleSheet.create({
   langButton: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: '#F2F2F4',
     borderRadius: 20,
   },
   langText: {
-    color: 'rgba(255,255,255,0.65)',
+    color: '#1A1A2E',
     fontSize: 13,
     fontWeight: '600' as const,
   },
@@ -1332,21 +1336,23 @@ const heroStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    paddingHorizontal: 36,
+    paddingHorizontal: 48,
+    paddingTop: 8,
+    paddingBottom: 24,
   },
   phoneFrame: {
     width: '100%',
     aspectRatio: 0.49,
     borderRadius: 44,
     overflow: 'hidden' as const,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: '#0D0D0D',
-    shadowColor: '#FFFFFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.06,
-    shadowRadius: 24,
-    elevation: 8,
+    borderWidth: 6,
+    borderColor: '#1A1A2E',
+    backgroundColor: '#1A1A2E',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
+    elevation: 10,
   },
   phoneVideo: {
     flex: 1,
@@ -1354,19 +1360,20 @@ const heroStyles = StyleSheet.create({
   textSection: {
     alignItems: 'center' as const,
     paddingHorizontal: 32,
-    paddingBottom: 20,
+    paddingTop: 24,
+    paddingBottom: 32,
   },
   appName: {
     fontSize: 46,
     fontWeight: '900' as const,
-    color: '#FFFFFF',
+    color: '#1A1A2E',
     letterSpacing: -1.5,
-    marginBottom: 6,
+    marginBottom: 10,
   },
   tagline: {
     fontSize: 16,
     fontWeight: '500' as const,
-    color: 'rgba(255,255,255,0.55)',
+    color: '#6B6B7B',
     textAlign: 'center' as const,
     lineHeight: 22,
   },
@@ -1376,14 +1383,14 @@ const heroStyles = StyleSheet.create({
   },
   getStartedBtn: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1A2E',
     paddingVertical: 17,
     borderRadius: 50,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
   getStartedText: {
-    color: '#000000',
+    color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '700' as const,
   },
@@ -1392,7 +1399,7 @@ const heroStyles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipLinkText: {
-    color: 'rgba(255,255,255,0.35)',
+    color: '#9A9AAB',
     fontSize: 14,
     fontWeight: '500' as const,
   },
