@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import { 
@@ -21,6 +23,7 @@ import { useApp } from "@/providers/AppProvider";
 import { getWorkoutById, WorkoutLog, calculateWorkoutCalories, Exercise } from "@/constants/workouts";
 import { useLanguage } from "@/providers/LanguageProvider";
 import { WORKOUT_NAME_TRANSLATION_KEYS } from "@/constants/xp";
+import RestTimer from "@/components/RestTimer";
 
 interface SetData {
   reps: number;
@@ -53,6 +56,7 @@ export default function WorkoutScreen() {
   const [exerciseProgress, setExerciseProgress] = useState<ExerciseProgress[]>([]);
   const [isResting, setIsResting] = useState(false);
   const [restTimeLeft, setRestTimeLeft] = useState(0);
+  const [restTimeTotal, setRestTimeTotal] = useState(0);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
   const [showAutoFill, setShowAutoFill] = useState(false);
 
@@ -80,7 +84,7 @@ export default function WorkoutScreen() {
     };
   }, [id]);
 
-  // Rest timer
+  // Rest timer countdown
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isResting && restTimeLeft > 0) {
@@ -88,6 +92,13 @@ export default function WorkoutScreen() {
         setRestTimeLeft(prev => {
           if (prev <= 1) {
             setIsResting(false);
+            // Haptic buzz when rest ends
+            if (Platform.OS !== 'web') {
+              void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              setTimeout(() => {
+                void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+              }, 120);
+            }
             return 0;
           }
           return prev - 1;
@@ -96,12 +107,6 @@ export default function WorkoutScreen() {
     }
     return () => clearInterval(interval);
   }, [isResting, restTimeLeft]);
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const currentExercise = workout?.exercises[currentExerciseIndex];
   const currentProgress = exerciseProgress[currentExerciseIndex];
@@ -143,8 +148,8 @@ export default function WorkoutScreen() {
 
     // Start rest timer if not the last set
     if (currentProgress.currentSet + 1 < currentExercise.sets) {
-      // Use 60-90 seconds rest time (randomized between 60-90 seconds)
-      const restTime = Math.floor(Math.random() * 31) + 60; // 60-90 seconds
+      const restTime = currentExercise.restTime || 90;
+      setRestTimeTotal(restTime);
       setRestTimeLeft(restTime);
       setIsResting(true);
     }
@@ -180,6 +185,7 @@ export default function WorkoutScreen() {
   const skipRest = () => {
     setIsResting(false);
     setRestTimeLeft(0);
+    setRestTimeTotal(0);
   };
 
 
@@ -275,15 +281,13 @@ export default function WorkoutScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Rest Timer */}
-        {isResting && (
-          <View style={styles.restTimer}>
-            <Hand size={24} color="#F59E0B" />
-            <Text style={styles.restText}>Rest for {formatTime(restTimeLeft)}</Text>
-            <TouchableOpacity style={styles.skipButton} onPress={skipRest}>
-              <Text style={styles.skipButtonText}>Skip</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Rest Timer Overlay */}
+        {isResting && restTimeTotal > 0 && (
+          <RestTimer
+            totalSeconds={restTimeTotal}
+            remainingSeconds={restTimeLeft}
+            onSkip={skipRest}
+          />
         )}
         {currentExercise && currentProgress && (
           <>
@@ -466,30 +470,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  restTimer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(245, 158, 11, 0.15)",
-    paddingVertical: 15,
-    gap: 10,
-  },
-  restText: {
-    fontSize: 16,
-    fontWeight: "600" as const,
-    color: "#F59E0B",
-  },
-  skipButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    backgroundColor: "#F59E0B",
-    borderRadius: 15,
-  },
-  skipButtonText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
-  },
+
   content: {
     flex: 1,
   },
