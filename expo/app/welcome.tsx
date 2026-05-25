@@ -236,11 +236,19 @@ function HeroSlide({
   hapticLight: () => void;
   setLanguage: (lang: string) => void;
 }) {
-  const player = useVideoPlayer(HERO_VIDEO_URL, (p) => {
+  const player = useVideoPlayer({ uri: HERO_VIDEO_URL }, (p) => {
     p.loop = true;
     p.muted = true;
+    p.audioMixingMode = 'mixWithOthers';
     p.play();
   });
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try { player.play(); } catch (e) { console.log('[HeroSlide] play retry failed', e); }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [player]);
 
   return (
     <View style={[s.flex1, heroStyles.bg, { paddingTop: insets.top }]}>
@@ -1337,11 +1345,11 @@ const heroStyles = StyleSheet.create({
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
     paddingHorizontal: 48,
-    paddingTop: 8,
-    paddingBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   phoneFrame: {
-    width: '100%',
+    flex: 1,
     aspectRatio: 0.49,
     borderRadius: 44,
     overflow: 'hidden' as const,
