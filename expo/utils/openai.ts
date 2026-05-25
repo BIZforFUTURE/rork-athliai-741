@@ -24,6 +24,12 @@ type ExerciseData = {
   duration: string;
 };
 
+type TreadmillData = {
+  distance: number;
+  time: number;
+  confidence: "high" | "medium" | "low";
+};
+
 type TextPart = { type: "text"; text: string };
 type ImageUrlPart = { type: "image_url"; image_url: { url: string } };
 type Content = string | (TextPart | ImageUrlPart)[];
@@ -129,6 +135,21 @@ const exerciseJsonSchema = {
   },
 };
 
+const treadmillJsonSchema = {
+  name: "treadmill",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      distance: { type: "number", description: "Total distance in miles" },
+      time: { type: "number", description: "Total time in seconds" },
+      confidence: { type: "string", enum: ["high", "medium", "low"], description: "How confident you are in the reading" },
+    },
+    required: ["distance", "time", "confidence"],
+  },
+};
+
 const NUTRITION_SYSTEM_PROMPT = `You are a board-certified nutritionist and registered dietitian with 20 years of experience analyzing food portions and macronutrients.
 
 Rules:
@@ -217,6 +238,84 @@ const analyzeFoodImage = async (base64Image: string): Promise<NutritionData> => 
     const msg = error?.message ?? String(error);
     console.error("[Food][image] failed:", msg);
     throw new Error(msg.startsWith("Could not identify") ? msg : `Failed to analyze image: ${msg}`);
+  }
+};
+
+/** Parse a treadmill dashboard photo and extract distance (mi) and time (s). */
+const parseTreadmillPhoto = async (
+  base64Image: string
+): Promise<TreadmillData> => {
+  if (!base64Image || base64Image.length < 100) {
+    throw new Error("No image data captured. Please try taking the photo again.");
+  }
+  console.log("[Treadmill] analyze, bytes:", base64Image.length);
+  try {
+    const data = await postChat({
+      model: VISION_MODEL,
+      temperature: 0.1,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a precise OCR reader for treadmill dashboard displays. Extract distance and time values from photos of treadmill screens. If the display shows kilometers, convert to miles (1 km = 0.621371 mi). If time is shown as minutes:seconds, convert to total seconds. Round distance to 2 decimal places. If values are partially obscured, give your best estimate. Return confidence as 'low' if the display is blurry, glare, or partially obscured; 'medium' if readable but ambiguous; 'high' if clearly legible.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Read the distance and time from this treadmill display.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`,
+                detail: "auto",
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 300,
+      response_format: {
+        type: "json_schema",
+        json_schema: treadmillJsonSchema,
+      },
+    });
+    const raw = extractText(data);
+    if (!raw) {
+      console.warn(
+        "[Treadmill] empty response",
+        JSON.stringify(data).slice(0, 500)
+      );
+      throw new Error("Empty response from AI");
+    }
+    const parsed = parseJson<TreadmillData>(raw);
+    console.log("[Treadmill] result:", parsed);
+    return {
+      distance:
+        typeof parsed.distance === "number" && parsed.distance >= 0
+          ? Math.round(parsed.distance * 100) / 100
+          : 0,
+      time:
+        typeof parsed.time === "number" && parsed.time >= 0
+          ? Math.round(parsed.time)
+          : 0,
+      confidence:
+        parsed.confidence === "high" ||
+        parsed.confidence === "medium" ||
+        parsed.confidence === "low"
+          ? parsed.confidence
+          : "medium",
+    };
+  } catch (error: any) {
+    const msg = error?.message ?? String(error);
+    console.error("[Treadmill] failed:", msg);
+    throw new Error(
+      msg.includes("Empty response")
+        ? "Could not read the display. Try a clearer photo."
+        : `Failed to analyze photo: ${msg}`
+    );
   }
 };
 
@@ -318,7 +417,7 @@ const callOpenAIWithVision = async (
   }
 };
 
-export type { NutritionData, ExerciseData, Message };
+export type { NutritionData, ExerciseData, TreadmillData, Message };
 export {
   analyzeFood,
   analyzeFoodImage,
@@ -326,4 +425,5 @@ export {
   refineFoodAI,
   callOpenAI,
   callOpenAIWithVision,
+  parseTreadmillPhoto,
 };

@@ -24,8 +24,7 @@ import * as Location from "expo-location";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { generateObject } from "@rork-ai/toolkit-sdk";
-import { z } from "zod";
+import { parseTreadmillPhoto } from "@/utils/openai";
 
 import { useApp } from "@/providers/AppProvider";
 import { XP_REWARDS } from "@/constants/xp";
@@ -496,30 +495,8 @@ export default function RunScreen() {
     try {
       console.log('Parsing treadmill photo with AI...');
       const base64 = await getBase64FromUri(photoUri);
-      const imageDataUri = `data:image/jpeg;base64,${base64}`;
 
-      const result = await generateObject({
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Look at this treadmill dashboard photo. Extract the total distance (in miles) and total time (in seconds). If the display shows kilometers, convert to miles (1 km = 0.621371 mi). If you see minutes:seconds format for time, convert to total seconds. If you cannot read the values clearly, make your best estimate from what is visible. Return distance in miles and time in seconds.',
-              },
-              {
-                type: 'image',
-                image: imageDataUri,
-              },
-            ],
-          },
-        ],
-        schema: z.object({
-          distance: z.number().describe('Total distance in miles'),
-          time: z.number().describe('Total time in seconds'),
-          confidence: z.enum(['high', 'medium', 'low']).describe('How confident you are in the reading'),
-        }),
-      });
+      const result = await parseTreadmillPhoto(base64);
 
       console.log('Treadmill AI result:', result);
 
