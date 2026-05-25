@@ -1344,9 +1344,9 @@ const heroStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    paddingHorizontal: 48,
-    paddingTop: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 28,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   phoneFrame: {
     flex: 1,
