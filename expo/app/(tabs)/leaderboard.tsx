@@ -431,24 +431,24 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
       </View>
 
       {weightProgress !== null && (() => {
-          const displayWeight = isSpanish ? lbsToKg(Math.abs(weightProgress)) : Math.abs(weightProgress);
-          const unit = isSpanish ? 'kg' : 'lbs';
-          return (
-        <View style={wpStyles.progressStrip}>
-          {isOnTrack ? (
-            <TrendingUp size={16} color="#10B981" />
-          ) : (
-            <TrendingDown size={16} color="#EF4444" />
-          )}
-          <Text style={[wpStyles.progressVal, { color: isOnTrack ? '#10B981' : '#EF4444' }]}>
-            {displayWeight.toFixed(1)} {unit}
-          </Text>
-          <Text style={wpStyles.progressLabel}>
-            {isOnTrack ? t('stats_on_track') : t('stats_to_go')}
-          </Text>);
-        })()}
-        </View>
-      )}
+        const displayWeight = isSpanish ? lbsToKg(Math.abs(weightProgress)) : Math.abs(weightProgress);
+        const unit = isSpanish ? 'kg' : 'lbs';
+        return (
+          <View style={wpStyles.progressStrip}>
+            {isOnTrack ? (
+              <TrendingUp size={16} color="#10B981" />
+            ) : (
+              <TrendingDown size={16} color="#EF4444" />
+            )}
+            <Text style={[wpStyles.progressVal, { color: isOnTrack ? '#10B981' : '#EF4444' }]}>
+              {displayWeight.toFixed(1)} {unit}
+            </Text>
+            <Text style={wpStyles.progressLabel}>
+              {isOnTrack ? t('stats_on_track') : t('stats_to_go')}
+            </Text>
+          </View>
+        );
+      })()}
 
       <View style={wpStyles.periodRow}>
         {(['7d', '30d', '90d', '1y'] as StatPeriod[]).map((period) => (
