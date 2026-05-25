@@ -430,7 +430,10 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
         </TouchableOpacity>
       </View>
 
-      {weightProgress !== null && (
+      {weightProgress !== null && (() => {
+          const displayWeight = isSpanish ? lbsToKg(Math.abs(weightProgress)) : Math.abs(weightProgress);
+          const unit = isSpanish ? 'kg' : 'lbs';
+          return (
         <View style={wpStyles.progressStrip}>
           {isOnTrack ? (
             <TrendingUp size={16} color="#10B981" />
@@ -438,11 +441,12 @@ function WeightProgressCard({ onAddWeight, onEditWeight, onDeleteWeight, selecte
             <TrendingDown size={16} color="#EF4444" />
           )}
           <Text style={[wpStyles.progressVal, { color: isOnTrack ? '#10B981' : '#EF4444' }]}>
-            {Math.abs(weightProgress).toFixed(1)} lbs
+            {displayWeight.toFixed(1)} {unit}
           </Text>
           <Text style={wpStyles.progressLabel}>
-            {isOnTrack ? t('stats_on_track') : t('stats_to_go', { weight: Math.abs(weightProgress).toFixed(1) })}
-          </Text>
+            {isOnTrack ? t('stats_on_track') : t('stats_to_go')}
+          </Text>);
+        })()}
         </View>
       )}
 

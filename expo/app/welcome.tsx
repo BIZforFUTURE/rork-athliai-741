@@ -1251,23 +1251,25 @@ Return ONLY valid JSON.`;
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {renderStepContent()}
+          <View style={stepStyles.innerFlex}>
+            <View style={s.flex1}>{renderStepContent()}</View>
 
-          <View style={footerStyles.innerWrap}>
-            <TouchableOpacity
-              style={[footerStyles.continueBtn, !canContinue() && footerStyles.continueBtnDisabled]}
-              onPress={handleContinue}
-              disabled={!canContinue()}
-              activeOpacity={0.85}
-            >
-              <Text style={footerStyles.continueText}>{continueLabel}</Text>
-              {step === 10 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
-            </TouchableOpacity>
-            {step === 4 && !targetWeightVal && (
-              <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
-                <Text style={footerStyles.skipText}>{isSpanish ? 'Omitir' : 'Skip'}</Text>
+            <View style={footerStyles.innerWrap}>
+              <TouchableOpacity
+                style={[footerStyles.continueBtn, !canContinue() && footerStyles.continueBtnDisabled]}
+                onPress={handleContinue}
+                disabled={!canContinue()}
+                activeOpacity={0.85}
+              >
+                <Text style={footerStyles.continueText}>{continueLabel}</Text>
+                {step === 10 && <Target size={18} color="#FFFFFF" style={{ marginLeft: 8 }} />}
               </TouchableOpacity>
-            )}
+              {step === 4 && !targetWeightVal && (
+                <TouchableOpacity style={footerStyles.skipBtn} onPress={goNext}>
+                  <Text style={footerStyles.skipText}>{isSpanish ? 'Omitir' : 'Skip'}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -1409,6 +1411,10 @@ const stepStyles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 20,
+  },
+  innerFlex: {
+    flex: 1,
+    justifyContent: 'space-between' as const,
   },
   content: {
     flex: 1,
