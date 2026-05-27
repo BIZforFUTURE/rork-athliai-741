@@ -1435,14 +1435,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EF4444",
   },
   startBtn: {
-    backgroundColor: "#FEFCF9",
-    borderRadius: 24,
-    padding: 4,
     marginTop: 6,
-    shadowColor: "#2C2C2C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
   },
   startBtnInner: {
     backgroundColor: "#2C2C2C",
@@ -1452,6 +1445,11 @@ const styles = StyleSheet.create({
     justifyContent: "center" as const,
     paddingVertical: 22,
     gap: 10,
+    shadowColor: "#2C2C2C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 4,
   },
   startBtnText: {
     color: "#FEFCF9",
