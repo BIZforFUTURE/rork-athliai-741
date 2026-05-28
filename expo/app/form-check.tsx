@@ -489,12 +489,12 @@ const styles = StyleSheet.create({
   },
   chipsRow: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     gap: 8,
   },
   chip: {
-    paddingHorizontal: 18,
-    paddingVertical: 9,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     backgroundColor: "#E8E1D6",
     borderRadius: 22,
   },
