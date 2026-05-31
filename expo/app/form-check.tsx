@@ -11,6 +11,7 @@ import {
   Alert,
   Animated,
   Easing,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -63,6 +64,7 @@ export default function FormCheckScreen() {
   const [stageText, setStageText] = useState<string>("");
   const [analysis, setAnalysis] = useState<FormAnalysis | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");
+  const [thumbnailUri, setThumbnailUri] = useState<string | null>(null);
   const spin = useRef(new Animated.Value(0)).current;
 
   const allExercises = useMemo(() => getAllExercises(), []);
@@ -152,6 +154,17 @@ export default function FormCheckScreen() {
       const uri = asset.uri;
       const duration = asset.duration ?? 5000;
 
+      // Generate a thumbnail right away so the user sees their clip
+      try {
+        const thumb = await VideoThumbnails.getThumbnailAsync(uri, {
+          time: Math.min(300, (duration ?? 5000) * 0.1),
+          quality: 0.7,
+        });
+        setThumbnailUri(thumb.uri);
+      } catch {
+        setThumbnailUri(null);
+      }
+
       if (Platform.OS === "web") {
         Alert.alert("Not supported", "Form check video analysis isn't supported on web. Try on your device.");
         setActiveExercise(null);
@@ -181,6 +194,7 @@ export default function FormCheckScreen() {
       console.error("Form check error", msg);
       setErrorMsg(msg);
       setStage("error");
+      setThumbnailUri(null);
       if (Platform.OS !== "web") {
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
@@ -192,6 +206,7 @@ export default function FormCheckScreen() {
     setStage("idle");
     setAnalysis(null);
     setErrorMsg("");
+    setThumbnailUri(null);
   };
 
   return (
@@ -312,16 +327,29 @@ export default function FormCheckScreen() {
           <ScrollView contentContainerStyle={styles.modalBody} showsVerticalScrollIndicator={false}>
             {(stage === "extracting" || stage === "analyzing") && (
               <View style={styles.loadingBlock}>
-                <Animated.View style={{ transform: [{ rotate: spinDeg }] }}>
-                  <View style={styles.loadingRing} />
-                </Animated.View>
-                <View style={styles.loadingIcon}>
-                  {stage === "extracting" ? (
-                    <Video size={26} color="#4A7C59" />
-                  ) : (
-                    <Sparkles size={26} color="#4A7C59" />
-                  )}
-                </View>
+                {thumbnailUri ? (
+                  <View style={styles.thumbWrap}>
+                    <Image source={{ uri: thumbnailUri }} style={styles.thumbImage} />
+                    <View style={styles.thumbOverlay}>
+                      <Animated.View style={{ transform: [{ rotate: spinDeg }] }}>
+                        <View style={styles.loadingRingSmall} />
+                      </Animated.View>
+                    </View>
+                  </View>
+                ) : (
+                  <>
+                    <Animated.View style={{ transform: [{ rotate: spinDeg }] }}>
+                      <View style={styles.loadingRing} />
+                    </Animated.View>
+                    <View style={styles.loadingIcon}>
+                      {stage === "extracting" ? (
+                        <Video size={26} color="#4A7C59" />
+                      ) : (
+                        <Sparkles size={26} color="#4A7C59" />
+                      )}
+                    </View>
+                  </>
+                )}
                 <Text style={styles.loadingTitle}>
                   {stage === "extracting" ? "Preparing your video" : "Analyzing your form"}
                 </Text>
@@ -799,6 +827,40 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#4A7C59",
     fontWeight: "600" as const,
+  },
+  thumbWrap: {
+    width: 180,
+    height: 180,
+    borderRadius: 20,
+    overflow: "hidden" as const,
+    marginBottom: 16,
+    backgroundColor: "rgba(0,0,0,0.06)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+  },
+  thumbImage: {
+    width: "100%",
+    height: "100%",
+  },
+  thumbOverlay: {
+    position: "absolute" as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: "rgba(0,0,0,0.15)",
+  },
+  loadingRingSmall: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: "rgba(255,255,255,0.3)",
+    borderTopColor: "#FFFFFF",
   },
   againBtn: {
     marginTop: 8,
