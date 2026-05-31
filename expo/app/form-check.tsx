@@ -315,6 +315,8 @@ export default function FormCheckScreen() {
         style={styles.list}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        canCancelContentTouches={false}
       >
         <Text style={styles.countLabel}>{filtered.length} EXERCISES</Text>
         {filtered.map((ex) => {
@@ -598,15 +600,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFCF9",
     borderRadius: 16,
     marginBottom: 10,
-    overflow: "hidden" as const,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.05,
     shadowRadius: 10,
+    elevation: 2,
   },
   rowAccent: {
     width: 4,
     backgroundColor: "#C4654E",
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
   },
   rowBody: {
     flex: 1,
