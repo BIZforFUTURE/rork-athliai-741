@@ -103,21 +103,37 @@ export default function FormCheckScreen() {
     const step = (end - start) / (frameCount - 1);
 
     const frames: string[] = [];
+    const errors: string[] = [];
     for (let i = 0; i < frameCount; i++) {
       const time = Math.max(0, Math.round(start + step * i));
-      setStageText(`Extracting frame ${i + 1} of ${frameCount}`);
+      setStageText(`Extracting frame ${i + 1} of ${frameCount}…`);
       try {
-        const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri, {
+        const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(videoUri, {
           time,
           quality: 0.5,
         });
-        const base64 = await FileSystem.readAsStringAsync(uri, {
+        // Verify the thumbnail file exists before reading
+        const fileInfo = await FileSystem.getInfoAsync(thumbUri);
+        if (!fileInfo.exists) {
+          errors.push(`Frame ${i + 1}: thumbnail file not found`);
+          continue;
+        }
+        const base64 = await FileSystem.readAsStringAsync(thumbUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
-        if (base64 && base64.length > 100) frames.push(base64);
-      } catch (e) {
-        console.warn(`Frame ${i} extract failed`, e);
+        if (base64 && base64.length > 100) {
+          frames.push(base64);
+        } else {
+          errors.push(`Frame ${i + 1}: base64 too small (${base64?.length ?? 0} chars)`);
+        }
+      } catch (e: any) {
+        const errMsg = e?.message ?? String(e);
+        errors.push(`Frame ${i + 1}: ${errMsg}`);
+        console.warn(`[FormCheck] Frame ${i + 1} extract failed:`, errMsg);
       }
+    }
+    if (errors.length > 0 && frames.length < 2) {
+      console.error("[FormCheck] Frame extraction errors:", errors);
     }
     return frames;
   };
@@ -140,7 +156,7 @@ export default function FormCheckScreen() {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["videos"],
+        mediaTypes: "videos",
         quality: 0.7,
         videoMaxDuration: 30,
       });
@@ -151,12 +167,31 @@ export default function FormCheckScreen() {
       }
 
       const asset = result.assets[0];
-      const uri = asset.uri;
+      const originalUri = asset.uri;
       const duration = asset.duration ?? 5000;
+
+      if (Platform.OS === "web") {
+        Alert.alert("Not supported", "Form check video analysis isn't supported on web. Try on your device.");
+        setActiveExercise(null);
+        return;
+      }
+
+      // Copy video to local cache so we always have a file:// URI
+      // (iOS returns ph:// URIs which VideoThumbnails can't reliably read)
+      const cacheDir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory;
+      const localVideoUri = `${cacheDir}formcheck_${Date.now()}.mp4`;
+      let videoUri: string;
+      try {
+        await FileSystem.copyAsync({ from: originalUri, to: localVideoUri });
+        videoUri = localVideoUri;
+      } catch (copyErr) {
+        console.warn("Video copy failed, using original URI", copyErr);
+        videoUri = originalUri;
+      }
 
       // Generate a thumbnail right away so the user sees their clip
       try {
-        const thumb = await VideoThumbnails.getThumbnailAsync(uri, {
+        const thumb = await VideoThumbnails.getThumbnailAsync(videoUri, {
           time: Math.min(300, (duration ?? 5000) * 0.1),
           quality: 0.7,
         });
@@ -165,19 +200,20 @@ export default function FormCheckScreen() {
         setThumbnailUri(null);
       }
 
-      if (Platform.OS === "web") {
-        Alert.alert("Not supported", "Form check video analysis isn't supported on web. Try on your device.");
-        setActiveExercise(null);
-        return;
-      }
-
       setStage("extracting");
       setStageText("Sampling frames from your video…");
       startSpinner();
 
-      const frames = await extractFrames(uri, duration);
+      const frames = await extractFrames(videoUri, duration);
+
+      // Clean up the copied video
+      if (videoUri !== originalUri) {
+        FileSystem.deleteAsync(videoUri, { idempotent: true }).catch(() => {});
+      }
       if (frames.length < 2) {
-        throw new Error("Could not extract enough frames from the video.");
+        throw new Error(
+          "Could not extract enough frames from the video. Try a shorter clip (under 15 seconds) with clear, steady footage of the exercise."
+        );
       }
 
       setStage("analyzing");
@@ -191,8 +227,19 @@ export default function FormCheckScreen() {
       }
     } catch (e: any) {
       const msg = e?.message ?? String(e);
-      console.error("Form check error", msg);
-      setErrorMsg(msg);
+      console.error("[FormCheck] error:", msg);
+      // Surface a user-friendly message
+      if (msg.includes("OpenAI") || msg.includes("API key") || msg.includes("401") || msg.includes("429")) {
+        setErrorMsg("The AI service is temporarily unavailable. Please try again in a moment.");
+      } else if (msg.includes("timed out") || msg.includes("AbortError")) {
+        setErrorMsg("The analysis took too long. Try a shorter video clip (under 15 seconds).");
+      } else if (msg.includes("extract enough frames")) {
+        setErrorMsg(msg);
+      } else if (msg.includes("No person detected")) {
+        setErrorMsg("No person was detected in the video. Make sure the lifter is clearly visible in frame.");
+      } else {
+        setErrorMsg(msg);
+      }
       setStage("error");
       setThumbnailUri(null);
       if (Platform.OS !== "web") {
